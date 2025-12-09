@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/vue-query'
 
 import { authAPI } from '@/api/auth'
 import { useAuthStore } from '@/stores/auth'
-import type { LoginRequest } from '@/types/auth'
+import type { LoginRequest } from '@/types'
 import { storage } from '@/utils/storage'
 
 export function useAuth() {

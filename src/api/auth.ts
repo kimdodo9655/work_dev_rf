@@ -1,29 +1,21 @@
-import type {
-  ApiResponse,
-  LoginData,
-  LoginRequest,
-  RefreshData,
-  RefreshRequest
-} from '@/types/auth'
+import type { ApiResponse, LoginData, LoginRequest, RefreshData, RefreshRequest } from '@/types' // 경로 변경
 
-import { api } from './client'
+import { apiHelpers } from './client' // apiHelpers 사용
 import { API } from './endpoints'
 
 export const authAPI = {
   // 로그인
   async login(data: LoginRequest) {
-    const response = await api.post<ApiResponse<LoginData>>(API.AUTH.LOGIN, data)
-    return response.data
+    return apiHelpers.post<ApiResponse<LoginData>>(API.AUTH.LOGIN, data)
   },
 
   // 토큰 갱신
   async refresh(data: RefreshRequest) {
-    const response = await api.post<ApiResponse<RefreshData>>(API.AUTH.REFRESH, data)
-    return response.data
+    return apiHelpers.post<ApiResponse<RefreshData>>(API.AUTH.REFRESH, data)
   },
 
   // 로그아웃
   async logout() {
-    await api.post(API.AUTH.LOGOUT)
+    return apiHelpers.post(API.AUTH.LOGOUT)
   }
 }
