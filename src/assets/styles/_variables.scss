@@ -1,0 +1,74 @@
+// Colors
+$color-main: #33cccc;
+$color-light: #ebf7f8;
+$color-dark: #21adad;
+
+$color-red: #ff4f4f;
+$color-red-light: #ffe9e9;
+
+$color-w: #ffffff;
+$color-b: #000000;
+
+$color-g3: #333333;
+$color-g6: #666666;
+$color-g9: #999999;
+$color-gb: #bbbbbb;
+$color-gd: #dddddd;
+$color-ge: #eeeeee;
+
+$shadow-base: unset;
+
+// 오버레이, 포커스
+
+// Breakpoints
+$bp-1280: 1280px; // contents area margin r/l 20px, width 1220px
+$bp-1440: 1440px; // contents area margin r/l 20px, width 1400px
+
+// ========================================
+// 타이포그래피
+// ========================================
+$font-family-pretendard:
+  'Pretendard',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Apple SD Gothic Neo',
+  'Malgun Gothic',
+  '맑은 고딕',
+  'Segoe UI',
+  'Roboto',
+  'Helvetica Neue',
+  Arial,
+  sans-serif,
+  'Apple Color Emoji',
+  'Segoe UI Emoji',
+  'Segoe UI Symbol';
+
+$font-weight-regular: 400;
+$font-weight-semibold: 600;
+$font-weight-extrabold: 800;
+
+// ========================================
+// 레이아웃
+// ========================================
+$border-radius-sm: 4px;
+$border-radius-md: 8px;
+$border-radius-lg: 12px;
+$border-radius-full: 50%;
+
+$shadow-base: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+
+// ========================================
+// 트랜지션
+// ========================================
+$transition-fast: 0.15s;
+$transition-base: 0.3s;
+$transition-slow: 0.5s;
+$transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+
+// ========================================
+// Z-Index
+// ========================================
+$z-index-header: 100;
+$z-index-modal: 200;
+$z-index-tooltip: 300;
+$z-index-dev-tool: 1000;

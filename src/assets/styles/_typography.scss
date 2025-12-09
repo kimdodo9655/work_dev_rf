@@ -1,0 +1,57 @@
+@use '@/assets/styles/variables' as *;
+
+// ================================
+// Pretendard Font Face 선언
+// ================================
+
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+  src:
+    url('/fonts/pretendard/woff2/Pretendard-Regular.woff2') format('woff2'),
+    url('/fonts/pretendard/woff/Pretendard-Regular.woff') format('woff');
+  unicode-range: U+0020-007E, U+1100-11FF, U+3130-318F, U+AC00-D7AF;
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  src:
+    url('/fonts/pretendard/woff2/Pretendard-SemiBold.woff2') format('woff2'),
+    url('/fonts/pretendard/woff/Pretendard-SemiBold.woff') format('woff');
+  unicode-range: U+0020-007E, U+1100-11FF, U+3130-318F, U+AC00-D7AF;
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+  src:
+    url('/fonts/pretendard/woff2/Pretendard-ExtraBold.woff2') format('woff2'),
+    url('/fonts/pretendard/woff/Pretendard-ExtraBold.woff') format('woff');
+  unicode-range: U+0020-007E, U+1100-11FF, U+3130-318F, U+AC00-D7AF;
+}
+
+// ================================
+// Typography Mixins
+// ================================
+
+@mixin font-regular {
+  font-family: $font-family-pretendard;
+  font-weight: $font-weight-regular;
+}
+
+@mixin font-semibold {
+  font-family: $font-family-pretendard;
+  font-weight: $font-weight-semibold;
+}
+
+@mixin font-extrabold {
+  font-family: $font-family-pretendard;
+  font-weight: $font-weight-extrabold;
+}

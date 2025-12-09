@@ -1,0 +1,182 @@
+########################################
+# OS / 운영체제 자동 생성 파일
+########################################
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+########################################
+# 편집기 / IDE 설정 파일
+########################################
+# VSCode
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+# JetBrains (WebStorm, IntelliJ 등)
+.idea/
+*.iml
+*.ipr
+*.iws
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+# Vim/Neovim
+*.swp
+*.swo
+*~
+
+########################################
+# Node / 패키지 관리자
+########################################
+# 패키지 디렉토리
+node_modules/
+# npm
+.npm/
+# pnpm
+.pnpm-store/
+# Yarn
+.yarn/
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+# 충돌 파일
+package-lock.json.orig
+
+########################################
+# 로그 파일
+########################################
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+########################################
+# 빌드 결과물 및 캐시
+########################################
+# 빌드 출력
+dist/
+dist-ssr/
+build/
+out/
+# Vite
+.vite/
+vite.config.timestamp-*
+# 기타 캐시
+.cache/
+.parcel-cache/
+.sass-cache/
+# 번들 분석
+stats.html
+
+########################################
+# 환경 변수 파일
+########################################
+# .env
+# .env.local
+# .env*.local
+# .env.development
+# .env.prod
+# .env.test
+
+########################################
+# TypeScript 관련
+########################################
+*.tsbuildinfo
+# src에서 생성되는 JS/Map 파일 제외 (빌드 결과물)
+/src/**/*.js
+/src/**/*.js.map
+# 타입 선언 파일 제외 (단, types 폴더는 포함)
+/src/**/*.d.ts
+!src/types/**/*.d.ts
+
+########################################
+# 테스트 도구
+########################################
+# Vitest
+.vitest/
+.vitest-cache/
+# Cypress
+cypress/videos/
+cypress/screenshots/
+cypress/downloads/
+# Playwright
+test-results/
+playwright-report/
+# Storybook
+storybook-static/
+# Coverage
+coverage/
+.nyc_output/
+*.lcov
+
+########################################
+# 린터/포매터 캐시
+########################################
+.eslintcache
+.stylelintcache
+.prettiercache
+
+########################################
+# 임시 개발 파일 (TEMP 규칙 통일)
+########################################
+# .temp 패턴 파일 (확장자 있든 없든)
+**/*.temp.*
+**/*.temp
+# TEMP 폴더
+**/TEMP/
+**/temp/
+# 개인 메모/스크래치
+scratch.*
+notes.md
+TODO.md
+*.local.md
+# 임시/백업 파일
+*.bak
+*.tmp
+*.orig
+*.rej
+*.merge_file_*
+
+########################################
+# 보안 / 민감 정보
+########################################
+# SSL 인증서
+*.pem
+*.key
+*.cert
+*.crt
+# 시크릿 파일
+.env.*.secret
+secrets/
+private/
+
+########################################
+# 기타
+########################################
+# Husky 내부 파일
+.husky/_/
+# 압축 파일
+*.zip
+*.tar.gz
+*.rar
+
+*storybook.log

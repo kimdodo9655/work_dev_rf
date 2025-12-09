@@ -1,0 +1,84 @@
+{
+  "pageTitle": {
+    "error": {
+      "404": "잘못된 페이지 접근",
+      "macOs": "접속 오류 (Mac OS)",
+      "mobile": "접속 오류 (모바일)"
+    },
+    "shared": {
+      "viewer": "웹뷰어",
+      "deviceInfo": "등록 단말기 입력 정보 확인"
+    },
+    "auth": {
+      "login": "로그인",
+      "signup": "회원가입",
+      "install": "프로그램 설치",
+      "autoLogout": "자동 로그아웃",
+      "passwordSetup": "비밀번호 설정",
+      "blocked": {
+        "mac": "사이트 접속 차단 (Mac Address 오류)",
+        "email": "사이트 접속 차단 (이메일 인증)",
+        "user": "사이트 접속 차단 (사용자 사용유무)"
+      }
+    },
+    "main": {
+      "bankSelect": "금융기관 선택",
+      "dashboard": "메인화면"
+    },
+    "my": {
+      "organization": "기관/지점 정보 관리",
+      "organizationDetail": "기관/지점 등록 정보",
+      "users": "사용자 정보 관리",
+      "userDetail": "사용자 등록 정보",
+      "profile": "내 정보 관리"
+    },
+    "estimate": {
+      "list": "등기 견적 관리",
+      "createDetail": "견적서 작성/제출 상세",
+      "confirmDetail": "견적서 확인/철회 상세"
+    },
+    "registration": {
+      "caseStatus": "등기 진행 현황",
+      "caseDetail": "등기 진행 상세",
+      "schedule": "등기 일정 관리"
+    }
+  },
+  "common": {
+    "home": "HOME",
+    "my": "마이",
+    "ok": "확인",
+    "cancel": "취소",
+    "register": "등록",
+    "selectAll": "전체 선택",
+    "deselectAll": "전체 해제",
+    "add": "추가",
+    "save": "저장",
+    "registerInfo": "정보 등록",
+    "view": "보기",
+    "viewDetail": "상세보기",
+    "edit": "수정",
+    "download": "파일 다운로드",
+    "delete": "삭제",
+    "search": "검색",
+    "reset": "초기화"
+  },
+  "header": {
+    "nav01": "등기 견적 관리",
+    "nav02": "등기 진행 현황",
+    "nav03": "등기 일정 관리",
+    "extend": "연장"
+  },
+  "myMenu": {
+    "nav01": "기관/지점 정보 관리",
+    "nav02": "사용자 정보 관리",
+    "nav03": "내 정보 관리",
+    "nav04": "금융기관 변경",
+    "nav05": "공지사항",
+    "nav06": "로그아웃"
+  },
+  "footer": {
+    "terms": "서비스 이용약관",
+    "privacy": "개인정보처리방침",
+    "copyright": "COPYRIGHT ⓒ 2025 BANKCLEAR Inc. ALL RIGHTS RESERVED."
+  }
+}
