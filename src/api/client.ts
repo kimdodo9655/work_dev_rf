@@ -1,5 +1,6 @@
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios'
 
+import { logger } from '@/utils/logger'
 import { storage } from '@/utils/storage'
 
 import { API } from './endpoints'
@@ -28,7 +29,7 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
       config.headers.Authorization = `Bearer ${accessToken}`
     }
 
-    // 2. X-Bank-Code 헤더 추가 👈 이 부분 추가
+    // 2. X-Bank-Code 헤더 추가
     const bankCode = storage.getBankCode()
     if (bankCode && config.headers) {
       config.headers['X-Bank-Code'] = bankCode
@@ -39,7 +40,7 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 })
 
 // ============================================================================
-// 응답 인터셉터: 401 에러 시 토큰 갱신
+// 응답 인터셉터: 401 에러 시 토큰 갱신 + 에러 로깅
 // ============================================================================
 let isRefreshing = false
 let failedQueue: Array<{
@@ -65,6 +66,14 @@ api.interceptors.response.use(
 
     // 401이 아니거나 이미 재시도한 요청이면 에러 반환
     if (error.response?.status !== 401 || originalRequest._retry) {
+      // 에러 로깅
+      logger.error('[API RESPONSE ERROR]', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        message: error.response?.data?.message,
+        url: error.config?.url,
+        method: error.config?.method?.toUpperCase()
+      })
       return Promise.reject(error)
     }
 
@@ -93,6 +102,7 @@ api.interceptors.response.use(
 
     try {
       // 토큰 갱신
+      logger.info('[AUTH] Token refresh attempt')
       const { data } = await axios.post(`${api.defaults.baseURL}${API.AUTH.REFRESH}`, {
         refreshToken
       })
@@ -101,11 +111,16 @@ api.interceptors.response.use(
       storage.updateTokens(newTokens)
       processQueue(null, newTokens.accessToken)
 
+      logger.info('[AUTH] Token refresh success')
+
       if (originalRequest.headers) {
         originalRequest.headers.Authorization = `Bearer ${newTokens.accessToken}`
       }
       return api(originalRequest)
     } catch (err) {
+      logger.error('[AUTH] Token refresh failed', {
+        error: err
+      })
       processQueue(err, null)
       storage.clear()
       window.dispatchEvent(new CustomEvent('auth:logout'))

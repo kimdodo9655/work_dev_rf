@@ -20,12 +20,14 @@ setupVueQuery(app)
 
 // 전역 에러 핸들러
 app.config.errorHandler = (err, _instance, info) => {
-  logger.error('Global error', { err, info })
+  logger.error('Global error', { error: err, info })
 }
 
 // 환경 정보 로그 (개발 환경에서만 출력)
 logger.info('Application Started')
-logger.info('API Base URL:', ENV.API_BASE_URL)
-logger.info('Is Development:', ENV.IS_DEV)
+logger.info('Environment info', {
+  apiBaseUrl: ENV.API_BASE_URL,
+  isDev: ENV.IS_DEV
+})
 
 app.mount('#app')

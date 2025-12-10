@@ -115,6 +115,23 @@ export const ROLE_LABELS: Record<RoleLevel, string> = {
 export type AuthState = 'pre-auth' | 'onboarding' | 'auth'
 
 // ============================================================================
+// 에러 관련 타입
+// ============================================================================
+
+/**
+ * API 에러 타입
+ */
+export interface APIError {
+  status: number
+  code?: string
+  message: string
+  data?: any
+  url?: string
+  method?: string
+  timestamp: string
+}
+
+// ============================================================================
 // 공통 유틸리티 타입
 // ============================================================================
 

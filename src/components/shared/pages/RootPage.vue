@@ -16,7 +16,9 @@ const authStore = useAuthStore()
 const currentComponent = computed(() => {
   const state = authStore.authState
 
-  logger.info('[ROOT] Rendering component for auth state:', state)
+  logger.info('[ROOT] Rendering component for auth state', {
+    authState: state
+  })
 
   if (state === 'pre-auth') return LoginPage
   if (state === 'onboarding') return BankSelectionPage
