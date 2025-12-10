@@ -131,13 +131,22 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function loadAuth() {
-    console.log('📂 [AUTH] 저장된 인증 정보 로드')
+    console.log('📂 [AUTH] 저장된 인증 정보 로드 시도')
 
     const data = storage.get()
-    console.log('저장된 데이터:', {
-      hasToken: !!data.accessToken,
+
+    // 토큰이 없으면 로드하지 않고 종료
+    if (!data.accessToken) {
+      console.log('⚠️ [AUTH] No token in storage - Skip loading')
+      return
+    }
+
+    console.log('✅ [AUTH] 저장된 데이터 로드:', {
+      hasToken: true,
       loginId: data.loginId,
-      bankCode: data.bankCode
+      bankCode: data.bankCode,
+      accessExpires: data.accessExpires,
+      refreshExpires: data.refreshExpires
     })
 
     loginId.value = data.loginId || ''

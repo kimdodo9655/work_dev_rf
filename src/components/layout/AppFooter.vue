@@ -1,5 +1,5 @@
 <template>
-  <footer class="main-footer" :class="currentAuthState === 'pre-auth' ? 'pre-auth-footer' : ''">
+  <footer class="main-footer" :class="authStore.authState === 'pre-auth' ? 'pre-auth-footer' : ''">
     <img src="@/assets/images/logo/bankclear_logo_bk.png" alt="bank logo" />
     <nav>
       <ul>
@@ -16,9 +16,8 @@
 </template>
 
 <script lang="ts" setup>
-import { useDevOptions } from '@/composables/useDevOptions'
 import locale from '@/locales/ko.json'
+import { useAuthStore } from '@/stores/auth'
 
-// 전역적으로 상태 초기화
-const { currentAuthState } = useDevOptions() // 'pre-auth', 'onboarding', 'auth'
+const authStore = useAuthStore()
 </script>

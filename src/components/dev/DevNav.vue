@@ -20,61 +20,126 @@
       {{ isFrameOpen ? '📱' : '🖥️' }}
     </button>
 
-    <!-- 인증 상태 토글 버튼 -->
+    <!-- 인증 상태 모니터 토글 버튼 -->
     <button
       class="floating-button auth-button"
-      :class="{ active: isAuthMenuOpen }"
-      @click="toggleAuthMenu"
-      aria-label="인증 상태 전환"
+      :class="{ active: isAuthMonitorOpen }"
+      @click="toggleAuthMonitor"
+      aria-label="인증 상태 모니터"
     >
-      🔐
+      📊
     </button>
 
-    <!-- 인증 상태 메뉴 -->
+    <!-- 인증 상태 모니터 -->
     <transition name="slide-up">
-      <div v-if="isAuthMenuOpen" class="auth-menu">
-        <div class="auth-menu-header">
-          <h4>인증 상태</h4>
-          <button class="close-auth-menu" @click="toggleAuthMenu">✕</button>
+      <div v-if="isAuthMonitorOpen" class="auth-monitor">
+        <div class="auth-monitor-header">
+          <h4>🔐 인증 상태 모니터</h4>
+          <div class="header-actions">
+            <button class="refresh-button" @click="refreshStorageData" title="새로고침">🔄</button>
+            <button class="close-auth-monitor" @click="toggleAuthMonitor">✕</button>
+          </div>
         </div>
-        <div class="auth-menu-content">
-          <div class="current-state">
-            현재 상태:
-            <span class="state-badge" :class="currentAuthState">{{
-              getStateLabel(currentAuthState)
-            }}</span>
-          </div>
-          <div class="auth-states">
-            <button
-              v-for="state in AUTH_STATES"
-              :key="state"
-              class="auth-state-button"
-              :class="{ active: currentAuthState === state }"
-              @click="setAuthState(state)"
-            >
-              {{ getStateLabel(state) }}
-            </button>
-          </div>
+        <div class="auth-monitor-content">
+          <!-- Pinia Store 상태 -->
+          <section class="monitor-section">
+            <h5>📦 Pinia Store (authStore)</h5>
+            <div class="monitor-item">
+              <span class="label">authState:</span>
+              <span class="value" :class="`state-${authStore.authState}`">{{
+                authStore.authState
+              }}</span>
+            </div>
+            <div class="monitor-item">
+              <span class="label">isLoggedIn:</span>
+              <span class="value" :class="authStore.isLoggedIn ? 'true' : 'false'">{{
+                authStore.isLoggedIn
+              }}</span>
+            </div>
+            <div class="monitor-item">
+              <span class="label">loginId:</span>
+              <span class="value">{{ authStore.loginId || '(empty)' }}</span>
+            </div>
+            <div class="monitor-item">
+              <span class="label">userId:</span>
+              <span class="value">{{ authStore.userId || 'null' }}</span>
+            </div>
+            <div class="monitor-item">
+              <span class="label">roleLevel:</span>
+              <span class="value">{{ authStore.roleLevel || 'null' }}</span>
+            </div>
+            <div class="monitor-item">
+              <span class="label">selectedBankCode:</span>
+              <span class="value">{{ authStore.selectedBankCode || 'null' }}</span>
+            </div>
+            <div class="monitor-item">
+              <span class="label">remainingTime:</span>
+              <span
+                class="value"
+                :class="{
+                  expiring: authStore.isExpiringSoon,
+                  expired: authStore.isExpired
+                }"
+                >{{ authStore.formattedTime }}</span
+              >
+            </div>
+          </section>
 
           <div class="section-divider"></div>
 
-          <div class="current-state">
-            현재 레벨:
-            <span class="level-badge" :class="`level-${currentLevelState}`">{{
-              getLevelLabel(currentLevelState)
-            }}</span>
-          </div>
-          <div class="auth-states">
-            <button
-              v-for="level in LEVEL_STATES"
-              :key="level"
-              class="level-state-button"
-              :class="{ active: currentLevelState === level }"
-              @click="setLevelState(level)"
-            >
-              {{ getLevelLabel(level) }}
-            </button>
-          </div>
+          <!-- LocalStorage 상태 -->
+          <section class="monitor-section">
+            <h5>💾 LocalStorage</h5>
+            <div class="monitor-item">
+              <span class="label">accessToken:</span>
+              <span class="value token">{{ truncateToken(storageData.accessToken) }}</span>
+            </div>
+            <div class="monitor-item">
+              <span class="label">refreshToken:</span>
+              <span class="value token">{{ truncateToken(storageData.refreshToken) }}</span>
+            </div>
+            <div class="monitor-item">
+              <span class="label">loginId:</span>
+              <span class="value">{{ storageData.loginId || '(empty)' }}</span>
+            </div>
+            <div class="monitor-item">
+              <span class="label">userId:</span>
+              <span class="value">{{ storageData.userId || 'null' }}</span>
+            </div>
+            <div class="monitor-item">
+              <span class="label">roleLevel:</span>
+              <span class="value">{{ storageData.roleLevel || 'null' }}</span>
+            </div>
+            <div class="monitor-item">
+              <span class="label">bankCode:</span>
+              <span class="value">{{ storageData.bankCode || 'null' }}</span>
+            </div>
+          </section>
+
+          <div class="section-divider"></div>
+
+          <!-- API 요청 헤더 -->
+          <section class="monitor-section">
+            <h5>📡 API 요청 헤더</h5>
+            <div class="monitor-item">
+              <span class="label">Authorization:</span>
+              <div class="token-wrapper">
+                <span class="value token">{{ getAuthorizationHeader() }}</span>
+                <button
+                  v-if="storageData.accessToken"
+                  class="copy-button"
+                  @click="copyToken(`Bearer ${storageData.accessToken}`)"
+                  title="헤더 복사"
+                >
+                  📋
+                </button>
+              </div>
+            </div>
+            <div class="monitor-item">
+              <span class="label">X-Bank-Code:</span>
+              <span class="value">{{ storageData.bankCode || '(empty)' }}</span>
+            </div>
+          </section>
         </div>
       </div>
     </transition>
@@ -141,9 +206,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, type Ref, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, type Ref, ref } from 'vue'
 
-import { useDevOptions } from '@/composables/useDevOptions'
+import { useAuthStore } from '@/stores/auth'
+import { storage } from '@/utils/storage'
 
 interface FrameSize {
   name: string
@@ -151,15 +217,11 @@ interface FrameSize {
   height: number
 }
 
-// Dev Options
-const {
-  currentAuthState,
-  currentLevelState,
-  setAuthState,
-  setLevelState,
-  AUTH_STATES,
-  LEVEL_STATES
-} = useDevOptions()
+// Auth Store
+const authStore = useAuthStore()
+
+// Storage 데이터 (수동 갱신)
+const storageData = ref(storage.get())
 
 // Constants
 const FRAME_SIZES: FrameSize[] = [
@@ -235,7 +297,7 @@ const ROUTE_CATEGORIES = [
 // State
 const isNavOpen = ref(false)
 const isFrameOpen = ref(false)
-const isAuthMenuOpen = ref(false)
+const isAuthMonitorOpen = ref(false)
 const currentFrameSize = ref<FrameSize>(FRAME_SIZES[0]!) as Ref<FrameSize>
 
 // Computed
@@ -250,22 +312,34 @@ const frameStyle = computed(() => {
 })
 
 // Methods
-const getStateLabel = (state: string): string => {
-  return state
+const truncateToken = (token: string | null): string => {
+  if (!token) return '(empty)'
+  if (token.length <= 20) return token
+  return `${token.substring(0, 10)}...${token.substring(token.length - 10)}`
 }
 
-const getLevelLabel = (level: string): string => {
-  const roleLabels: Record<string, string> = {
-    '100': 'Level 100 (사용자)',
-    '200': 'Level 200 (지점 관리자)',
-    '300': 'Level 300 (기관 관리자)'
+const getAuthorizationHeader = (): string => {
+  if (!storageData.value.accessToken) return '(empty)'
+  const token = storageData.value.accessToken
+  if (token.length <= 30) return `Bearer ${token}`
+  return `Bearer ${token.substring(0, 15)}...${token.substring(token.length - 15)}`
+}
+
+const copyToken = async (token: string | null) => {
+  if (!token) return
+
+  try {
+    await navigator.clipboard.writeText(token)
+    alert('토큰이 클립보드에 복사되었습니다!')
+  } catch (err) {
+    console.error('복사 실패:', err)
+    alert('복사에 실패했습니다.')
   }
-  return roleLabels[level] || `Level ${level}`
 }
 
 const toggleNav = () => {
   if (isFrameOpen.value) isFrameOpen.value = false
-  if (isAuthMenuOpen.value) isAuthMenuOpen.value = false
+  if (isAuthMonitorOpen.value) isAuthMonitorOpen.value = false
   isNavOpen.value = !isNavOpen.value
   document.body.style.overflow = isNavOpen.value ? 'hidden' : ''
 }
@@ -277,16 +351,35 @@ const closeNav = () => {
 
 const toggleFrame = () => {
   if (isNavOpen.value) isNavOpen.value = false
-  if (isAuthMenuOpen.value) isAuthMenuOpen.value = false
+  if (isAuthMonitorOpen.value) isAuthMonitorOpen.value = false
   isFrameOpen.value = !isFrameOpen.value
   document.body.style.overflow = isFrameOpen.value ? 'hidden' : ''
 }
 
-const toggleAuthMenu = () => {
+const toggleAuthMonitor = () => {
   if (isNavOpen.value) isNavOpen.value = false
   if (isFrameOpen.value) isFrameOpen.value = false
-  isAuthMenuOpen.value = !isAuthMenuOpen.value
+  isAuthMonitorOpen.value = !isAuthMonitorOpen.value
+
+  // 모니터를 열 때 데이터 새로고침
+  if (isAuthMonitorOpen.value) {
+    refreshStorageData()
+  }
 }
+
+const refreshStorageData = () => {
+  storageData.value = storage.get()
+}
+
+// Lifecycle
+onMounted(() => {
+  // 초기 데이터 로드
+  storageData.value = storage.get()
+})
+
+onBeforeUnmount(() => {
+  // cleanup
+})
 </script>
 
 <style scoped>
@@ -347,36 +440,64 @@ const toggleAuthMenu = () => {
   background-color: #10b981;
 }
 
-/* 인증 상태 메뉴 */
-.auth-menu {
+/* 인증 상태 모니터 */
+.auth-monitor {
   position: fixed;
   bottom: 230px;
   right: 20px;
-  width: 320px;
+  width: 400px;
+  max-height: 70vh;
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   z-index: 1001;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
-.auth-menu-header {
+.auth-monitor-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 15px 20px;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
+  flex-shrink: 0;
 }
 
-.auth-menu-header h4 {
+.auth-monitor-header h4 {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
-  color: #ffffff;
 }
 
-.close-auth-menu {
+.header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.refresh-button {
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  width: 32px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.refresh-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.close-auth-monitor {
   background: transparent;
   border: none;
   color: white;
@@ -392,133 +513,142 @@ const toggleAuthMenu = () => {
   transition: background 0.2s;
 }
 
-.close-auth-menu:hover {
+.close-auth-monitor:hover {
   background: rgba(255, 255, 255, 0.2);
 }
 
-.auth-menu-content {
+.auth-monitor-content {
   padding: 20px;
+  overflow-y: auto;
+  flex: 1;
 }
 
-.current-state {
-  margin-bottom: 15px;
+.monitor-section {
+  margin-bottom: 20px;
+}
+
+.monitor-section h5 {
+  margin: 0 0 12px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.monitor-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  margin-bottom: 6px;
+  background: #f9fafb;
+  border-radius: 8px;
   font-size: 14px;
-  color: #666;
+}
+
+.monitor-item .label {
+  color: #6b7280;
+  font-weight: 600;
+  font-size: 14px;
+  min-width: 140px;
+  flex-shrink: 0;
+}
+
+.monitor-item .value {
+  color: #111827;
+  font-weight: 500;
+  font-size: 14px;
+  word-break: break-all;
+  text-align: right;
+}
+
+.monitor-item .value.token {
+  font-size: 12px;
+  color: #6b7280;
+  font-family: 'Courier New', monospace;
+}
+
+.token-wrapper {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex: 1;
+  justify-content: flex-end;
 }
 
-.state-badge {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
-  font-family: monospace;
+.copy-button {
+  background: #e5e7eb;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  flex-shrink: 0;
 }
 
-.state-badge.pre-auth {
-  background: #fee2e2;
-  color: #991b1b;
+.copy-button:hover {
+  background: #d1d5db;
 }
 
-.state-badge.onboarding {
-  background: #fef3c7;
-  color: #92400e;
+.copy-button:active {
+  transform: scale(0.95);
 }
 
-.state-badge.auth {
-  background: #d1fae5;
-  color: #065f46;
+.monitor-item .value.state-pre-auth {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.monitor-item .value.state-onboarding {
+  color: #d97706;
+  font-weight: 700;
+}
+
+.monitor-item .value.state-auth {
+  color: #059669;
+  font-weight: 700;
+}
+
+.monitor-item .value.true {
+  color: #059669;
+  font-weight: 700;
+}
+
+.monitor-item .value.false {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.monitor-item .value.expiring {
+  color: #d97706;
+  font-weight: 700;
+}
+
+.monitor-item .value.expired {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.monitor-item .value.level-100 {
+  color: #2563eb;
+  font-weight: 700;
+}
+
+.monitor-item .value.level-200 {
+  color: #7c3aed;
+  font-weight: 700;
+}
+
+.monitor-item .value.level-300 {
+  color: #db2777;
+  font-weight: 700;
 }
 
 .section-divider {
   height: 1px;
   background: linear-gradient(to right, transparent, #e5e7eb, transparent);
   margin: 20px 0;
-}
-
-.level-badge {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
-  font-family: monospace;
-}
-
-.level-badge.level-100 {
-  background: #dbeafe;
-  color: #1e40af;
-}
-
-.level-badge.level-200 {
-  background: #e0e7ff;
-  color: #4338ca;
-}
-
-.level-badge.level-300 {
-  background: #f3e8ff;
-  color: #6b21a8;
-}
-
-.auth-states {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.auth-state-button {
-  padding: 12px 16px;
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
-  background: white;
-  color: #374151;
-  font-size: 14px;
-  font-weight: 600;
-  font-family: monospace;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-align: left;
-}
-
-.auth-state-button:hover {
-  border-color: #10b981;
-  background: #f0fdf4;
-  transform: translateX(4px);
-}
-
-.auth-state-button.active {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-  border-color: #059669;
-}
-
-.level-state-button {
-  padding: 12px 16px;
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
-  background: white;
-  color: #374151;
-  font-size: 14px;
-  font-weight: 600;
-  font-family: monospace;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-align: left;
-}
-
-.level-state-button:hover {
-  border-color: #6366f1;
-  background: #eef2ff;
-  transform: translateX(4px);
-}
-
-.level-state-button.active {
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-  color: white;
-  border-color: #4f46e5;
 }
 
 /* 오버레이 */
@@ -722,20 +852,24 @@ const toggleAuthMenu = () => {
 }
 
 /* 스크롤바 */
-.nav-menu::-webkit-scrollbar {
+.nav-menu::-webkit-scrollbar,
+.auth-monitor-content::-webkit-scrollbar {
   width: 8px;
 }
 
-.nav-menu::-webkit-scrollbar-track {
+.nav-menu::-webkit-scrollbar-track,
+.auth-monitor-content::-webkit-scrollbar-track {
   background: #f1f1f1;
 }
 
-.nav-menu::-webkit-scrollbar-thumb {
+.nav-menu::-webkit-scrollbar-thumb,
+.auth-monitor-content::-webkit-scrollbar-thumb {
   background: #667eea;
   border-radius: 4px;
 }
 
-.nav-menu::-webkit-scrollbar-thumb:hover {
+.nav-menu::-webkit-scrollbar-thumb:hover,
+.auth-monitor-content::-webkit-scrollbar-thumb:hover {
   background: #5568d3;
 }
 
