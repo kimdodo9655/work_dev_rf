@@ -49,6 +49,7 @@ import AppFooter from '@/components/layout/AppFooter.vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import { useAuthStore } from '@/stores/auth'
 import { logger } from '@/utils/logger'
+import { storage } from '@/utils/storage'
 
 import TempLogin from './components/dev/TEMP/TempLogin.vue'
 import TempPdf from './components/dev/TEMP/TempPdf.vue'
@@ -65,14 +66,14 @@ const isVisible = ref(false)
 onMounted(async () => {
   logger.info('[APP] Application mounted')
 
-  // 1. 저장된 인증 정보 로드
-  authStore.loadAuth()
+  // 1. 저장된 인증 정보 유효성 검사 및 로드 👈 추가
+  validateAndLoadAuth()
 
   // 2. 현재 경로 및 인증 상태 확인
   const currentPath = router.currentRoute.value.path
   const authState = authStore.authState
 
-  logger.info('[APP] Initial routing check:', {
+  logger.info('[APP] Initial routing check', {
     authState,
     currentPath,
     isLoggedIn: authStore.isLoggedIn,
@@ -89,6 +90,57 @@ onBeforeUnmount(() => {
   logger.info('[APP] Application unmounting')
   authStore.cleanup()
 })
+
+// ============================================================================
+// 인증 정보 유효성 검사 및 로드
+// ============================================================================
+function validateAndLoadAuth() {
+  const storedData = storage.get()
+
+  // 토큰이 없으면 로컬스토리지 전체 삭제
+  if (!storedData.accessToken) {
+    logger.warn('[APP] No access token found - Clear storage')
+    storage.clear()
+    return
+  }
+
+  // 토큰 만료 시간 체크
+  const now = Math.floor(Date.now() / 1000)
+  const isAccessTokenValid = storedData.accessExpires > now
+  const isRefreshTokenValid = storedData.refreshExpires > now
+
+  // 두 토큰 모두 만료되었으면 로컬스토리지 전체 삭제
+  if (!isAccessTokenValid && !isRefreshTokenValid) {
+    logger.warn('[APP] Both tokens expired - Clear storage', {
+      accessExpires: storedData.accessExpires,
+      refreshExpires: storedData.refreshExpires,
+      currentTime: now
+    })
+    storage.clear()
+    return
+  }
+
+  // accessToken만 만료되었으면 로컬스토리지 전체 삭제
+  if (!isAccessTokenValid && isRefreshTokenValid) {
+    logger.warn('[APP] Access token expired - Clear storage', {
+      accessExpires: storedData.accessExpires,
+      refreshExpires: storedData.refreshExpires,
+      currentTime: now
+    })
+    storage.clear()
+    return
+  }
+
+  // 유효한 경우에만 정상 로드
+  logger.info('[APP] Valid tokens found - Load auth', {
+    accessExpires: storedData.accessExpires,
+    refreshExpires: storedData.refreshExpires,
+    currentTime: now,
+    remainingSeconds: storedData.accessExpires - now
+  })
+
+  authStore.loadAuth()
+}
 
 // ============================================================================
 // 초기 라우팅 처리

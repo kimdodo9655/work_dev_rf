@@ -100,6 +100,39 @@ export const storage = {
   // 유효성 체크
   // ============================================================================
 
+  /**
+   * 토큰 유효성 검사
+   * @returns 'valid' | 'refresh_needed' | 'invalid'
+   */
+  checkTokenValidity(): 'valid' | 'refresh_needed' | 'invalid' {
+    const { accessToken, accessExpires, refreshExpires } = this.get() // ✅ refreshToken 제거
+
+    // 토큰이 없으면 invalid
+    if (!accessToken) {
+      return 'invalid'
+    }
+
+    const now = Math.floor(Date.now() / 1000)
+    const isAccessTokenValid = accessExpires > now
+    const isRefreshTokenValid = refreshExpires > now
+
+    // 두 토큰 모두 만료 → invalid
+    if (!isAccessTokenValid && !isRefreshTokenValid) {
+      return 'invalid'
+    }
+
+    // accessToken만 만료, refreshToken 유효 → refresh 필요
+    if (!isAccessTokenValid && isRefreshTokenValid) {
+      return 'refresh_needed'
+    }
+
+    // accessToken 유효 → valid
+    return 'valid'
+  },
+
+  /**
+   * @deprecated Use checkTokenValidity() instead
+   */
   isValid() {
     const { accessToken, accessExpires } = this.get()
     if (!accessToken) return false
