@@ -6,11 +6,15 @@ const KEYS = {
   REFRESH_EXPIRES: 'refresh_expires',
   LOGIN_ID: 'login_id',
   USER_ID: 'user_id',
-  ROLE_LEVEL: 'role_level'
+  ROLE_LEVEL: 'role_level',
+  BANK_CODE: 'bank_code'
 } as const
 
 export const storage = {
+  // ============================================================================
   // 저장
+  // ============================================================================
+
   save(data: {
     accessToken: string
     refreshToken: string
@@ -42,7 +46,15 @@ export const storage = {
     localStorage.setItem(KEYS.REFRESH_EXPIRES, String(data.refreshTokenExpiresIn))
   },
 
+  // 금융기관 코드 저장
+  setBankCode(code: string) {
+    localStorage.setItem(KEYS.BANK_CODE, code)
+  },
+
+  // ============================================================================
   // 조회
+  // ============================================================================
+
   get() {
     return {
       accessToken: localStorage.getItem(KEYS.ACCESS_TOKEN),
@@ -51,21 +63,53 @@ export const storage = {
       refreshExpires: Number(localStorage.getItem(KEYS.REFRESH_EXPIRES)) || 0,
       loginId: localStorage.getItem(KEYS.LOGIN_ID),
       userId: Number(localStorage.getItem(KEYS.USER_ID)) || null,
-      roleLevel: Number(localStorage.getItem(KEYS.ROLE_LEVEL)) || null
+      roleLevel: Number(localStorage.getItem(KEYS.ROLE_LEVEL)) || null,
+      bankCode: localStorage.getItem(KEYS.BANK_CODE)
     }
   },
 
+  // accessToken만 조회
+  getAccessToken() {
+    return localStorage.getItem(KEYS.ACCESS_TOKEN)
+  },
+
+  // refreshToken만 조회
+  getRefreshToken() {
+    return localStorage.getItem(KEYS.REFRESH_TOKEN)
+  },
+
+  // bankCode만 조회
+  getBankCode() {
+    return localStorage.getItem(KEYS.BANK_CODE)
+  },
+
+  // ============================================================================
   // 삭제
+  // ============================================================================
+
   clear() {
     Object.values(KEYS).forEach((key) => localStorage.removeItem(key))
   },
 
+  // bankCode만 삭제
+  clearBankCode() {
+    localStorage.removeItem(KEYS.BANK_CODE)
+  },
+
+  // ============================================================================
   // 유효성 체크
+  // ============================================================================
+
   isValid() {
     const { accessToken, accessExpires } = this.get()
     if (!accessToken) return false
 
     const now = Math.floor(Date.now() / 1000)
     return accessExpires > now + 30 // 30초 버퍼
+  },
+
+  // 금융기관 선택 여부 체크
+  hasBankCode() {
+    return !!this.getBankCode()
   }
 }

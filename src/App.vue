@@ -1,18 +1,19 @@
 <template>
   <div id="app">
-    <div class="wrapper" :class="currentAuthState === 'pre-auth' ? 'pre-auth-wrapper' : ''">
-      <AppHeader v-if="currentAuthState !== 'pre-auth'" />
+    <div class="wrapper" :class="authStore.authState === 'pre-auth' ? 'pre-auth-wrapper' : ''">
+      <AppHeader v-if="authStore.authState !== 'pre-auth'" />
 
-      <div class="content" v-if="currentAuthState !== 'pre-auth'">
+      <div class="content" v-if="authStore.authState !== 'pre-auth'">
         <router-view />
       </div>
 
-      <div class="full-content" v-if="currentAuthState === 'pre-auth'">
+      <div class="full-content" v-if="authStore.authState === 'pre-auth'">
         <div class="full-content-inner">
           <router-view />
         </div>
       </div>
 
+      <!-- 기존 TEMP 버튼 등은 그대로 유지 -->
       <button
         style="
           width: 100%;
@@ -40,23 +41,56 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
-// [DEV] 개발요 도구 네비게이션
 import DevNav from '@/components/dev/DevNav.vue'
-// 공통 레이아웃
 import AppFooter from '@/components/layout/AppFooter.vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
-// [DEV] 개발요 도구 상태관리
-import { useDevOptions } from '@/composables/useDevOptions'
+import { useAuthStore } from '@/stores/auth'
+import { logger } from '@/utils/logger'
 
-// 테스트용 임시 파일
 import TempLogin from './components/dev/TEMP/TempLogin.vue'
 import TempPdf from './components/dev/TEMP/TempPdf.vue'
 
-// Temp 요소 on/off
+const authStore = useAuthStore()
+const router = useRouter()
+
+// Temp 요소 on/off (기존)
 const isVisible = ref(false)
 
-// [DEV] 전역적으로 상태 초기화
-const { currentAuthState } = useDevOptions() // 'pre-auth', 'onboarding', 'auth'
+// ============================================================================
+// Lifecycle
+// ============================================================================
+onMounted(() => {
+  logger.info('[APP] Application mounted')
+
+  // 1. 저장된 인증 정보 로드
+  authStore.loadAuth()
+
+  // 2. 인증 상태에 따라 초기 라우팅
+  const currentPath = router.currentRoute.value.path
+  const authState = authStore.authState
+
+  logger.info('[APP] Auth state:', {
+    authState,
+    currentPath,
+    isLoggedIn: authStore.isLoggedIn
+  })
+
+  // 로그인 전 페이지가 아닌데 로그인 안 되어 있으면 로그인 페이지로
+  // if (
+  //   authState === 'pre-auth' &&
+  //   !currentPath.startsWith('/auth') &&
+  //   !currentPath.startsWith('/error')
+  // ) {
+  //   logger.warn('[APP] Not logged in - Redirect to login')
+  //   router.push('/auth/login')
+  // }
+})
+
+onBeforeUnmount(() => {
+  logger.info('[APP] Application unmounting')
+  authStore.cleanup()
+})
 </script>

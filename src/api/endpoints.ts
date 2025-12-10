@@ -8,6 +8,12 @@ export const API = {
     LOGIN: '/api/auth/login',
     LOGOUT: '/api/auth/logout',
     REFRESH: '/api/auth/refresh'
+  },
+
+  // 금융기관
+  BANKS: {
+    LIST: '/api/banks',
+    DETAIL: (code: string) => `/api/banks/${code}`
   }
 
   // TODO: 백엔드 API 개발 후 아래 형식으로 추가

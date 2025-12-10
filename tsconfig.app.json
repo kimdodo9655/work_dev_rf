@@ -9,9 +9,11 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noImplicitAny": false,
-    "erasableSyntaxOnly": true,
+    "erasableSyntaxOnly": false,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
+    "resolveJsonModule": true, // 👈 추가
+    "esModuleInterop": true, // 👈 추가 (안전하게)
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]

@@ -1,152 +1,124 @@
 import type { NavigationGuardNext, RouteLocationNormalized, RouteRecordRaw } from 'vue-router'
 import { createRouter, createWebHistory } from 'vue-router'
 
+import { useAuthStore } from '@/stores/auth'
+import { RoleLevel } from '@/types'
 import { logger } from '@/utils/logger'
-import { storage } from '@/utils/storage'
 
 // Meta 타입 정의
 declare module 'vue-router' {
   interface RouteMeta {
     title?: string
-    titleAuth?: string // 로그인 후 타이틀 추가
-    requiresAuth?: boolean
-    requiredRoles?: string[]
-    isOnboarding?: boolean
+    requiresAuth?: boolean // 로그인 필요 여부
+    requiresBankCode?: boolean // 금융기관 선택 필요 여부
+    requiredRoles?: RoleLevel[] // 필요 권한
+    allowedAuthStates?: ('pre-auth' | 'onboarding' | 'auth')[] // 허용된 인증 상태
   }
 }
 
 const routes: RouteRecordRaw[] = [
-  // Root - 로그인 상태에 따라 동적으로 컴포넌트 변경
+  // ============================================================================
+  // Root
+  // ============================================================================
+
   {
     path: '/',
-    name: 'Home',
-    component: () => import('@/components/auth/pages/LoginPage.vue'),
+    name: 'Root',
+    component: () => import('@/components/shared/pages/RootPage.vue'),
     meta: {
-      title: '로그인', // 로그인 전
-      titleAuth: '나의 사건 정보', // 로그인 후
-      requiresAuth: false
+      title: '전자등기',
+      allowedAuthStates: ['pre-auth', 'onboarding', 'auth'] // 모든 상태에서 접근 가능
     }
   },
 
-  // Error Pages
-  {
-    path: '/error/404',
-    name: 'NotFound',
-    component: () => import('@/components/shared/pages/NotFoundPage.vue'),
-    meta: {
-      title: '잘못된 페이지 접근',
-      requiresAuth: false
-    }
-  },
-  {
-    path: '/error/mac-os',
-    name: 'AccessErrorMac',
-    component: () => import('@/components/shared/pages/AccessErrorMacPage.vue'),
-    meta: {
-      title: '접속 오류 (Mac OS)',
-      requiresAuth: false
-    }
-  },
-  {
-    path: '/error/mobile',
-    name: 'AccessErrorMobile',
-    component: () => import('@/components/shared/pages/AccessErrorMobilePage.vue'),
-    meta: {
-      title: '접속 오류 (모바일)',
-      requiresAuth: false
-    }
-  },
+  // ============================================================================
+  // Pre-Auth (로그인 전)
+  // ============================================================================
 
-  // shared Pages
-  {
-    path: '/viewer',
-    name: 'WebViewer',
-    component: () => import('@/components/shared/pages/WebViewerPage.vue'),
-    meta: {
-      title: '웹뷰어',
-      requiresAuth: true
-    }
-  },
-  {
-    path: '/device-info',
-    name: 'DeviceInfo',
-    component: () => import('@/components/shared/pages/DeviceInfoPage.vue'),
-    meta: {
-      title: '등록 단말기 입력 정보 확인',
-      requiresAuth: true
-    }
-  },
-
-  // Auth Pages (직접 접근용 - 필요시)
   {
     path: '/auth/login',
-    redirect: '/'
+    name: 'Login',
+    component: () => import('@/components/auth/pages/LoginPage.vue'),
+    meta: {
+      title: '로그인',
+      allowedAuthStates: ['pre-auth']
+    }
   },
+
   {
     path: '/auth/signup',
     name: 'SignUp',
     component: () => import('@/components/auth/pages/SignupPage.vue'),
     meta: {
       title: '회원가입',
-      requiresAuth: false
+      allowedAuthStates: ['pre-auth']
     }
   },
+
   {
     path: '/auth/install',
     name: 'ProgramInstall',
     component: () => import('@/components/auth/pages/ProgramInstallPage.vue'),
     meta: {
       title: '프로그램 설치',
-      requiresAuth: false
+      allowedAuthStates: ['pre-auth']
     }
   },
+
   {
     path: '/auth/auto-logout',
     name: 'AutoLogout',
     component: () => import('@/components/auth/pages/AutoLogoutPage.vue'),
     meta: {
       title: '자동 로그아웃',
-      requiresAuth: false
+      allowedAuthStates: ['pre-auth']
     }
   },
+
   {
     path: '/auth/password-setup',
     name: 'PasswordSetup',
     component: () => import('@/components/auth/pages/PasswordSetupPage.vue'),
     meta: {
       title: '비밀번호 설정',
-      requiresAuth: true
+      allowedAuthStates: ['pre-auth']
     }
   },
+
   {
     path: '/auth/blocked/mac',
     name: 'AccessBlockMac',
     component: () => import('@/components/auth/pages/AccessBlockMacPage.vue'),
     meta: {
       title: '사이트 접속 차단 (Mac Address 오류)',
-      requiresAuth: false
+      allowedAuthStates: ['pre-auth']
     }
   },
+
   {
     path: '/auth/blocked/email',
     name: 'AccessBlockEmail',
     component: () => import('@/components/auth/pages/AccessBlockEmailPage.vue'),
     meta: {
       title: '사이트 접속 차단 (이메일 인증)',
-      requiresAuth: false
+      allowedAuthStates: ['pre-auth']
     }
   },
+
   {
     path: '/auth/blocked/user',
     name: 'AccessBlockUser',
     component: () => import('@/components/auth/pages/AccessBlockUserPage.vue'),
     meta: {
       title: '사이트 접속 차단 (사용자 사용유무)',
-      requiresAuth: false
+      allowedAuthStates: ['pre-auth']
     }
   },
 
-  // Main Pages
+  // ============================================================================
+  // Onboarding (로그인 후, 금융기관 선택 전)
+  // ============================================================================
+
   {
     path: '/bank-select',
     name: 'BankSelection',
@@ -154,15 +126,10 @@ const routes: RouteRecordRaw[] = [
     meta: {
       title: '금융기관 선택',
       requiresAuth: true,
-      isOnboarding: true
+      allowedAuthStates: ['onboarding', 'auth'] // auth 상태에서도 접근 가능 (변경용)
     }
   },
-  {
-    path: '/dashboard',
-    redirect: '/' // 대시보드도 루트로 리다이렉트
-  },
 
-  // My Pages
   {
     path: '/my/organization',
     name: 'OrgMgmt',
@@ -170,9 +137,11 @@ const routes: RouteRecordRaw[] = [
     meta: {
       title: '기관/지점 정보 관리',
       requiresAuth: true,
-      requiredRoles: ['기관 관리자', '지점 관리자']
+      allowedAuthStates: ['onboarding', 'auth'],
+      requiredRoles: [RoleLevel.ORGANIZATION_ADMIN, RoleLevel.BRANCH_ADMIN]
     }
   },
+
   {
     path: '/my/organization/:orgId',
     name: 'OrgDetail',
@@ -180,9 +149,11 @@ const routes: RouteRecordRaw[] = [
     meta: {
       title: '기관/지점 등록 정보',
       requiresAuth: true,
-      requiredRoles: ['기관 관리자', '지점 관리자']
+      allowedAuthStates: ['onboarding', 'auth'],
+      requiredRoles: [RoleLevel.ORGANIZATION_ADMIN, RoleLevel.BRANCH_ADMIN]
     }
   },
+
   {
     path: '/my/users',
     name: 'UserMgmt',
@@ -190,9 +161,11 @@ const routes: RouteRecordRaw[] = [
     meta: {
       title: '사용자 정보 관리',
       requiresAuth: true,
-      requiredRoles: ['기관 관리자', '지점 관리자']
+      allowedAuthStates: ['onboarding', 'auth'],
+      requiredRoles: [RoleLevel.ORGANIZATION_ADMIN, RoleLevel.BRANCH_ADMIN]
     }
   },
+
   {
     path: '/my/users/:userId',
     name: 'UserDetail',
@@ -200,78 +173,171 @@ const routes: RouteRecordRaw[] = [
     meta: {
       title: '사용자 등록 정보',
       requiresAuth: true,
-      requiredRoles: ['기관 관리자', '지점 관리자']
+      allowedAuthStates: ['onboarding', 'auth'],
+      requiredRoles: [RoleLevel.ORGANIZATION_ADMIN, RoleLevel.BRANCH_ADMIN]
     }
   },
+
   {
     path: '/my/profile',
-    name: 'MyInfo',
+    name: 'MyProfile',
     component: () => import('@/components/my/pages/MyProfilePage.vue'),
     meta: {
       title: '내 정보 관리',
-      requiresAuth: true
+      requiresAuth: true,
+      allowedAuthStates: ['onboarding', 'auth'],
+      requiredRoles: [RoleLevel.USER]
     }
   },
 
-  // Estimate Pages
+  // ============================================================================
+  // Auth (로그인 후, 금융기관 선택 완료)
+  // ============================================================================
+
+  {
+    path: '/dashboard',
+    name: 'Dashboard',
+    component: () => import('@/components/main/pages/DashboardPage.vue'),
+    meta: {
+      title: '메인화면',
+      requiresAuth: true,
+      requiresBankCode: true,
+      allowedAuthStates: ['auth']
+    }
+  },
+
+  {
+    path: '/viewer',
+    name: 'WebViewer',
+    component: () => import('@/components/shared/pages/WebViewerPage.vue'),
+    meta: {
+      title: '웹뷰어',
+      requiresAuth: true,
+      requiresBankCode: true,
+      allowedAuthStates: ['auth']
+    }
+  },
+
   {
     path: '/estimate',
-    name: 'CaseEstimateMgmt',
+    name: 'EstimateMgmt',
     component: () => import('@/components/estimate/pages/EstimateMgmtContainer.vue'),
     meta: {
       title: '등기 견적 관리',
-      requiresAuth: true
+      requiresAuth: true,
+      requiresBankCode: true,
+      allowedAuthStates: ['auth']
     }
   },
+
   {
     path: '/estimate/create/:registrationNo',
-    name: 'EstimateCreateSubmitDetail',
+    name: 'EstimateCreate',
     component: () => import('@/components/estimate/pages/EstimateDetailPage.vue'),
     meta: {
       title: '견적서 작성/제출 상세',
-      requiresAuth: true
+      requiresAuth: true,
+      requiresBankCode: true,
+      allowedAuthStates: ['auth']
     }
   },
+
   {
     path: '/estimate/detail/:registrationNo',
-    name: 'EstimateConfirmWithdrawDetail',
+    name: 'EstimateDetail',
     component: () => import('@/components/estimate/pages/EstimateDetailPage.vue'),
     meta: {
       title: '견적서 확인/철회 상세',
-      requiresAuth: true
+      requiresAuth: true,
+      requiresBankCode: true,
+      allowedAuthStates: ['auth']
     }
   },
 
-  // Registration Pages
   {
     path: '/registration',
-    name: 'CaseStatus',
+    name: 'RegistrationStatus',
     component: () => import('@/components/registration/pages/CaseStatusContainer.vue'),
     meta: {
       title: '등기 진행 현황',
-      requiresAuth: true
-    }
-  },
-  {
-    path: '/registration/:caseId',
-    name: 'CaseDetail',
-    component: () => import('@/components/registration/pages/CaseDetailPage.vue'),
-    meta: {
-      title: '등기 진행 상세',
-      requiresAuth: true
-    }
-  },
-  {
-    path: '/registration/schedule',
-    name: 'CaseScheduleMgmt',
-    component: () => import('@/components/registration/pages/CaseScheduleMgmtPage.vue'),
-    meta: {
-      title: '등기 일정 관리',
-      requiresAuth: true
+      requiresAuth: true,
+      requiresBankCode: true,
+      allowedAuthStates: ['auth']
     }
   },
 
-  // 404 Catch All (맨 마지막에 위치)
+  {
+    path: '/registration/:caseId',
+    name: 'RegistrationDetail',
+    component: () => import('@/components/registration/pages/CaseDetailPage.vue'),
+    meta: {
+      title: '등기 진행 상세',
+      requiresAuth: true,
+      requiresBankCode: true,
+      allowedAuthStates: ['auth']
+    }
+  },
+
+  {
+    path: '/registration/schedule',
+    name: 'RegistrationSchedule',
+    component: () => import('@/components/registration/pages/CaseScheduleMgmtPage.vue'),
+    meta: {
+      title: '등기 일정 관리',
+      requiresAuth: true,
+      requiresBankCode: true,
+      allowedAuthStates: ['auth']
+    }
+  },
+
+  // ============================================================================
+  // 공통 (모든 상태에서 접근 가능)
+  // ============================================================================
+
+  {
+    path: '/device-info',
+    name: 'DeviceInfo',
+    component: () => import('@/components/shared/pages/DeviceInfoPage.vue'),
+    meta: {
+      title: '등록 단말기 정보',
+      allowedAuthStates: ['pre-auth', 'onboarding', 'auth']
+    }
+  },
+
+  {
+    path: '/error/404',
+    name: 'NotFound',
+    component: () => import('@/components/shared/pages/NotFoundPage.vue'),
+    meta: {
+      title: '페이지를 찾을 수 없습니다',
+      allowedAuthStates: ['pre-auth', 'onboarding', 'auth']
+    }
+  },
+
+  {
+    path: '/error/mac-os',
+    name: 'ErrorMacOS',
+    component: () => import('@/components/shared/pages/AccessErrorMacPage.vue'),
+    meta: {
+      title: '접속 오류 (Mac OS)',
+      allowedAuthStates: ['pre-auth', 'onboarding', 'auth']
+    }
+  },
+
+  {
+    path: '/error/mobile',
+    name: 'ErrorMobile',
+    component: () => import('@/components/shared/pages/AccessErrorMobilePage.vue'),
+    meta: {
+      title: '접속 오류 (모바일)',
+      allowedAuthStates: ['pre-auth', 'onboarding', 'auth']
+    }
+  },
+
+  // ============================================================================
+  // Catch All
+  // ============================================================================
+
   {
     path: '/:pathMatch(.*)*',
     redirect: '/error/404'
@@ -289,123 +355,94 @@ const router = createRouter({
   }
 })
 
-// ============================================
+// ============================================================================
 // Navigation Guards
-// ============================================
+// ============================================================================
 
-/**
- * 인증 체크 함수
- */
-function checkAuth(): boolean {
-  return storage.isValid()
-}
-
-/**
- * 사용자 권한 조회 함수
- * roleLevel을 문자열 권한으로 매핑
- */
-function getUserRoles(): string[] {
-  const { roleLevel } = storage.get()
-
-  if (!roleLevel) return []
-
-  // roleLevel에 따른 권한 매핑
-  const roleMap: Record<number, string[]> = {
-    100: ['시스템 관리자'], // SUPER_ADMIN
-    50: ['기관 관리자'],
-    40: ['지점 관리자'],
-    30: ['일반 사용자']
-  }
-
-  return roleMap[roleLevel] || []
-}
-
-/**
- * 전역 네비게이션 가드
- */
 router.beforeEach(
-  (to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
-    const isAuthenticated = checkAuth()
-    const requiresAuth = to.meta.requiresAuth
+  (to: RouteLocationNormalized, _from: RouteLocationNormalized, next: NavigationGuardNext) => {
+    const authStore = useAuthStore()
+    const currentAuthState = authStore.authState
+    const userRoleLevel = authStore.roleLevel
+    const isAdmin = authStore.isAdmin
 
-    logger.debug('Navigation', {
+    logger.debug('[ROUTER] Navigation', {
       to: to.path,
-      from: from.path,
-      requiresAuth,
-      isAuthenticated
+      currentAuthState,
+      userRoleLevel,
+      requiresAuth: to.meta.requiresAuth,
+      requiresBankCode: to.meta.requiresBankCode
     })
 
-    // 페이지 타이틀 설정 (로그인 상태에 따라 다른 타이틀 사용)
-    let pageTitle = '전자등기'
+    // 1. 페이지 타이틀 설정
+    document.title = to.meta.title ? `${to.meta.title} - 전자등기` : '전자등기'
 
-    if (to.path === '/' && to.meta.titleAuth && isAuthenticated) {
-      // 루트 경로이고 로그인 상태이면 titleAuth 사용
-      pageTitle = `${to.meta.titleAuth} - 전자등기`
-    } else if (to.meta.title) {
-      // 그 외에는 기본 title 사용
-      pageTitle = `${to.meta.title} - 전자등기`
+    // 2. 인증 상태 체크
+    if (to.meta.requiresAuth && !authStore.isLoggedIn) {
+      logger.warn('[ROUTER] Unauthorized - Redirect to login')
+      next('/auth/login')
+      return
     }
 
-    document.title = pageTitle
-
-    // 1. 인증이 필요한 페이지인데 로그인하지 않은 경우
-    if (requiresAuth && !isAuthenticated) {
-      logger.warn('Unauthorized access attempt', { to: to.path })
-
-      // 루트가 아닌 경우만 루트로 리다이렉트 (무한 루프 방지)
-      if (to.path !== '/') {
-        next({ path: '/', query: { redirect: to.fullPath } })
-        return
-      }
+    // 3. 금융기관 선택 체크
+    if (to.meta.requiresBankCode && !authStore.selectedBankCode) {
+      logger.warn('[ROUTER] Bank code required - Redirect to bank selection')
+      next('/bank-select')
+      return
     }
 
-    // 2. 권한 체크 (requiredRoles가 있는 경우)
-    if (
-      isAuthenticated &&
-      requiresAuth &&
-      to.meta.requiredRoles &&
-      to.meta.requiredRoles.length > 0
-    ) {
-      const userRoles = getUserRoles()
-      const hasRequiredRole = to.meta.requiredRoles.some((role) => userRoles.includes(role))
-
-      if (!hasRequiredRole) {
-        logger.warn('Insufficient permissions', {
-          required: to.meta.requiredRoles,
-          userRoles
+    // 4. 인증 상태 허용 범위 체크
+    if (to.meta.allowedAuthStates && to.meta.allowedAuthStates.length > 0) {
+      if (!to.meta.allowedAuthStates.includes(currentAuthState)) {
+        logger.warn('[ROUTER] Invalid auth state', {
+          current: currentAuthState,
+          allowed: to.meta.allowedAuthStates
         })
-        next({ name: 'NotFound' })
+
+        // 현재 상태에 맞는 페이지로 리다이렉트
+        if (currentAuthState === 'pre-auth') {
+          next('/auth/login')
+          return
+        } else if (currentAuthState === 'onboarding') {
+          next('/bank-select')
+          return
+        } else {
+          next('/dashboard')
+          return
+        }
+      }
+    }
+
+    // 5. 권한 체크 (시스템/서비스 관리자는 모든 페이지 접근 가능)
+    if (to.meta.requiredRoles && to.meta.requiredRoles.length > 0) {
+      if (isAdmin) {
+        // 관리자는 모든 페이지 접근 가능
+        next()
+        return
+      }
+
+      if (!userRoleLevel || !to.meta.requiredRoles.includes(userRoleLevel)) {
+        logger.warn('[ROUTER] Insufficient permissions', {
+          userRole: userRoleLevel,
+          requiredRoles: to.meta.requiredRoles
+        })
+        next('/error/404')
         return
       }
     }
 
-    // 3. 정상 진행
+    // 6. 정상 진행
     next()
   }
 )
 
-/**
- * 네비게이션 후 처리
- */
-router.afterEach((to, from) => {
-  logger.debug('Navigation completed', {
-    to: to.path,
-    from: from.path
-  })
-})
+// ============================================================================
+// 인증 관련 이벤트 리스너
+// ============================================================================
 
-/**
- * 인증 관련 이벤트 리스너
- * Axios 인터셉터에서 발생하는 로그아웃 이벤트 처리
- */
 window.addEventListener('auth:logout', () => {
-  logger.warn('Auth logout event received')
-  // 이미 루트에 있으면 리로드, 아니면 루트로 이동
-  if (window.location.pathname === '/') {
-    window.location.reload()
-  } else {
-    window.location.href = '/'
-  }
+  logger.warn('[ROUTER] Auth logout event - Redirect to auto-logout')
+  router.push('/auth/auto-logout')
 })
 
 export default router

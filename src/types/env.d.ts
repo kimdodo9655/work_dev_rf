@@ -9,3 +9,9 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }
+
+// 👇 이 부분 추가
+declare module '*.json' {
+  const value: any
+  export default value
+}

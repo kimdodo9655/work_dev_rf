@@ -14,7 +14,7 @@ export const api: AxiosInstance = axios.create({
 })
 
 // ============================================================================
-// 요청 인터셉터: 토큰 자동 추가
+// 요청 인터셉터: 토큰 + 금융기관 코드 자동 추가
 // ============================================================================
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   // 공개 API 목록 (토큰 불필요)
@@ -22,9 +22,16 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const isPublic = publicUrls.some((url) => config.url?.includes(url))
 
   if (!isPublic) {
-    const { accessToken } = storage.get()
+    // 1. Authorization 헤더 추가
+    const accessToken = storage.getAccessToken()
     if (accessToken && config.headers) {
       config.headers.Authorization = `Bearer ${accessToken}`
+    }
+
+    // 2. X-Bank-Code 헤더 추가 👈 이 부분 추가
+    const bankCode = storage.getBankCode()
+    if (bankCode && config.headers) {
+      config.headers['X-Bank-Code'] = bankCode
     }
   }
 

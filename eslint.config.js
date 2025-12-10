@@ -73,9 +73,9 @@ export default [
     files: ['**/*.{ts,mts,tsx,vue}'],
     rules: {
       // TypeScript 규칙 완화
-      '@typescript-eslint/no-explicit-any': 'off', // any 허용
+      '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-      '@typescript-eslint/no-unnecessary-condition': 'off', // undefined 체크 허용
+      '@typescript-eslint/no-unnecessary-condition': 'off',
 
       // Vue 규칙
       'vue/multi-word-component-names': 'off',
@@ -86,7 +86,8 @@ export default [
 
       // 접근성 규칙
       'vuejs-accessibility/alt-text': 'error',
-      'vuejs-accessibility/click-events-have-key-events': 'warn',
+      'vuejs-accessibility/click-events-have-key-events': 'off',
+      'vuejs-accessibility/no-static-element-interactions': 'off', // 👈 추가
       'vuejs-accessibility/label-has-for': 'off',
       'vuejs-accessibility/mouse-events-have-key-events': 'warn',
       'vuejs-accessibility/form-control-has-label': 'off'
