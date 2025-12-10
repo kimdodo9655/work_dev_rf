@@ -62,35 +62,87 @@ const isVisible = ref(false)
 // ============================================================================
 // Lifecycle
 // ============================================================================
-onMounted(() => {
+onMounted(async () => {
   logger.info('[APP] Application mounted')
 
   // 1. 저장된 인증 정보 로드
   authStore.loadAuth()
 
-  // 2. 인증 상태에 따라 초기 라우팅
+  // 2. 현재 경로 및 인증 상태 확인
   const currentPath = router.currentRoute.value.path
   const authState = authStore.authState
 
-  logger.info('[APP] Auth state:', {
+  logger.info('[APP] Initial routing check:', {
     authState,
     currentPath,
-    isLoggedIn: authStore.isLoggedIn
+    isLoggedIn: authStore.isLoggedIn,
+    hasBankCode: !!authStore.selectedBankCode
   })
 
-  // 로그인 전 페이지가 아닌데 로그인 안 되어 있으면 로그인 페이지로
-  // if (
-  //   authState === 'pre-auth' &&
-  //   !currentPath.startsWith('/auth') &&
-  //   !currentPath.startsWith('/error')
-  // ) {
-  //   logger.warn('[APP] Not logged in - Redirect to login')
-  //   router.push('/auth/login')
-  // }
+  // 3. 인증 상태에 따른 자동 라우팅 (Root 페이지가 아닌 경우에만)
+  if (currentPath !== '/') {
+    await handleInitialRouting(currentPath, authState)
+  }
 })
 
 onBeforeUnmount(() => {
   logger.info('[APP] Application unmounting')
   authStore.cleanup()
 })
+
+// ============================================================================
+// 초기 라우팅 처리
+// ============================================================================
+async function handleInitialRouting(
+  currentPath: string,
+  authState: 'pre-auth' | 'onboarding' | 'auth'
+) {
+  // 에러 페이지는 라우팅하지 않음
+  if (currentPath.startsWith('/error/')) {
+    logger.info('[APP] Error page - No routing needed')
+    return
+  }
+
+  switch (authState) {
+    case 'pre-auth':
+      // 로그인 전: 인증 페이지나 단말기 정보 페이지가 아니면 로그인으로
+      if (!currentPath.startsWith('/auth') && currentPath !== '/device-info') {
+        logger.warn('[APP] Not logged in - Redirect to login')
+        await router.replace('/auth/login')
+      }
+      break
+
+    case 'onboarding':
+      // 로그인 후, 금융기관 선택 전
+      if (currentPath.startsWith('/auth')) {
+        // 인증 페이지에 있으면 금융기관 선택으로
+        logger.info('[APP] Logged in but on auth page - Redirect to bank selection')
+        await router.replace('/bank-select')
+      } else if (!isOnboardingAllowedPath(currentPath)) {
+        // onboarding 허용 경로가 아니면 금융기관 선택으로
+        logger.warn('[APP] Not allowed in onboarding state - Redirect to bank selection')
+        await router.replace('/bank-select')
+      }
+      break
+
+    case 'auth':
+      // 로그인 후, 금융기관 선택 완료
+      if (currentPath.startsWith('/auth') && currentPath !== '/auth/auto-logout') {
+        // 인증 페이지에 있으면 대시보드로
+        logger.info('[APP] Already authenticated - Redirect to dashboard')
+        await router.replace('/dashboard')
+      } else if (currentPath === '/device-info') {
+        // 이미 로그인했는데 단말기 정보 페이지에 있으면 대시보드로
+        logger.info('[APP] Already authenticated - Redirect to dashboard from device-info')
+        await router.replace('/dashboard')
+      }
+      break
+  }
+}
+
+// onboarding 상태에서 허용되는 경로 체크
+function isOnboardingAllowedPath(path: string): boolean {
+  const allowedPaths = ['/bank-select', '/my/organization', '/my/users', '/my/profile']
+  return allowedPaths.some((allowed) => path.startsWith(allowed))
+}
 </script>

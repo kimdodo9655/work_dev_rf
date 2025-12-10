@@ -18,7 +18,7 @@ declare module 'vue-router' {
 
 const routes: RouteRecordRaw[] = [
   // ============================================================================
-  // Root
+  // Root - 인증 상태에 따라 동적 컴포넌트 렌더링
   // ============================================================================
 
   {
@@ -111,6 +111,16 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/components/auth/pages/AccessBlockUserPage.vue'),
     meta: {
       title: '사이트 접속 차단 (사용자 사용유무)',
+      allowedAuthStates: ['pre-auth']
+    }
+  },
+
+  {
+    path: '/device-info',
+    name: 'DeviceInfo',
+    component: () => import('@/components/shared/pages/DeviceInfoPage.vue'),
+    meta: {
+      title: '등록 단말기 정보',
       allowedAuthStates: ['pre-auth']
     }
   },
@@ -291,18 +301,8 @@ const routes: RouteRecordRaw[] = [
   },
 
   // ============================================================================
-  // 공통 (모든 상태에서 접근 가능)
+  // 에러 페이지 (모든 상태에서 접근 가능)
   // ============================================================================
-
-  {
-    path: '/device-info',
-    name: 'DeviceInfo',
-    component: () => import('@/components/shared/pages/DeviceInfoPage.vue'),
-    meta: {
-      title: '등록 단말기 정보',
-      allowedAuthStates: ['pre-auth', 'onboarding', 'auth']
-    }
-  },
 
   {
     path: '/error/404',
@@ -360,38 +360,51 @@ const router = createRouter({
 // ============================================================================
 
 router.beforeEach(
-  (to: RouteLocationNormalized, _from: RouteLocationNormalized, next: NavigationGuardNext) => {
+  (to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
     const authStore = useAuthStore()
     const currentAuthState = authStore.authState
     const userRoleLevel = authStore.roleLevel
     const isAdmin = authStore.isAdmin
 
     logger.debug('[ROUTER] Navigation', {
+      from: from.path,
       to: to.path,
       currentAuthState,
       userRoleLevel,
-      requiresAuth: to.meta.requiresAuth,
-      requiresBankCode: to.meta.requiresBankCode
+      isLoggedIn: authStore.isLoggedIn,
+      hasBankCode: !!authStore.selectedBankCode
     })
 
     // 1. 페이지 타이틀 설정
     document.title = to.meta.title ? `${to.meta.title} - 전자등기` : '전자등기'
 
-    // 2. 인증 상태 체크
+    // 2. Root 페이지는 동적 컴포넌트 렌더링하므로 통과
+    if (to.path === '/') {
+      next()
+      return
+    }
+
+    // 3. 에러 페이지는 모든 상태에서 접근 가능
+    if (to.path.startsWith('/error/')) {
+      next()
+      return
+    }
+
+    // 4. 인증 필요 체크
     if (to.meta.requiresAuth && !authStore.isLoggedIn) {
       logger.warn('[ROUTER] Unauthorized - Redirect to login')
       next('/auth/login')
       return
     }
 
-    // 3. 금융기관 선택 체크
+    // 5. 금융기관 선택 필요 체크
     if (to.meta.requiresBankCode && !authStore.selectedBankCode) {
       logger.warn('[ROUTER] Bank code required - Redirect to bank selection')
       next('/bank-select')
       return
     }
 
-    // 4. 인증 상태 허용 범위 체크
+    // 6. 인증 상태 허용 범위 체크
     if (to.meta.allowedAuthStates && to.meta.allowedAuthStates.length > 0) {
       if (!to.meta.allowedAuthStates.includes(currentAuthState)) {
         logger.warn('[ROUTER] Invalid auth state', {
@@ -399,21 +412,13 @@ router.beforeEach(
           allowed: to.meta.allowedAuthStates
         })
 
-        // 현재 상태에 맞는 페이지로 리다이렉트
-        if (currentAuthState === 'pre-auth') {
-          next('/auth/login')
-          return
-        } else if (currentAuthState === 'onboarding') {
-          next('/bank-select')
-          return
-        } else {
-          next('/dashboard')
-          return
-        }
+        // Root로 리다이렉트 (Root에서 상태에 맞는 컴포넌트 렌더링)
+        next('/')
+        return
       }
     }
 
-    // 5. 권한 체크 (시스템/서비스 관리자는 모든 페이지 접근 가능)
+    // 7. 권한 체크 (시스템/서비스 관리자는 모든 페이지 접근 가능)
     if (to.meta.requiredRoles && to.meta.requiredRoles.length > 0) {
       if (isAdmin) {
         // 관리자는 모든 페이지 접근 가능
@@ -431,7 +436,7 @@ router.beforeEach(
       }
     }
 
-    // 6. 정상 진행
+    // 8. 정상 진행
     next()
   }
 )

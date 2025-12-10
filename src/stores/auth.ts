@@ -181,11 +181,21 @@ export const useAuthStore = defineStore('auth', () => {
 
     console.log('⏰ [AUTH] 세션 타이머 시작')
 
+    // 초기 시간 업데이트
+    currentTime.value = Math.floor(Date.now() / 1000)
+
+    // 토큰이 이미 만료되었는지 체크
+    if (accessExpires.value <= currentTime.value) {
+      console.warn('⚠️ [AUTH] 토큰이 이미 만료됨 - 자동 로그아웃')
+      handleAutoLogout()
+      return
+    }
+
     timerInterval = setInterval(() => {
       currentTime.value = Math.floor(Date.now() / 1000)
 
       // 세션 만료 시 자동 로그아웃
-      if (isExpired.value) {
+      if (accessExpires.value <= currentTime.value) {
         console.warn('⚠️ [AUTH] 세션 만료 - 자동 로그아웃')
         handleAutoLogout()
       }
@@ -205,8 +215,13 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function handleAutoLogout() {
+    stopTimer()
     clearAuth()
-    window.location.href = '/auth/auto-logout'
+
+    // 현재 페이지가 자동 로그아웃 페이지가 아니면 이동
+    if (window.location.pathname !== '/auth/auto-logout') {
+      window.location.href = '/auth/auto-logout'
+    }
   }
 
   // ============================================================================
