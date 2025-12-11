@@ -1,5 +1,6 @@
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios'
 
+import { ENV } from '@/utils/env'
 import { logger } from '@/utils/logger'
 import { storage } from '@/utils/storage'
 
@@ -9,7 +10,7 @@ import { API } from './endpoints'
 // Axios 인스턴스 생성
 // ============================================================================
 export const api: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://register-api.dev.com',
+  baseURL: ENV.API_BASE_URL,
   timeout: 30000,
   headers: { 'Content-Type': 'application/json' }
 })
@@ -42,7 +43,12 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 // ============================================================================
 // 응답 인터셉터: 401 에러 시 토큰 갱신 + 에러 로깅
 // ============================================================================
+
+/** 토큰 갱신 최대 재시도 횟수 */
+const MAX_REFRESH_RETRIES = 3
+
 let isRefreshing = false
+let refreshRetryCount = 0
 let failedQueue: Array<{
   resolve: (token: string | null) => void
   reject: (error: any) => void
@@ -57,6 +63,17 @@ const processQueue = (error: any, token: string | null = null) => {
     }
   })
   failedQueue = []
+}
+
+const handleAuthFailure = () => {
+  storage.clear()
+  refreshRetryCount = 0
+
+  // 알림 표시
+  alert('세션이 만료되었습니다. 다시 로그인해주세요.')
+
+  // 로그인 페이지로 이동
+  window.location.href = '/auth/login'
 }
 
 api.interceptors.response.use(
@@ -89,20 +106,34 @@ api.interceptors.response.use(
       })
     }
 
+    // 최대 재시도 횟수 초과 체크
+    if (refreshRetryCount >= MAX_REFRESH_RETRIES) {
+      logger.error('[AUTH] Token refresh max retries exceeded', {
+        retryCount: refreshRetryCount,
+        maxRetries: MAX_REFRESH_RETRIES
+      })
+      handleAuthFailure()
+      return Promise.reject(error)
+    }
+
     originalRequest._retry = true
     isRefreshing = true
+    refreshRetryCount++
 
     const { refreshToken } = storage.get()
 
     if (!refreshToken) {
-      storage.clear()
-      window.dispatchEvent(new CustomEvent('auth:logout'))
+      logger.warn('[AUTH] No refresh token available')
+      handleAuthFailure()
       return Promise.reject(error)
     }
 
     try {
       // 토큰 갱신
-      logger.info('[AUTH] Token refresh attempt')
+      logger.info('[AUTH] Token refresh attempt', {
+        retryCount: refreshRetryCount,
+        maxRetries: MAX_REFRESH_RETRIES
+      })
       const { data } = await axios.post(`${api.defaults.baseURL}${API.AUTH.REFRESH}`, {
         refreshToken
       })
@@ -111,6 +142,8 @@ api.interceptors.response.use(
       storage.updateTokens(newTokens)
       processQueue(null, newTokens.accessToken)
 
+      // 성공 시 재시도 카운트 초기화
+      refreshRetryCount = 0
       logger.info('[AUTH] Token refresh success')
 
       if (originalRequest.headers) {
@@ -119,11 +152,12 @@ api.interceptors.response.use(
       return api(originalRequest)
     } catch (err) {
       logger.error('[AUTH] Token refresh failed', {
+        retryCount: refreshRetryCount,
+        maxRetries: MAX_REFRESH_RETRIES,
         error: err
       })
       processQueue(err, null)
-      storage.clear()
-      window.dispatchEvent(new CustomEvent('auth:logout'))
+      handleAuthFailure()
       return Promise.reject(err)
     } finally {
       isRefreshing = false

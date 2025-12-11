@@ -4,16 +4,16 @@
     "composite": true,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "types": ["vite/client"],
-    "strict": false,
-    "strictNullChecks": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noImplicitAny": false,
+    "strict": true,
+    "strictNullChecks": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitAny": true,
     "erasableSyntaxOnly": false,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "resolveJsonModule": true, // 👈 추가
-    "esModuleInterop": true, // 👈 추가 (안전하게)
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]

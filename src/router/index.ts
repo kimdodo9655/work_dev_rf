@@ -418,10 +418,16 @@ router.beforeEach(
       }
     }
 
-    // 7. 권한 체크 (시스템/서비스 관리자는 모든 페이지 접근 가능)
+    // 7. 권한 체크
     if (to.meta.requiredRoles && to.meta.requiredRoles.length > 0) {
+      // 시스템/서비스 관리자(SUPER_ADMIN:100, ADMIN:90)는 모든 페이지 접근 가능
+      // 이는 관리자가 시스템 전체를 테스트하고 관리할 수 있도록 하기 위함
+      //
+      // [참고] 이로 인해 관리자는 allowedAuthStates 제약도 무시하게 됨
+      // 예: 로그인된 관리자가 /auth/login (pre-auth 페이지)에도 접근 가능
+      // 이는 의도된 동작이며, 기관/지점 관리자(ORGANIZATION_ADMIN:80, BRANCH_ADMIN:70)는
+      // 이 우회 로직이 적용되지 않아 일반 사용자와 동일하게 authState 제약을 받음
       if (isAdmin) {
-        // 관리자는 모든 페이지 접근 가능
         next()
         return
       }

@@ -2,7 +2,16 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
 import type { AuthState } from '@/types'
+import { RoleLevel } from '@/types'
+import { logger } from '@/utils/logger'
 import { storage } from '@/utils/storage'
+
+// ============================================================================
+// 상수 정의
+// ============================================================================
+
+/** 세션 만료 경고 시간 (초) - 5분 */
+const SESSION_WARNING_THRESHOLD = 300
 
 export const useAuthStore = defineStore('auth', () => {
   // ============================================================================
@@ -35,8 +44,8 @@ export const useAuthStore = defineStore('auth', () => {
   })
 
   const isAdmin = computed(() => {
-    // 시스템 관리자(100) 또는 서비스 관리자(90)
-    return roleLevel.value === 100 || roleLevel.value === 90
+    // 시스템 관리자 또는 서비스 관리자
+    return roleLevel.value === RoleLevel.SUPER_ADMIN || roleLevel.value === RoleLevel.ADMIN
   })
 
   // ============================================================================
@@ -71,8 +80,8 @@ export const useAuthStore = defineStore('auth', () => {
   })
 
   const isExpiringSoon = computed(() => {
-    // 5분 미만 남았을 때
-    return remainingSeconds.value > 0 && remainingSeconds.value < 300
+    // SESSION_WARNING_THRESHOLD 미만 남았을 때 (5분)
+    return remainingSeconds.value > 0 && remainingSeconds.value < SESSION_WARNING_THRESHOLD
   })
 
   const isExpired = computed(() => {
@@ -92,7 +101,7 @@ export const useAuthStore = defineStore('auth', () => {
     userId: number
     roleLevel: number
   }) {
-    console.log('🔐 [AUTH] 로그인 성공:', { loginId: data.loginId, userId: data.userId })
+    logger.info('[AUTH] 로그인 성공', { loginId: data.loginId, userId: data.userId })
 
     // storage에 저장
     storage.save(data)
@@ -114,7 +123,7 @@ export const useAuthStore = defineStore('auth', () => {
     accessTokenExpiresIn: number
     refreshTokenExpiresIn: number
   }) {
-    console.log('🔄 [AUTH] 토큰 갱신 성공')
+    logger.info('[AUTH] 토큰 갱신 성공')
 
     // storage에 저장
     storage.updateTokens(data)
@@ -125,23 +134,23 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function setBankCode(code: string) {
-    console.log('🏦 [AUTH] 금융기관 선택:', code)
+    logger.info('[AUTH] 금융기관 선택', { code })
     selectedBankCode.value = code
     storage.setBankCode(code)
   }
 
   function loadAuth() {
-    console.log('📂 [AUTH] 저장된 인증 정보 로드 시도')
+    logger.info('[AUTH] 저장된 인증 정보 로드 시도')
 
     const data = storage.get()
 
     // 토큰이 없으면 로드하지 않고 종료
     if (!data.accessToken) {
-      console.log('⚠️ [AUTH] No token in storage - Skip loading')
+      logger.info('[AUTH] No token in storage - Skip loading')
       return
     }
 
-    console.log('✅ [AUTH] 저장된 데이터 로드:', {
+    logger.info('[AUTH] 저장된 데이터 로드', {
       hasToken: true,
       loginId: data.loginId,
       bankCode: data.bankCode,
@@ -163,7 +172,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function clearAuth() {
-    console.log('🗑️ [AUTH] 로그아웃 처리')
+    logger.info('[AUTH] 로그아웃 처리')
 
     // 타이머 정지
     stopTimer()
@@ -188,14 +197,14 @@ export const useAuthStore = defineStore('auth', () => {
     // 이미 실행 중이면 중복 방지
     if (timerInterval) return
 
-    console.log('⏰ [AUTH] 세션 타이머 시작')
+    logger.info('[AUTH] 세션 타이머 시작')
 
     // 초기 시간 업데이트
     currentTime.value = Math.floor(Date.now() / 1000)
 
     // 토큰이 이미 만료되었는지 체크
     if (accessExpires.value <= currentTime.value) {
-      console.warn('⚠️ [AUTH] 토큰이 이미 만료됨 - 자동 로그아웃')
+      logger.warn('[AUTH] 토큰이 이미 만료됨 - 자동 로그아웃')
       handleAutoLogout()
       return
     }
@@ -205,7 +214,7 @@ export const useAuthStore = defineStore('auth', () => {
 
       // 세션 만료 시 자동 로그아웃
       if (accessExpires.value <= currentTime.value) {
-        console.warn('⚠️ [AUTH] 세션 만료 - 자동 로그아웃')
+        logger.warn('[AUTH] 세션 만료 - 자동 로그아웃')
         handleAutoLogout()
       }
     }, 1000)
@@ -213,7 +222,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   function stopTimer() {
     if (timerInterval) {
-      console.log('⏹️ [AUTH] 세션 타이머 정지')
+      logger.info('[AUTH] 세션 타이머 정지')
       clearInterval(timerInterval)
       timerInterval = null
     }

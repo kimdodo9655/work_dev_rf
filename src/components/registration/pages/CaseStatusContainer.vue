@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
+import { logger } from '@/utils/logger'
+
 // 타입 정의
 interface Column {
   key: string
@@ -286,7 +288,7 @@ const getManagerDisplayType = (row: RegistrationData) => {
 
 // 행 클릭 핸들러
 const handleRowClick = (row: RegistrationData) => {
-  console.log('행 클릭:', row.registryRequestNumber)
+  logger.info('[REGISTRY] 행 클릭', { registryRequestNumber: row.registryRequestNumber })
   // TODO: 상세 페이지로 이동
   // router.push(`/registry/detail/${row.registryRequestNumber}`)
 }
@@ -294,13 +296,18 @@ const handleRowClick = (row: RegistrationData) => {
 // 이벤트 핸들러
 const handleAssignManager = (event: Event, row: RegistrationData) => {
   event.stopPropagation() // 행 클릭 이벤트 전파 방지
-  console.log('담당자 배정 버튼 클릭:', row.registryRequestNumber)
+  logger.info('[REGISTRY] 담당자 배정 버튼 클릭', {
+    registryRequestNumber: row.registryRequestNumber
+  })
   // TODO: 담당자 배정 모달 열기
 }
 
 const handleManagerChange = (event: Event, row: RegistrationData, newManager: string) => {
   event.stopPropagation() // 행 클릭 이벤트 전파 방지
-  console.log('담당자 변경:', row.registryRequestNumber, '→', newManager)
+  logger.info('[REGISTRY] 담당자 변경', {
+    registryRequestNumber: row.registryRequestNumber,
+    newManager
+  })
   // TODO: API 호출하여 담당자 변경
 }
 

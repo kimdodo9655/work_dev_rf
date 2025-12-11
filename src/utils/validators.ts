@@ -91,11 +91,13 @@ export const businessNumber = (message = '올바른 사업자번호가 아닙니
     const num = value.replace(/[^0-9]/g, '')
     if (num.length !== 10) return false
 
-    const weights = [1, 3, 7, 1, 3, 7, 1, 3, 5]
+    const weights = [1, 3, 7, 1, 3, 7, 1, 3, 5] as const
     let sum = 0
 
     for (let i = 0; i < 9; i++) {
-      sum += Number(num[i]) * weights[i]
+      const weight = weights[i]
+      if (weight === undefined) continue
+      sum += Number(num[i]) * weight
     }
 
     sum += Math.floor((Number(num[8]) * 5) / 10)
@@ -111,11 +113,13 @@ export const residentNumber = (message = '올바른 주민등록번호가 아닙
     const num = value.replace(/[^0-9]/g, '')
     if (num.length !== 13) return false
 
-    const weights = [2, 3, 4, 5, 6, 7, 8, 9, 2, 3, 4, 5]
+    const weights = [2, 3, 4, 5, 6, 7, 8, 9, 2, 3, 4, 5] as const
     let sum = 0
 
     for (let i = 0; i < 12; i++) {
-      sum += Number(num[i]) * weights[i]
+      const weight = weights[i]
+      if (weight === undefined) continue
+      sum += Number(num[i]) * weight
     }
 
     const checkDigit = (11 - (sum % 11)) % 10

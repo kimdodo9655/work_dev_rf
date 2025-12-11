@@ -130,17 +130,6 @@ export const storage = {
     return 'valid'
   },
 
-  /**
-   * @deprecated Use checkTokenValidity() instead
-   */
-  isValid() {
-    const { accessToken, accessExpires } = this.get()
-    if (!accessToken) return false
-
-    const now = Math.floor(Date.now() / 1000)
-    return accessExpires > now + 30 // 30초 버퍼
-  },
-
   // 금융기관 선택 여부 체크
   hasBankCode() {
     return !!this.getBankCode()

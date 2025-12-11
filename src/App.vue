@@ -12,6 +12,7 @@
           <router-view />
         </div>
       </div>
+      <TempPdf />
 
       <AppFooter />
     </div>
@@ -29,6 +30,8 @@ import AppHeader from '@/components/layout/AppHeader.vue'
 import { useAuthInitializer } from '@/composables/useAuthInitializer'
 import { useAuthStore } from '@/stores/auth'
 import { logger } from '@/utils/logger'
+
+import TempPdf from './components/dev/TEMP/TempPdf.vue'
 
 const authStore = useAuthStore()
 const { initialize } = useAuthInitializer()
