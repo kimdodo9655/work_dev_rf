@@ -33,6 +33,9 @@ export const useAuthStore = defineStore('auth', () => {
   // 타이머 인터벌 ID
   let timerInterval: ReturnType<typeof setInterval> | null = null
 
+  // ✅ 개선: 로그아웃 플래그 (경쟁 조건 방지)
+  let isLoggingOut = false
+
   // ============================================================================
   // Getters - 로그인 상태
   // ============================================================================
@@ -187,6 +190,9 @@ export const useAuthStore = defineStore('auth', () => {
     selectedBankCode.value = null
     accessExpires.value = 0
     refreshExpires.value = 0
+
+    // ✅ 개선: 로그아웃 플래그 초기화
+    isLoggingOut = false
   }
 
   // ============================================================================
@@ -233,6 +239,14 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function handleAutoLogout() {
+    // ✅ 개선: 이미 로그아웃 처리 중이면 중복 실행 방지
+    if (isLoggingOut) {
+      logger.info('[AUTH] Already logging out - Skip duplicate execution')
+      return
+    }
+
+    isLoggingOut = true
+
     stopTimer()
     clearAuth()
 

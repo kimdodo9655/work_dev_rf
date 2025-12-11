@@ -49,6 +49,10 @@ export function useErrorHandler() {
 
   /**
    * 401 에러 자동 처리 (로그아웃)
+   *
+   * ⚠️ 주의: 401 에러는 Axios 인터셉터(client.ts)에서 자동으로 처리되므로
+   * 일반적으로 이 함수가 호출될 일은 없습니다.
+   * 인터셉터를 거치지 않는 특수한 경우에만 사용하세요.
    */
   function handleUnauthorized() {
     logger.warn('[AUTH] Unauthorized - Auto logout')
@@ -67,7 +71,9 @@ export function useErrorHandler() {
   /**
    * 기본 에러 처리
    * - Console 로깅
-   * - 401/403 자동 처리
+   * - 403 자동 처리
+   *
+   * ⚠️ 주의: 401 에러는 Axios 인터셉터에서 자동 처리되므로 여기서는 처리하지 않습니다.
    */
   function handleError(error: any, context?: string) {
     // Console 로깅
@@ -77,9 +83,10 @@ export function useErrorHandler() {
 
     // 자동 처리가 필요한 에러
     switch (status) {
-      case 401:
-        handleUnauthorized()
-        break
+      // ✅ 개선: 401 에러는 Axios 인터셉터에서 자동 처리되므로 제거
+      // case 401:
+      //   handleUnauthorized()
+      //   break
       case 403:
         handleForbidden()
         break
@@ -91,7 +98,7 @@ export function useErrorHandler() {
     getErrorMessage,
     getStatusCode,
     handleError,
-    handleUnauthorized,
+    handleUnauthorized, // 특수한 경우를 위해 export는 유지
     handleForbidden
   }
 }

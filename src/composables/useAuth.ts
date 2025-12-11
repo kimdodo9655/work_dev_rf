@@ -3,7 +3,6 @@ import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { authAPI } from '@/api/auth'
 import { useAuthStore } from '@/stores/auth'
 import type { LoginRequest } from '@/types'
-import { storage } from '@/utils/storage'
 
 export function useAuth() {
   const store = useAuthStore()
@@ -17,20 +16,9 @@ export function useAuth() {
     }
   })
 
-  // 토큰 갱신
-  const refresh = useMutation({
-    mutationFn: () => {
-      const { refreshToken } = storage.get()
-      if (!refreshToken) throw new Error('No refresh token')
-      return authAPI.refresh({ refreshToken })
-    },
-    onSuccess: (response) => {
-      store.updateTokens(response.data)
-    },
-    onError: () => {
-      store.clearAuth()
-    }
-  })
+  // ✅ 개선: refresh mutation 제거
+  // 토큰 갱신은 Axios 인터셉터(client.ts)에서 자동으로 처리되므로
+  // 수동 갱신 mutation은 불필요합니다.
 
   // 로그아웃
   const logout = useMutation({
@@ -41,5 +29,5 @@ export function useAuth() {
     }
   })
 
-  return { login, refresh, logout }
+  return { login, logout }
 }

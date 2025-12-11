@@ -447,13 +447,8 @@ router.beforeEach(
   }
 )
 
-// ============================================================================
-// 인증 관련 이벤트 리스너
-// ============================================================================
-
-window.addEventListener('auth:logout', () => {
-  logger.warn('[ROUTER] Auth logout event - Redirect to auto-logout')
-  router.push('/auth/auto-logout')
-})
+// ✅ 개선: 미사용 이벤트 리스너 제거
+// auth:logout 이벤트는 더 이상 발생하지 않으므로 리스너도 제거합니다.
+// (client.ts의 handleAuthFailure에서 직접 window.location.href로 이동)
 
 export default router

@@ -1,5 +1,6 @@
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios'
 
+import { useAuthStore } from '@/stores/auth'
 import { ENV } from '@/utils/env'
 import { logger } from '@/utils/logger'
 import { storage } from '@/utils/storage'
@@ -66,6 +67,12 @@ const processQueue = (error: any, token: string | null = null) => {
 }
 
 const handleAuthFailure = () => {
+  // 이미 인증 관련 페이지면 중복 처리 방지
+  if (window.location.pathname.startsWith('/auth/')) {
+    logger.info('[AUTH] Already on auth page - Skip failure handling')
+    return
+  }
+
   storage.clear()
   refreshRetryCount = 0
 
@@ -139,7 +146,14 @@ api.interceptors.response.use(
       })
 
       const newTokens = data.data
+
+      // ✅ 개선 #1: LocalStorage 업데이트
       storage.updateTokens(newTokens)
+
+      // ✅ 개선 #2: Auth Store도 업데이트 (타이머 정확도 향상)
+      const authStore = useAuthStore()
+      authStore.updateTokens(newTokens)
+
       processQueue(null, newTokens.accessToken)
 
       // 성공 시 재시도 카운트 초기화
