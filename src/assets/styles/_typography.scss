@@ -38,6 +38,18 @@
 }
 
 // ================================
+// Roboto Mono Font Face 선언 (TTF만 사용)
+// ================================
+
+@font-face {
+  font-family: 'Roboto Mono';
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/Roboto_Mono/RobotoMono-SemiBold.ttf') format('truetype');
+}
+
+// ================================
 // Typography Mixins
 // ================================
 
@@ -54,4 +66,15 @@
 @mixin font-extrabold {
   font-family: $font-family-pretendard;
   font-weight: $font-weight-extrabold;
+}
+
+// ================================
+// Roboto Mono Mixin (타이머용)
+// ================================
+
+@mixin font-mono {
+  font-family: 'Roboto Mono', 'SF Mono', Consolas, Monaco, monospace;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
 }

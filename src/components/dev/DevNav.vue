@@ -36,14 +36,14 @@
         <div class="auth-monitor-header">
           <h4>🔐 인증 상태 모니터</h4>
           <div class="header-actions">
-            <button class="refresh-button" @click="refreshStorageData" title="새로고침">🔄</button>
+            <button class="refresh-button" @click="manualRefresh" title="수동 새로고침">🔄</button>
             <button class="close-auth-monitor" @click="toggleAuthMonitor">✕</button>
           </div>
         </div>
         <div class="auth-monitor-content">
-          <!-- Pinia Store 상태 -->
+          <!-- Pinia Store 상태 (실시간 반영) -->
           <section class="monitor-section">
-            <h5>📦 Pinia Store (authStore)</h5>
+            <h5>📦 Pinia Store (authStore) - 실시간</h5>
             <div class="monitor-item">
               <span class="label">authState:</span>
               <span class="value" :class="`state-${authStore.authState}`">{{
@@ -87,9 +87,9 @@
 
           <div class="section-divider"></div>
 
-          <!-- LocalStorage 상태 -->
+          <!-- LocalStorage 상태 (실시간 갱신) -->
           <section class="monitor-section">
-            <h5>💾 LocalStorage</h5>
+            <h5>💾 LocalStorage - 실시간 ({{ updateCount }}회 갱신됨)</h5>
             <div class="monitor-item">
               <span class="label">accessToken:</span>
               <span class="value token">{{ truncateToken(storageData.accessToken) }}</span>
@@ -206,7 +206,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, type Ref, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, type Ref, ref, watch } from 'vue'
 
 import { useAuthStore } from '@/stores/auth'
 import { storage } from '@/utils/storage'
@@ -220,8 +220,9 @@ interface FrameSize {
 // Auth Store
 const authStore = useAuthStore()
 
-// Storage 데이터 (수동 갱신)
+// Storage 데이터 (실시간 갱신)
 const storageData = ref(storage.get())
+const updateCount = ref(0)
 
 // Constants
 const FRAME_SIZES: FrameSize[] = [
@@ -300,6 +301,101 @@ const isFrameOpen = ref(false)
 const isAuthMonitorOpen = ref(false)
 const currentFrameSize = ref<FrameSize>(FRAME_SIZES[0]!) as Ref<FrameSize>
 
+// Polling interval
+let storagePollingInterval: ReturnType<typeof setInterval> | null = null
+
+// ============================================================================
+// 실시간 Storage 갱신
+// ============================================================================
+
+/**
+ * Storage 데이터 갱신 (실시간)
+ */
+const refreshStorageData = () => {
+  storageData.value = storage.get()
+  updateCount.value++
+}
+
+/**
+ * Storage 변경 감지 (다른 탭)
+ */
+const handleStorageChange = (event: StorageEvent) => {
+  const authKeys = [
+    'access_token',
+    'refresh_token',
+    'access_expires',
+    'refresh_expires',
+    'login_id',
+    'user_id',
+    'role_level',
+    'bank_code'
+  ]
+
+  if (event.key && authKeys.includes(event.key)) {
+    console.log('[DevNav] Storage changed:', event.key)
+    refreshStorageData()
+  }
+}
+
+/**
+ * 주기적 Storage 갱신 (2초마다)
+ */
+const startStoragePolling = () => {
+  if (storagePollingInterval) return
+
+  storagePollingInterval = setInterval(() => {
+    if (isAuthMonitorOpen.value) {
+      refreshStorageData()
+    }
+  }, 2000) // 2초마다 갱신
+}
+
+const stopStoragePolling = () => {
+  if (storagePollingInterval) {
+    clearInterval(storagePollingInterval)
+    storagePollingInterval = null
+  }
+}
+
+/**
+ * 수동 새로고침
+ */
+const manualRefresh = () => {
+  refreshStorageData()
+  // 새로고침 피드백
+  const button = document.querySelector('.refresh-button') as HTMLElement
+  if (button) {
+    button.style.transform = 'rotate(360deg)'
+    setTimeout(() => {
+      button.style.transform = ''
+    }, 300)
+  }
+}
+
+// ============================================================================
+// Watch - authStore 변경 감지 (실시간)
+// ============================================================================
+
+/**
+ * authStore의 주요 값 변경 시 Storage도 갱신
+ * (authStore 변경 → Storage 변경 → DevNav 갱신)
+ */
+watch(
+  () => [
+    authStore.loginId,
+    authStore.selectedBankCode,
+    authStore.accessExpires,
+    authStore.roleLevel
+  ],
+  () => {
+    // authStore가 변경되면 Storage도 변경되었을 가능성이 높음
+    if (isAuthMonitorOpen.value) {
+      refreshStorageData()
+    }
+  },
+  { deep: true }
+)
+
 // Computed
 const frameStyle = computed(() => {
   const size = currentFrameSize.value
@@ -361,29 +457,39 @@ const toggleAuthMonitor = () => {
   if (isFrameOpen.value) isFrameOpen.value = false
   isAuthMonitorOpen.value = !isAuthMonitorOpen.value
 
-  // 모니터를 열 때 데이터 새로고침
+  // 모니터를 열 때 즉시 데이터 갱신 및 폴링 시작
   if (isAuthMonitorOpen.value) {
     refreshStorageData()
+    startStoragePolling()
+  } else {
+    stopStoragePolling()
   }
-}
-
-const refreshStorageData = () => {
-  storageData.value = storage.get()
 }
 
 // Lifecycle
 onMounted(() => {
   // 초기 데이터 로드
-  storageData.value = storage.get()
+  refreshStorageData()
+
+  // Storage 이벤트 리스너 등록 (다른 탭 감지)
+  window.addEventListener('storage', handleStorageChange)
+
+  console.log('[DevNav] Mounted - Real-time monitoring enabled')
 })
 
 onBeforeUnmount(() => {
-  // cleanup
+  // Storage 이벤트 리스너 제거
+  window.removeEventListener('storage', handleStorageChange)
+
+  // 폴링 정지
+  stopStoragePolling()
+
+  console.log('[DevNav] Unmounted - Monitoring stopped')
 })
 </script>
 
 <style scoped>
-/* 플로팅 버튼 공통 스타일 */
+/* 기존 스타일 동일 */
 .floating-button {
   position: fixed;
   right: 20px;
@@ -440,7 +546,6 @@ onBeforeUnmount(() => {
   background-color: #10b981;
 }
 
-/* 인증 상태 모니터 */
 .auth-monitor {
   position: fixed;
   bottom: 230px;
@@ -480,6 +585,7 @@ onBeforeUnmount(() => {
 
 .refresh-button {
   border: none;
+  background: transparent;
   color: white;
   font-size: 16px;
   cursor: pointer;
@@ -490,7 +596,7 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  transition: all 0.2s;
+  transition: all 0.3s;
 }
 
 .refresh-button:hover {
@@ -630,28 +736,12 @@ onBeforeUnmount(() => {
   font-weight: 700;
 }
 
-.monitor-item .value.level-100 {
-  color: #2563eb;
-  font-weight: 700;
-}
-
-.monitor-item .value.level-200 {
-  color: #7c3aed;
-  font-weight: 700;
-}
-
-.monitor-item .value.level-300 {
-  color: #db2777;
-  font-weight: 700;
-}
-
 .section-divider {
   height: 1px;
   background: linear-gradient(to right, transparent, #e5e7eb, transparent);
   margin: 20px 0;
 }
 
-/* 오버레이 */
 .overlay {
   position: fixed;
   inset: 0;
@@ -664,12 +754,6 @@ onBeforeUnmount(() => {
   height: 100%;
 }
 
-.overlay:focus {
-  outline: 2px solid #667eea;
-  outline-offset: -2px;
-}
-
-/* 프레임 오버레이 */
 .frame-overlay {
   position: fixed;
   inset: 0;
@@ -760,7 +844,6 @@ onBeforeUnmount(() => {
   display: block;
 }
 
-/* 네비게이션 메뉴 */
 .nav-menu {
   position: fixed;
   top: 0;
@@ -851,7 +934,6 @@ onBeforeUnmount(() => {
   font-family: monospace;
 }
 
-/* 스크롤바 */
 .nav-menu::-webkit-scrollbar,
 .auth-monitor-content::-webkit-scrollbar {
   width: 8px;
@@ -873,7 +955,6 @@ onBeforeUnmount(() => {
   background: #5568d3;
 }
 
-/* 애니메이션 */
 .slide-fade-enter-active,
 .slide-fade-leave-active {
   transition: transform 0.3s ease;

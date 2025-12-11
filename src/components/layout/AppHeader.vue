@@ -89,9 +89,9 @@
               </div>
             </li>
 
-            <!-- 세션 타이머 (auth 상태만) 👈 추가 -->
+            <!-- 세션 타이머 (auth, onboarding 상태) -->
             <li
-              v-if="authStore.authState === 'auth'"
+              v-if="authStore.authState === 'auth' || 'onboarding'"
               class="session-timer"
               :class="{ expired: authStore.isExpired, expiring: authStore.isExpiringSoon }"
             >
@@ -100,7 +100,7 @@
               <button @click="handleExtendSession">{{ locale.header.extend }}</button>
             </li>
 
-            <!-- 로그아웃 버튼 (onboarding 상태) 👈 추가 -->
+            <!-- 로그아웃 버튼 (onboarding 상태) -->
             <li v-if="authStore.authState === 'onboarding'">
               <button class="logout-btn" @click="handleLogout">
                 {{ locale.myMenu.nav06 }}
