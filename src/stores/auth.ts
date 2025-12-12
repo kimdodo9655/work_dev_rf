@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 
 import type { AuthState } from '@/types'
 import { RoleLevel } from '@/types'
+import { handleInvalidAuthState, isValidAuthData } from '@/utils/authValidator'
 import { logger } from '@/utils/logger'
 import { storage } from '@/utils/storage'
 
@@ -33,7 +34,7 @@ export const useAuthStore = defineStore('auth', () => {
   // 타이머 인터벌 ID
   let timerInterval: ReturnType<typeof setInterval> | null = null
 
-  // ✅ 개선: 로그아웃 플래그 (경쟁 조건 방지)
+  // 로그아웃 플래그 (경쟁 조건 방지)
   let isLoggingOut = false
 
   // ============================================================================
@@ -153,12 +154,25 @@ export const useAuthStore = defineStore('auth', () => {
       return
     }
 
+    // ✅ authState 계산 (bankCode 유무로 판단)
+    const computedAuthState = data.bankCode ? 'auth' : 'onboarding'
+
+    // ✅ 필수값 검증 (authState 전달)
+    if (!isValidAuthData(data, computedAuthState)) {
+      logger.error('[AUTH] Invalid stored auth data - Clear and skip loading', {
+        authState: computedAuthState
+      })
+      handleInvalidAuthState()
+      return
+    }
+
     logger.info('[AUTH] 저장된 데이터 로드', {
       hasToken: true,
       loginId: data.loginId,
       bankCode: data.bankCode,
       accessExpires: data.accessExpires,
-      refreshExpires: data.refreshExpires
+      refreshExpires: data.refreshExpires,
+      authState: computedAuthState
     })
 
     loginId.value = data.loginId || ''
@@ -191,7 +205,7 @@ export const useAuthStore = defineStore('auth', () => {
     accessExpires.value = 0
     refreshExpires.value = 0
 
-    // ✅ 개선: 로그아웃 플래그 초기화
+    // 로그아웃 플래그 초기화
     isLoggingOut = false
   }
 
@@ -239,7 +253,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function handleAutoLogout() {
-    // ✅ 개선: 이미 로그아웃 처리 중이면 중복 실행 방지
+    // 이미 로그아웃 처리 중이면 중복 실행 방지
     if (isLoggingOut) {
       logger.info('[AUTH] Already logging out - Skip duplicate execution')
       return

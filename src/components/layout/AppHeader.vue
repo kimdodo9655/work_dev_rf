@@ -303,15 +303,22 @@ const handleLogout = async () => {
 
 const handleExtendSession = async () => {
   try {
-    const { refreshToken } = storage.get() // ✅ storage에서 가져오기
+    const { refreshToken } = storage.get()
     if (!refreshToken) throw new Error('No refresh token')
 
     const response = await authAPI.refresh({ refreshToken })
     authStore.updateTokens(response.data)
 
     alert('세션이 연장되었습니다.')
-  } catch (error) {
+  } catch (error: any) {
     console.error('세션 연장 오류:', error)
+
+    // ✅ 검증 실패 에러는 이미 handleInvalidAuthState에서 알럿 표시했으므로 스킵
+    if (error.message === 'Invalid auth data') {
+      return // 중복 알럿 방지
+    }
+
+    // ✅ 그 외 에러만 알럿 표시
     alert('세션 연장에 실패했습니다.')
   }
 }

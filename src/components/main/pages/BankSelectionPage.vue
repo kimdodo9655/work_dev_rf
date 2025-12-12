@@ -2,19 +2,8 @@
   <div class="bank-selection-page">
     <h1>금융기관 선택</h1>
 
-    <!-- 로딩 상태 -->
-    <div v-if="isLoading" class="loading">
-      <p>금융기관 목록을 불러오는 중...</p>
-    </div>
-
-    <!-- 에러 상태 -->
-    <div v-else-if="isError" class="error">
-      <p>{{ errorMessage }}</p>
-      <button @click="refetch">다시 시도</button>
-    </div>
-
     <!-- 금융기관 목록 -->
-    <div v-else-if="banks && banks.length > 0" class="bank-content">
+    <div class="bank-content">
       <div class="bank-list">
         <div
           v-for="bank in banks"
@@ -42,11 +31,6 @@
         </button>
       </div>
     </div>
-
-    <!-- 목록이 비어있을 때 -->
-    <div v-else class="empty">
-      <p>선택 가능한 금융기관이 없습니다.</p>
-    </div>
   </div>
 </template>
 
@@ -56,39 +40,23 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { banksAPI } from '@/api/banks'
-import { useErrorHandler } from '@/composables/useErrorHandler'
 import { useAuthStore } from '@/stores/auth'
 import type { Bank } from '@/types'
 import { logger } from '@/utils/logger'
 
 const router = useRouter()
 const authStore = useAuthStore()
-const { getErrorMessage } = useErrorHandler()
 
 // ============================================================================
 // 금융기관 목록 조회
 // ============================================================================
-const {
-  data: bankResponse,
-  isLoading,
-  isError,
-  error,
-  refetch
-} = useQuery({
+const { data: bankResponse } = useQuery({
   queryKey: ['banks', 'list'],
   queryFn: () => banksAPI.getList()
 })
 
 // 금융기관 목록
 const banks = computed(() => bankResponse.value?.data || [])
-
-// 에러 메시지
-const errorMessage = computed(() => {
-  if (error.value) {
-    return getErrorMessage(error.value)
-  }
-  return '금융기관 목록을 불러올 수 없습니다.'
-})
 
 // ============================================================================
 // 금융기관 선택 상태

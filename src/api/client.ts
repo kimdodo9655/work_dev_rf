@@ -1,6 +1,7 @@
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios'
 
 import { useAuthStore } from '@/stores/auth'
+import { handleInvalidAuthState, isValidAuthData } from '@/utils/authValidator'
 import { ENV } from '@/utils/env'
 import { logger } from '@/utils/logger'
 import { storage } from '@/utils/storage'
@@ -17,25 +18,165 @@ export const api: AxiosInstance = axios.create({
 })
 
 // ============================================================================
-// 요청 인터셉터: 토큰 + 금융기관 코드 자동 추가
+// 자동 세션 연장 관련 변수
 // ============================================================================
-api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  // 공개 API 목록 (토큰 불필요)
-  const publicUrls = [API.AUTH.LOGIN, API.AUTH.REFRESH]
-  const isPublic = publicUrls.some((url) => config.url?.includes(url))
+let lastRefreshTime = 0 // 마지막 세션 연장 시간
+const REFRESH_COOLDOWN = 60 * 1000 // 1분 (쿨다운 시간)
 
-  if (!isPublic) {
-    // 1. Authorization 헤더 추가
-    const accessToken = storage.getAccessToken()
-    if (accessToken && config.headers) {
-      config.headers.Authorization = `Bearer ${accessToken}`
-    }
+// ============================================================================
+// 공개 API 판별 함수 (하이브리드 방식)
+// ============================================================================
+function isPublicUrl(url: string | undefined): boolean {
+  if (!url) return false
 
-    // 2. X-Bank-Code 헤더 추가
-    const bankCode = storage.getBankCode()
-    if (bankCode && config.headers) {
-      config.headers['X-Bank-Code'] = bankCode
-    }
+  // 1. 개별 지정 API (명확한 경로)
+  const explicitPublicUrls = [
+    API.AUTH.LOGIN, // 로그인
+    API.AUTH.LOGOUT // 로그아웃
+  ]
+
+  // 2. 패턴 매칭 API (/* 하위 경로 전체)
+  const publicPatterns = [
+    '/api/auth/' // /api/auth/* 전체
+  ]
+
+  // 3. 개별 제외 API (패턴에 포함되지만 검증 필요한 경우)
+  const explicitPrivateUrls = [
+    API.AUTH.REFRESH // /api/auth/refresh는 검증 필요
+  ]
+
+  // 먼저 명시적 private 체크 (최우선)
+  if (explicitPrivateUrls.some((privateUrl) => url.includes(privateUrl))) {
+    return false // 검증 필요
+  }
+
+  // 개별 지정 또는 패턴 매칭 확인
+  return (
+    explicitPublicUrls.some((publicUrl) => url.includes(publicUrl)) ||
+    publicPatterns.some((pattern) => url.includes(pattern))
+  )
+}
+
+// ============================================================================
+// 세션 연장 제외 API 판별 함수
+// ============================================================================
+function shouldSkipAutoRefresh(url: string | undefined): boolean {
+  if (!url) return true
+
+  // 세션 연장 제외 API
+  const skipUrls = [
+    API.AUTH.LOGIN,
+    API.AUTH.LOGOUT,
+    API.AUTH.REFRESH // 세션 연장 API 자체
+  ]
+
+  return skipUrls.some((skipUrl) => url.includes(skipUrl))
+}
+
+// ============================================================================
+// 자동 세션 연장 함수
+// ============================================================================
+async function autoRefreshSession() {
+  const now = Date.now()
+
+  console.log('[DEBUG] autoRefreshSession 호출됨', {
+    now,
+    lastRefreshTime,
+    차이: now - lastRefreshTime,
+    쿨다운: REFRESH_COOLDOWN,
+    쿨다운체크: now - lastRefreshTime < REFRESH_COOLDOWN
+  })
+
+  // ✅ 쿨다운 체크 (1분 이내 중복 호출 방지)
+  if (now - lastRefreshTime < REFRESH_COOLDOWN) {
+    logger.debug('[AUTO_REFRESH] Skipped - Cooldown period', {
+      timeSinceLastRefresh: Math.floor((now - lastRefreshTime) / 1000),
+      cooldownSeconds: REFRESH_COOLDOWN / 1000
+    })
+    return
+  }
+
+  const { refreshToken } = storage.get()
+
+  if (!refreshToken) {
+    logger.warn('[AUTO_REFRESH] No refresh token available')
+    return
+  }
+
+  // ✅ auth 상태인지 확인
+  const bankCode = storage.getBankCode()
+  if (!bankCode) {
+    logger.debug('[AUTO_REFRESH] Skipped - Not in auth state (no bankCode)')
+    return
+  }
+
+  try {
+    logger.info('[AUTO_REFRESH] Auto session refresh triggered')
+
+    const { data } = await axios.post(`${api.defaults.baseURL}${API.AUTH.REFRESH}`, {
+      refreshToken
+    })
+
+    const newTokens = data.data
+
+    // LocalStorage 업데이트
+    storage.updateTokens(newTokens)
+
+    // Auth Store 업데이트
+    const authStore = useAuthStore()
+    authStore.updateTokens(newTokens)
+
+    // ✅ 성공 시에만 마지막 갱신 시간 업데이트
+    lastRefreshTime = now
+
+    console.log('[DEBUG] 세션 연장 성공! lastRefreshTime 업데이트:', lastRefreshTime)
+
+    logger.info('[AUTO_REFRESH] Session refreshed successfully')
+  } catch (error) {
+    logger.error('[AUTO_REFRESH] Failed to refresh session', { error })
+    // ✅ 에러 발생 시 lastRefreshTime 업데이트 안 함 (재시도 가능하도록)
+  }
+}
+
+// ============================================================================
+// 요청 인터셉터: 토큰 + 금융기관 코드 자동 추가 + 인증 데이터 검증 + 자동 세션 연장
+// ============================================================================
+api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
+  // 공개 API는 검증 제외
+  if (isPublicUrl(config.url)) {
+    return config
+  }
+
+  // ✅ 인증 데이터 검증 (API 요청 전 필수값 체크)
+  const authData = storage.get()
+
+  if (!isValidAuthData(authData)) {
+    logger.error('[API] Invalid auth data detected before request', {
+      url: config.url,
+      method: config.method?.toUpperCase()
+    })
+    handleInvalidAuthState()
+    return Promise.reject(new Error('Invalid auth data'))
+  }
+
+  // 1. Authorization 헤더 추가
+  const accessToken = storage.getAccessToken()
+  if (accessToken && config.headers) {
+    config.headers.Authorization = `Bearer ${accessToken}`
+  }
+
+  // 2. X-Bank-Code 헤더 추가
+  const bankCode = storage.getBankCode()
+  if (bankCode && config.headers) {
+    config.headers['X-Bank-Code'] = bankCode
+  }
+
+  // ✅ 3. 자동 세션 연장 (백그라운드 실행)
+  if (!shouldSkipAutoRefresh(config.url)) {
+    // await 없이 백그라운드 실행 (API 호출 지연 방지)
+    autoRefreshSession().catch((err) => {
+      logger.warn('[AUTO_REFRESH] Background refresh failed', { error: err })
+    })
   }
 
   return config

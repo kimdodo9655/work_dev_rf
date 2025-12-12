@@ -3,7 +3,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import { useAuthStore } from '@/stores/auth'
 import { RoleLevel } from '@/types'
+import { handleInvalidAuthState, isValidAuthData } from '@/utils/authValidator'
 import { logger } from '@/utils/logger'
+import { storage } from '@/utils/storage'
 
 // Meta 타입 정의
 declare module 'vue-router' {
@@ -115,16 +117,6 @@ const routes: RouteRecordRaw[] = [
     }
   },
 
-  {
-    path: '/device-info',
-    name: 'DeviceInfo',
-    component: () => import('@/components/shared/pages/DeviceInfoPage.vue'),
-    meta: {
-      title: '등록 단말기 정보',
-      allowedAuthStates: ['pre-auth']
-    }
-  },
-
   // ============================================================================
   // Onboarding (로그인 후, 금융기관 선택 전)
   // ============================================================================
@@ -197,6 +189,16 @@ const routes: RouteRecordRaw[] = [
       requiresAuth: true,
       allowedAuthStates: ['onboarding', 'auth'],
       requiredRoles: [RoleLevel.USER]
+    }
+  },
+
+  {
+    path: '/device-info',
+    name: 'DeviceInfo',
+    component: () => import('@/components/shared/pages/DeviceInfoPage.vue'),
+    meta: {
+      title: '등록 단말기 정보',
+      allowedAuthStates: ['onboarding', 'auth']
     }
   },
 
@@ -362,6 +364,10 @@ const router = createRouter({
 router.beforeEach(
   (to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
     const authStore = useAuthStore()
+
+    // ✅ 인증 정보 로드 (Router Guard 추가)
+    authStore.loadAuth()
+
     const currentAuthState = authStore.authState
     const userRoleLevel = authStore.roleLevel
     const isAdmin = authStore.isAdmin
@@ -390,11 +396,26 @@ router.beforeEach(
       return
     }
 
-    // 4. 인증 필요 체크
-    if (to.meta.requiresAuth && !authStore.isLoggedIn) {
-      logger.warn('[ROUTER] Unauthorized - Redirect to login')
-      next('/auth/login')
-      return
+    // 4. 인증 필요 체크 + ✅ 인증 데이터 검증
+    if (to.meta.requiresAuth) {
+      if (!authStore.isLoggedIn) {
+        logger.warn('[ROUTER] Unauthorized - Redirect to login')
+        next('/auth/login')
+        return
+      }
+
+      // ✅ 로그인 상태이면 인증 데이터 유효성 검증 (authState 전달)
+      const authData = storage.get()
+      if (!isValidAuthData(authData, currentAuthState)) {
+        logger.error('[ROUTER] Invalid auth data detected', {
+          from: from.path,
+          to: to.path,
+          authState: currentAuthState
+        })
+        handleInvalidAuthState()
+        next('/auth/login')
+        return
+      }
     }
 
     // 5. 금융기관 선택 필요 체크
@@ -421,12 +442,6 @@ router.beforeEach(
     // 7. 권한 체크
     if (to.meta.requiredRoles && to.meta.requiredRoles.length > 0) {
       // 시스템/서비스 관리자(SUPER_ADMIN:100, ADMIN:90)는 모든 페이지 접근 가능
-      // 이는 관리자가 시스템 전체를 테스트하고 관리할 수 있도록 하기 위함
-      //
-      // [참고] 이로 인해 관리자는 allowedAuthStates 제약도 무시하게 됨
-      // 예: 로그인된 관리자가 /auth/login (pre-auth 페이지)에도 접근 가능
-      // 이는 의도된 동작이며, 기관/지점 관리자(ORGANIZATION_ADMIN:80, BRANCH_ADMIN:70)는
-      // 이 우회 로직이 적용되지 않아 일반 사용자와 동일하게 authState 제약을 받음
       if (isAdmin) {
         next()
         return
@@ -446,9 +461,5 @@ router.beforeEach(
     next()
   }
 )
-
-// ✅ 개선: 미사용 이벤트 리스너 제거
-// auth:logout 이벤트는 더 이상 발생하지 않으므로 리스너도 제거합니다.
-// (client.ts의 handleAuthFailure에서 직접 window.location.href로 이동)
 
 export default router
