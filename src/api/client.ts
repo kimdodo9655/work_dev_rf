@@ -18,10 +18,27 @@ export const api: AxiosInstance = axios.create({
 })
 
 // ============================================================================
-// 자동 세션 연장 관련 변수
+// Refresh Single-flight + Cooldown + Multi-tab Sync
 // ============================================================================
-let lastRefreshTime = 0 // 마지막 세션 연장 시간
-const REFRESH_COOLDOWN = 60 * 1000 // 1분 (쿨다운 시간)
+let refreshPromise: Promise<void> | null = null
+let lastRefreshTime = 0 // 마지막 refresh 성공 시간
+const REFRESH_COOLDOWN = 60 * 1000 // 1분
+
+const authChannel =
+  typeof window !== 'undefined' ? new BroadcastChannel('auth-refresh-channel') : null
+
+authChannel?.addEventListener('message', (event) => {
+  const { type } = event.data || {}
+
+  if (type === 'REFRESH_SUCCESS') {
+    lastRefreshTime = Date.now()
+    logger.info('[AUTH][BC] Refresh success synced from another tab')
+  }
+
+  if (type === 'REFRESH_FAIL') {
+    logger.warn('[AUTH][BC] Refresh failed in another tab')
+  }
+})
 
 // ============================================================================
 // 공개 API 판별 함수 (하이브리드 방식)
@@ -74,74 +91,72 @@ function shouldSkipAutoRefresh(url: string | undefined): boolean {
 }
 
 // ============================================================================
-// 자동 세션 연장 함수
+// Refresh 실행기 (single-flight)
+// - auto refresh: ignoreCooldown=false (쿨다운 적용)
+// - 401 refresh:  ignoreCooldown=true  (쿨다운 무시하고 즉시 복구)
 // ============================================================================
-async function autoRefreshSession() {
+async function runRefreshOnce({ ignoreCooldown = false }: { ignoreCooldown?: boolean } = {}) {
   const now = Date.now()
 
-  console.log('[DEBUG] autoRefreshSession 호출됨', {
-    now,
-    lastRefreshTime,
-    차이: now - lastRefreshTime,
-    쿨다운: REFRESH_COOLDOWN,
-    쿨다운체크: now - lastRefreshTime < REFRESH_COOLDOWN
-  })
-
-  // ✅ 쿨다운 체크 (1분 이내 중복 호출 방지)
-  if (now - lastRefreshTime < REFRESH_COOLDOWN) {
-    logger.debug('[AUTO_REFRESH] Skipped - Cooldown period', {
+  // auto refresh만 쿨다운 적용
+  if (!ignoreCooldown && now - lastRefreshTime < REFRESH_COOLDOWN) {
+    logger.debug('[REFRESH] Skipped by cooldown', {
       timeSinceLastRefresh: Math.floor((now - lastRefreshTime) / 1000),
       cooldownSeconds: REFRESH_COOLDOWN / 1000
     })
     return
   }
 
-  const { refreshToken } = storage.get()
+  // 이미 진행 중이면 같은 Promise 공유
+  if (refreshPromise) return refreshPromise
 
-  if (!refreshToken) {
-    logger.warn('[AUTO_REFRESH] No refresh token available')
-    return
-  }
+  refreshPromise = (async () => {
+    try {
+      const { refreshToken } = storage.get()
+      if (!refreshToken) throw new Error('No refresh token')
 
-  // ✅ auth 상태인지 확인
-  const bankCode = storage.getBankCode()
-  if (!bankCode) {
-    logger.debug('[AUTO_REFRESH] Skipped - Not in auth state (no bankCode)')
-    return
-  }
+      // ✅ auth 상태인지 확인 (onboarding/auth state)
+      const bankCode = storage.getBankCode()
 
-  try {
-    logger.info('[AUTO_REFRESH] Auto session refresh triggered')
+      if (!bankCode && !refreshToken) {
+        logger.debug('[REFRESH] Skipped - Not in auth state (no bankCode)')
+        return
+      }
 
-    const { data } = await axios.post(`${api.defaults.baseURL}${API.AUTH.REFRESH}`, {
-      refreshToken
-    })
+      logger.info('[REFRESH] Refresh started', { ignoreCooldown })
 
-    const newTokens = data.data
+      // 인터셉터 회피를 위해 axios 직접 호출
+      const { data } = await axios.post(`${ENV.API_BASE_URL}${API.AUTH.REFRESH}`, { refreshToken })
 
-    // LocalStorage 업데이트
-    storage.updateTokens(newTokens)
+      const newTokens = data.data
 
-    // Auth Store 업데이트
-    const authStore = useAuthStore()
-    authStore.updateTokens(newTokens)
+      storage.updateTokens(newTokens)
+      useAuthStore().updateTokens(newTokens)
 
-    // ✅ 성공 시에만 마지막 갱신 시간 업데이트
-    lastRefreshTime = now
+      // 성공 직후 시각으로 갱신
+      lastRefreshTime = Date.now()
 
-    console.log('[DEBUG] 세션 연장 성공! lastRefreshTime 업데이트:', lastRefreshTime)
+      // 다른 탭에 성공 알림
+      authChannel?.postMessage({ type: 'REFRESH_SUCCESS' })
+      logger.info('[REFRESH] Refresh success')
+    } catch (error) {
+      authChannel?.postMessage({ type: 'REFRESH_FAIL' })
+      logger.error('[REFRESH] Refresh failed', { error })
+      throw error
+    } finally {
+      refreshPromise = null
+    }
+  })()
 
-    logger.info('[AUTO_REFRESH] Session refreshed successfully')
-  } catch (error) {
-    logger.error('[AUTO_REFRESH] Failed to refresh session', { error })
-    // ✅ 에러 발생 시 lastRefreshTime 업데이트 안 함 (재시도 가능하도록)
-  }
+  return refreshPromise
 }
 
 // ============================================================================
 // 요청 인터셉터: 토큰 + 금융기관 코드 자동 추가 + 인증 데이터 검증 + 자동 세션 연장
 // ============================================================================
-api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
+api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  logger.debug('[REQ]', { url: config.url, isPublic: isPublicUrl(config.url) })
+
   // 공개 API는 검증 제외
   if (isPublicUrl(config.url)) {
     return config
@@ -173,10 +188,13 @@ api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
 
   // ✅ 3. 자동 세션 연장 (백그라운드 실행)
   if (!shouldSkipAutoRefresh(config.url)) {
-    // await 없이 백그라운드 실행 (API 호출 지연 방지)
-    autoRefreshSession().catch((err) => {
-      logger.warn('[AUTO_REFRESH] Background refresh failed', { error: err })
-    })
+    // onboarding/auth 상태(bankCode)에서만 트리거
+    if (bankCode) {
+      // await 없이 백그라운드 실행 (API 호출 지연 방지)
+      runRefreshOnce({ ignoreCooldown: false }).catch((err) => {
+        logger.warn('[AUTO_REFRESH] Background refresh failed', { error: err })
+      })
+    }
   }
 
   return config
@@ -208,6 +226,8 @@ const processQueue = (error: any, token: string | null = null) => {
 }
 
 const handleAuthFailure = () => {
+  if (typeof window === 'undefined') return
+
   // 이미 인증 관련 페이지면 중복 처리 방지
   if (window.location.pathname.startsWith('/auth/')) {
     logger.info('[AUTH] Already on auth page - Skip failure handling')
@@ -231,7 +251,6 @@ api.interceptors.response.use(
 
     // 401이 아니거나 이미 재시도한 요청이면 에러 반환
     if (error.response?.status !== 401 || originalRequest._retry) {
-      // 에러 로깅
       logger.error('[API RESPONSE ERROR]', {
         status: error.response?.status,
         statusText: error.response?.statusText,
@@ -268,41 +287,25 @@ api.interceptors.response.use(
     isRefreshing = true
     refreshRetryCount++
 
-    const { refreshToken } = storage.get()
-
-    if (!refreshToken) {
-      logger.warn('[AUTH] No refresh token available')
-      handleAuthFailure()
-      return Promise.reject(error)
-    }
-
     try {
-      // 토큰 갱신
       logger.info('[AUTH] Token refresh attempt', {
         retryCount: refreshRetryCount,
         maxRetries: MAX_REFRESH_RETRIES
       })
-      const { data } = await axios.post(`${api.defaults.baseURL}${API.AUTH.REFRESH}`, {
-        refreshToken
-      })
 
-      const newTokens = data.data
+      // ✅ 401은 쿨다운 무시하고 즉시 복구
+      await runRefreshOnce({ ignoreCooldown: true })
 
-      // ✅ 개선 #1: LocalStorage 업데이트
-      storage.updateTokens(newTokens)
+      const newAccessToken = storage.getAccessToken()
 
-      // ✅ 개선 #2: Auth Store도 업데이트 (타이머 정확도 향상)
-      const authStore = useAuthStore()
-      authStore.updateTokens(newTokens)
-
-      processQueue(null, newTokens.accessToken)
+      processQueue(null, newAccessToken)
 
       // 성공 시 재시도 카운트 초기화
       refreshRetryCount = 0
       logger.info('[AUTH] Token refresh success')
 
       if (originalRequest.headers) {
-        originalRequest.headers.Authorization = `Bearer ${newTokens.accessToken}`
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
       }
       return api(originalRequest)
     } catch (err) {

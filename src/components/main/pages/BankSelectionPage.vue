@@ -1,36 +1,29 @@
 <template>
-  <div class="bank-selection-page">
-    <h1>금융기관 선택</h1>
-
-    <!-- 금융기관 목록 -->
-    <div class="bank-content">
-      <div class="bank-list">
-        <div
-          v-for="bank in banks"
-          :key="bank.code"
-          class="bank-item"
-          :class="{
-            disabled: !bank.isActive,
-            selected: selectedBankCode === bank.code
-          }"
-          @click="handleClickBank(bank)"
-        >
-          <div class="bank-info">
-            <h3>{{ bank.name }}</h3>
-            <p>코드: {{ bank.code }}</p>
-            <p v-if="!bank.isActive" class="inactive-badge">비활성</p>
-          </div>
-          <div v-if="selectedBankCode === bank.code" class="check-icon">✓</div>
-        </div>
+  <div class="bank-list">
+    <div
+      v-for="bank in banks"
+      :key="bank.code"
+      class="bank-item"
+      :class="{
+        disabled: !bank.isActive,
+        selected: selectedBankCode === bank.code
+      }"
+      @click="handleClickBank(bank)"
+    >
+      <div class="bank-info">
+        <h3>{{ bank.name }}</h3>
+        <p>코드: {{ bank.code }}</p>
+        <p v-if="!bank.isActive" class="inactive-badge">비활성</p>
       </div>
-
-      <!-- 선택 완료 버튼 -->
-      <div class="action-buttons">
-        <button class="confirm-btn" :disabled="!selectedBankCode" @click="handleConfirmSelection">
-          {{ selectedBankCode ? '금융기관 선택 완료' : '금융기관을 선택해주세요' }}
-        </button>
-      </div>
+      <div v-if="selectedBankCode === bank.code" class="check-icon">✓</div>
     </div>
+  </div>
+
+  <!-- 선택 완료 버튼 -->
+  <div class="action-buttons">
+    <button class="confirm-btn" :disabled="!selectedBankCode" @click="handleConfirmSelection">
+      {{ selectedBankCode ? '금융기관 선택 완료' : '금융기관을 선택해주세요' }}
+    </button>
   </div>
 </template>
 
