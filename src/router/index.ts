@@ -1,6 +1,7 @@
 import type { NavigationGuardNext, RouteLocationNormalized, RouteRecordRaw } from 'vue-router'
 import { createRouter, createWebHistory } from 'vue-router'
 
+import locale from '@/locales/ko.json'
 import { useAuthStore } from '@/stores/auth'
 import { RoleLevel } from '@/types'
 import { handleInvalidAuthState, isValidAuthData } from '@/utils/authValidator'
@@ -15,10 +16,22 @@ declare module 'vue-router' {
     requiresBankCode?: boolean // 금융기관 선택 필요 여부
     requiredRoles?: RoleLevel[] // 필요 권한
     allowedAuthStates?: ('pre-auth' | 'onboarding' | 'auth')[] // 허용된 인증 상태
+    layout?: string
+    footerOff?: boolean
+    mobile?: boolean
   }
 }
 
 const routes: RouteRecordRaw[] = [
+  {
+    path: '/test',
+    name: 'Test',
+    component: () => import('@/components/dev/DevTestView.vue'),
+    meta: {
+      title: '테스트',
+      allowedAuthStates: ['pre-auth', 'onboarding', 'auth']
+    }
+  },
   // ============================================================================
   // Root - 인증 상태에 따라 동적 컴포넌트 렌더링
   // ============================================================================
@@ -42,7 +55,7 @@ const routes: RouteRecordRaw[] = [
     name: 'Login',
     component: () => import('@/components/auth/pages/LoginPage.vue'),
     meta: {
-      title: '로그인',
+      title: locale.pageTitle.auth.login,
       allowedAuthStates: ['pre-auth']
     }
   },
@@ -52,7 +65,7 @@ const routes: RouteRecordRaw[] = [
     name: 'SignUp',
     component: () => import('@/components/auth/pages/SignupPage.vue'),
     meta: {
-      title: '회원가입',
+      title: locale.pageTitle.auth.signup,
       allowedAuthStates: ['pre-auth']
     }
   },
@@ -62,7 +75,7 @@ const routes: RouteRecordRaw[] = [
     name: 'ProgramInstall',
     component: () => import('@/components/auth/pages/ProgramInstallPage.vue'),
     meta: {
-      title: '프로그램 설치',
+      title: locale.pageTitle.auth.install,
       allowedAuthStates: ['pre-auth']
     }
   },
@@ -72,7 +85,7 @@ const routes: RouteRecordRaw[] = [
     name: 'AutoLogout',
     component: () => import('@/components/auth/pages/AutoLogoutPage.vue'),
     meta: {
-      title: '자동 로그아웃',
+      title: locale.pageTitle.auth.autoLogout,
       allowedAuthStates: ['pre-auth']
     }
   },
@@ -82,7 +95,7 @@ const routes: RouteRecordRaw[] = [
     name: 'PasswordSetup',
     component: () => import('@/components/auth/pages/PasswordSetupPage.vue'),
     meta: {
-      title: '비밀번호 설정',
+      title: locale.pageTitle.auth.passwordSetup,
       allowedAuthStates: ['pre-auth']
     }
   },
@@ -92,7 +105,7 @@ const routes: RouteRecordRaw[] = [
     name: 'AccessBlockMac',
     component: () => import('@/components/auth/pages/AccessBlockMacPage.vue'),
     meta: {
-      title: '사이트 접속 차단 (Mac Address 오류)',
+      title: locale.pageTitle.auth.blocked.mac,
       allowedAuthStates: ['pre-auth']
     }
   },
@@ -102,7 +115,7 @@ const routes: RouteRecordRaw[] = [
     name: 'AccessBlockEmail',
     component: () => import('@/components/auth/pages/AccessBlockEmailPage.vue'),
     meta: {
-      title: '사이트 접속 차단 (이메일 인증)',
+      title: locale.pageTitle.auth.blocked.email,
       allowedAuthStates: ['pre-auth']
     }
   },
@@ -112,7 +125,7 @@ const routes: RouteRecordRaw[] = [
     name: 'AccessBlockUser',
     component: () => import('@/components/auth/pages/AccessBlockUserPage.vue'),
     meta: {
-      title: '사이트 접속 차단 (사용자 사용유무)',
+      title: locale.pageTitle.auth.blocked.user,
       allowedAuthStates: ['pre-auth']
     }
   },
@@ -126,7 +139,7 @@ const routes: RouteRecordRaw[] = [
     name: 'BankSelection',
     component: () => import('@/components/main/pages/BankSelectionPage.vue'),
     meta: {
-      title: '금융기관 선택',
+      title: locale.pageTitle.main.bankSelect,
       requiresAuth: true,
       allowedAuthStates: ['onboarding', 'auth'] // auth 상태에서도 접근 가능 (변경용)
     }
@@ -137,7 +150,7 @@ const routes: RouteRecordRaw[] = [
     name: 'OrgMgmt',
     component: () => import('@/components/my/pages/OrgMgmtPage.vue'),
     meta: {
-      title: '기관/지점 정보 관리',
+      title: locale.pageTitle.my.organization,
       requiresAuth: true,
       allowedAuthStates: ['onboarding', 'auth'],
       requiredRoles: [RoleLevel.ORGANIZATION_ADMIN, RoleLevel.BRANCH_ADMIN]
@@ -149,7 +162,7 @@ const routes: RouteRecordRaw[] = [
     name: 'OrgDetail',
     component: () => import('@/components/my/pages/OrgDetailPage.vue'),
     meta: {
-      title: '기관/지점 등록 정보',
+      title: locale.pageTitle.my.organizationDetail,
       requiresAuth: true,
       allowedAuthStates: ['onboarding', 'auth'],
       requiredRoles: [RoleLevel.ORGANIZATION_ADMIN, RoleLevel.BRANCH_ADMIN]
@@ -161,7 +174,7 @@ const routes: RouteRecordRaw[] = [
     name: 'UserMgmt',
     component: () => import('@/components/my/pages/UserMgmtPage.vue'),
     meta: {
-      title: '사용자 정보 관리',
+      title: locale.pageTitle.my.users,
       requiresAuth: true,
       allowedAuthStates: ['onboarding', 'auth'],
       requiredRoles: [RoleLevel.ORGANIZATION_ADMIN, RoleLevel.BRANCH_ADMIN]
@@ -173,7 +186,7 @@ const routes: RouteRecordRaw[] = [
     name: 'UserDetail',
     component: () => import('@/components/my/pages/UserDetailPage.vue'),
     meta: {
-      title: '사용자 등록 정보',
+      title: locale.pageTitle.my.userDetail,
       requiresAuth: true,
       allowedAuthStates: ['onboarding', 'auth'],
       requiredRoles: [RoleLevel.ORGANIZATION_ADMIN, RoleLevel.BRANCH_ADMIN]
@@ -185,7 +198,7 @@ const routes: RouteRecordRaw[] = [
     name: 'MyProfile',
     component: () => import('@/components/my/pages/MyProfilePage.vue'),
     meta: {
-      title: '내 정보 관리',
+      title: locale.pageTitle.my.profile,
       requiresAuth: true,
       allowedAuthStates: ['onboarding', 'auth'],
       requiredRoles: [RoleLevel.USER]
@@ -197,8 +210,20 @@ const routes: RouteRecordRaw[] = [
     name: 'DeviceInfo',
     component: () => import('@/components/shared/pages/DeviceInfoPage.vue'),
     meta: {
-      title: '등록 단말기 정보',
-      allowedAuthStates: ['onboarding', 'auth']
+      title: locale.pageTitle.shared.deviceInfo,
+      allowedAuthStates: ['pre-auth', 'onboarding', 'auth'],
+      layout: 'all'
+    }
+  },
+
+  {
+    path: '/device-info',
+    name: 'DeviceInfo',
+    component: () => import('@/components/shared/pages/DeviceInfoPage.vue'),
+    meta: {
+      title: locale.pageTitle.shared.deviceInfo,
+      allowedAuthStates: ['pre-auth', 'onboarding', 'auth'],
+      layout: 'all'
     }
   },
 
@@ -211,7 +236,7 @@ const routes: RouteRecordRaw[] = [
     name: 'Dashboard',
     component: () => import('@/components/main/pages/DashboardPage.vue'),
     meta: {
-      title: '메인화면',
+      title: locale.pageTitle.main.dashboard,
       requiresAuth: true,
       requiresBankCode: true,
       allowedAuthStates: ['auth']
@@ -223,7 +248,31 @@ const routes: RouteRecordRaw[] = [
     name: 'WebViewer',
     component: () => import('@/components/shared/pages/WebViewerPage.vue'),
     meta: {
-      title: '웹뷰어',
+      title: locale.pageTitle.shared.viewer,
+      requiresAuth: true,
+      requiresBankCode: true,
+      allowedAuthStates: ['auth']
+    }
+  },
+
+  {
+    path: '/notice',
+    name: 'Notice',
+    component: () => import('@/components/shared/pages/NoticePage.vue'),
+    meta: {
+      title: '공지사항 목록',
+      requiresAuth: true,
+      requiresBankCode: true,
+      allowedAuthStates: ['auth']
+    }
+  },
+
+  {
+    path: '/notice/001',
+    name: 'NoticeDetail',
+    component: () => import('@/components/shared/pages/NoticeDetailPage.vue'),
+    meta: {
+      title: '공지사항 디테일',
       requiresAuth: true,
       requiresBankCode: true,
       allowedAuthStates: ['auth']
@@ -235,7 +284,7 @@ const routes: RouteRecordRaw[] = [
     name: 'EstimateMgmt',
     component: () => import('@/components/estimate/pages/EstimateMgmtContainer.vue'),
     meta: {
-      title: '등기 견적 관리',
+      title: locale.pageTitle.estimate.list,
       requiresAuth: true,
       requiresBankCode: true,
       allowedAuthStates: ['auth']
@@ -247,7 +296,7 @@ const routes: RouteRecordRaw[] = [
     name: 'EstimateCreate',
     component: () => import('@/components/estimate/pages/EstimateDetailPage.vue'),
     meta: {
-      title: '견적서 작성/제출 상세',
+      title: locale.pageTitle.estimate.createDetail,
       requiresAuth: true,
       requiresBankCode: true,
       allowedAuthStates: ['auth']
@@ -259,7 +308,7 @@ const routes: RouteRecordRaw[] = [
     name: 'EstimateDetail',
     component: () => import('@/components/estimate/pages/EstimateDetailPage.vue'),
     meta: {
-      title: '견적서 확인/철회 상세',
+      title: locale.pageTitle.estimate.confirmDetail,
       requiresAuth: true,
       requiresBankCode: true,
       allowedAuthStates: ['auth']
@@ -271,7 +320,7 @@ const routes: RouteRecordRaw[] = [
     name: 'RegistrationStatus',
     component: () => import('@/components/registration/pages/CaseStatusContainer.vue'),
     meta: {
-      title: '등기 진행 현황',
+      title: locale.pageTitle.registration.caseStatus,
       requiresAuth: true,
       requiresBankCode: true,
       allowedAuthStates: ['auth']
@@ -283,7 +332,7 @@ const routes: RouteRecordRaw[] = [
     name: 'RegistrationDetail',
     component: () => import('@/components/registration/pages/CaseDetailPage.vue'),
     meta: {
-      title: '등기 진행 상세',
+      title: locale.pageTitle.registration.caseDetail,
       requiresAuth: true,
       requiresBankCode: true,
       allowedAuthStates: ['auth']
@@ -295,7 +344,7 @@ const routes: RouteRecordRaw[] = [
     name: 'RegistrationSchedule',
     component: () => import('@/components/registration/pages/CaseScheduleMgmtPage.vue'),
     meta: {
-      title: '등기 일정 관리',
+      title: locale.pageTitle.registration.schedule,
       requiresAuth: true,
       requiresBankCode: true,
       allowedAuthStates: ['auth']
@@ -311,8 +360,9 @@ const routes: RouteRecordRaw[] = [
     name: 'NotFound',
     component: () => import('@/components/shared/pages/NotFoundPage.vue'),
     meta: {
-      title: '페이지를 찾을 수 없습니다',
-      allowedAuthStates: ['pre-auth', 'onboarding', 'auth']
+      title: locale.pageTitle.error['404'],
+      allowedAuthStates: ['pre-auth', 'onboarding', 'auth'],
+      layout: 'all'
     }
   },
 
@@ -321,8 +371,10 @@ const routes: RouteRecordRaw[] = [
     name: 'ErrorMacOS',
     component: () => import('@/components/shared/pages/AccessErrorMacPage.vue'),
     meta: {
-      title: '접속 오류 (Mac OS)',
-      allowedAuthStates: ['pre-auth', 'onboarding', 'auth']
+      title: locale.pageTitle.error.macOs,
+      allowedAuthStates: ['pre-auth', 'onboarding', 'auth'],
+      layout: 'all',
+      footerOff: true
     }
   },
 
@@ -331,8 +383,11 @@ const routes: RouteRecordRaw[] = [
     name: 'ErrorMobile',
     component: () => import('@/components/shared/pages/AccessErrorMobilePage.vue'),
     meta: {
-      title: '접속 오류 (모바일)',
-      allowedAuthStates: ['pre-auth', 'onboarding', 'auth']
+      title: locale.pageTitle.error.mobile,
+      allowedAuthStates: ['pre-auth', 'onboarding', 'auth'],
+      layout: 'all',
+      mobile: true,
+      footerOff: true
     }
   },
 
@@ -382,7 +437,26 @@ router.beforeEach(
     })
 
     // 1. 페이지 타이틀 설정
-    document.title = to.meta.title ? `${to.meta.title} - 전자등기` : '전자등기'
+    let pageTitle = to.meta.title || '전자등기'
+
+    // ✅ Root 페이지는 authState에 따라 타이틀 동적 설정
+    if (to.path === '/' || to.name === 'Root') {
+      switch (currentAuthState) {
+        case 'pre-auth':
+          pageTitle = locale.pageTitle.auth.login
+          break
+        case 'onboarding':
+          pageTitle = locale.pageTitle.main.bankSelect
+          break
+        case 'auth':
+          pageTitle = locale.pageTitle.main.dashboard
+          break
+        default:
+          pageTitle = '전자등기'
+      }
+    }
+
+    document.title = pageTitle ? `${pageTitle} - 전자등기` : '전자등기'
 
     // 2. Root 페이지는 동적 컴포넌트 렌더링하므로 통과
     if (to.path === '/') {

@@ -23,7 +23,7 @@
     },
     "main": {
       "bankSelect": "금융기관 선택",
-      "dashboard": "메인화면"
+      "dashboard": "나의 사건 정보"
     },
     "my": {
       "organization": "기관/지점 정보 관리",

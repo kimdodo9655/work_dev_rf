@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="all-content-inner">
     <h1>
       잘못된 페이지 접근
       <br />

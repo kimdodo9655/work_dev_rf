@@ -5,7 +5,7 @@
     </div>
     <div class="right">
       <div>
-        <h4>로그인</h4>
+        <h4>임시 로그인(SUPER_ADMIN)</h4>
 
         <form @submit.prevent="handleSubmit">
           <input

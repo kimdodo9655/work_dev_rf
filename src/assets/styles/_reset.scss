@@ -23,6 +23,7 @@
 *::before,
 *::after {
   @extend %reset-base;
+  @include font-regular;
 }
 
 /* HTML 요소별 상세 리셋 (레거시 브라우저 호환성) */
@@ -97,6 +98,7 @@ html {
   overflow-y: scroll; // 스크롤바 항상 표시로 레이아웃 깜빡임 방지
   scroll-behavior: smooth; // 부드러운 스크롤
   -webkit-text-size-adjust: 100%; // iOS Safari 텍스트 크기 조정 방지
+  @include font-regular;
 }
 
 html,
@@ -106,6 +108,7 @@ body,
   height: 100%;
   line-height: 1;
   background-color: $color-light;
+  @include font-regular;
 }
 
 /* 리스트 스타일 제거 */

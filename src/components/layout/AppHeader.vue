@@ -243,6 +243,20 @@ const breadcrumbs = computed(() => {
 })
 
 const pageTitle = computed(() => {
+  // Root 페이지는 authState에 따라 동적 타이틀
+  if (route.path === '/') {
+    switch (authStore.authState) {
+      case 'pre-auth':
+        return locale.pageTitle.auth.login
+      case 'onboarding':
+        return locale.pageTitle.main.bankSelect
+      case 'auth':
+        return locale.pageTitle.main.dashboard
+      default:
+        return ''
+    }
+  }
+
   if (route.path === '/bank-select') {
     return authStore.authState === 'onboarding'
       ? locale.pageTitle.main.bankSelect

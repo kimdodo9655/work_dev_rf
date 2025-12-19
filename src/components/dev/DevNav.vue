@@ -248,7 +248,7 @@ const ROUTE_CATEGORIES = [
     name: '메인',
     routes: [
       { path: '/', title: '홈' },
-      { path: '/dashboard', title: '메인화면' },
+      { path: '/dashboard', title: '나의 사건 정보' },
       { path: '/bank-select', title: '금융기관 선택' }
     ]
   },

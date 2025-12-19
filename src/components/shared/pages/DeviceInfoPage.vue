@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="all-content-inner">
     <h1>
       등록 단말기 입력 정보 확인
       <br />
