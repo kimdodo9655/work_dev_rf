@@ -249,7 +249,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-import FormSelect, { type SelectOption } from '@/components/template/input/FormSelect.vue'
+import FormSelect, { type SelectOption } from '@/components/template/input/UserSelect.vue'
 import { useExternalLinks } from '@/composables/useExternalLinks'
 
 const { links } = useExternalLinks()

@@ -123,7 +123,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
-import FormDateRangePicker from '@/components/template/input/FormDateRangePicker.vue'
+import FormDateRangePicker from '@/components/template/input/SearchDateRangePicker.vue'
 
 interface DateRange {
   startDate: string | null

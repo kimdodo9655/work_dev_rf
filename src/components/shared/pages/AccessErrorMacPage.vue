@@ -77,9 +77,6 @@
     background-color: #ffffff;
     border-radius: 10px;
     padding: 30px;
-
-    > p {
-    }
   }
 }
 </style>

@@ -260,7 +260,7 @@ const routes: RouteRecordRaw[] = [
     name: 'Notice',
     component: () => import('@/components/shared/pages/NoticePage.vue'),
     meta: {
-      title: '공지사항 목록',
+      title: locale.pageTitle.shared.notice,
       requiresAuth: true,
       requiresBankCode: true,
       allowedAuthStates: ['auth']
@@ -272,7 +272,7 @@ const routes: RouteRecordRaw[] = [
     name: 'NoticeDetail',
     component: () => import('@/components/shared/pages/NoticeDetailPage.vue'),
     meta: {
-      title: '공지사항 디테일',
+      title: locale.pageTitle.shared.noticeDetail,
       requiresAuth: true,
       requiresBankCode: true,
       allowedAuthStates: ['auth']
@@ -282,7 +282,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/estimate',
     name: 'EstimateMgmt',
-    component: () => import('@/components/estimate/pages/EstimateMgmtContainer.vue'),
+    component: () => import('@/components/estimate/pages/EstimateMgmtPage.vue'),
     meta: {
       title: locale.pageTitle.estimate.list,
       requiresAuth: true,

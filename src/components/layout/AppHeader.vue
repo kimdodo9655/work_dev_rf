@@ -45,42 +45,42 @@
                     <li v-if="canAccessOrgMgmt">
                       <router-link to="/my/organization" @click="closeMyMenu">
                         <i class="fi fi-ss-apartment"></i>
-                        {{ locale.myMenu.nav01 }}
+                        {{ locale.pageTitle.my.organization }}
                         <i class="fi fi-rs-angle-circle-right"></i>
                       </router-link>
                     </li>
                     <li v-if="canAccessOrgMgmt">
                       <router-link to="/my/users" @click="closeMyMenu">
                         <i class="fi fi-ss-users-alt"></i>
-                        {{ locale.myMenu.nav02 }}
+                        {{ locale.pageTitle.my.users }}
                         <i class="fi fi-rs-angle-circle-right"></i>
                       </router-link>
                     </li>
                     <li v-if="!canAccessOrgMgmt">
                       <router-link to="/my/profile" @click="closeMyMenu">
                         <i class="fi fi-ss-user"></i>
-                        {{ locale.myMenu.nav03 }}
+                        {{ locale.pageTitle.my.profile }}
                         <i class="fi fi-rs-angle-circle-right"></i>
                       </router-link>
                     </li>
                     <li>
                       <router-link to="/bank-select" @click="closeMyMenu">
                         <i class="fi fi-ss-bank"></i>
-                        {{ locale.myMenu.nav04 }}
+                        {{ locale.pageTitle.main.bankChange }}
                         <i class="fi fi-rs-angle-circle-right"></i>
                       </router-link>
                     </li>
                     <li>
-                      <router-link to="/" @click="closeMyMenu">
+                      <router-link to="/notice" @click="closeMyMenu">
                         <i class="fi fi-ss-exclamation"></i>
-                        {{ locale.myMenu.nav05 }}
+                        {{ locale.pageTitle.shared.notice }}
                         <i class="fi fi-rs-angle-circle-right"></i>
                       </router-link>
                     </li>
                     <li class="logout">
                       <a @click="handleLogout">
                         <i class="fi fi-ss-leave"></i>
-                        {{ locale.myMenu.nav06 }}
+                        {{ locale.header.logout }}
                         <i class="fi fi-rs-angle-circle-right"></i>
                       </a>
                     </li>
@@ -103,7 +103,7 @@
             <!-- 로그아웃 버튼 (onboarding 상태) -->
             <li v-if="authStore.authState === 'onboarding'">
               <button class="logout-btn" @click="handleLogout">
-                {{ locale.myMenu.nav06 }}
+                {{ locale.header.logout }}
               </button>
             </li>
           </ul>
@@ -177,10 +177,10 @@ const navigationMenuItems = computed(() => {
     const items = [{ path: '/bank-select', label: locale.pageTitle.main.bankSelect }]
 
     if (canAccessOrgMgmt.value) {
-      items.push({ path: '/my/organization', label: locale.myMenu.nav01 })
-      items.push({ path: '/my/users', label: locale.myMenu.nav02 })
+      items.push({ path: '/my/organization', label: locale.pageTitle.my.organization })
+      items.push({ path: '/my/users', label: locale.pageTitle.my.users })
     } else {
-      items.push({ path: '/my/profile', label: locale.myMenu.nav03 })
+      items.push({ path: '/my/profile', label: locale.pageTitle.my.profile })
     }
 
     return items
@@ -219,7 +219,9 @@ const breadcrumbs = computed(() => {
   } else if (path === '/bank-select') {
     pathArray.push(locale.common.my)
     pathArray.push(
-      authStore.authState === 'onboarding' ? locale.pageTitle.main.bankSelect : locale.myMenu.nav04
+      authStore.authState === 'onboarding'
+        ? locale.pageTitle.main.bankSelect
+        : locale.pageTitle.main.bankChange
     )
   } else if (path.startsWith('/estimate')) {
     pathArray.push(locale.pageTitle.estimate.list)
@@ -236,6 +238,12 @@ const breadcrumbs = computed(() => {
       pathArray.push(locale.pageTitle.registration.caseDetail)
     } else {
       pathArray.push(locale.pageTitle.registration.caseStatus)
+    }
+  } else if (path.startsWith('/notice')) {
+    // TODO 공지사항. 추후 조건 수정
+    pathArray.push(locale.pageTitle.shared.notice)
+    if (path.includes('')) {
+      pathArray.push(locale.pageTitle.shared.noticeDetail)
     }
   }
 
@@ -260,7 +268,7 @@ const pageTitle = computed(() => {
   if (route.path === '/bank-select') {
     return authStore.authState === 'onboarding'
       ? locale.pageTitle.main.bankSelect
-      : locale.myMenu.nav04
+      : locale.pageTitle.main.bankChange
   }
 
   return route.meta.title || breadcrumbs.value[breadcrumbs.value.length - 1] || ''

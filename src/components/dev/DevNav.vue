@@ -128,7 +128,7 @@
                 <button
                   v-if="storageData.accessToken"
                   class="copy-button"
-                  @click="copyToken(`Bearer ${storageData.accessToken}`)"
+                  @click="copyToken(`${storageData.accessToken}`)"
                   title="헤더 복사"
                 >
                   📋

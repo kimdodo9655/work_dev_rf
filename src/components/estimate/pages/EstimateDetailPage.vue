@@ -3,7 +3,7 @@
     <h1>
       [공용] 견적서 작성/제출 or 확인/철회 상세
       <br />
-      EstimateDetailPage
+      EstimateDetailPage &#128187;
     </h1>
   </div>
 </template>

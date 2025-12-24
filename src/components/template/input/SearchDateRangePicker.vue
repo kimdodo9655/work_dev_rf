@@ -1,15 +1,17 @@
+<!-- src/components/template/input/FormDateRangePicker.vue -->
 <template>
   <div ref="pickerRef" class="date-range-picker">
-    <label v-if="label" class="picker-label">{{ label }}</label>
-    <div class="picker-input-wrapper">
+    <div class="input-wrapper" @click="toggleCalendar">
+      <label v-if="label" :for="inputId">{{ label }}</label>
       <input
+        :id="inputId"
+        ref="inputRef"
         type="text"
         :value="displayValue"
         :placeholder="placeholder"
         readonly
-        @click="toggleCalendar"
       />
-      <button class="dropdown-btn" @click="toggleCalendar">▼</button>
+      <i class="fi fi-rs-calendar"></i>
     </div>
 
     <div v-show="isOpen" class="calendar-dropdown">
@@ -102,8 +104,10 @@ const emit = defineEmits<Emits>()
 
 // Refs
 const pickerRef = ref<HTMLDivElement>()
+const inputRef = ref<HTMLInputElement>()
 const isOpen = ref(false)
 const pickerId = ref(`picker-${Math.random().toString(36).substr(2, 9)}`)
+const inputId = ref(`input-${Math.random().toString(36).substr(2, 9)}`)
 const startDate = ref<Date | null>(null)
 const endDate = ref<Date | null>(null)
 const tempStartDate = ref<Date | null>(null)
@@ -304,14 +308,17 @@ function toggleCalendar() {
   if (isOpen.value) {
     // 이미 열려있으면 닫기
     cancelSelection()
+    inputRef.value?.blur() // 포커스 해제
   } else {
     // 닫혀있으면 열기
     openCalendar()
+    inputRef.value?.focus() // 포커스 설정
   }
 }
 
 function closeCalendar() {
   isOpen.value = false
+  inputRef.value?.blur() // 캘린더 닫을 때 포커스 해제
 }
 
 function confirmSelection() {
@@ -448,250 +455,3 @@ onUnmounted(() => {
   document.removeEventListener('picker-open', handleOtherPickerOpen as any)
 })
 </script>
-
-<style scoped>
-.date-range-picker {
-  font-family: inherit;
-  position: relative;
-}
-
-.picker-label {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #333;
-}
-
-.picker-input-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background: white;
-}
-
-.picker-input-wrapper input {
-  flex: 1;
-  padding: 10px 12px;
-  border: none;
-  font-size: 14px;
-  cursor: pointer;
-  background: transparent;
-}
-
-.picker-input-wrapper input:focus {
-  outline: none;
-}
-
-.dropdown-btn {
-  padding: 10px 12px;
-  background: none;
-  border: none;
-  border-left: 1px solid #ddd;
-  cursor: pointer;
-  font-size: 12px;
-  color: #666;
-  transition: background 0.2s;
-}
-
-.dropdown-btn:hover {
-  background: #f5f5f5;
-}
-
-.calendar-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  width: fit-content;
-  margin-top: 8px;
-  z-index: 1000;
-}
-
-.calendar {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  border: 1px solid #e5e7eb;
-  padding: 16px;
-  width: 100%;
-  max-width: 320px;
-}
-
-.calendar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.calendar-header button {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 4px;
-  padding: 6px 12px;
-  cursor: pointer;
-  font-size: 14px;
-  color: #666;
-  transition: all 0.2s;
-}
-
-.calendar-header button:hover:not(:disabled) {
-  background: #f9fafb;
-  border-color: #d1d5db;
-}
-
-.calendar-header button:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.calendar-header span {
-  font-weight: 600;
-  font-size: 16px;
-  color: #111827;
-}
-
-.weekdays {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  margin-bottom: 8px;
-}
-
-.weekdays div {
-  text-align: center;
-  font-size: 11px;
-  font-weight: 600;
-  color: #666;
-  padding: 6px 0;
-}
-
-.days {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-}
-
-.day {
-  aspect-ratio: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 13px;
-  position: relative;
-  min-height: 32px;
-}
-
-.day::before,
-.day::after {
-  position: absolute;
-  font-size: 9px;
-  font-weight: 600;
-  color: #21adad;
-  left: 50%;
-  transform: translateX(-50%);
-  white-space: nowrap;
-}
-
-.day.range-start::before {
-  content: '시작일';
-  background-color: #21adad;
-  color: #fff;
-  padding: 5px 0 0;
-  width: 32px;
-  border-radius: 5px 5px 0 0;
-  text-align: center;
-  top: -10px;
-}
-
-.day.range-end::after {
-  content: '종료일';
-  background-color: #21adad;
-  color: #fff;
-  padding: 0 0 5px;
-  width: 32px;
-  border-radius: 0 0 5px 5px;
-  text-align: center;
-  bottom: -10px;
-}
-
-.day:hover:not(.disabled):not(.other-month) {
-  background: #ebf7f8;
-}
-
-.day.other-month {
-  color: #ccc;
-}
-
-.day.disabled {
-  color: #ddd;
-  cursor: not-allowed;
-}
-
-.day.disabled:hover {
-  background: none;
-}
-
-.day.selected {
-  background: #2563eb;
-  color: white;
-  font-weight: 600;
-}
-
-.day.in-range {
-  background: #ebf7f8;
-}
-
-.day.range-start,
-.day.range-end {
-  background: #21adad;
-  color: white;
-  font-weight: 600;
-}
-
-.selected-period {
-  margin-top: 12px;
-  padding: 10px;
-  background: #ebf7f8;
-  border-radius: 4px;
-  text-align: center;
-  font-size: 12px;
-  color: #0369a1;
-  font-weight: 500;
-}
-
-.calendar-footer {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #ebf7f8;
-  text-align: right;
-}
-
-.confirm-btn {
-  padding: 8px 24px;
-  border: none;
-  border-radius: 4px;
-  background: #21adad;
-  color: white;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: background 0.2s;
-}
-
-.confirm-btn:hover {
-  background: #21adad;
-}
-
-.confirm-btn:disabled {
-  background: #9ca3af;
-  cursor: not-allowed;
-}
-</style>
