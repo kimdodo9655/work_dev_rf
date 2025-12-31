@@ -18,16 +18,20 @@
           @change="handleLot"
         />
 
+        <!-- 등기의뢰일자 선택 -->
         <SearchDateRangePicker
           v-model="dateRange1"
           label="등기의뢰일자 선택"
           @change="handleChange1"
         />
+
+        <!-- 등기접수일자 선택 -->
         <SearchDateRangePicker
           v-model="dateRange2"
           label="등기접수일자 선택"
           @change="handleChange2"
         />
+
         <SearchSelect
           v-model="selectedCity"
           :options="cityOptions"
@@ -49,16 +53,19 @@
           label="카테고리"
           placeholder="카테고리를 선택해주세요"
         />
+
         <SearchInput
           v-model="searchKeyword"
-          label="상품 검색"
-          placeholder="상품명을 입력하세요"
+          label="통합검색"
+          placeholder=""
           @search="handleSearch"
         />
       </div>
       <input type="submit" value="검색" />
     </form>
   </div>
+
+  <router-link to="/estimate/create/REG-2024-001">test</router-link>
 </template>
 
 <script lang="ts" setup>
@@ -71,6 +78,10 @@ import { useMessage } from '@/composables/useMessage'
 
 const { t } = useMessage()
 const handleSubmit = async () => {}
+
+defineOptions({
+  name: 'EstimateSearch'
+})
 
 /* ***********************************
  * search panel
@@ -113,6 +124,8 @@ const optionLot = computed(() => [
 function handleLot(value: string | number | null) {
   console.log('선택된 필지:', value)
 }
+
+// --------------------------------------------------------------- 필지 선택
 
 // 기간선택
 interface DateRange {

@@ -228,3 +228,8 @@ h1 {
   color: $color-g3;
   @include font-extrabold;
 }
+
+i::before {
+  display: inline-flex;
+  align-items: center;
+}

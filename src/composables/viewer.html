@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>문서 뷰어</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: Arial, sans-serif;
+        background: #f5f7fa;
+        padding: 20px;
+      }
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 24px;
+      }
+      .header h1 {
+        font-size: 24px;
+        margin-bottom: 8px;
+      }
+      .header p {
+        font-size: 14px;
+        opacity: 0.9;
+        margin-bottom: 16px;
+      }
+      .format-group {
+        margin-bottom: 12px;
+      }
+      .format-label {
+        font-size: 12px;
+        font-weight: 600;
+        opacity: 0.8;
+        margin-bottom: 8px;
+        display: block;
+      }
+      .file-selector {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .file-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid white;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        transition: all 0.3s;
+      }
+      .file-btn:hover {
+        background: white;
+        color: #667eea;
+      }
+      .file-btn.active {
+        background: white;
+        color: #667eea;
+      }
+      .viewer-section {
+        padding: 24px;
+      }
+      .file-info {
+        background: #f8f9fa;
+        padding: 16px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .file-type-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .file-type-badge.pdf {
+        background: #fee;
+        color: #c33;
+      }
+      .file-type-badge.image {
+        background: #efe;
+        color: #3a3;
+      }
+      .file-type-badge.text {
+        background: #f3e8ff;
+        color: #7c3aed;
+      }
+      .viewer-container {
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        min-height: 600px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fafafa;
+        overflow: auto;
+      }
+      .image-viewer {
+        max-width: 100%;
+        max-height: 800px;
+        object-fit: contain;
+      }
+      .text-viewer {
+        width: 100%;
+        height: 600px;
+        padding: 20px;
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        line-height: 1.6;
+        overflow: auto;
+        background: white;
+        border: none;
+        resize: none;
+      }
+      #pdf-canvas {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+      }
+      .pdf-controls {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        padding: 16px;
+        background: #f8f9fa;
+        border-top: 1px solid #e2e8f0;
+      }
+      .pdf-controls button {
+        background: #667eea;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.3s;
+      }
+      .pdf-controls button:hover:not(:disabled) {
+        background: #5568d3;
+        transform: translateY(-2px);
+      }
+      .pdf-controls button:disabled {
+        background: #cbd5e0;
+        cursor: not-allowed;
+      }
+      .pdf-controls .page-info {
+        display: flex;
+        align-items: center;
+        padding: 0 16px;
+        font-weight: 600;
+        color: #4a5568;
+      }
+      .empty-state {
+        text-align: center;
+        color: #a0aec0;
+        padding: 60px 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>문서 뷰어</h1>
+        <p>Base64 파일 뷰어</p>
+
+        <div class="format-group">
+          <span class="format-label">이미지</span>
+          <div class="file-selector">
+            <button class="file-btn active" onclick="loadSample('image-jpg')">JPG</button>
+            <button class="file-btn" onclick="loadSample('image-png')">PNG</button>
+            <button class="file-btn" onclick="loadSample('image-gif')">GIF</button>
+            <button class="file-btn" onclick="loadSample('image-webp')">WebP</button>
+            <button class="file-btn" onclick="loadSample('image-svg')">SVG</button>
+          </div>
+        </div>
+
+        <div class="format-group">
+          <span class="format-label">문서</span>
+          <div class="file-selector">
+            <button class="file-btn" onclick="loadSample('pdf')">PDF</button>
+            <button class="file-btn" onclick="loadSample('text-txt')">TXT</button>
+            <button class="file-btn" onclick="loadSample('text-json')">JSON</button>
+            <button class="file-btn" onclick="loadSample('text-csv')">CSV</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="viewer-section">
+        <div class="file-info">
+          <div>
+            <span class="file-type-badge" id="fileTypeBadge">-</span>
+            <span style="margin-left: 12px; font-weight: 600" id="fileName">파일을 선택하세요</span>
+          </div>
+          <div style="color: #718096; font-size: 14px" id="fileSize">-</div>
+        </div>
+
+        <div class="viewer-container" id="viewerContainer">
+          <div class="empty-state">
+            <span style="font-size: 64px">📁</span>
+            <p style="font-size: 18px; margin-top: 16px">상단에서 파일을 선택하세요</p>
+          </div>
+        </div>
+
+        <div class="pdf-controls" id="pdfControls" style="display: none">
+          <button onclick="prevPage()" id="prevBtn">이전</button>
+          <div class="page-info"><span id="pageNum">1</span> / <span id="pageCount">1</span></div>
+          <button onclick="nextPage()" id="nextBtn">다음</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
+
+      var pdfDoc = null
+      var pageNum = 1
+      var pageRendering = false
+      var pageNumPending = null
+
+      function makeImage(w, h, color, txt) {
+        var c = document.createElement('canvas')
+        c.width = w
+        c.height = h
+        var x = c.getContext('2d')
+        x.fillStyle = color
+        x.fillRect(0, 0, w, h)
+        x.fillStyle = 'white'
+        x.font = 'bold 24px Arial'
+        x.textAlign = 'center'
+        x.fillText(txt, w / 2, h / 2)
+        return c.toDataURL('image/png').split(',')[1]
+      }
+
+      function makeSVG() {
+        var s =
+          '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><rect width="300" height="300" fill="#9333ea"/><text x="150" y="150" font-size="24" fill="white" text-anchor="middle">SVG</text></svg>'
+        return btoa(s)
+      }
+
+      function makeText(type) {
+        var t = ''
+        if (type === 'txt') t = 'Hello World\nThis is text file'
+        if (type === 'json') t = '{"name":"test","value":123}'
+        if (type === 'csv') t = 'ID,Name\n1,John\n2,Jane'
+        return btoa(unescape(encodeURIComponent(t)))
+      }
+
+      var samples = {
+        'image-jpg': {
+          name: 'file.jpg',
+          type: 'image',
+          category: 'image',
+          mimeType: 'image/jpeg',
+          data: makeImage(300, 300, '#ef4444', 'JPG')
+        },
+        'image-png': {
+          name: 'file.png',
+          type: 'image',
+          category: 'image',
+          mimeType: 'image/png',
+          data: makeImage(300, 300, '#3b82f6', 'PNG')
+        },
+        'image-gif': {
+          name: 'file.gif',
+          type: 'image',
+          category: 'image',
+          mimeType: 'image/gif',
+          data: makeImage(300, 300, '#10b981', 'GIF')
+        },
+        'image-webp': {
+          name: 'file.webp',
+          type: 'image',
+          category: 'image',
+          mimeType: 'image/webp',
+          data: makeImage(300, 300, '#f59e0b', 'WebP')
+        },
+        'image-svg': {
+          name: 'file.svg',
+          type: 'image',
+          category: 'image',
+          mimeType: 'image/svg+xml',
+          data: makeSVG()
+        },
+        'text-txt': {
+          name: 'file.txt',
+          type: 'text',
+          category: 'text',
+          mimeType: 'text/plain',
+          data: makeText('txt')
+        },
+        'text-json': {
+          name: 'data.json',
+          type: 'text',
+          category: 'text',
+          mimeType: 'application/json',
+          data: makeText('json')
+        },
+        'text-csv': {
+          name: 'data.csv',
+          type: 'text',
+          category: 'text',
+          mimeType: 'text/csv',
+          data: makeText('csv')
+        },
+        pdf: {
+          name: 'file.pdf',
+          type: 'pdf',
+          category: 'pdf',
+          mimeType: 'application/pdf',
+          data: 'JVBERi0xLjQKJeLjz9MKMyAwIG9iago8PC9UeXBlL1BhZ2UvUGFyZW50IDIgMCBSL1Jlc291cmNlczw8L0ZvbnQ8PC9GMSA1IDAgUj4+Pj4vTWVkaWFCb3hbMCAwIDYxMiA3OTJdL0NvbnRlbnRzIDQgMCBSPj4KZW5kb2JqCjQgMCBvYmoKPDwvTGVuZ3RoIDQ0Pj4Kc3RyZWFtCkJUCi9GMSA0OCBUZgoxMCA3MDAgVGQKKEhlbGxvKSBUagpFVAplbmRzdHJlYW0KZW5kb2JqCjUgMCBvYmoKPDwvVHlwZS9Gb250L1N1YnR5cGUvVHlwZTEvQmFzZUZvbnQvSGVsdmV0aWNhPj4KZW5kb2JqCjIgMCBvYmoKPDwvVHlwZS9QYWdlcy9LaWRzWzMgMCBSXS9Db3VudCAxPj4KZW5kb2JqCjEgMCBvYmoKPDwvVHlwZS9DYXRhbG9nL1BhZ2VzIDIgMCBSPj4KZW5kb2JqCnhyZWYKMCA2CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDI1MiAwMDAwMCBuIAowMDAwMDAwMjAxIDAwMDAwIG4gCjAwMDAwMDAwMDkgMDAwMDAgbiAKMDAwMDAwMDEyNyAwMDAwMCBuIAowMDAwMDAwMTY5IDAwMDAwIG4gCnRyYWlsZXIKPDwvU2l6ZSA2L1Jvb3QgMSAwIFI+PgpzdGFydHhyZWYKMzAxCiUlRU9G'
+        }
+      }
+
+      function loadSample(type) {
+        var sample = samples[type]
+        if (!sample) return
+
+        displayFile(sample)
+
+        var btns = document.querySelectorAll('.file-btn')
+        for (var i = 0; i < btns.length; i++) {
+          btns[i].classList.remove('active')
+        }
+        event.target.classList.add('active')
+      }
+
+      function displayFile(file) {
+        var container = document.getElementById('viewerContainer')
+        var badge = document.getElementById('fileTypeBadge')
+        var name = document.getElementById('fileName')
+        var size = document.getElementById('fileSize')
+        var controls = document.getElementById('pdfControls')
+
+        name.textContent = file.name
+        badge.textContent = file.type.toUpperCase()
+        badge.className = 'file-type-badge ' + file.category
+
+        var kb = Math.round((file.data.length * 3) / 4 / 1024)
+        size.textContent = kb + ' KB'
+
+        container.innerHTML = ''
+        controls.style.display = 'none'
+
+        if (file.category === 'image') {
+          var img = document.createElement('img')
+          img.className = 'image-viewer'
+          img.src = 'data:' + file.mimeType + ';base64,' + file.data
+          container.appendChild(img)
+        } else if (file.category === 'text') {
+          var txt = document.createElement('textarea')
+          txt.className = 'text-viewer'
+          txt.readOnly = true
+          txt.value = decodeURIComponent(escape(atob(file.data)))
+          container.appendChild(txt)
+        } else if (file.category === 'pdf') {
+          controls.style.display = 'flex'
+          var canvas = document.createElement('canvas')
+          canvas.id = 'pdf-canvas'
+          container.appendChild(canvas)
+
+          pdfjsLib.getDocument({ data: atob(file.data) }).promise.then(function (pdf) {
+            pdfDoc = pdf
+            document.getElementById('pageCount').textContent = pdf.numPages
+            pageNum = 1
+            renderPage(1)
+          })
+        }
+      }
+
+      function renderPage(num) {
+        pageRendering = true
+        pdfDoc.getPage(num).then(function (page) {
+          var canvas = document.getElementById('pdf-canvas')
+          var ctx = canvas.getContext('2d')
+          var viewport = page.getViewport({ scale: 1.5 })
+          canvas.height = viewport.height
+          canvas.width = viewport.width
+          page.render({ canvasContext: ctx, viewport: viewport }).promise.then(function () {
+            pageRendering = false
+            if (pageNumPending !== null) {
+              renderPage(pageNumPending)
+              pageNumPending = null
+            }
+          })
+        })
+        document.getElementById('pageNum').textContent = num
+        updateButtons()
+      }
+
+      function prevPage() {
+        if (pageNum <= 1) return
+        pageNum--
+        renderPage(pageNum)
+      }
+
+      function nextPage() {
+        if (!pdfDoc || pageNum >= pdfDoc.numPages) return
+        pageNum++
+        renderPage(pageNum)
+      }
+
+      function updateButtons() {
+        document.getElementById('prevBtn').disabled = pageNum <= 1
+        document.getElementById('nextBtn').disabled = pdfDoc && pageNum >= pdfDoc.numPages
+      }
+
+      window.onload = function () {
+        loadSample('image-jpg')
+      }
+    </script>
+  </body>
+</html>

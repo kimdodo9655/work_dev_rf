@@ -1,6 +1,4 @@
 export const MESSAGES = {
-  test: '전체 <span>{count}</span>건',
-
   pageTitle: {
     error: {
       404: '잘못된 페이지 접근',
@@ -124,6 +122,14 @@ export const MESSAGES = {
       writeStatus: '작성여부',
       selectStatus: '선정여부'
     }
+  },
+  login: {
+    serviceTitle: '법무대리인<br/>등기지원시스템',
+    id: '아이디',
+    password: '비밀번호',
+    forgetId: '아이디 기억하기',
+    passwordSetup: '비밀번호 변경',
+    signup: '아직 회원이 아니신가요?'
   }
 } as const
 

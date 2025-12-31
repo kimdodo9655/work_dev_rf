@@ -4,7 +4,12 @@
       <AppHeader v-if="shouldShowHeader" />
 
       <div class="content" v-if="layoutType === 'default'">
-        <router-view />
+        <router-view v-slot="{ Component, route }">
+          <keep-alive>
+            <component :is="Component" v-if="route.meta.keepAlive" :key="route.path" />
+          </keep-alive>
+          <component :is="Component" v-if="!route.meta.keepAlive" :key="route.path" />
+        </router-view>
       </div>
 
       <div class="full-content" v-if="layoutType === 'pre-auth'">

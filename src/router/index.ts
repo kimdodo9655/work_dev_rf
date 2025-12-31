@@ -8,14 +8,17 @@ import { handleInvalidAuthState, isValidAuthData } from '@/utils/authValidator'
 import { logger } from '@/utils/logger'
 import { storage } from '@/utils/storage'
 
-// Meta 타입 정의
+/**
+ * Route Meta 타입 확장
+ */
 declare module 'vue-router' {
   interface RouteMeta {
     title?: string
-    requiresAuth?: boolean // 로그인 필요 여부
-    requiresBankCode?: boolean // 금융기관 선택 필요 여부
-    requiredRoles?: RoleLevel[] // 필요 권한
-    allowedAuthStates?: ('pre-auth' | 'onboarding' | 'auth')[] // 허용된 인증 상태
+    requiresAuth?: boolean
+    requiresBankCode?: boolean
+    requiredRoles?: RoleLevel[]
+    allowedAuthStates?: ('pre-auth' | 'onboarding' | 'auth')[]
+    keepAlive?: boolean
     layout?: string
     footerOff?: boolean
     mobile?: boolean
@@ -23,6 +26,10 @@ declare module 'vue-router' {
 }
 
 const routes: RouteRecordRaw[] = [
+  /**
+   * 개발 테스트 페이지
+   * 모든 인증 상태에서 접근 가능한 개발용 테스트 페이지
+   */
   {
     path: '/test',
     name: 'Test',
@@ -32,24 +39,32 @@ const routes: RouteRecordRaw[] = [
       allowedAuthStates: ['pre-auth', 'onboarding', 'auth']
     }
   },
-  // ============================================================================
-  // Root - 인증 상태에 따라 동적 컴포넌트 렌더링
-  // ============================================================================
 
+  /**
+   * Root 페이지
+   *
+   * 사용자의 인증 상태(authState)에 따라 적절한 페이지로 동적 렌더링:
+   * - pre-auth: LoginPage 렌더링
+   * - onboarding: BankSelectionPage 렌더링
+   * - auth: DashboardPage 렌더링
+   */
   {
     path: '/',
     name: 'Root',
     component: () => import('@/components/shared/pages/RootPage.vue'),
     meta: {
       title: '전자등기',
-      allowedAuthStates: ['pre-auth', 'onboarding', 'auth'] // 모든 상태에서 접근 가능
+      allowedAuthStates: ['pre-auth', 'onboarding', 'auth']
     }
   },
 
   // ============================================================================
-  // Pre-Auth (로그인 전)
+  // Pre-Auth 라우트 (로그인 전)
   // ============================================================================
 
+  /**
+   * 로그인 페이지
+   */
   {
     path: '/auth/login',
     name: 'Login',
@@ -60,6 +75,9 @@ const routes: RouteRecordRaw[] = [
     }
   },
 
+  /**
+   * 회원가입 페이지
+   */
   {
     path: '/auth/signup',
     name: 'SignUp',
@@ -70,6 +88,9 @@ const routes: RouteRecordRaw[] = [
     }
   },
 
+  /**
+   * 프로그램 설치 안내 페이지
+   */
   {
     path: '/auth/install',
     name: 'ProgramInstall',
@@ -80,6 +101,9 @@ const routes: RouteRecordRaw[] = [
     }
   },
 
+  /**
+   * 자동 로그아웃 페이지
+   */
   {
     path: '/auth/auto-logout',
     name: 'AutoLogout',
@@ -90,6 +114,9 @@ const routes: RouteRecordRaw[] = [
     }
   },
 
+  /**
+   * 비밀번호 설정 페이지
+   */
   {
     path: '/auth/password-setup',
     name: 'PasswordSetup',
@@ -100,6 +127,9 @@ const routes: RouteRecordRaw[] = [
     }
   },
 
+  /**
+   * MAC 주소 차단 페이지
+   */
   {
     path: '/auth/blocked/mac',
     name: 'AccessBlockMac',
@@ -110,6 +140,9 @@ const routes: RouteRecordRaw[] = [
     }
   },
 
+  /**
+   * 이메일 차단 페이지
+   */
   {
     path: '/auth/blocked/email',
     name: 'AccessBlockEmail',
@@ -120,6 +153,9 @@ const routes: RouteRecordRaw[] = [
     }
   },
 
+  /**
+   * 사용자 계정 차단 페이지
+   */
   {
     path: '/auth/blocked/user',
     name: 'AccessBlockUser',
@@ -131,9 +167,12 @@ const routes: RouteRecordRaw[] = [
   },
 
   // ============================================================================
-  // Onboarding (로그인 후, 금융기관 선택 전)
+  // Onboarding 라우트 (로그인 후, 금융기관 선택 전/후)
   // ============================================================================
 
+  /**
+   * 금융기관 선택 페이지
+   */
   {
     path: '/bank-select',
     name: 'BankSelection',
@@ -141,10 +180,13 @@ const routes: RouteRecordRaw[] = [
     meta: {
       title: locale.pageTitle.main.bankSelect,
       requiresAuth: true,
-      allowedAuthStates: ['onboarding', 'auth'] // auth 상태에서도 접근 가능 (변경용)
+      allowedAuthStates: ['onboarding', 'auth']
     }
   },
 
+  /**
+   * 조직 관리 페이지
+   */
   {
     path: '/my/organization',
     name: 'OrgMgmt',
@@ -157,6 +199,10 @@ const routes: RouteRecordRaw[] = [
     }
   },
 
+  /**
+   * 조직 상세 페이지
+   * @param {string} orgId - 조직 고유 식별자
+   */
   {
     path: '/my/organization/:orgId',
     name: 'OrgDetail',
@@ -169,6 +215,9 @@ const routes: RouteRecordRaw[] = [
     }
   },
 
+  /**
+   * 사용자 관리 페이지
+   */
   {
     path: '/my/users',
     name: 'UserMgmt',
@@ -181,6 +230,10 @@ const routes: RouteRecordRaw[] = [
     }
   },
 
+  /**
+   * 사용자 상세 페이지
+   * @param {string} userId - 사용자 고유 식별자
+   */
   {
     path: '/my/users/:userId',
     name: 'UserDetail',
@@ -193,6 +246,9 @@ const routes: RouteRecordRaw[] = [
     }
   },
 
+  /**
+   * 내 프로필 페이지
+   */
   {
     path: '/my/profile',
     name: 'MyProfile',
@@ -205,17 +261,9 @@ const routes: RouteRecordRaw[] = [
     }
   },
 
-  {
-    path: '/device-info',
-    name: 'DeviceInfo',
-    component: () => import('@/components/shared/pages/DeviceInfoPage.vue'),
-    meta: {
-      title: locale.pageTitle.shared.deviceInfo,
-      allowedAuthStates: ['pre-auth', 'onboarding', 'auth'],
-      layout: 'all'
-    }
-  },
-
+  /**
+   * 디바이스 정보 페이지
+   */
   {
     path: '/device-info',
     name: 'DeviceInfo',
@@ -228,9 +276,12 @@ const routes: RouteRecordRaw[] = [
   },
 
   // ============================================================================
-  // Auth (로그인 후, 금융기관 선택 완료)
+  // Auth 라우트 (로그인 후, 금융기관 선택 완료)
   // ============================================================================
 
+  /**
+   * 대시보드 페이지
+   */
   {
     path: '/dashboard',
     name: 'Dashboard',
@@ -243,6 +294,9 @@ const routes: RouteRecordRaw[] = [
     }
   },
 
+  /**
+   * 웹 뷰어 페이지
+   */
   {
     path: '/viewer',
     name: 'WebViewer',
@@ -255,6 +309,9 @@ const routes: RouteRecordRaw[] = [
     }
   },
 
+  /**
+   * 공지사항 목록 페이지
+   */
   {
     path: '/notice',
     name: 'Notice',
@@ -267,6 +324,10 @@ const routes: RouteRecordRaw[] = [
     }
   },
 
+  /**
+   * 공지사항 상세 페이지
+   * TODO: 동적 라우트 파라미터로 변경 필요
+   */
   {
     path: '/notice/001',
     name: 'NoticeDetail',
@@ -279,6 +340,9 @@ const routes: RouteRecordRaw[] = [
     }
   },
 
+  /**
+   * 견적 관리 목록 페이지
+   */
   {
     path: '/estimate',
     name: 'EstimateMgmt',
@@ -287,10 +351,15 @@ const routes: RouteRecordRaw[] = [
       title: locale.pageTitle.estimate.list,
       requiresAuth: true,
       requiresBankCode: true,
-      allowedAuthStates: ['auth']
+      allowedAuthStates: ['auth'],
+      keepAlive: true
     }
   },
 
+  /**
+   * 견적서 작성 페이지
+   * @param {string} registrationNo - 등기 사건 번호
+   */
   {
     path: '/estimate/create/:registrationNo',
     name: 'EstimateCreate',
@@ -299,10 +368,15 @@ const routes: RouteRecordRaw[] = [
       title: locale.pageTitle.estimate.createDetail,
       requiresAuth: true,
       requiresBankCode: true,
-      allowedAuthStates: ['auth']
+      allowedAuthStates: ['auth'],
+      keepAlive: false
     }
   },
 
+  /**
+   * 견적서 상세/수정 페이지
+   * @param {string} registrationNo - 등기 사건 번호
+   */
   {
     path: '/estimate/detail/:registrationNo',
     name: 'EstimateDetail',
@@ -311,10 +385,14 @@ const routes: RouteRecordRaw[] = [
       title: locale.pageTitle.estimate.confirmDetail,
       requiresAuth: true,
       requiresBankCode: true,
-      allowedAuthStates: ['auth']
+      allowedAuthStates: ['auth'],
+      keepAlive: false
     }
   },
 
+  /**
+   * 등기 사건 현황 페이지
+   */
   {
     path: '/registration',
     name: 'RegistrationStatus',
@@ -327,6 +405,10 @@ const routes: RouteRecordRaw[] = [
     }
   },
 
+  /**
+   * 등기 사건 상세 페이지
+   * @param {string} caseId - 등기 사건 고유 식별자
+   */
   {
     path: '/registration/:caseId',
     name: 'RegistrationDetail',
@@ -339,6 +421,9 @@ const routes: RouteRecordRaw[] = [
     }
   },
 
+  /**
+   * 등기 일정 관리 페이지
+   */
   {
     path: '/registration/schedule',
     name: 'RegistrationSchedule',
@@ -352,9 +437,12 @@ const routes: RouteRecordRaw[] = [
   },
 
   // ============================================================================
-  // 에러 페이지 (모든 상태에서 접근 가능)
+  // 에러 페이지
   // ============================================================================
 
+  /**
+   * 404 Not Found 페이지
+   */
   {
     path: '/error/404',
     name: 'NotFound',
@@ -366,6 +454,9 @@ const routes: RouteRecordRaw[] = [
     }
   },
 
+  /**
+   * macOS 접근 오류 페이지
+   */
   {
     path: '/error/mac-os',
     name: 'ErrorMacOS',
@@ -378,6 +469,9 @@ const routes: RouteRecordRaw[] = [
     }
   },
 
+  /**
+   * 모바일 접근 오류 페이지
+   */
   {
     path: '/error/mobile',
     name: 'ErrorMobile',
@@ -395,6 +489,9 @@ const routes: RouteRecordRaw[] = [
   // Catch All
   // ============================================================================
 
+  /**
+   * 404 Catch All 라우트
+   */
   {
     path: '/:pathMatch(.*)*',
     redirect: '/error/404'
@@ -412,15 +509,25 @@ const router = createRouter({
   }
 })
 
-// ============================================================================
-// Navigation Guards
-// ============================================================================
-
+/*
+ * Navigation Guard
+ *
+ * 모든 라우트 이동 전 실행되는 가드
+ *
+ * 검증 순서:
+ * 1. 페이지 타이틀 설정
+ * 2. Root 페이지 예외 처리
+ * 3. 에러 페이지 예외 처리
+ * 4. 로그인 필요 여부 체크 (requiresAuth)
+ * 5. 인증 데이터 유효성 검증
+ * 6. 금융기관 선택 필요 여부 체크 (requiresBankCode)
+ * 7. 허용된 인증 상태 범위 체크 (allowedAuthStates)
+ * 8. 권한 레벨 체크 (requiredRoles)
+ * 9. 모든 검증 통과 시 접근 허용
+ */
 router.beforeEach(
   (to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
     const authStore = useAuthStore()
-
-    // ✅ 인증 정보 로드 (Router Guard 추가)
     authStore.loadAuth()
 
     const currentAuthState = authStore.authState
@@ -439,7 +546,6 @@ router.beforeEach(
     // 1. 페이지 타이틀 설정
     let pageTitle = to.meta.title || '전자등기'
 
-    // ✅ Root 페이지는 authState에 따라 타이틀 동적 설정
     if (to.path === '/' || to.name === 'Root') {
       switch (currentAuthState) {
         case 'pre-auth':
@@ -458,19 +564,19 @@ router.beforeEach(
 
     document.title = pageTitle ? `${pageTitle} - 전자등기` : '전자등기'
 
-    // 2. Root 페이지는 동적 컴포넌트 렌더링하므로 통과
+    // 2. Root 페이지 예외 처리
     if (to.path === '/') {
       next()
       return
     }
 
-    // 3. 에러 페이지는 모든 상태에서 접근 가능
+    // 3. 에러 페이지 예외 처리
     if (to.path.startsWith('/error/')) {
       next()
       return
     }
 
-    // 4. 인증 필요 체크 + ✅ 인증 데이터 검증
+    // 4. 로그인 필요 여부 체크
     if (to.meta.requiresAuth) {
       if (!authStore.isLoggedIn) {
         logger.warn('[ROUTER] Unauthorized - Redirect to login')
@@ -478,7 +584,7 @@ router.beforeEach(
         return
       }
 
-      // ✅ 로그인 상태이면 인증 데이터 유효성 검증 (authState 전달)
+      // 5. 인증 데이터 유효성 검증
       const authData = storage.get()
       if (!isValidAuthData(authData, currentAuthState)) {
         logger.error('[ROUTER] Invalid auth data detected', {
@@ -492,30 +598,27 @@ router.beforeEach(
       }
     }
 
-    // 5. 금융기관 선택 필요 체크
+    // 6. 금융기관 선택 필요 여부 체크
     if (to.meta.requiresBankCode && !authStore.selectedBankCode) {
       logger.warn('[ROUTER] Bank code required - Redirect to bank selection')
       next('/bank-select')
       return
     }
 
-    // 6. 인증 상태 허용 범위 체크
+    // 7. 허용된 인증 상태 범위 체크
     if (to.meta.allowedAuthStates && to.meta.allowedAuthStates.length > 0) {
       if (!to.meta.allowedAuthStates.includes(currentAuthState)) {
         logger.warn('[ROUTER] Invalid auth state', {
           current: currentAuthState,
           allowed: to.meta.allowedAuthStates
         })
-
-        // Root로 리다이렉트 (Root에서 상태에 맞는 컴포넌트 렌더링)
         next('/')
         return
       }
     }
 
-    // 7. 권한 체크
+    // 8. 권한 레벨 체크
     if (to.meta.requiredRoles && to.meta.requiredRoles.length > 0) {
-      // 시스템/서비스 관리자(SUPER_ADMIN:100, ADMIN:90)는 모든 페이지 접근 가능
       if (isAdmin) {
         next()
         return
@@ -531,7 +634,7 @@ router.beforeEach(
       }
     }
 
-    // 8. 정상 진행
+    // 9. 모든 검증 통과
     next()
   }
 )
