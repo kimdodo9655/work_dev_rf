@@ -36,7 +36,7 @@
     // padding 대신 width를 좌우 각 20씩 줄여 계산
   }
 
-  .all-content {
+  > .all-content {
     width: 100%;
     min-height: calc(100vh - 320px);
 
@@ -60,7 +60,7 @@
     }
   }
 
-  .full-content {
+  > .full-content {
     width: 100%;
     min-height: calc(100vh - 180px);
 
@@ -81,12 +81,12 @@
     }
   }
 
-  .content {
+  > .content {
     width: 100%;
     min-height: calc(100vh - 440px);
   }
 
-  .main-footer {
+  > .main-footer {
     width: 100%;
     margin-top: 200px;
     padding: 40px 0;
@@ -233,7 +233,7 @@
           transition: 0.3s;
 
           i {
-            padding: 8px 7px 5px 10px;
+            padding: 0 7px 0 10px;
 
             &::before {
               font-size: 18px;

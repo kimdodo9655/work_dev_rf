@@ -90,7 +90,6 @@ th,
 td {
   font-size: 100%;
   font: inherit;
-  vertical-align: baseline;
 }
 
 /* HTML, Body 기본 설정 + 모던 CSS 기능 */
@@ -229,7 +228,7 @@ h1 {
   @include font-extrabold;
 }
 
-i::before {
+i {
   display: inline-flex;
   align-items: center;
 }

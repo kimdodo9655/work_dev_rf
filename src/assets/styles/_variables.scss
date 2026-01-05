@@ -72,3 +72,93 @@ $z-index-header: 100;
 $z-index-modal: 200;
 $z-index-tooltip: 300;
 $z-index-dev-tool: 1000;
+
+// Spacing utilities
+$spacings: (10, 15, 20, 30, 40, 60, 80);
+
+// Margin utilities
+@each $size in $spacings {
+  // Margin all
+  .m-#{$size} {
+    margin: #{$size}px;
+  }
+
+  // Margin top
+  .mt-#{$size} {
+    margin-top: #{$size}px;
+  }
+
+  // Margin right
+  .mr-#{$size} {
+    margin-right: #{$size}px;
+  }
+
+  // Margin bottom
+  .mb-#{$size} {
+    margin-bottom: #{$size}px;
+  }
+
+  // Margin left
+  .ml-#{$size} {
+    margin-left: #{$size}px;
+  }
+
+  // Margin horizontal (left & right)
+  .mx-#{$size} {
+    margin-left: #{$size}px;
+    margin-right: #{$size}px;
+  }
+
+  // Margin vertical (top & bottom)
+  .my-#{$size} {
+    margin-top: #{$size}px;
+    margin-bottom: #{$size}px;
+  }
+}
+
+// Padding utilities
+@each $size in $spacings {
+  // Padding all
+  .p-#{$size} {
+    padding: #{$size}px;
+  }
+
+  // Padding top
+  .pt-#{$size} {
+    padding-top: #{$size}px;
+  }
+
+  // Padding right
+  .pr-#{$size} {
+    padding-right: #{$size}px;
+  }
+
+  // Padding bottom
+  .pb-#{$size} {
+    padding-bottom: #{$size}px;
+  }
+
+  // Padding left
+  .pl-#{$size} {
+    padding-left: #{$size}px;
+  }
+
+  // Padding horizontal (left & right)
+  .px-#{$size} {
+    padding-left: #{$size}px;
+    padding-right: #{$size}px;
+  }
+
+  // Padding vertical (top & bottom)
+  .py-#{$size} {
+    padding-top: #{$size}px;
+    padding-bottom: #{$size}px;
+  }
+}
+
+// Gap utilities (for flexbox/grid)
+@each $size in $spacings {
+  .gap-#{$size} {
+    gap: #{$size}px;
+  }
+}
