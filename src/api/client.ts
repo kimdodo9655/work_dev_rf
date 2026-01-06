@@ -54,7 +54,8 @@ function isPublicUrl(url: string | undefined): boolean {
 
   // 2. 패턴 매칭 API (/* 하위 경로 전체)
   const publicPatterns = [
-    '/api/auth/' // /api/auth/* 전체
+    '/api/auth/', // /api/auth/* 전체
+    '/api/codes/' // /api/codes/* 전체 (공통코드)
   ]
 
   // 3. 개별 제외 API (패턴에 포함되지만 검증 필요한 경우)

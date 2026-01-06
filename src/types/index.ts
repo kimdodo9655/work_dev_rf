@@ -188,3 +188,15 @@ export interface CustomSelectEmits {
 // 외부 링크 타입
 // ============================================================================
 export type { ExternalLinks } from '@/constants/externalLinks'
+
+// ============================================================================
+// 공통코드 타입
+// ============================================================================
+export type {
+  Code,
+  CodeKey,
+  CodeMap,
+  CodeResponse,
+  RoleLevelCode,
+  RoleLevelCodeMap
+} from '@/types/code'
