@@ -1,525 +1,602 @@
 <template>
-  <div class="app-container">
-    <div class="test-page">
-      <h1 class="page-title">개발 테스트 페이지</h1>
+  <div class="test-area">
+    <h2>FloatingInput 테스트</h2>
 
-      <!-- 공통코드 테스트 섹션 -->
-      <section class="test-section">
-        <h2>공통코드 테스트</h2>
+    <div class="container">
+      <!-- 1. 기본 단일 input -->
+      <FloatingInput label="사용자 이름" placeholder="사용자 이름을 입력하세요" field-id="username">
+        <input id="username" v-model="form.username" type="text" />
+      </FloatingInput>
 
-        <div class="code-categories">
-          <button
-            v-for="category in codeCategories"
-            :key="category.key"
-            class="category-btn"
-            :class="{ active: selectedCategory === category.key }"
-            @click="loadCategory(category.key)"
-          >
-            {{ category.label }}
-            <span v-if="categoryData[category.key]" class="count">
-              ({{ categoryData[category.key]!.length }})
-            </span>
-          </button>
+      <!-- 2. 여러 input 직접 나열 (성, 이름) -->
+      <FloatingInput label="이름" placeholder="성과 이름을 입력하세요" field-id="first-name">
+        <input id="first-name" v-model="form.firstName" type="text" placeholder="성" />
+        <span style="margin: 0 8px; color: #9ca3af">,</span>
+        <input v-model="form.lastName" type="text" placeholder="이름" />
+      </FloatingInput>
+
+      <!-- 3. 필수 입력 마크 -->
+      <FloatingInput
+        label="이메일"
+        placeholder="이메일을 입력하세요"
+        field-id="email"
+        :show-required="true"
+      >
+        <input id="email" v-model="form.email" type="email" />
+      </FloatingInput>
+    </div>
+
+    <div class="container">
+      <!-- 4. 에러 상태 (값 없음) -->
+      <FloatingInput
+        label="필수 입력"
+        placeholder="필수 입력 항목입니다"
+        field-id="required-field"
+        :show-required="true"
+        :show-error="emptyFieldError"
+        error-message="필수 입력 항목입니다"
+      >
+        <input id="required-field" v-model="form.requiredField" type="text" @blur="validateEmpty" />
+      </FloatingInput>
+
+      <!-- 5. 에러 상태 (값 있음 - 형식 오류) -->
+      <FloatingInput
+        label="휴대폰 번호"
+        placeholder="010-1234-5678"
+        field-id="phone"
+        :show-required="true"
+        :show-error="phoneError"
+        error-message="올바른 형식이 아닙니다"
+      >
+        <input id="phone" v-model="form.phone" type="tel" @blur="validatePhone" />
+      </FloatingInput>
+
+      <!-- 6. 에러 상태 (값 있음 - 길이 초과) -->
+      <FloatingInput
+        label="닉네임"
+        placeholder="10자 이내로 입력하세요"
+        field-id="nickname"
+        :show-error="nicknameError"
+        error-message="10자를 초과했습니다"
+      >
+        <input id="nickname" v-model="form.nickname" type="text" @input="validateNickname" />
+      </FloatingInput>
+    </div>
+
+    <div class="container">
+      <!-- 7. 여러 개의 input (기간 선택) -->
+      <FloatingInput
+        label="기간"
+        placeholder="기간을 선택하세요"
+        field-id="period-start"
+        :show-required="true"
+      >
+        <div class="input-group">
+          <input id="period-start" v-model="form.startDate" type="date" />
+          <span style="color: #9ca3af">~</span>
+          <input v-model="form.endDate" type="date" />
         </div>
+      </FloatingInput>
 
-        <div v-if="isLoading" class="loading">로딩 중...</div>
-
-        <div v-if="selectedCategory && categoryData[selectedCategory]" class="code-result">
-          <div class="result-header">
-            <h3>
-              {{ codeCategories.find((c) => c.key === selectedCategory)?.label }}
-            </h3>
-            <button @click="copyToClipboard" class="copy-btn">📋 JSON 복사</button>
-          </div>
-
-          <div class="code-table-wrapper">
-            <table class="code-table">
-              <thead>
-                <tr>
-                  <th>코드</th>
-                  <th v-if="selectedCategory === 'userRoleLevels'">레벨</th>
-                  <th>설명</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="code in categoryData[selectedCategory]" :key="code.code">
-                  <td>
-                    <code class="code-text">{{ code.code }}</code>
-                  </td>
-                  <td v-if="selectedCategory === 'userRoleLevels'">
-                    <code class="code-text">{{ (code as RoleLevelCode).level }}</code>
-                  </td>
-                  <td>{{ code.description }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="json-preview">
-            <h4>JSON 미리보기</h4>
-            <pre>{{ JSON.stringify(categoryData[selectedCategory], null, 2) }}</pre>
-          </div>
+      <!-- 8. input + 버튼 -->
+      <FloatingInput
+        label="인증번호"
+        placeholder="인증번호를 입력하세요"
+        field-id="verify-code"
+        :show-required="true"
+      >
+        <div class="input-with-button">
+          <input id="verify-code" v-model="form.verifyCode" type="text" maxlength="6" />
+          <button @click="sendVerifyCode">인증번호 발송</button>
         </div>
+      </FloatingInput>
 
-        <div v-if="!selectedCategory && !isLoading" class="empty-state">
-          <p>👆 위에서 카테고리를 선택하세요</p>
+      <!-- 9. input + addon 텍스트 (앞) -->
+      <FloatingInput label="가격" placeholder="가격을 입력하세요" field-id="price">
+        <div class="input-addon">
+          <span class="addon-text">₩</span>
+          <input id="price" v-model="form.price" type="number" />
         </div>
-      </section>
+      </FloatingInput>
+    </div>
 
-      <!-- 유틸리티 함수 테스트 섹션 -->
-      <section v-if="selectedCategory && categoryData[selectedCategory]" class="test-section">
-        <h2>유틸리티 함수 테스트</h2>
-
-        <div class="utility-grid">
-          <div class="utility-card">
-            <h3>getCodeLabel</h3>
-            <div class="test-case">
-              <code class="code-block">
-                getCodeLabel('{{ selectedCategory }}', '{{ firstCode?.code }}')
-              </code>
-              <div class="result">
-                결과: <strong>{{ labelResult }}</strong>
-              </div>
-            </div>
-          </div>
-
-          <div v-if="selectedCategory === 'userRoleLevels'" class="utility-card">
-            <h3>getRoleLevel</h3>
-            <div class="test-case">
-              <code class="code-block"> getRoleLevel('{{ firstCode?.code }}') </code>
-              <div class="result">
-                결과: <strong>{{ roleLevelResult }}</strong>
-              </div>
-            </div>
-          </div>
-
-          <div class="utility-card">
-            <h3>getCodeOptions</h3>
-            <div class="test-case">
-              <code class="code-block">getCodeOptions('{{ selectedCategory }}')</code>
-              <div class="result">
-                <div v-for="option in optionsResult" :key="option.value" class="option-item">
-                  { value: "{{ option.value }}", label: "{{ option.label }}" }
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="utility-card">
-            <h3>hasCode</h3>
-            <div class="test-case">
-              <code class="code-block">
-                hasCode('{{ selectedCategory }}', '{{ firstCode?.code }}')
-              </code>
-              <div class="result">
-                결과: <strong class="success">{{ hasCodeResult }}</strong>
-              </div>
-            </div>
-            <div class="test-case">
-              <code class="code-block">hasCode('{{ selectedCategory }}', 'INVALID_CODE')</code>
-              <div class="result">
-                결과: <strong class="error">{{ hasInvalidCodeResult }}</strong>
-              </div>
-            </div>
-          </div>
+    <div class="container">
+      <!-- 10. input + addon 텍스트 (뒤) -->
+      <FloatingInput label="무게" placeholder="무게를 입력하세요" field-id="weight">
+        <div class="input-addon">
+          <input id="weight" v-model="form.weight" type="number" />
+          <span class="addon-text">kg</span>
         </div>
-      </section>
+      </FloatingInput>
+
+      <!-- 11. textarea -->
+      <FloatingInput label="상세 설명" placeholder="상세 설명을 입력하세요" field-id="description">
+        <textarea id="description" v-model="form.description" rows="4" />
+      </FloatingInput>
+
+      <!-- 12. select (기본) -->
+      <FloatingInput label="직급" placeholder="직급을 선택하세요" field-id="position">
+        <select id="position" v-model="form.position">
+          <option value="">선택하세요</option>
+          <option value="staff">사원</option>
+          <option value="senior">대리</option>
+          <option value="manager">과장</option>
+          <option value="director">부장</option>
+        </select>
+      </FloatingInput>
+    </div>
+
+    <!-- ✨ FloatingInnerSelect (FloatingInput 내부 사용) 테스트 -->
+    <div class="container">
+      <!-- 13. FloatingInnerSelect - 기본 -->
+      <FloatingInput
+        label="학력"
+        placeholder="학력을 선택하세요"
+        field-id="education"
+        :show-required="true"
+      >
+        <input id="first-name" v-model="form.firstName" type="text" placeholder="성" />
+        <span style="margin: 0 8px; color: #9ca3af">,</span>
+        <FloatingInnerSelect
+          v-model="form.education"
+          :options="educations"
+          placeholder="학력을 선택하세요"
+        />
+      </FloatingInput>
+
+      <!-- 14. FloatingInnerSelect - 직접입력 기능 -->
+      <FloatingInput label="전공" placeholder="전공을 선택하거나 직접 입력하세요" field-id="major">
+        <FloatingInnerSelect
+          v-model="form.major"
+          :options="majors"
+          :allow-custom-input="true"
+          custom-input-placeholder="전공명을 입력하세요"
+          placeholder="전공을 선택하거나 직접 입력하세요"
+        />
+      </FloatingInput>
+
+      <!-- 15. FloatingInnerSelect - 에러 상태 -->
+      <FloatingInput
+        label="경력"
+        placeholder="경력을 선택하세요"
+        field-id="experience"
+        :show-required="true"
+        :show-error="experienceError"
+        error-message="경력을 선택해주세요"
+      >
+        <FloatingInnerSelect
+          v-model="form.experience"
+          :options="experiences"
+          placeholder="경력을 선택하세요"
+          @blur="validateExperience"
+        />
+      </FloatingInput>
+    </div>
+
+    <!-- ✨ FloatingCustomSelect (독립 컴포넌트) 테스트 -->
+    <div class="container">
+      <!-- 16. FloatingCustomSelect - 기본 -->
+      <FloatingCustomSelect
+        v-model="form.country"
+        label="국가"
+        placeholder="국가를 선택하세요"
+        :options="countries"
+        @change="handleCountryChange"
+      />
+
+      <!-- 17. FloatingCustomSelect - 직접입력 기능 -->
+      <FloatingCustomSelect
+        v-model="form.city"
+        label="도시"
+        placeholder="도시를 선택하거나 직접 입력하세요"
+        :options="cities"
+        :allow-custom-input="true"
+        custom-input-value="CUSTOM"
+        custom-input-placeholder="도시명을 입력하세요"
+        :show-required="true"
+        @update:custom-text="form.cityCustomText = $event"
+      />
+
+      <!-- 18. FloatingCustomSelect - 간단한 배열 -->
+      <FloatingCustomSelect
+        v-model="form.category"
+        label="카테고리"
+        placeholder="카테고리를 선택하세요"
+        :options="categories"
+      />
+    </div>
+
+    <div class="container">
+      <!-- 19. FloatingCustomSelect - 에러 상태 -->
+      <FloatingCustomSelect
+        v-model="form.department"
+        label="부서"
+        placeholder="부서를 선택하세요"
+        :options="departments"
+        :show-required="true"
+        :show-error="departmentError"
+        error-message="부서를 선택해주세요"
+        @blur="validateDepartment"
+      />
+
+      <!-- 20. FloatingCustomSelect - 비활성화 -->
+      <FloatingCustomSelect
+        v-model="form.fixedPosition"
+        label="고정 직급"
+        placeholder="수정 불가"
+        :options="positions"
+        :is-disabled="true"
+      />
+
+      <!-- 21. FloatingCustomSelect - 직접입력 + 많은 옵션 -->
+      <FloatingCustomSelect
+        v-model="form.employee"
+        label="직원"
+        placeholder="직원을 선택하거나 직접 입력하세요"
+        :options="employees"
+        :allow-custom-input="true"
+        custom-input-value="__custom_employee__"
+        custom-input-placeholder="직원 이름을 입력하세요"
+        @update:custom-text="form.employeeCustomText = $event"
+      />
+    </div>
+
+    <div class="container">
+      <!-- 22. 비활성화 상태 -->
+      <FloatingInput
+        label="고정 값"
+        placeholder="수정할 수 없습니다"
+        field-id="fixed"
+        :is-disabled="true"
+      >
+        <input id="fixed" v-model="form.fixed" type="text" disabled />
+      </FloatingInput>
+
+      <!-- 23. 비활성화 + 에러 (에러가 시각적으로만 표시) -->
+      <FloatingInput
+        label="비활성 필드"
+        placeholder="비활성화된 필드"
+        field-id="disabled-error"
+        :is-disabled="true"
+      >
+        <input id="disabled-error" v-model="form.disabledField" type="text" disabled />
+      </FloatingInput>
+
+      <!-- 24. 읽기 전용 -->
+      <FloatingInput label="읽기 전용" placeholder="읽기만 가능합니다" field-id="readonly">
+        <input id="readonly" v-model="form.readonly" type="text" readonly />
+      </FloatingInput>
+    </div>
+
+    <div class="container">
+      <!-- 25. 여러 input 직접 나열 (전화번호) -->
+      <FloatingInput
+        label="전화번호"
+        placeholder="전화번호를 입력하세요"
+        field-id="tel1"
+        :show-required="true"
+        :show-error="telError"
+        error-message="전화번호를 모두 입력하세요"
+      >
+        <input
+          id="tel1"
+          v-model="form.tel1"
+          type="text"
+          placeholder="010"
+          maxlength="3"
+          style="width: 60px"
+          @blur="validateTel"
+        />
+        <span style="margin: 0 8px; color: #9ca3af">-</span>
+        <input
+          v-model="form.tel2"
+          type="text"
+          placeholder="1234"
+          maxlength="4"
+          style="width: 70px"
+          @blur="validateTel"
+        />
+        <span style="margin: 0 8px; color: #9ca3af">-</span>
+        <input
+          v-model="form.tel3"
+          type="text"
+          placeholder="5678"
+          maxlength="4"
+          style="width: 70px"
+          @blur="validateTel"
+        />
+      </FloatingInput>
+
+      <!-- 26. 복잡한 구조 (주소 검색) -->
+      <FloatingInput
+        label="주소"
+        placeholder="주소를 검색하세요"
+        field-id="address"
+        :show-required="true"
+        :show-error="addressError"
+        error-message="주소를 검색하고 상세 주소를 입력하세요"
+      >
+        <div style="display: flex; flex-direction: column; gap: 8px; width: 100%">
+          <div class="input-with-button">
+            <input
+              id="address"
+              v-model="form.zipCode"
+              type="text"
+              placeholder="우편번호"
+              readonly
+            />
+            <button @click="searchAddress">주소 검색</button>
+          </div>
+          <input v-model="form.address" type="text" placeholder="기본 주소" readonly />
+          <input
+            v-model="form.addressDetail"
+            type="text"
+            placeholder="상세 주소를 입력하세요"
+            @blur="validateAddress"
+          />
+        </div>
+      </FloatingInput>
+    </div>
+
+    <!-- 폼 데이터 출력 (디버깅용) -->
+    <div class="debug-section">
+      <h3>폼 데이터</h3>
+      <pre>{{ JSON.stringify(form, null, 2) }}</pre>
+      <h3>에러 상태</h3>
+      <pre>{{
+        JSON.stringify(
+          {
+            emptyFieldError,
+            phoneError,
+            nicknameError,
+            telError,
+            addressError,
+            departmentError,
+            experienceError
+          },
+          null,
+          2
+        )
+      }}</pre>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { reactive, ref } from 'vue'
 
-import { codesAPI } from '@/api/codes'
-import { useCodes } from '@/composables/useCodes'
-import type { Code, CodeKey, RoleLevelCode } from '@/types'
+import FloatingCustomSelect from '@/components/template/input/FloatingCustomSelect.vue'
+import FloatingInnerSelect from '@/components/template/input/FloatingInnerSelect.vue'
+import FloatingInput from '@/components/template/input/FloatingInput.vue'
 
-// ============================================================================
-// Composable
-// ============================================================================
-
-const { getCodeLabel, getRoleLevel, getCodeOptions, hasCode } = useCodes()
-
-// ============================================================================
-// State
-// ============================================================================
-
-const selectedCategory = ref<CodeKey | null>(null)
-const categoryData = ref<Partial<Record<CodeKey, Code[] | RoleLevelCode[]>>>({})
-const isLoading = ref(false)
-
-const codeCategories = [
-  { key: 'organizationTypes', label: '기관 유형' },
-  { key: 'organizationStatuses', label: '기관 상태' },
-  { key: 'qualifiedTypes', label: '자격 유형' },
-  { key: 'branchStatuses', label: '지점 상태' },
-  { key: 'userRoleLevels', label: '사용자 권한 레벨' },
-  { key: 'registryTypes', label: '등기 유형' },
-  { key: 'registryCauses', label: '등기 원인' },
-  { key: 'partyTypes', label: '당사자 유형' },
-  { key: 'propertyTypes', label: '부동산 유형' },
-  { key: 'sections', label: '구역' },
-  { key: 'registryMethods', label: '등기 방법' },
-  { key: 'securedDebtScopeTypes', label: '담보채무 범위 유형' },
-  { key: 'certificateTypes', label: '권리증 유형' },
-  { key: 'workTypes', label: '업무 유형' },
-  { key: 'paymentStatuses', label: '지급 상태' },
-  { key: 'adminInfoLinkTime', label: '행정정보 연계 시간' }
-] as const
-
-// ============================================================================
-// Computed
-// ============================================================================
-
-const firstCode = computed(() => {
-  if (!selectedCategory.value || !categoryData.value[selectedCategory.value]) return null
-  const data = categoryData.value[selectedCategory.value]
-  return data && data.length > 0 ? data[0] : null
+const form = reactive({
+  username: '',
+  firstName: '',
+  lastName: '',
+  email: '',
+  requiredField: '',
+  phone: '',
+  nickname: '',
+  startDate: '',
+  endDate: '',
+  verifyCode: '',
+  price: '',
+  weight: '',
+  description: '',
+  position: '',
+  fixed: '수정 불가능한 값',
+  disabledField: '비활성 상태',
+  readonly: '읽기 전용 값',
+  tel1: '',
+  tel2: '',
+  tel3: '',
+  zipCode: '',
+  address: '',
+  addressDetail: '',
+  // FloatingInnerSelect 필드
+  education: null as string | number | null,
+  major: null as string | number | null,
+  experience: null as string | number | null,
+  // FloatingCustomSelect 필드
+  country: null as string | number | null,
+  city: null as string | number | null,
+  cityCustomText: null as string | null, // ⭐ 타입 명시 추가
+  category: null as string | number | null,
+  department: null as string | number | null,
+  fixedPosition: 'manager',
+  employee: null as string | number | null,
+  employeeCustomText: null as string | null // ⭐ 타입 명시 추가
 })
 
-const labelResult = computed(() => {
-  if (!selectedCategory.value || !firstCode.value) return '-'
-  return getCodeLabel(selectedCategory.value, firstCode.value.code)
-})
+const emptyFieldError = ref(false)
+const phoneError = ref(false)
+const nicknameError = ref(false)
+const telError = ref(false)
+const addressError = ref(false)
+const departmentError = ref(false)
+const experienceError = ref(false)
 
-const roleLevelResult = computed(() => {
-  if (!firstCode.value) return '-'
-  return getRoleLevel(firstCode.value.code)
-})
+// FloatingInnerSelect 옵션 데이터
+const educations = [
+  { label: '고등학교 졸업', value: 'high_school' },
+  { label: '전문대 졸업', value: 'associate' },
+  { label: '대학교 졸업', value: 'bachelor' },
+  { label: '석사', value: 'master' },
+  { label: '박사', value: 'phd' }
+]
 
-const optionsResult = computed(() => {
-  if (!selectedCategory.value) return []
-  return getCodeOptions(selectedCategory.value)
-})
+const majors = [
+  '컴퓨터공학',
+  '전자공학',
+  '기계공학',
+  '경영학',
+  '경제학',
+  '디자인학',
+  '심리학',
+  '수학',
+  '물리학',
+  '화학'
+]
 
-const hasCodeResult = computed(() => {
-  if (!selectedCategory.value || !firstCode.value) return false
-  return hasCode(selectedCategory.value, firstCode.value.code)
-})
+const experiences = [
+  { label: '신입', value: 'junior' },
+  { label: '1~3년', value: '1-3' },
+  { label: '3~5년', value: '3-5' },
+  { label: '5~10년', value: '5-10' },
+  { label: '10년 이상', value: '10+' }
+]
 
-const hasInvalidCodeResult = computed(() => {
-  if (!selectedCategory.value) return false
-  return hasCode(selectedCategory.value, 'INVALID_CODE')
-})
+// FloatingCustomSelect 옵션 데이터
+const countries = [
+  { label: '대한민국', value: 'kr' },
+  { label: '미국', value: 'us' },
+  { label: '일본', value: 'jp' },
+  { label: '중국', value: 'cn' },
+  { label: '영국', value: 'uk' },
+  { label: '독일', value: 'de' },
+  { label: '프랑스', value: 'fr' },
+  { label: '캐나다', value: 'ca' },
+  { label: '호주', value: 'au' }
+]
 
-// ============================================================================
-// Methods
-// ============================================================================
+const cities = [
+  { label: '서울', value: 'seoul' },
+  { label: '부산', value: 'busan' },
+  { label: '대구', value: 'daegu' },
+  { label: '인천', value: 'incheon' }
+]
 
-const apiMethodMap: Record<CodeKey, () => Promise<any>> = {
-  organizationTypes: codesAPI.getOrganizationTypes,
-  organizationStatuses: codesAPI.getOrganizationStatuses,
-  qualifiedTypes: codesAPI.getQualifiedTypes,
-  branchStatuses: codesAPI.getBranchStatuses,
-  userRoleLevels: codesAPI.getUserRoleLevels,
-  registryTypes: codesAPI.getRegistryTypes,
-  registryCauses: codesAPI.getRegistryCauses,
-  partyTypes: codesAPI.getPartyTypes,
-  propertyTypes: codesAPI.getPropertyTypes,
-  sections: codesAPI.getSections,
-  registryMethods: codesAPI.getRegistryMethods,
-  securedDebtScopeTypes: codesAPI.getSecuredDebtScopeTypes,
-  certificateTypes: codesAPI.getCertificateTypes,
-  workTypes: codesAPI.getWorkTypes,
-  paymentStatuses: codesAPI.getPaymentStatuses,
-  adminInfoLinkTime: codesAPI.getAdminInfoLinkTime
+const categories = ['전자제품', '의류', '식품', '도서', '스포츠', '가구', '완구', '화장품']
+
+const departments = [
+  { label: '개발팀', value: 'dev' },
+  { label: '디자인팀', value: 'design' },
+  { label: '기획팀', value: 'planning' },
+  { label: '마케팅팀', value: 'marketing' },
+  { label: '인사팀', value: 'hr' },
+  { label: '재무팀', value: 'finance' }
+]
+
+const positions = [
+  { label: '사원', value: 'staff' },
+  { label: '대리', value: 'senior' },
+  { label: '과장', value: 'manager' },
+  { label: '부장', value: 'director' }
+]
+
+const employees = [
+  { label: '김철수 (개발팀)', value: 'emp001' },
+  { label: '이영희 (디자인팀)', value: 'emp002' },
+  { label: '박민수 (기획팀)', value: 'emp003' },
+  { label: '정지원 (마케팅팀)', value: 'emp004' },
+  { label: '최수진 (인사팀)', value: 'emp005' },
+  { label: '강동현 (재무팀)', value: 'emp006' },
+  { label: '윤서연 (개발팀)', value: 'emp007' },
+  { label: '장민호 (디자인팀)', value: 'emp008' },
+  { label: '임하늘 (기획팀)', value: 'emp009' },
+  { label: '한지우 (마케팅팀)', value: 'emp010' },
+  { label: '송예진 (인사팀)', value: 'emp011' },
+  { label: '백승현 (재무팀)', value: 'emp012' },
+  { label: '오유진 (개발팀)', value: 'emp013' },
+  { label: '권태양 (디자인팀)', value: 'emp014' },
+  { label: '남궁선 (기획팀)', value: 'emp015' }
+]
+
+function validateEmpty() {
+  emptyFieldError.value = form.requiredField.trim() === ''
 }
 
-async function loadCategory(category: CodeKey) {
-  selectedCategory.value = category
-
-  // 이미 로드된 데이터가 있으면 API 호출 생략
-  if (categoryData.value[category]) {
+function validatePhone() {
+  if (form.phone === '') {
+    phoneError.value = false
     return
   }
-
-  isLoading.value = true
-
-  try {
-    const response = await apiMethodMap[category]()
-    categoryData.value[category] = response.data
-  } catch (error) {
-    console.error('Failed to load category:', error)
-    alert('코드 조회에 실패했습니다.')
-  } finally {
-    isLoading.value = false
-  }
+  const phonePattern = /^010-\d{4}-\d{4}$/
+  phoneError.value = !phonePattern.test(form.phone)
 }
 
-async function copyToClipboard() {
-  if (!selectedCategory.value || !categoryData.value[selectedCategory.value]) return
+function validateNickname() {
+  nicknameError.value = form.nickname.length > 10
+}
 
-  const json = JSON.stringify(categoryData.value[selectedCategory.value], null, 2)
+function validateTel() {
+  const allEmpty = !form.tel1 && !form.tel2 && !form.tel3
+  const allFilled = form.tel1 && form.tel2 && form.tel3
+  telError.value = !allEmpty && !allFilled
+}
 
-  try {
-    await navigator.clipboard.writeText(json)
-    alert('클립보드에 복사되었습니다!')
-  } catch (error) {
-    console.error('Failed to copy:', error)
-    alert('복사에 실패했습니다.')
-  }
+function validateAddress() {
+  addressError.value = (!!form.zipCode || !!form.address) && !form.addressDetail
+}
+
+function validateDepartment() {
+  departmentError.value = form.department === null
+}
+
+function validateExperience() {
+  experienceError.value = form.experience === null
+}
+
+function sendVerifyCode() {
+  alert('인증번호가 발송되었습니다')
+}
+
+function searchAddress() {
+  form.zipCode = '12345'
+  form.address = '서울시 강남구 테헤란로 123'
+  addressError.value = !form.addressDetail
+}
+
+function handleCountryChange(value: string | number | null) {
+  console.log('선택된 국가:', value)
 }
 </script>
 
 <style scoped lang="scss">
-.test-page {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 40px 20px;
-}
-
-.page-title {
-  font-size: 32px;
-  font-weight: 700;
-  margin-bottom: 40px;
-  color: #1e293b;
-}
-
-.test-section {
-  background: white;
-  border-radius: 12px;
-  padding: 32px;
-  margin-bottom: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-
-  h2 {
-    font-size: 24px;
-    font-weight: 600;
-    margin-bottom: 24px;
-    color: #1e293b;
-    border-bottom: 2px solid #e2e8f0;
-    padding-bottom: 12px;
-  }
-}
-
-.code-categories {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-.category-btn {
-  background: white;
-  border: 2px solid #e2e8f0;
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-align: left;
-  color: #475569;
-
-  &:hover {
-    border-color: #3b82f6;
-    background: #eff6ff;
-    color: #3b82f6;
-  }
-
-  &.active {
-    border-color: #3b82f6;
-    background: #3b82f6;
-    color: white;
-  }
-
-  .count {
-    font-size: 12px;
-    opacity: 0.8;
-    margin-left: 4px;
-  }
-}
-
-.loading {
-  text-align: center;
+.test-area {
   padding: 40px;
-  color: #64748b;
-  font-size: 16px;
+  margin: 0 auto;
 }
 
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  color: #94a3b8;
-  font-size: 16px;
+h2 {
+  margin-bottom: 32px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
 }
 
-.code-result {
-  margin-top: 24px;
+h3 {
+  margin-bottom: 16px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333333;
 }
 
-.result-header {
+.container {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  gap: 20px;
   margin-bottom: 20px;
 
-  h3 {
-    font-size: 18px;
-    font-weight: 600;
-    color: #1e293b;
+  > * {
+    flex: 1;
+    min-width: 0;
   }
 }
 
-.copy-btn {
-  background: white;
-  color: #3b82f6;
-  border: 1px solid #3b82f6;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 14px;
-
-  &:hover {
-    background: #eff6ff;
-  }
-}
-
-.code-table-wrapper {
-  overflow-x: auto;
-  margin-bottom: 24px;
-  border: 1px solid #e2e8f0;
+.debug-section {
+  margin-top: 40px;
+  padding: 20px;
+  background: #f9fafb;
   border-radius: 8px;
-}
-
-.code-table {
-  width: 100%;
-  border-collapse: collapse;
-
-  th,
-  td {
-    padding: 12px 16px;
-    text-align: left;
-    border-bottom: 1px solid #e2e8f0;
-  }
-
-  th {
-    background: #f8fafc;
-    font-weight: 600;
-    font-size: 14px;
-    color: #475569;
-  }
-
-  td {
-    font-size: 14px;
-    color: #1e293b;
-  }
-
-  tbody tr:hover {
-    background: #f8fafc;
-  }
-
-  tbody tr:last-child td {
-    border-bottom: none;
-  }
-}
-
-.code-text {
-  background: #f1f5f9;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-family: 'Courier New', monospace;
-  font-size: 13px;
-  color: #3b82f6;
-}
-
-.json-preview {
-  h4 {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 12px;
-    color: #475569;
-  }
+  border: 1px solid #e5e7eb;
 
   pre {
-    background: #1e293b;
-    color: #e2e8f0;
-    padding: 20px;
-    border-radius: 8px;
+    background: white;
+    padding: 16px;
+    border-radius: 6px;
     overflow-x: auto;
-    font-family: 'Courier New', monospace;
-    font-size: 13px;
-    line-height: 1.6;
-    max-height: 400px;
-    overflow-y: auto;
-  }
-}
-
-.utility-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-}
-
-.utility-card {
-  background: #f8fafc;
-  border-radius: 8px;
-  padding: 20px;
-  border: 1px solid #e2e8f0;
-
-  h3 {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 16px;
-    color: #1e293b;
-  }
-
-  .test-case {
-    margin-bottom: 16px;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-
-  .code-block {
-    display: block;
-    background: white;
-    padding: 10px 12px;
-    border-radius: 6px;
-    font-family: 'Courier New', monospace;
-    font-size: 13px;
-    margin-bottom: 10px;
-    color: #3b82f6;
-    border: 1px solid #e2e8f0;
-    word-break: break-all;
-  }
-
-  .result {
-    padding: 10px 12px;
-    background: white;
-    border-radius: 6px;
-    font-size: 14px;
-    border: 1px solid #e2e8f0;
-
-    strong {
-      color: #16a34a;
-
-      &.success {
-        color: #16a34a;
-      }
-
-      &.error {
-        color: #dc2626;
-      }
-    }
-
-    .option-item {
-      font-family: 'Courier New', monospace;
-      font-size: 12px;
-      color: #64748b;
-      margin-top: 6px;
-      padding: 4px 8px;
-      background: #f8fafc;
-      border-radius: 4px;
-
-      &:first-child {
-        margin-top: 0;
-      }
-    }
+    font-size: 12px;
+    line-height: 1.5;
   }
 }
 </style>

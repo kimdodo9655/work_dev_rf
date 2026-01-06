@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import locale from '@/locales/ko.json'
 import { useAuthStore } from '@/stores/auth'
-import { RoleLevel } from '@/types'
+import { UserRoleLevel } from '@/types'
 import { handleInvalidAuthState, isValidAuthData } from '@/utils/authValidator'
 import { logger } from '@/utils/logger'
 import { storage } from '@/utils/storage'
@@ -16,7 +16,7 @@ declare module 'vue-router' {
     title?: string
     requiresAuth?: boolean
     requiresBankCode?: boolean
-    requiredRoles?: RoleLevel[]
+    requiredRoles?: UserRoleLevel[]
     allowedAuthStates?: ('pre-auth' | 'onboarding' | 'auth')[]
     keepAlive?: boolean
     layout?: string
@@ -195,7 +195,7 @@ const routes: RouteRecordRaw[] = [
       title: locale.pageTitle.my.organization,
       requiresAuth: true,
       allowedAuthStates: ['onboarding', 'auth'],
-      requiredRoles: [RoleLevel.ORGANIZATION_ADMIN, RoleLevel.BRANCH_ADMIN]
+      requiredRoles: [UserRoleLevel.ORGANIZATION_ADMIN, UserRoleLevel.BRANCH_ADMIN]
     }
   },
 
@@ -211,7 +211,7 @@ const routes: RouteRecordRaw[] = [
       title: locale.pageTitle.my.organizationDetail,
       requiresAuth: true,
       allowedAuthStates: ['onboarding', 'auth'],
-      requiredRoles: [RoleLevel.ORGANIZATION_ADMIN, RoleLevel.BRANCH_ADMIN]
+      requiredRoles: [UserRoleLevel.ORGANIZATION_ADMIN, UserRoleLevel.BRANCH_ADMIN]
     }
   },
 
@@ -226,7 +226,7 @@ const routes: RouteRecordRaw[] = [
       title: locale.pageTitle.my.users,
       requiresAuth: true,
       allowedAuthStates: ['onboarding', 'auth'],
-      requiredRoles: [RoleLevel.ORGANIZATION_ADMIN, RoleLevel.BRANCH_ADMIN]
+      requiredRoles: [UserRoleLevel.ORGANIZATION_ADMIN, UserRoleLevel.BRANCH_ADMIN]
     }
   },
 
@@ -242,7 +242,7 @@ const routes: RouteRecordRaw[] = [
       title: locale.pageTitle.my.userDetail,
       requiresAuth: true,
       allowedAuthStates: ['onboarding', 'auth'],
-      requiredRoles: [RoleLevel.ORGANIZATION_ADMIN, RoleLevel.BRANCH_ADMIN]
+      requiredRoles: [UserRoleLevel.ORGANIZATION_ADMIN, UserRoleLevel.BRANCH_ADMIN]
     }
   },
 
@@ -257,7 +257,7 @@ const routes: RouteRecordRaw[] = [
       title: locale.pageTitle.my.profile,
       requiresAuth: true,
       allowedAuthStates: ['onboarding', 'auth'],
-      requiredRoles: [RoleLevel.USER]
+      requiredRoles: [UserRoleLevel.USER]
     }
   },
 

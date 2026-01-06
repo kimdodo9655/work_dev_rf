@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
 import type { AuthState } from '@/types'
-import { RoleLevel } from '@/types'
+import { UserRoleLevel } from '@/types'
 import { handleInvalidAuthState, isValidAuthData } from '@/utils/authValidator'
 import { logger } from '@/utils/logger'
 import { storage } from '@/utils/storage'
@@ -49,7 +49,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isAdmin = computed(() => {
     // 시스템 관리자 또는 서비스 관리자
-    return roleLevel.value === RoleLevel.SUPER_ADMIN || roleLevel.value === RoleLevel.ADMIN
+    return roleLevel.value === UserRoleLevel.SUPER_ADMIN || roleLevel.value === UserRoleLevel.ADMIN
   })
 
   // ============================================================================

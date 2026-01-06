@@ -133,7 +133,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { authAPI } from '@/api/auth'
 import locale from '@/locales/ko.json'
 import { useAuthStore } from '@/stores/auth'
-import { RoleLevel } from '@/types'
+import { UserRoleLevel } from '@/types'
 import { storage } from '@/utils/storage'
 
 const authStore = useAuthStore()
@@ -154,8 +154,8 @@ const SCROLL_THRESHOLD = 1
 
 const canAccessOrgMgmt = computed(() => {
   return (
-    authStore.roleLevel === RoleLevel.ORGANIZATION_ADMIN ||
-    authStore.roleLevel === RoleLevel.BRANCH_ADMIN ||
+    authStore.roleLevel === UserRoleLevel.ORGANIZATION_ADMIN ||
+    authStore.roleLevel === UserRoleLevel.BRANCH_ADMIN ||
     authStore.isAdmin
   )
 })
