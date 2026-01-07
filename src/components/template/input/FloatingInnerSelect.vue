@@ -16,6 +16,7 @@
     <div
       class="select-trigger"
       :tabindex="disabled ? -1 : 0"
+      @mousedown.prevent="handleMouseDown"
       @click.stop="toggleDropdown"
       @keydown.enter.prevent="toggleDropdown"
       @keydown.space.prevent="toggleDropdown"
@@ -39,6 +40,7 @@
       </span>
     </div>
 
+    <!-- 나머지 template 동일 -->
     <Transition name="dropdown">
       <div v-show="isOpen" class="dropdown-menu" :style="dropdownStyle" @click.stop>
         <div class="options-wrapper" @scroll="handleScroll">
@@ -52,6 +54,7 @@
               'is-highlighted': highlightedIndex === index
             }"
             :tabindex="0"
+            @mousedown.prevent
             @click="selectOption(option)"
             @mouseenter="highlightedIndex = index"
             @focus="highlightedIndex = index"
@@ -70,6 +73,7 @@
               'is-active': shouldShowCustomInputCheck
             }"
             :tabindex="0"
+            @mousedown.prevent
             @click="activateCustomInput"
             @mouseenter="highlightedIndex = normalizedOptions.length"
             @focus="highlightedIndex = normalizedOptions.length"
@@ -91,8 +95,10 @@
               @keydown.escape="cancelCustomInput"
             />
             <div class="custom-input-actions">
-              <button class="btn-cancel" @click="cancelCustomInput">취소</button>
-              <button class="btn-confirm" @click="confirmCustomInput">확인</button>
+              <button class="btn-cancel" @mousedown.prevent @click="cancelCustomInput">취소</button>
+              <button class="btn-confirm" @mousedown.prevent @click="confirmCustomInput">
+                확인
+              </button>
             </div>
           </div>
         </div>
@@ -235,11 +241,11 @@ function openDropdown() {
 
   isOpen.value = true
 
-  // FloatingInput에 focus 이벤트 전달
-  if (hiddenInput.value) {
+  // ⭐ 포커스 이벤트 발생 (한 번만)
+  if (hiddenInput.value && hiddenInput.value !== document.activeElement) {
     hiddenInput.value.focus()
+    emit('focus')
   }
-  emit('focus')
 
   nextTick(() => {
     calculateDropdownPosition()
@@ -254,6 +260,7 @@ function openDropdown() {
       }
     } else if (props.allowCustomInput && !isValueInOptions.value && hasValue.value) {
       highlightedIndex.value = normalizedOptions.value.length
+      activateCustomInput()
     }
   })
 }
@@ -265,7 +272,7 @@ function closeDropdown() {
   isCustomInputMode.value = false
   customInputValue.value = ''
 
-  // FloatingInput에 blur 이벤트 전달
+  // ⭐ 드롭다운이 닫힐 때만 포커스 해제
   if (hiddenInput.value) {
     hiddenInput.value.blur()
   }
@@ -413,6 +420,11 @@ function handleOtherSelectOpen(e: Event) {
   if (isOpen.value && customEvent.detail.selectId !== selectId) {
     closeDropdown()
   }
+}
+
+function handleMouseDown(event: MouseEvent) {
+  // mousedown의 기본 동작(포커스 변경)을 막아서 FloatingInput의 포커스가 유지되도록 함
+  event.preventDefault()
 }
 
 // props 변경 시 상태 업데이트

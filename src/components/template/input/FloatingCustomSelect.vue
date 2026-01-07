@@ -145,6 +145,7 @@ interface Props {
   allowCustomInput?: boolean
   customInputPlaceholder?: string
   customInputValue?: string | null // 직접입력 선택 시 modelValue에 설정할 값
+  customText?: string | null // 직접입력 실제 텍스트 (선택값/입력값 분리 모드에서만 사용)
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -159,7 +160,8 @@ const props = withDefaults(defineProps<Props>(), {
   valueKey: 'value',
   allowCustomInput: false,
   customInputPlaceholder: '직접 입력하세요',
-  customInputValue: null
+  customInputValue: null,
+  customText: null
 })
 
 const emit = defineEmits<{
@@ -180,9 +182,7 @@ const isFocused = ref(false)
 const highlightedIndex = ref(-1)
 const dropdownStyle = ref<Record<string, string>>({})
 const isCustomInputMode = ref(false)
-const internalInputText = ref('') // ⭐ 변수명 변경: customInputValue → internalInputText
-
-// ... 기존 computed들 동일 ...
+const internalInputText = ref('')
 
 // 옵션 정규화
 const normalizedOptions = computed<Option[]>(() => {
@@ -221,20 +221,24 @@ const displayValue = computed(() => {
     return props.placeholder
   }
 
+  // 직접입력이 선택된 경우
   if (isCustomInputSelected.value) {
-    return '직접입력'
+    // 선택값/입력값 분리 모드
+    if (props.customInputValue !== null) {
+      // customText가 있으면 그걸 표시, 없으면 placeholder
+      return props.customText || props.placeholder
+    }
+    // 기존 모드 (입력값이 바로 modelValue)
+    return String(props.modelValue)
   }
 
+  // 옵션 목록에서 찾기
   const selected = normalizedOptions.value.find(
     (option) => getOptionValue(option) === props.modelValue
   )
 
   if (selected) {
     return getOptionLabel(selected)
-  }
-
-  if (props.allowCustomInput && !isValueInOptions.value) {
-    return String(props.modelValue)
   }
 
   return props.placeholder
@@ -300,6 +304,8 @@ function openDropdown() {
       }
     } else if (isCustomInputSelected.value) {
       highlightedIndex.value = normalizedOptions.value.length
+      // 직접입력이 이미 선택되어 있으면 자동으로 입력 모드 활성화
+      activateCustomInput()
     }
   })
 }
@@ -309,7 +315,7 @@ function closeDropdown() {
   isFocused.value = false
   highlightedIndex.value = -1
   isCustomInputMode.value = false
-  internalInputText.value = '' // ⭐ 변경
+  internalInputText.value = ''
   emit('blur')
 }
 
@@ -325,27 +331,42 @@ function selectOption(option: Option) {
   }
 
   isCustomInputMode.value = false
-  internalInputText.value = '' // ⭐ 변경
+  internalInputText.value = ''
   closeDropdown()
 }
 
 function activateCustomInput() {
   isCustomInputMode.value = true
-  internalInputText.value = '' // ⭐ 변경
+
+  // 기존에 입력된 값이 있으면 불러오기
+  if (props.customInputValue !== null) {
+    // 선택값/입력값 분리 모드: customText 사용
+    internalInputText.value = props.customText || ''
+  } else {
+    // 기존 모드: modelValue가 옵션에 없으면 그게 직접입력 값
+    if (props.modelValue && !isValueInOptions.value) {
+      internalInputText.value = String(props.modelValue)
+    } else {
+      internalInputText.value = ''
+    }
+  }
+
   nextTick(() => {
     customInputRef.value?.focus()
   })
 }
 
 function confirmCustomInput() {
-  const trimmedValue = internalInputText.value.trim() // ⭐ 변경
+  const trimmedValue = internalInputText.value.trim()
   if (!trimmedValue) return
 
   if (props.customInputValue !== null) {
+    // 선택값/입력값 분리 모드
     emit('update:modelValue', props.customInputValue)
     emit('change', props.customInputValue)
     emit('update:customText', trimmedValue)
   } else {
+    // 기존 모드
     emit('update:modelValue', trimmedValue)
     emit('change', trimmedValue)
   }
@@ -355,7 +376,7 @@ function confirmCustomInput() {
 
 function cancelCustomInput() {
   isCustomInputMode.value = false
-  internalInputText.value = '' // ⭐ 변경
+  internalInputText.value = ''
 }
 
 function navigateOptions(direction: number) {
@@ -549,7 +570,7 @@ defineExpose({
 
 .input-frame {
   position: relative;
-  height: 74px;
+  height: 64px;
   border: 1px solid #bbbbbb;
   border-radius: 8px;
   background: white;

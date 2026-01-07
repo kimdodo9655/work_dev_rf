@@ -264,7 +264,7 @@ watch(
 
 .input-frame {
   position: relative;
-  height: 74px;
+  height: 64px;
   border: 1px solid #bbbbbb;
   border-radius: 8px;
   background: white;

@@ -187,14 +187,14 @@
       <!-- 17. FloatingCustomSelect - 직접입력 기능 -->
       <FloatingCustomSelect
         v-model="form.city"
+        v-model:custom-text="form.cityCustomText"
         label="도시"
         placeholder="도시를 선택하거나 직접 입력하세요"
         :options="cities"
         :allow-custom-input="true"
-        custom-input-value="CUSTOM"
+        custom-input-value="__custom__"
         custom-input-placeholder="도시명을 입력하세요"
         :show-required="true"
-        @update:custom-text="form.cityCustomText = $event"
       />
 
       <!-- 18. FloatingCustomSelect - 간단한 배열 -->
@@ -231,13 +231,13 @@
       <!-- 21. FloatingCustomSelect - 직접입력 + 많은 옵션 -->
       <FloatingCustomSelect
         v-model="form.employee"
+        v-model:custom-text="form.employeeCustomText"
         label="직원"
         placeholder="직원을 선택하거나 직접 입력하세요"
         :options="employees"
         :allow-custom-input="true"
         custom-input-value="__custom_employee__"
         custom-input-placeholder="직원 이름을 입력하세요"
-        @update:custom-text="form.employeeCustomText = $event"
       />
     </div>
 
