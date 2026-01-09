@@ -1,5 +1,6 @@
 <template>
-  <div class="test-area">
+  <div class="test-area" style="background-color: #fff">
+    <RPATest />
     <h2>FloatingInput 테스트</h2>
 
     <!-- 공통코드 테스트 섹션 -->
@@ -550,6 +551,7 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 
+import RPATest from '@/components/dev/RPATest.vue'
 import FloatingCustomSelect from '@/components/template/input/FloatingCustomSelect.vue'
 import FloatingInnerSelect from '@/components/template/input/FloatingInnerSelect.vue'
 import FloatingInput from '@/components/template/input/FloatingInput.vue'
