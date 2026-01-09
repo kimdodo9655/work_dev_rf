@@ -32,7 +32,7 @@ import { useQuery } from '@tanstack/vue-query'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { banksAPI } from '@/api/banks'
+import { bankAPI } from '@/api/services/bank'
 import { useAuthStore } from '@/stores/auth'
 import type { Bank } from '@/types'
 import { logger } from '@/utils/logger'
@@ -45,7 +45,7 @@ const authStore = useAuthStore()
 // ============================================================================
 const { data: bankResponse } = useQuery({
   queryKey: ['banks', 'list'],
-  queryFn: () => banksAPI.getList()
+  queryFn: () => bankAPI.getList()
 })
 
 // 금융기관 목록

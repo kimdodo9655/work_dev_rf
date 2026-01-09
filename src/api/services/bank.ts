@@ -2,14 +2,14 @@ import { apiHelpers } from '@/api/client'
 import { API } from '@/api/endpoints'
 import type { ApiResponse, Bank, BankList } from '@/types'
 
-export const banksAPI = {
+export const bankAPI = {
   /**
    * 금융기관 목록 조회
    * @returns 금융기관 목록
    * @throws {ApiError} 조회 실패 시
    *
    * @example
-   * const response = await banksAPI.getList()
+   * const response = await bankAPI.getList()
    * console.log(response.data) // Bank[]
    */
   async getList() {
@@ -23,7 +23,7 @@ export const banksAPI = {
    * @throws {ApiError} 조회 실패 시
    *
    * @example
-   * const response = await banksAPI.getDetail('001')
+   * const response = await bankAPI.getDetail('001')
    * console.log(response.data) // Bank
    */
   async getDetail(code: string) {

@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue'
 
-import { codesAPI } from '@/api/codes'
+import { codeAPI } from '@/api/services/code'
 import type { Code, SelectOption } from '@/types'
 import type {
   CodeKey,
@@ -100,23 +100,23 @@ export function useCodes() {
       logger.info('[CODES] Fetching codes by category', { category })
 
       const apiMethodMap: Record<CodeKey, () => Promise<any>> = {
-        organizationTypes: codesAPI.getOrganizationTypes,
-        organizationStatuses: codesAPI.getOrganizationStatuses,
-        qualifiedTypes: codesAPI.getQualifiedTypes,
-        branchStatuses: codesAPI.getBranchStatuses,
-        userRoleLevels: codesAPI.getUserRoleLevels,
-        registryTypes: codesAPI.getRegistryTypes,
-        registryCauses: codesAPI.getRegistryCauses,
-        partyTypes: codesAPI.getPartyTypes,
-        propertyTypes: codesAPI.getPropertyTypes,
-        sections: codesAPI.getSections,
-        registryMethods: codesAPI.getRegistryMethods,
-        securedDebtScopeTypes: codesAPI.getSecuredDebtScopeTypes,
-        certificateTypes: codesAPI.getCertificateTypes,
-        workTypes: codesAPI.getWorkTypes,
-        paymentStatuses: codesAPI.getPaymentStatuses,
-        adminInfoLinkTime: codesAPI.getAdminInfoLinkTime,
-        userStatuses: codesAPI.getUserStatuses // [P06-17] 추가
+        organizationTypes: codeAPI.getOrganizationTypes,
+        organizationStatuses: codeAPI.getOrganizationStatuses,
+        qualifiedTypes: codeAPI.getQualifiedTypes,
+        branchStatuses: codeAPI.getBranchStatuses,
+        userRoleLevels: codeAPI.getUserRoleLevels,
+        registryTypes: codeAPI.getRegistryTypes,
+        registryCauses: codeAPI.getRegistryCauses,
+        partyTypes: codeAPI.getPartyTypes,
+        propertyTypes: codeAPI.getPropertyTypes,
+        sections: codeAPI.getSections,
+        registryMethods: codeAPI.getRegistryMethods,
+        securedDebtScopeTypes: codeAPI.getSecuredDebtScopeTypes,
+        certificateTypes: codeAPI.getCertificateTypes,
+        workTypes: codeAPI.getWorkTypes,
+        paymentStatuses: codeAPI.getPaymentStatuses,
+        adminInfoLinkTime: codeAPI.getAdminInfoLinkTime,
+        userStatuses: codeAPI.getUserStatuses // [P06-17] 추가
       }
 
       const response = await apiMethodMap[category]()
@@ -163,23 +163,23 @@ export function useCodes() {
         adminLinkTime,
         userStats
       ] = await Promise.all([
-        codesAPI.getOrganizationTypes(),
-        codesAPI.getOrganizationStatuses(),
-        codesAPI.getQualifiedTypes(),
-        codesAPI.getBranchStatuses(),
-        codesAPI.getUserRoleLevels(),
-        codesAPI.getRegistryTypes(),
-        codesAPI.getRegistryCauses(),
-        codesAPI.getPartyTypes(),
-        codesAPI.getPropertyTypes(),
-        codesAPI.getSections(),
-        codesAPI.getRegistryMethods(),
-        codesAPI.getSecuredDebtScopeTypes(),
-        codesAPI.getCertificateTypes(),
-        codesAPI.getWorkTypes(),
-        codesAPI.getPaymentStatuses(),
-        codesAPI.getAdminInfoLinkTime(),
-        codesAPI.getUserStatuses()
+        codeAPI.getOrganizationTypes(),
+        codeAPI.getOrganizationStatuses(),
+        codeAPI.getQualifiedTypes(),
+        codeAPI.getBranchStatuses(),
+        codeAPI.getUserRoleLevels(),
+        codeAPI.getRegistryTypes(),
+        codeAPI.getRegistryCauses(),
+        codeAPI.getPartyTypes(),
+        codeAPI.getPropertyTypes(),
+        codeAPI.getSections(),
+        codeAPI.getRegistryMethods(),
+        codeAPI.getSecuredDebtScopeTypes(),
+        codeAPI.getCertificateTypes(),
+        codeAPI.getWorkTypes(),
+        codeAPI.getPaymentStatuses(),
+        codeAPI.getAdminInfoLinkTime(),
+        codeAPI.getUserStatuses()
       ])
 
       codes.value.organizationTypes = orgTypes.data || []

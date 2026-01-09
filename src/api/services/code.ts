@@ -3,7 +3,7 @@ import { API } from '@/api/endpoints'
 import type { ApiResponse, Code } from '@/types'
 import type { RoleLevelCode } from '@/types/domains/code'
 
-export const codesAPI = {
+export const codeAPI = {
   /**
    * [P06-01] 기관 유형 목록 조회
    * @returns 기관 유형 코드 목록
