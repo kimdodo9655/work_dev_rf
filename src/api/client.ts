@@ -1,4 +1,5 @@
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios'
+import axiosRetry from 'axios-retry'
 
 import { useAuthStore } from '@/stores/auth'
 import { handleInvalidAuthState, isValidAuthData } from '@/utils/authValidator'
@@ -15,6 +16,28 @@ export const api: AxiosInstance = axios.create({
   baseURL: ENV.API_BASE_URL,
   timeout: 30000,
   headers: { 'Content-Type': 'application/json' }
+})
+
+// ============================================================================
+// 네트워크 재시도 설정 (신규 추가)
+// ============================================================================
+axiosRetry(api, {
+  retries: 3, // 최대 3번 재시도
+  retryDelay: axiosRetry.exponentialDelay, // 지수 백오프 (1초, 2초, 4초...)
+  retryCondition: (error) => {
+    // 네트워크 오류 또는 5xx 서버 에러만 재시도
+    return (
+      axiosRetry.isNetworkOrIdempotentRequestError(error) || (error.response?.status ?? 0) >= 500
+    )
+  },
+  onRetry: (retryCount, error, requestConfig) => {
+    logger.warn('[API RETRY]', {
+      retryCount,
+      url: requestConfig.url,
+      method: requestConfig.method?.toUpperCase(),
+      error: error.message
+    })
+  }
 })
 
 // ============================================================================
@@ -153,6 +176,21 @@ async function runRefreshOnce({ ignoreCooldown = false }: { ignoreCooldown?: boo
 }
 
 // ============================================================================
+// 개발 환경 요청 로깅 (신규 추가)
+// ============================================================================
+if (ENV.IS_DEV) {
+  api.interceptors.request.use((config) => {
+    logger.debug('[API REQUEST]', {
+      method: config.method?.toUpperCase(),
+      url: config.url,
+      params: config.params,
+      data: config.data
+    })
+    return config
+  })
+}
+
+// ============================================================================
 // 요청 인터셉터: 토큰 + 금융기관 코드 자동 추가 + 인증 데이터 검증 + 자동 세션 연장
 // ============================================================================
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
@@ -246,7 +284,19 @@ const handleAuthFailure = () => {
 }
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // ✅ 개발 환경에서 성공 응답 로깅
+    if (ENV.IS_DEV) {
+      logger.debug('[API RESPONSE SUCCESS]', {
+        status: response.status,
+        statusText: response.statusText,
+        url: response.config.url,
+        method: response.config.method?.toUpperCase(),
+        data: response.data
+      })
+    }
+    return response
+  },
   async (error) => {
     const originalRequest = error.config
 
@@ -325,62 +375,82 @@ api.interceptors.response.use(
 )
 
 // ============================================================================
-// 공통 API 헬퍼 함수
+// 공통 API 헬퍼 함수 (타임아웃 세분화)
 // ============================================================================
 export const apiHelpers = {
   /**
    * GET 요청
+   * @param url - 요청 URL
+   * @param params - 쿼리 파라미터
+   * @param timeout - 타임아웃 (기본: 30초)
    */
-  async get<T>(url: string, params?: any): Promise<T> {
-    const response = await api.get<T>(url, { params })
+  async get<T>(url: string, params?: any, timeout = 30000): Promise<T> {
+    const response = await api.get<T>(url, { params, timeout })
     return response.data
   },
 
   /**
    * POST 요청
+   * @param url - 요청 URL
+   * @param data - 요청 바디
+   * @param timeout - 타임아웃 (기본: 30초)
    */
-  async post<T>(url: string, data?: any): Promise<T> {
-    const response = await api.post<T>(url, data)
+  async post<T>(url: string, data?: any, timeout = 30000): Promise<T> {
+    const response = await api.post<T>(url, data, { timeout })
     return response.data
   },
 
   /**
    * PUT 요청 (전체 수정)
+   * @param url - 요청 URL
+   * @param data - 요청 바디
+   * @param timeout - 타임아웃 (기본: 30초)
    */
-  async put<T>(url: string, data?: any): Promise<T> {
-    const response = await api.put<T>(url, data)
+  async put<T>(url: string, data?: any, timeout = 30000): Promise<T> {
+    const response = await api.put<T>(url, data, { timeout })
     return response.data
   },
 
   /**
    * PATCH 요청 (부분 수정)
+   * @param url - 요청 URL
+   * @param data - 요청 바디
+   * @param timeout - 타임아웃 (기본: 30초)
    */
-  async patch<T>(url: string, data?: any): Promise<T> {
-    const response = await api.patch<T>(url, data)
+  async patch<T>(url: string, data?: any, timeout = 30000): Promise<T> {
+    const response = await api.patch<T>(url, data, { timeout })
     return response.data
   },
 
   /**
    * DELETE 요청
+   * @param url - 요청 URL
+   * @param timeout - 타임아웃 (기본: 30초)
    */
-  async delete<T>(url: string): Promise<T> {
-    const response = await api.delete<T>(url)
+  async delete<T>(url: string, timeout = 30000): Promise<T> {
+    const response = await api.delete<T>(url, { timeout })
     return response.data
   },
 
   /**
    * 파일 업로드
+   * @param url - 요청 URL
+   * @param file - 업로드할 파일
+   * @param onProgress - 업로드 진행률 콜백
+   * @param timeout - 타임아웃 (기본: 60초, 파일 업로드는 더 길게)
    */
   async uploadFile<T>(
     url: string,
     file: File,
-    onProgress?: (progress: number) => void
+    onProgress?: (progress: number) => void,
+    timeout = 60000
   ): Promise<T> {
     const formData = new FormData()
     formData.append('file', file)
 
     const response = await api.post<T>(url, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
+      timeout,
       onUploadProgress: (progressEvent) => {
         if (onProgress && progressEvent.total) {
           const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total)
