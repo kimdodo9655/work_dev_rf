@@ -1,7 +1,6 @@
+import { apiHelpers } from '@/api/client'
+import { API } from '@/api/endpoints'
 import type { ApiResponse, LoginData, LoginRequest, RefreshData, RefreshRequest } from '@/types'
-
-import { apiHelpers } from './client'
-import { API } from './endpoints'
 
 export const authAPI = {
   /**

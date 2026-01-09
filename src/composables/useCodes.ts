@@ -2,7 +2,13 @@ import { computed, ref } from 'vue'
 
 import { codesAPI } from '@/api/codes'
 import type { Code, SelectOption } from '@/types'
-import type { CodeKey, CodeMap, CodeResponse, RoleLevelCode, RoleLevelCodeMap } from '@/types/code'
+import type {
+  CodeKey,
+  CodeMap,
+  CodeResponse,
+  RoleLevelCode,
+  RoleLevelCodeMap
+} from '@/types/domains/code'
 import { logger } from '@/utils/logger'
 
 /**

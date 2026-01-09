@@ -1,7 +1,6 @@
+import { apiHelpers } from '@/api/client'
+import { API } from '@/api/endpoints'
 import type { ApiResponse, Bank, BankList } from '@/types'
-
-import { apiHelpers } from './client'
-import { API } from './endpoints'
 
 export const banksAPI = {
   /**

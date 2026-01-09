@@ -1,13 +1,12 @@
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios'
 import axiosRetry from 'axios-retry'
 
+import { API } from '@/api/endpoints'
 import { useAuthStore } from '@/stores/auth'
 import { handleInvalidAuthState, isValidAuthData } from '@/utils/authValidator'
 import { ENV } from '@/utils/env'
 import { logger } from '@/utils/logger'
 import { storage } from '@/utils/storage'
-
-import { API } from './endpoints'
 
 // ============================================================================
 // Axios 인스턴스 생성

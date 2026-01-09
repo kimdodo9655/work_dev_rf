@@ -1,8 +1,7 @@
+import { apiHelpers } from '@/api/client'
+import { API } from '@/api/endpoints'
 import type { ApiResponse, Code } from '@/types'
-import type { RoleLevelCode } from '@/types/code'
-
-import { apiHelpers } from './client'
-import { API } from './endpoints'
+import type { RoleLevelCode } from '@/types/domains/code'
 
 export const codesAPI = {
   /**
