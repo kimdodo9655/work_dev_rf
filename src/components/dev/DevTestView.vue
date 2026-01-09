@@ -2,6 +2,189 @@
   <div class="test-area">
     <h2>FloatingInput 테스트</h2>
 
+    <!-- 공통코드 테스트 섹션 -->
+    <div class="code-test-section">
+      <h3>공통코드 일괄 호출 테스트</h3>
+
+      <div class="code-controls">
+        <button class="load-codes-btn" :disabled="isLoading" @click="handleLoadAllCodes">
+          {{ isLoading ? '로딩 중...' : '공통코드 일괄 호출' }}
+        </button>
+
+        <button
+          v-if="codes.organizationTypes.length > 0"
+          class="clear-codes-btn"
+          @click="handleClearCodes"
+        >
+          데이터 초기화
+        </button>
+      </div>
+
+      <div v-if="isLoading" class="loading-state">
+        <div class="spinner"></div>
+        <p>공통코드를 불러오는 중...</p>
+      </div>
+
+      <div v-if="loadError" class="error-state">
+        <p>{{ loadError }}</p>
+      </div>
+
+      <div v-if="codes.organizationTypes.length > 0" class="codes-display">
+        <div class="code-group">
+          <h4>[P06-01] 기관 구분 ({{ codes.organizationTypes.length }}개)</h4>
+          <div class="code-items">
+            <span v-for="code in codes.organizationTypes" :key="code.code" class="code-chip">
+              {{ code.description }}
+            </span>
+          </div>
+        </div>
+
+        <div class="code-group">
+          <h4>[P06-02] 기관 상태 ({{ codes.organizationStatuses.length }}개)</h4>
+          <div class="code-items">
+            <span v-for="code in codes.organizationStatuses" :key="code.code" class="code-chip">
+              {{ code.description }}
+            </span>
+          </div>
+        </div>
+
+        <div class="code-group">
+          <h4>[P06-03] 자격자 구분 ({{ codes.qualifiedTypes.length }}개)</h4>
+          <div class="code-items">
+            <span v-for="code in codes.qualifiedTypes" :key="code.code" class="code-chip">
+              {{ code.description }}
+            </span>
+          </div>
+        </div>
+
+        <div class="code-group">
+          <h4>[P06-04] 지점 상태 ({{ codes.branchStatuses.length }}개)</h4>
+          <div class="code-items">
+            <span v-for="code in codes.branchStatuses" :key="code.code" class="code-chip">
+              {{ code.description }}
+            </span>
+          </div>
+        </div>
+
+        <div class="code-group">
+          <h4>[P06-05] 사용자 권한 레벨 ({{ codes.userRoleLevels.length }}개)</h4>
+          <div class="code-items">
+            <span v-for="code in codes.userRoleLevels" :key="code.code" class="code-chip">
+              {{ code.description }} (Level: {{ code.level }})
+            </span>
+          </div>
+        </div>
+
+        <div class="code-group">
+          <h4>[P06-06] 등기 유형 ({{ codes.registryTypes.length }}개)</h4>
+          <div class="code-items">
+            <span v-for="code in codes.registryTypes" :key="code.code" class="code-chip">
+              {{ code.description }}
+            </span>
+          </div>
+        </div>
+
+        <div class="code-group">
+          <h4>[P06-07] 등기 원인 ({{ codes.registryCauses.length }}개)</h4>
+          <div class="code-items">
+            <span v-for="code in codes.registryCauses" :key="code.code" class="code-chip">
+              {{ code.description }}
+            </span>
+          </div>
+        </div>
+
+        <div class="code-group">
+          <h4>[P06-08] 당사자 구분 ({{ codes.partyTypes.length }}개)</h4>
+          <div class="code-items">
+            <span v-for="code in codes.partyTypes" :key="code.code" class="code-chip">
+              {{ code.description }}
+            </span>
+          </div>
+        </div>
+
+        <div class="code-group">
+          <h4>[P06-09] 부동산 구분 ({{ codes.propertyTypes.length }}개)</h4>
+          <div class="code-items">
+            <span v-for="code in codes.propertyTypes" :key="code.code" class="code-chip">
+              {{ code.description }}
+            </span>
+          </div>
+        </div>
+
+        <div class="code-group">
+          <h4>[P06-10] 구분 ({{ codes.sections.length }}개)</h4>
+          <div class="code-items">
+            <span v-for="code in codes.sections" :key="code.code" class="code-chip">
+              {{ code.description }}
+            </span>
+          </div>
+        </div>
+
+        <div class="code-group">
+          <h4>[P06-11] 등기 방법 ({{ codes.registryMethods.length }}개)</h4>
+          <div class="code-items">
+            <span v-for="code in codes.registryMethods" :key="code.code" class="code-chip">
+              {{ code.description }}
+            </span>
+          </div>
+        </div>
+
+        <div class="code-group">
+          <h4>[P06-12] 채권최고액 범위 구분 ({{ codes.securedDebtScopeTypes.length }}개)</h4>
+          <div class="code-items">
+            <span v-for="code in codes.securedDebtScopeTypes" :key="code.code" class="code-chip">
+              {{ code.description }}
+            </span>
+          </div>
+        </div>
+
+        <div class="code-group">
+          <h4>[P06-13] 증명서 구분 ({{ codes.certificateTypes.length }}개)</h4>
+          <div class="code-items">
+            <span v-for="code in codes.certificateTypes" :key="code.code" class="code-chip">
+              {{ code.description }}
+            </span>
+          </div>
+        </div>
+
+        <div class="code-group">
+          <h4>[P06-14] 업무 구분 ({{ codes.workTypes.length }}개)</h4>
+          <div class="code-items">
+            <span v-for="code in codes.workTypes" :key="code.code" class="code-chip">
+              {{ code.description }}
+            </span>
+          </div>
+        </div>
+
+        <div class="code-group">
+          <h4>[P06-15] 지급 상태 ({{ codes.paymentStatuses.length }}개)</h4>
+          <div class="code-items">
+            <span v-for="code in codes.paymentStatuses" :key="code.code" class="code-chip">
+              {{ code.description }}
+            </span>
+          </div>
+        </div>
+
+        <div class="code-group">
+          <h4>[P06-16] 행정정보 연계 시점 ({{ codes.adminInfoLinkTime.length }}개)</h4>
+          <div class="code-items">
+            <span v-for="code in codes.adminInfoLinkTime" :key="code.code" class="code-chip">
+              {{ code.description }}
+            </span>
+          </div>
+        </div>
+
+        <div class="code-group">
+          <h4>[P06-17] 사용자 상태 ({{ codes.userStatuses.length }}개)</h4>
+          <div class="code-items">
+            <span v-for="code in codes.userStatuses" :key="code.code" class="code-chip">
+              {{ code.description }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="container">
       <!-- 1. 기본 단일 input -->
       <FloatingInput label="사용자 이름" placeholder="사용자 이름을 입력하세요" field-id="username">
@@ -359,6 +542,8 @@
         )
       }}</pre>
     </div>
+
+    <Pagination v-model:current-page="currentPage" :total-items="100" :items-per-page="10" />
   </div>
 </template>
 
@@ -368,6 +553,29 @@ import { reactive, ref } from 'vue'
 import FloatingCustomSelect from '@/components/template/input/FloatingCustomSelect.vue'
 import FloatingInnerSelect from '@/components/template/input/FloatingInnerSelect.vue'
 import FloatingInput from '@/components/template/input/FloatingInput.vue'
+import Pagination from '@/components/template/PaginationItem.vue'
+import { useCodes } from '@/composables/useCodes'
+
+// ✨ useCodes 사용
+const { codes, isLoading, loadError, fetchAllCodes, clearCache } = useCodes()
+
+// 공통코드 로드 핸들러
+async function handleLoadAllCodes() {
+  try {
+    await fetchAllCodes()
+    console.log('✅ 공통코드 로드 완료!')
+  } catch (error) {
+    console.error('❌ 공통코드 로드 실패:', error)
+  }
+}
+
+// 데이터 초기화 핸들러
+function handleClearCodes() {
+  clearCache()
+  console.log('🗑️ 공통코드 데이터 초기화 완료')
+}
+
+const currentPage = ref(1) // 현재 페이지 상태
 
 const form = reactive({
   username: '',
@@ -597,6 +805,150 @@ h3 {
     overflow-x: auto;
     font-size: 12px;
     line-height: 1.5;
+  }
+}
+
+// 기존 스타일 아래에 추가
+.code-test-section {
+  margin-bottom: 40px;
+  padding: 24px;
+  background: #ffffff;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+
+  h3 {
+    margin-bottom: 20px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+  }
+}
+
+.code-controls {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.load-codes-btn,
+.clear-codes-btn {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.load-codes-btn {
+  background: #3b82f6;
+  color: white;
+
+  &:not(:disabled):hover {
+    background: #2563eb;
+  }
+
+  &:not(:disabled):active {
+    background: #1d4ed8;
+  }
+}
+
+.clear-codes-btn {
+  background: #ef4444;
+  color: white;
+
+  &:hover {
+    background: #dc2626;
+  }
+
+  &:active {
+    background: #b91c1c;
+  }
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  gap: 16px;
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e5e7eb;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  p {
+    color: #6b7280;
+    font-size: 14px;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error-state {
+  padding: 20px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  font-size: 14px;
+}
+
+.codes-display {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.code-group {
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+
+  h4 {
+    margin-bottom: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+  }
+}
+
+.code-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.code-chip {
+  display: inline-flex;
+  padding: 6px 12px;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #1f2937;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
   }
 }
 </style>

@@ -9,7 +9,13 @@ import { logger } from '@/utils/logger'
  * 공통코드 관리 Composable
  *
  * @example
- * const { codes, isLoading, getCodeLabel, getCodeOptions } = useCodes()
+ * const { codes, isLoading, fetchAllCodes, getCodeLabel, getCodeOptions } = useCodes()
+ *
+ * // 전체 코드 일괄 조회
+ * await fetchAllCodes()
+ *
+ * // 특정 카테고리만 조회
+ * await fetchCodesByCategory('organizationStatuses')
  *
  * // 코드 라벨 조회
  * const label = getCodeLabel('organizationStatuses', 'ACTIVE') // '사용'
@@ -38,10 +44,12 @@ export function useCodes() {
     certificateTypes: [],
     workTypes: [],
     paymentStatuses: [],
-    adminInfoLinkTime: []
+    adminInfoLinkTime: [],
+    userStatuses: [] // [P06-17] 추가
   })
 
   const isLoading = ref(false)
+  const loadError = ref<string | null>(null)
 
   // ============================================================================
   // 빠른 조회를 위한 Map (computed)
@@ -80,6 +88,7 @@ export function useCodes() {
    */
   async function fetchCodesByCategory(category: CodeKey) {
     isLoading.value = true
+    loadError.value = null
 
     try {
       logger.info('[CODES] Fetching codes by category', { category })
@@ -100,7 +109,8 @@ export function useCodes() {
         certificateTypes: codesAPI.getCertificateTypes,
         workTypes: codesAPI.getWorkTypes,
         paymentStatuses: codesAPI.getPaymentStatuses,
-        adminInfoLinkTime: codesAPI.getAdminInfoLinkTime
+        adminInfoLinkTime: codesAPI.getAdminInfoLinkTime,
+        userStatuses: codesAPI.getUserStatuses // [P06-17] 추가
       }
 
       const response = await apiMethodMap[category]()
@@ -110,6 +120,88 @@ export function useCodes() {
       return response.data
     } catch (error) {
       logger.error('[CODES] Failed to fetch codes', { category, error })
+      loadError.value = `${category} 로드 실패`
+      throw error
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  /**
+   * 모든 공통코드 일괄 조회
+   */
+  async function fetchAllCodes() {
+    isLoading.value = true
+    loadError.value = null
+
+    try {
+      const startTime = performance.now()
+      logger.info('[CODES] Fetching all codes')
+
+      const [
+        orgTypes,
+        orgStatuses,
+        qualTypes,
+        branchStats,
+        userRoles,
+        regTypes,
+        regCauses,
+        partyTypes,
+        propTypes,
+        sections,
+        regMethods,
+        debtScopes,
+        certTypes,
+        workTypes,
+        payStatuses,
+        adminLinkTime,
+        userStats
+      ] = await Promise.all([
+        codesAPI.getOrganizationTypes(),
+        codesAPI.getOrganizationStatuses(),
+        codesAPI.getQualifiedTypes(),
+        codesAPI.getBranchStatuses(),
+        codesAPI.getUserRoleLevels(),
+        codesAPI.getRegistryTypes(),
+        codesAPI.getRegistryCauses(),
+        codesAPI.getPartyTypes(),
+        codesAPI.getPropertyTypes(),
+        codesAPI.getSections(),
+        codesAPI.getRegistryMethods(),
+        codesAPI.getSecuredDebtScopeTypes(),
+        codesAPI.getCertificateTypes(),
+        codesAPI.getWorkTypes(),
+        codesAPI.getPaymentStatuses(),
+        codesAPI.getAdminInfoLinkTime(),
+        codesAPI.getUserStatuses()
+      ])
+
+      codes.value.organizationTypes = orgTypes.data || []
+      codes.value.organizationStatuses = orgStatuses.data || []
+      codes.value.qualifiedTypes = qualTypes.data || []
+      codes.value.branchStatuses = branchStats.data || []
+      codes.value.userRoleLevels = userRoles.data || []
+      codes.value.registryTypes = regTypes.data || []
+      codes.value.registryCauses = regCauses.data || []
+      codes.value.partyTypes = partyTypes.data || []
+      codes.value.propertyTypes = propTypes.data || []
+      codes.value.sections = sections.data || []
+      codes.value.registryMethods = regMethods.data || []
+      codes.value.securedDebtScopeTypes = debtScopes.data || []
+      codes.value.certificateTypes = certTypes.data || []
+      codes.value.workTypes = workTypes.data || []
+      codes.value.paymentStatuses = payStatuses.data || []
+      codes.value.adminInfoLinkTime = adminLinkTime.data || []
+      codes.value.userStatuses = userStats.data || []
+
+      const endTime = performance.now()
+      const loadTime = (endTime - startTime).toFixed(2)
+
+      logger.info('[CODES] All codes loaded successfully', { loadTime: `${loadTime}ms` })
+      return codes.value
+    } catch (error) {
+      logger.error('[CODES] Failed to fetch all codes', { error })
+      loadError.value = '공통코드 로드 실패'
       throw error
     } finally {
       isLoading.value = false
@@ -199,8 +291,10 @@ export function useCodes() {
       certificateTypes: [],
       workTypes: [],
       paymentStatuses: [],
-      adminInfoLinkTime: []
+      adminInfoLinkTime: [],
+      userStatuses: []
     }
+    loadError.value = null
     logger.info('[CODES] Cache cleared')
   }
 
@@ -212,9 +306,11 @@ export function useCodes() {
     // State
     codes,
     isLoading,
+    loadError,
 
     // API
     fetchCodesByCategory,
+    fetchAllCodes,
 
     // Utilities
     getCodeLabel,

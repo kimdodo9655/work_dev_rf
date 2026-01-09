@@ -1,0 +1,1377 @@
+@use '@/assets/styles/variables' as *;
+@use '@/assets/styles/typography' as *;
+@use '@/assets/styles/reset' as *;
+
+/* ==========================================================================
+   검색 패널
+   ========================================================================== */
+.Search-panel {
+  width: 100%;
+  height: auto;
+  background-color: $color-w;
+  box-shadow: $shadow-base;
+  padding: 20px;
+  border-radius: 10px;
+
+  form {
+    width: 100%;
+    display: flex;
+    gap: 15px;
+
+    .input-area {
+      position: relative;
+      width: calc(92% - 15px);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+
+      > * {
+        // 기본: 25% (4개 균등)
+        flex: 0 0 calc((100% - 30px) / 4);
+      }
+
+      // ===== 두 번째 줄 (5번째 아이템부터) =====
+
+      // 5번째가 마지막인 경우 (두 번째 줄 1개): 100%
+      > *:nth-child(5):last-child {
+        flex: 0 0 100%;
+      }
+
+      // 6번째가 마지막인 경우 (두 번째 줄 2개)
+      > *:nth-child(5):nth-last-child(2) {
+        flex: 0 0 calc((100% - 30px) / 4); // 25%
+      }
+      > *:nth-child(6):last-child {
+        flex: 0 0 calc((100% - 30px) / 2); // 50%
+      }
+
+      // 7번째가 마지막인 경우 (두 번째 줄 3개)
+      > *:nth-child(5):nth-last-child(3),
+      > *:nth-child(6):nth-last-child(2) {
+        flex: 0 0 calc((100% - 30px) / 4); // 25%
+      }
+      > *:nth-child(7):last-child {
+        flex: 0 0 calc((100% - 30px) / 2); // 50%
+      }
+
+      // 8번째가 있는 경우 (두 번째 줄 4개): 기본 스타일 유지
+
+      input[type='search'] {
+        // 브라우저 기본 X 버튼 숨기기
+        &::-webkit-search-cancel-button {
+          -webkit-appearance: none;
+          appearance: none;
+          display: none;
+        }
+
+        &::-ms-clear {
+          display: none;
+        }
+      }
+    }
+
+    input[type='submit'] {
+      width: 8%;
+      font-size: 16px;
+      color: $color-w;
+      @include font-semibold;
+      background-color: $color-dark;
+      border-radius: 5px;
+    }
+  }
+}
+
+/* ==========================================================================
+   레거시 인풋 래퍼
+   ========================================================================== */
+.input-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid $color-main;
+  border-radius: 5px;
+  background-color: $color-w;
+  padding: 11px 13px 9px 13px;
+  cursor: pointer;
+
+  > label {
+    font-size: 14px;
+    @include font-semibold;
+    margin-bottom: 8px;
+    color: $color-g3;
+    cursor: pointer;
+    pointer-events: none;
+  }
+
+  > input {
+    padding: 0;
+    border: none;
+    font-size: 14px;
+    @include font-semibold;
+    color: $color-dark;
+    background: transparent;
+    cursor: pointer;
+
+    &::placeholder {
+      color: $color-g9;
+    }
+  }
+
+  > i {
+    position: absolute;
+    top: 20px;
+    right: 15px;
+
+    &::before {
+      font-size: 20px;
+      color: $color-g9;
+    }
+  }
+
+  &:focus-within {
+    outline: 5px solid $color-outline;
+    border: 1px solid $color-dark;
+
+    label {
+      color: $color-dark;
+    }
+
+    > input {
+      outline: none;
+    }
+
+    > i {
+      &::before {
+        color: $color-dark;
+      }
+    }
+  }
+}
+
+/* ==========================================================================
+   레거시 폼 셀렉트
+   ========================================================================== */
+.form-select {
+  position: relative;
+  width: 100%;
+
+  .select-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    background: $color-w;
+    border: 1px solid $color-gd;
+    border-radius: 4px;
+    box-shadow: $shadow-base;
+    max-height: 240px;
+    overflow-y: auto;
+
+    .dropdown {
+      .dropdown-item {
+        cursor: pointer;
+        transition: background-color 0.2s;
+        font-size: 14px;
+
+        > p {
+          padding: 10px 15px;
+          margin: 10px;
+          border-radius: 5px;
+          font-size: 16px;
+          @include font-semibold;
+        }
+
+        &:hover p {
+          background-color: $color-light;
+          color: $color-dark;
+        }
+
+        &.selected p {
+          background-color: $color-dark;
+          color: $color-w;
+        }
+
+        &:first-child {
+          border-radius: 4px 4px 0 0;
+        }
+
+        &:last-child {
+          border-radius: 0 0 4px 4px;
+        }
+      }
+    }
+  }
+}
+
+/* ==========================================================================
+   기간 설정 캘린더
+   ========================================================================== */
+.date-range-picker {
+  font-family: inherit;
+  position: relative;
+}
+
+.calendar-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  width: fit-content;
+  margin-top: 8px;
+  z-index: 1000;
+}
+
+.calendar {
+  background: $color-w;
+  border-radius: 8px;
+  box-shadow: $shadow-base;
+  border: 1px solid $color-ge;
+  padding: 16px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid $color-ge;
+}
+
+.calendar-header button {
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 18px;
+  color: $color-g6;
+  transition: all 0.2s;
+}
+
+.calendar-header button:hover:not(:disabled) {
+  color: $color-dark;
+}
+
+.calendar-header button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.calendar-header span {
+  font-weight: 600;
+  font-size: 16px;
+  color: $color-g3;
+}
+
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.weekdays div {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: $color-g6;
+  padding: 6px 0;
+}
+
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  position: relative;
+  min-height: 32px;
+}
+
+.day::before,
+.day::after {
+  position: absolute;
+  font-size: 9px;
+  font-weight: 600;
+  color: $color-dark;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.day.range-start::before {
+  content: '시작일';
+  background-color: $color-dark;
+  color: $color-w;
+  padding: 5px 0 0;
+  width: 32px;
+  border-radius: 5px 5px 0 0;
+  text-align: center;
+  top: -10px;
+}
+
+.day.range-end::after {
+  content: '종료일';
+  background-color: $color-dark;
+  color: $color-w;
+  padding: 0 0 5px;
+  width: 32px;
+  border-radius: 0 0 5px 5px;
+  text-align: center;
+  bottom: -10px;
+}
+
+.day:hover:not(.disabled):not(.other-month) {
+  background: $color-light;
+}
+
+.day.other-month {
+  color: $color-gd;
+}
+
+.day.disabled {
+  color: $color-gd;
+  cursor: not-allowed;
+}
+
+.day.disabled:hover {
+  background: none;
+}
+
+.day.selected {
+  background: $color-main;
+  color: $color-w;
+  font-weight: 600;
+}
+
+.day.in-range {
+  background: $color-light;
+}
+
+.day.range-start,
+.day.range-end {
+  background: $color-dark;
+  color: $color-w;
+  font-weight: 600;
+}
+
+.selected-period {
+  margin-top: 12px;
+  padding: 10px;
+  background: $color-light;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 12px;
+  color: $color-dark;
+  font-weight: 500;
+}
+
+.calendar-footer {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid $color-light;
+  text-align: right;
+}
+
+.confirm-btn {
+  padding: 8px 24px;
+  border: none;
+  border-radius: 4px;
+  background: $color-dark;
+  color: $color-w;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.confirm-btn:hover {
+  background: $color-dark;
+}
+
+.confirm-btn:disabled {
+  background: $color-g9;
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+   Floating Input 컴포넌트
+   ========================================================================== */
+
+/* 컨테이너 */
+.floating-field {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+/* 필드 컨테이너 */
+.floating-field .field-container {
+  position: relative;
+  cursor: pointer;
+
+  &:has(.input-frame.is-disabled) {
+    cursor: not-allowed;
+  }
+}
+
+/* Placeholder 라벨 (비어있을 때만 표시) */
+.floating-field .placeholder-label {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: $color-g6;
+  font-size: 15px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+
+  &.is-disabled {
+    color: $color-gd;
+  }
+}
+
+/* Floating 라벨 (입력 시 위로 이동) */
+.floating-field .floating-label {
+  position: absolute;
+  left: 12px;
+  top: -10px;
+  color: $color-dark;
+  font-size: 12px;
+  font-weight: 600;
+  background: $color-w;
+  padding: 0 4px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: all 0.2s $transition-timing;
+  pointer-events: none;
+
+  &.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  &.is-error {
+    color: $color-red;
+  }
+
+  &.is-disabled {
+    color: $color-g9;
+  }
+}
+
+/* 필수 표시 */
+.floating-field .required-mark {
+  color: $color-red;
+  font-size: 14px;
+  font-style: normal;
+}
+
+/* Input 프레임 */
+.floating-field .input-frame {
+  position: relative;
+  height: 64px;
+  border: 1px solid $color-gb;
+  border-radius: 8px;
+  background: $color-w;
+  transition: all 0.2s ease;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+
+  // 내용이 없을 때는 투명하게
+  &:not(.has-content) {
+    * {
+      opacity: 0 !important;
+    }
+  }
+
+  // 내용이 있거나 포커스 상태일 때는 보이게
+  &.has-content {
+    * {
+      opacity: 1 !important;
+    }
+
+    // has-content일 때만 input placeholder 보이기
+    input,
+    textarea,
+    select {
+      &::placeholder {
+        color: $color-g9 !important;
+      }
+    }
+  }
+
+  &.is-focused {
+    outline: 5px solid $color-outline;
+    border-color: $color-dark;
+  }
+
+  &.is-error {
+    border-color: $color-red;
+
+    &.is-focused {
+      outline: 5px solid $color-red-outline;
+      border-color: $color-red;
+    }
+  }
+
+  &.is-disabled {
+    background: $color-ge;
+    cursor: not-allowed;
+  }
+}
+
+/* Slot 내부 input/textarea/select 스타일 초기화 */
+.floating-field .input-frame input,
+.floating-field .input-frame textarea,
+.floating-field .input-frame select {
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  font-size: 15px;
+  color: $color-g3;
+  padding: 0;
+  margin: 0;
+  transition: opacity 0.2s ease;
+  box-shadow: none !important;
+
+  // 기본적으로 placeholder는 투명 (FloatingInput의 placeholder만 보이게)
+  &::placeholder {
+    color: transparent;
+  }
+
+  &:disabled {
+    color: $color-g9;
+    cursor: not-allowed;
+  }
+
+  &:focus {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+}
+
+/* 직접 자식 input (나란히 배치용) */
+.floating-field .input-frame > input,
+.floating-field .input-frame > textarea,
+.floating-field .input-frame > select {
+  flex: 0 1 auto;
+
+  // width가 지정되지 않은 경우에만 flex: 1로 공간 채우기
+  &:not([style*='width']) {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}
+
+/* 직접 자식 구분자 (span, p 등) */
+.floating-field .input-frame > span,
+.floating-field .input-frame > p {
+  flex-shrink: 0;
+  opacity: 1 !important;
+}
+
+.floating-field .input-frame textarea {
+  resize: vertical;
+  min-height: 60px;
+  width: 100%;
+}
+
+/* 여러 input이 있을 때의 레이아웃 */
+.floating-field .input-frame .input-group {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  transition: opacity 0.2s ease;
+  width: 100%;
+
+  input {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.floating-field .input-frame .input-with-button {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  transition: opacity 0.2s ease;
+  width: 100%;
+
+  input {
+    flex: 1;
+    min-width: 0;
+    font-size: 14px;
+  }
+
+  button {
+    flex-shrink: 0;
+    padding: 8px 12px;
+    background: $color-ge;
+    border: 1px solid $color-gd;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    opacity: 1 !important;
+
+    &:hover {
+      background: $color-gd;
+    }
+
+    &:active {
+      background: $color-gb;
+    }
+  }
+}
+
+.floating-field .input-frame .input-addon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: opacity 0.2s ease;
+  width: 100%;
+
+  .addon-text {
+    color: $color-g6;
+    font-size: 14px;
+    white-space: nowrap;
+    opacity: 1 !important;
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+/* 에러 메시지 */
+.floating-field .error-message {
+  position: absolute;
+  bottom: 5px;
+  right: 10px;
+  margin-top: 4px;
+  font-size: 12px;
+  color: $color-red;
+  padding-left: 4px;
+  text-align: right;
+}
+
+/* ==========================================================================
+   Floating Custom Select 컴포넌트
+   ========================================================================== */
+
+/* 컨테이너 */
+.floating-custom-select {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+/* 필드 컨테이너 */
+.floating-custom-select .field-container {
+  position: relative;
+  cursor: pointer;
+
+  &:has(.input-frame.is-disabled) {
+    cursor: not-allowed;
+  }
+}
+
+/* Placeholder 라벨 */
+.floating-custom-select .placeholder-label {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: $color-g6;
+  font-size: 15px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+
+  &.is-disabled {
+    color: $color-gd;
+  }
+}
+
+/* Floating 라벨 */
+.floating-custom-select .floating-label {
+  position: absolute;
+  left: 12px;
+  top: -10px;
+  color: $color-dark;
+  font-size: 12px;
+  font-weight: 600;
+  background: $color-w;
+  padding: 0 4px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: all 0.2s $transition-timing;
+  pointer-events: none;
+
+  &.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  &.is-error {
+    color: $color-red;
+  }
+
+  &.is-disabled {
+    color: $color-g9;
+  }
+}
+
+/* 필수 표시 */
+.floating-custom-select .required-mark {
+  color: $color-red;
+  font-size: 14px;
+  font-style: normal;
+}
+
+/* Select 프레임 */
+.floating-custom-select .input-frame {
+  position: relative;
+  height: 64px;
+  border: 1px solid $color-gb;
+  border-radius: 8px;
+  background: $color-w;
+  transition: all 0.2s ease;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+
+  &:not(.has-content) {
+    .custom-select {
+      opacity: 0;
+    }
+  }
+
+  &.has-content {
+    .custom-select {
+      opacity: 1;
+    }
+  }
+
+  &.is-focused {
+    outline: 5px solid $color-outline;
+    border-color: $color-dark;
+  }
+
+  &.is-error {
+    border-color: $color-red;
+
+    &.is-focused {
+      outline: 5px solid $color-red-outline;
+      border-color: $color-red;
+    }
+  }
+
+  &.is-disabled {
+    background: $color-ge;
+    cursor: not-allowed;
+  }
+}
+
+/* 커스텀 셀렉트 */
+.floating-custom-select .custom-select {
+  position: relative;
+  width: 100%;
+  user-select: none;
+  transition: opacity 0.2s ease;
+
+  &.is-disabled {
+    cursor: not-allowed;
+  }
+}
+
+/* 셀렉트 트리거 */
+.floating-custom-select .select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  outline: none;
+
+  .is-disabled & {
+    cursor: not-allowed;
+  }
+}
+
+/* 선택된 값 */
+.floating-custom-select .selected-value {
+  flex: 1;
+  font-size: 15px;
+  color: $color-g3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &.is-placeholder {
+    color: $color-g9;
+  }
+}
+
+/* 화살표 아이콘 */
+.floating-custom-select .arrow {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: $color-g6;
+  transition: transform 0.2s ease;
+
+  &.is-open {
+    transform: rotate(180deg);
+  }
+}
+
+/* 드롭다운 메뉴 */
+.floating-custom-select .dropdown-menu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: $color-w;
+  border: 1px solid $color-ge;
+  border-radius: 8px;
+  box-shadow: $shadow-base;
+  overflow: hidden;
+}
+
+/* 옵션 래퍼 */
+.floating-custom-select .options-wrapper {
+  max-height: 300px;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $color-ge;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $color-gd;
+    border-radius: 3px;
+
+    &:hover {
+      background: $color-gb;
+    }
+  }
+}
+
+/* 옵션 아이템 */
+.floating-custom-select .option-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background-color $transition-fast ease;
+  outline: none;
+
+  &:hover,
+  &.is-highlighted,
+  &:focus {
+    background-color: $color-ge;
+  }
+
+  &.is-selected {
+    background-color: $color-light;
+    color: $color-dark;
+    font-weight: 500;
+  }
+
+  &.is-active {
+    background-color: $color-light;
+    color: $color-dark;
+    font-weight: 500;
+  }
+
+  &:active {
+    background-color: $color-gd;
+  }
+
+  &.custom-input-option {
+    border-top: 1px solid $color-ge;
+    color: $color-dark;
+    font-weight: 500;
+  }
+}
+
+/* 옵션 라벨 */
+.floating-custom-select .option-label {
+  flex: 1;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 체크 아이콘 */
+.floating-custom-select .check-icon {
+  flex-shrink: 0;
+  margin-left: 8px;
+  color: $color-dark;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* 직접입력 래퍼 */
+.floating-custom-select .custom-input-wrapper {
+  padding: 12px 16px;
+  border-top: 1px solid $color-ge;
+}
+
+/* 직접입력 필드 */
+.floating-custom-select .custom-input-field {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid $color-gd;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  margin-bottom: 8px;
+
+  &:focus {
+    border-color: $color-dark;
+  }
+}
+
+/* 직접입력 버튼 영역 */
+.floating-custom-select .custom-input-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* 직접입력 버튼 */
+.floating-custom-select .btn-cancel,
+.floating-custom-select .btn-confirm {
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  outline: none;
+
+  &:active {
+    transform: translateY(1px);
+  }
+}
+
+.floating-custom-select .btn-cancel {
+  background: $color-ge;
+  color: $color-g6;
+
+  &:hover {
+    background: $color-gd;
+  }
+}
+
+.floating-custom-select .btn-confirm {
+  background: $color-dark;
+  color: $color-w;
+}
+
+/* 에러 메시지 */
+.floating-custom-select .error-message {
+  position: absolute;
+  bottom: 5px;
+  right: 10px;
+  margin-top: 4px;
+  font-size: 12px;
+  color: $color-red;
+  padding-left: 4px;
+  text-align: right;
+}
+
+/* 드롭다운 트랜지션 */
+.floating-custom-select .dropdown-enter-active,
+.floating-custom-select .dropdown-leave-active {
+  transition: all 0.2s $transition-timing;
+  transform-origin: top;
+}
+
+.floating-custom-select .dropdown-enter-from,
+.floating-custom-select .dropdown-leave-to {
+  opacity: 0;
+  transform: scaleY(0.95);
+}
+
+.floating-custom-select .dropdown-enter-to,
+.floating-custom-select .dropdown-leave-from {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+/* ==========================================================================
+   Floating Inner Select 컴포넌트 (FloatingInput 내부에서 사용)
+   ========================================================================== */
+
+/* 컨테이너 */
+.floating-inner-select {
+  position: relative;
+  width: 100%;
+  user-select: none;
+
+  &.is-disabled {
+    cursor: not-allowed;
+  }
+}
+
+/* 셀렉트 트리거 */
+.floating-inner-select .select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  cursor: pointer;
+  outline: none;
+
+  .is-disabled & {
+    cursor: not-allowed;
+  }
+}
+
+/* 선택된 값 */
+.floating-inner-select .selected-value {
+  flex: 1;
+  font-size: 15px;
+  color: $color-g3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &.is-placeholder {
+    color: $color-g9;
+  }
+}
+
+/* 화살표 아이콘 */
+.floating-inner-select .arrow {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: $color-g6;
+  transition: transform 0.2s ease;
+
+  &.is-open {
+    transform: rotate(180deg);
+  }
+}
+
+/* 드롭다운 메뉴 */
+.floating-inner-select .dropdown-menu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: $color-w;
+  border: 1px solid $color-ge;
+  border-radius: 8px;
+  box-shadow: $shadow-base;
+  overflow: hidden;
+}
+
+/* 옵션 래퍼 */
+.floating-inner-select .options-wrapper {
+  max-height: 300px;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $color-ge;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $color-gd;
+    border-radius: 3px;
+
+    &:hover {
+      background: $color-gb;
+    }
+  }
+}
+
+/* 옵션 아이템 */
+.floating-inner-select .option-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background-color $transition-fast ease;
+  outline: none;
+
+  &:hover,
+  &.is-highlighted,
+  &:focus {
+    background-color: $color-ge;
+  }
+
+  &.is-selected {
+    background-color: $color-light;
+    color: $color-dark;
+    font-weight: 500;
+  }
+
+  &.is-active {
+    background-color: $color-light;
+    color: $color-dark;
+    font-weight: 500;
+  }
+
+  &:active {
+    background-color: $color-gd;
+  }
+
+  &.custom-input-option {
+    border-top: 1px solid $color-ge;
+    color: $color-dark;
+    font-weight: 500;
+  }
+}
+
+/* 옵션 라벨 */
+.floating-inner-select .option-label {
+  flex: 1;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 체크 아이콘 */
+.floating-inner-select .check-icon {
+  flex-shrink: 0;
+  margin-left: 8px;
+  color: $color-dark;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* 직접입력 래퍼 */
+.floating-inner-select .custom-input-wrapper {
+  padding: 12px 16px;
+  border-top: 1px solid $color-ge;
+}
+
+/* 직접입력 필드 */
+.floating-inner-select .custom-input-field {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid $color-gd;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  margin-bottom: 8px;
+
+  &:focus {
+    border-color: $color-dark;
+  }
+}
+
+/* 직접입력 버튼 영역 */
+.floating-inner-select .custom-input-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* 직접입력 버튼 */
+.floating-inner-select .btn-cancel,
+.floating-inner-select .btn-confirm {
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  outline: none;
+
+  &:active {
+    transform: translateY(1px);
+  }
+}
+
+.floating-inner-select .btn-cancel {
+  background: $color-ge;
+  color: $color-g6;
+
+  &:hover {
+    background: $color-gd;
+  }
+}
+
+.floating-inner-select .btn-confirm {
+  background: $color-dark;
+  color: $color-w;
+}
+
+/* 드롭다운 트랜지션 */
+.floating-inner-select .dropdown-enter-active,
+.floating-inner-select .dropdown-leave-active {
+  transition: all 0.2s $transition-timing;
+  transform-origin: top;
+}
+
+.floating-inner-select .dropdown-enter-from,
+.floating-inner-select .dropdown-leave-to {
+  opacity: 0;
+  transform: scaleY(0.95);
+}
+
+.floating-inner-select .dropdown-enter-to,
+.floating-inner-select .dropdown-leave-from {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+/* ***********************************
+ * data table
+ *********************************** */
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+
+  thead {
+    tr {
+      th {
+        padding: 20px 15px;
+        text-align: center;
+        font-weight: 900;
+        color: #21adad;
+        border-top: 2px solid #21adad;
+        border-bottom: 2px solid #21adad;
+        white-space: nowrap;
+      }
+    }
+  }
+
+  tbody {
+    tr {
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: #ebf7f8;
+      }
+
+      td {
+        padding: 15px;
+        text-align: center;
+        font-size: 14px;
+        border-bottom: 2px solid #dddddd;
+
+        .detail-btn {
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          margin: auto;
+
+          i {
+            &::before {
+              color: #21adad;
+              font-size: 24px;
+            }
+          }
+        }
+      }
+
+      &.no-input-data {
+        td {
+          padding: 40px 20px;
+          p {
+            font-size: 16px;
+            margin-bottom: 20px;
+          }
+
+          button {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            margin: auto;
+            gap: 8px;
+            border-radius: 10px;
+            padding: 15px 40px;
+            background-color: #21adad;
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+
+            i {
+              &::before {
+                color: #ffffff;
+              }
+            }
+          }
+        }
+
+        &:hover {
+          background-color: unset;
+        }
+      }
+
+      &.info-text {
+        td {
+          color: #21adad;
+          font-weight: 600;
+        }
+
+        &:hover {
+          background-color: unset;
+        }
+      }
+
+      &:last-of-type {
+        td {
+          border-bottom: 2px solid #21adad;
+        }
+      }
+    }
+  }
+}

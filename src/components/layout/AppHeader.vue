@@ -240,7 +240,7 @@ const breadcrumbs = computed(() => {
       pathArray.push(locale.pageTitle.registration.caseStatus)
     }
   } else if (path.startsWith('/notice')) {
-    // TODO 공지사항. 추후 조건 수정
+    // TODO: 공지사항. 추후 조건 수정
     pathArray.push(locale.pageTitle.shared.notice)
     if (path.includes('')) {
       pathArray.push(locale.pageTitle.shared.noticeDetail)

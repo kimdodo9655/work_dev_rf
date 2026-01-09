@@ -3,4 +3,6 @@
 @use '@/assets/styles/reset' as *;
 
 @use '@/assets/styles/rayout' as *;
-@use '@/assets/styles/form' as *;
+@use '@/assets/styles/template' as *;
+
+@use '@/assets/styles/pages/auth' as *;

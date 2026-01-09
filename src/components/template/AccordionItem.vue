@@ -1,4 +1,3 @@
-// components/AccordionItem.vue
 <template>
   <li :class="{ active: computedIsOpen }">
     <h1 @click="handleToggle">

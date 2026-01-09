@@ -1,6 +1,150 @@
+<template>
+  <div>
+    <!-- 데이터 개수 조절 패널 -->
+    <div style="margin-bottom: 20px; padding: 15px; background: #f5f5f5; border-radius: 5px">
+      <h3 style="margin-top: 0">테스트 패널 (Mock API)</h3>
+      <div style="margin-bottom: 10px">
+        <label
+          >데이터 개수:
+          <input
+            type="number"
+            v-model.number="dataCount"
+            min="0"
+            style="width: 100px; padding: 5px"
+        /></label>
+        <span style="margin-left: 10px"
+          >현재: <strong>{{ dataCount }}</strong
+          >개</span
+        >
+      </div>
+      <div>
+        <button @click="setDataCount(0)" style="margin: 2px; padding: 5px 10px">0개</button>
+        <button @click="setDataCount(3)" style="margin: 2px; padding: 5px 10px">3개</button>
+        <button @click="setDataCount(5)" style="margin: 2px; padding: 5px 10px">5개</button>
+        <button @click="setDataCount(10)" style="margin: 2px; padding: 5px 10px">10개</button>
+        <button @click="setDataCount(15)" style="margin: 2px; padding: 5px 10px">15개</button>
+        <button @click="setDataCount(50)" style="margin: 2px; padding: 5px 10px">50개</button>
+        <button @click="setDataCount(100)" style="margin: 2px; padding: 5px 10px">100개</button>
+        <button @click="setDataCount(220)" style="margin: 2px; padding: 5px 10px">
+          220개 (22페이지)
+        </button>
+      </div>
+      <div style="margin-top: 10px; font-size: 12px; color: #666">
+        💡 1번: 버튼 / 2번: 셀렉트 / 3번: 텍스트 (완료 상태) | 행 클릭 시 상세 페이지 이동
+      </div>
+    </div>
+
+    <div class="table-area">
+      <!-- 총 개수 표시 -->
+      <div style="text-align: right; margin-bottom: 10px">
+        총 <strong>{{ apiResponse.data.totalElements }}</strong
+        >건
+      </div>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th
+              v-for="col in columns"
+              :key="col.key"
+              :style="{ width: col.width, textAlign: col.align || 'left' }"
+            >
+              {{ col.label }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- 데이터가 없을 때 -->
+          <template v-if="allData.length === 0">
+            <tr class="empty-row">
+              <td
+                :colspan="columns.length"
+                :style="{
+                  textAlign: 'center',
+                  verticalAlign: 'middle',
+                  color: '#999',
+                  fontSize: '16px'
+                }"
+              >
+                <i class="fi fi-ss-problem-solving"></i>
+                조회된 데이터가 없습니다.
+              </td>
+            </tr>
+          </template>
+
+          <!-- 데이터가 있을 때 -->
+          <template v-else>
+            <!-- 실제 데이터 행 -->
+            <tr
+              v-for="row in paginatedData"
+              :key="row.rowNum"
+              class="data-row"
+              @click="handleRowClick(row)"
+            >
+              <td v-for="col in columns" :key="col.key" :style="{ textAlign: col.align || 'left' }">
+                <!-- 업무담당자 컬럼 특수 처리 -->
+                <template v-if="col.key === 'managerUserName'">
+                  <!-- 버튼: 담당자 미배정 -->
+                  <button
+                    v-if="getManagerDisplayType(row) === 'button'"
+                    @click="(e) => handleAssignManager(e, row)"
+                    class="assign-button"
+                  >
+                    담당자 배정
+                  </button>
+
+                  <!-- 셀렉트: 담당자 변경 가능 -->
+                  <select
+                    v-else-if="getManagerDisplayType(row) === 'select'"
+                    :value="row.managerUserName || ''"
+                    @click.stop
+                    @change="
+                      (e) => handleManagerChange(e, row, (e.target as HTMLSelectElement).value)
+                    "
+                    class="manager-select"
+                  >
+                    <option v-for="manager in managerOptions" :key="manager" :value="manager">
+                      {{ manager }}
+                    </option>
+                  </select>
+
+                  <!-- 텍스트: 변경 불가 (완료 상태) -->
+                  <span v-else>
+                    {{ row.managerUserName || '-' }}
+                  </span>
+                </template>
+
+                <!-- 일반 컬럼 -->
+                <template v-else>
+                  {{ getCellValue(row, col.key) }}
+                </template>
+              </td>
+            </tr>
+
+            <!-- 빈 행 (높이 유지용) -->
+            <tr v-for="i in emptyRows" :key="`empty-${i}`" class="empty-data-row">
+              <td v-for="col in columns" :key="col.key">&nbsp;</td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+
+      <!-- 페이지네이션 컴포넌트 사용 -->
+      <Pagination
+        v-if="allData.length > 0"
+        :total-items="allData.length"
+        :items-per-page="itemsPerPage"
+        :current-page="currentPage"
+        @update:current-page="currentPage = $event"
+      />
+    </div>
+  </div>
+</template>
+
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
+import Pagination from '@/components/template/PaginationItem.vue'
 import { logger } from '@/utils/logger'
 
 // 타입 정의
@@ -207,9 +351,6 @@ const allData = computed(() => apiResponse.value.data.content)
 const currentPage = ref(1)
 const itemsPerPage = 10
 
-// 전체 페이지 수 계산
-const totalPages = computed(() => Math.ceil(allData.value.length / itemsPerPage))
-
 // 현재 페이지 데이터
 const paginatedData = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage
@@ -223,52 +364,6 @@ const emptyRows = computed(() => {
   const current = paginatedData.value.length
   return current < itemsPerPage ? itemsPerPage - current : 0
 })
-
-// 보이는 페이지 계산
-const visiblePages = computed(() => {
-  const current = currentPage.value
-  const total = totalPages.value
-  const pages: (number | string)[] = []
-
-  if (total <= 9) {
-    // 전체 페이지가 9개 이하면 모두 표시
-    for (let i = 1; i <= total; i++) {
-      pages.push(i)
-    }
-  } else if (current <= 5) {
-    // 현재 페이지가 1~5: [1][2][3][4][5][6][7]---[마지막]
-    for (let i = 1; i <= 7; i++) {
-      pages.push(i)
-    }
-    pages.push('ellipsis-end')
-    pages.push(total)
-  } else if (current >= total - 4) {
-    // 현재 페이지가 마지막-4 ~ 마지막: [1]---[마지막-6][마지막-5][마지막-4][마지막-3][마지막-2][마지막-1][마지막]
-    pages.push(1)
-    pages.push('ellipsis-start')
-    for (let i = total - 6; i <= total; i++) {
-      pages.push(i)
-    }
-  } else {
-    // 중간 페이지: [1]---[현재-3][현재-2][현재-1][현재][현재+1][현재+2][현재+3]---[마지막]
-    pages.push(1)
-    pages.push('ellipsis-start')
-    for (let i = current - 3; i <= current + 3; i++) {
-      pages.push(i)
-    }
-    pages.push('ellipsis-end')
-    pages.push(total)
-  }
-
-  return pages
-})
-
-// 페이지 변경
-const goToPage = (page: number) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page
-  }
-}
 
 // 업무담당자 표시 타입 결정 로직
 const getManagerDisplayType = (row: RegistrationData) => {
@@ -324,172 +419,6 @@ const setDataCount = (count: number) => {
   currentPage.value = 1
 }
 </script>
-
-<template>
-  <div>
-    <!-- 데이터 개수 조절 패널 -->
-    <div style="margin-bottom: 20px; padding: 15px; background: #f5f5f5; border-radius: 5px">
-      <h3 style="margin-top: 0">테스트 패널 (Mock API)</h3>
-      <div style="margin-bottom: 10px">
-        <label
-          >데이터 개수:
-          <input
-            type="number"
-            v-model.number="dataCount"
-            min="0"
-            style="width: 100px; padding: 5px"
-        /></label>
-        <span style="margin-left: 10px"
-          >현재: <strong>{{ dataCount }}</strong
-          >개</span
-        >
-      </div>
-      <div>
-        <button @click="setDataCount(0)" style="margin: 2px; padding: 5px 10px">0개</button>
-        <button @click="setDataCount(3)" style="margin: 2px; padding: 5px 10px">3개</button>
-        <button @click="setDataCount(5)" style="margin: 2px; padding: 5px 10px">5개</button>
-        <button @click="setDataCount(10)" style="margin: 2px; padding: 5px 10px">10개</button>
-        <button @click="setDataCount(15)" style="margin: 2px; padding: 5px 10px">15개</button>
-        <button @click="setDataCount(50)" style="margin: 2px; padding: 5px 10px">50개</button>
-        <button @click="setDataCount(100)" style="margin: 2px; padding: 5px 10px">100개</button>
-        <button @click="setDataCount(220)" style="margin: 2px; padding: 5px 10px">
-          220개 (22페이지)
-        </button>
-      </div>
-      <div style="margin-top: 10px; font-size: 12px; color: #666">
-        💡 1번: 버튼 / 2번: 셀렉트 / 3번: 텍스트 (완료 상태) | 행 클릭 시 상세 페이지 이동
-      </div>
-    </div>
-
-    <div class="table-area">
-      <!-- 총 개수 표시 -->
-      <div style="text-align: right; margin-bottom: 10px">
-        총 <strong>{{ apiResponse.data.totalElements }}</strong
-        >건
-      </div>
-
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th
-              v-for="col in columns"
-              :key="col.key"
-              :style="{ width: col.width, textAlign: col.align || 'left' }"
-            >
-              {{ col.label }}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- 데이터가 없을 때 -->
-          <template v-if="allData.length === 0">
-            <tr class="empty-row">
-              <td
-                :colspan="columns.length"
-                :style="{
-                  textAlign: 'center',
-                  verticalAlign: 'middle',
-                  color: '#999',
-                  fontSize: '16px'
-                }"
-              >
-                <i class="fi fi-ss-problem-solving"></i>
-                조회된 데이터가 없습니다.
-              </td>
-            </tr>
-          </template>
-
-          <!-- 데이터가 있을 때 -->
-          <template v-else>
-            <!-- 실제 데이터 행 -->
-            <tr
-              v-for="row in paginatedData"
-              :key="row.rowNum"
-              class="data-row"
-              @click="handleRowClick(row)"
-            >
-              <td v-for="col in columns" :key="col.key" :style="{ textAlign: col.align || 'left' }">
-                <!-- 업무담당자 컬럼 특수 처리 -->
-                <template v-if="col.key === 'managerUserName'">
-                  <!-- 버튼: 담당자 미배정 -->
-                  <button
-                    v-if="getManagerDisplayType(row) === 'button'"
-                    @click="(e) => handleAssignManager(e, row)"
-                    class="assign-button"
-                  >
-                    담당자 배정
-                  </button>
-
-                  <!-- 셀렉트: 담당자 변경 가능 -->
-                  <select
-                    v-else-if="getManagerDisplayType(row) === 'select'"
-                    :value="row.managerUserName || ''"
-                    @click.stop
-                    @change="
-                      (e) => handleManagerChange(e, row, (e.target as HTMLSelectElement).value)
-                    "
-                    class="manager-select"
-                  >
-                    <option v-for="manager in managerOptions" :key="manager" :value="manager">
-                      {{ manager }}
-                    </option>
-                  </select>
-
-                  <!-- 텍스트: 변경 불가 (완료 상태) -->
-                  <span v-else>
-                    {{ row.managerUserName || '-' }}
-                  </span>
-                </template>
-
-                <!-- 일반 컬럼 -->
-                <template v-else>
-                  {{ getCellValue(row, col.key) }}
-                </template>
-              </td>
-            </tr>
-
-            <!-- 빈 행 (높이 유지용) -->
-            <tr v-for="i in emptyRows" :key="`empty-${i}`" class="empty-data-row">
-              <td v-for="col in columns" :key="col.key">&nbsp;</td>
-            </tr>
-          </template>
-        </tbody>
-      </table>
-
-      <!-- 페이지네이션 -->
-      <div v-if="allData.length > 0" class="pagination">
-        <button
-          @click="goToPage(currentPage - 1)"
-          :disabled="currentPage === 1"
-          class="page-button"
-        >
-          이전
-        </button>
-
-        <template v-for="(page, index) in visiblePages" :key="index">
-          <!-- 말줄임표 -->
-          <span v-if="typeof page === 'string'" class="ellipsis">---</span>
-          <!-- 페이지 번호 -->
-          <button
-            v-else
-            @click="goToPage(page)"
-            :class="['page-button', { active: page === currentPage }]"
-          >
-            {{ page }}
-          </button>
-        </template>
-
-        <button
-          @click="goToPage(currentPage + 1)"
-          :disabled="currentPage === totalPages"
-          class="page-button"
-        >
-          다음
-        </button>
-      </div>
-    </div>
-  </div>
-</template>
 
 <style scoped>
 .table-area {
@@ -583,49 +512,5 @@ const setDataCount = (count: number) => {
   outline: none;
   border-color: #007bff;
   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-}
-
-/* 페이지네이션 */
-.pagination {
-  margin-top: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-}
-
-.page-button {
-  min-width: 50px;
-  padding: 8px 12px;
-  border: 1px solid #dee2e6;
-  background-color: white;
-  color: #495057;
-  cursor: pointer;
-  border-radius: 4px;
-  font-size: 14px;
-  transition: all 0.2s;
-}
-
-.page-button:hover:not(:disabled) {
-  background-color: #e9ecef;
-  border-color: #adb5bd;
-}
-
-.page-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.page-button.active {
-  background-color: #007bff;
-  color: white;
-  border-color: #007bff;
-  font-weight: bold;
-}
-
-.ellipsis {
-  padding: 0 8px;
-  color: #6c757d;
-  user-select: none;
 }
 </style>

@@ -232,6 +232,10 @@ const FRAME_SIZES: FrameSize[] = [
 
 const ROUTE_CATEGORIES = [
   {
+    name: '테스트',
+    routes: [{ path: '/test', title: '테스트' }]
+  },
+  {
     name: '인증',
     routes: [
       { path: '/auth/login', title: '로그인' },

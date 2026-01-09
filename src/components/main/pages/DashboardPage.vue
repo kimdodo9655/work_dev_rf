@@ -132,7 +132,7 @@
         <div class="dashboard-card">
           <h4>진행 상태별 업무 현황</h4>
 
-          <!-- TODO 임시영역 -->
+          <!-- TODO: 임시영역 -->
           <div class="catbox">
             <i class="fi fi-sr-cat"></i>
             <p>This area is in a Schrödinger state.</p>
@@ -639,7 +639,7 @@ const handleClick = (tab: DateTab) => {
   }
 }
 
-// TODO 임시영역
+// TODO: 임시영역
 .catbox {
   background-color: #eeeeee;
   height: 300px;

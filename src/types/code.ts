@@ -33,6 +33,7 @@ export interface CodeResponse {
   workTypes: Code[]
   paymentStatuses: Code[]
   adminInfoLinkTime: Code[]
+  userStatuses: Code[]
 }
 
 /**
