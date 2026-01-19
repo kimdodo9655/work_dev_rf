@@ -1,0 +1,138 @@
+@use '@/assets/styles/variables' as *;
+@use '@/assets/styles/typography' as *;
+@use '@/assets/styles/reset' as *;
+
+/* ***********************************
+ * 접속오류 - 404, Mac OS
+ *********************************** */
+.error-area {
+  display: flex;
+  min-height: 100vh;
+
+  align-items: center;
+  justify-content: center;
+
+  .error-box {
+    height: auto;
+    margin: 80px auto 160px;
+
+    .cont-top {
+      display: flex;
+      margin-bottom: 40px;
+
+      > img {
+        height: 200px;
+      }
+      > div {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        margin-left: 60px;
+        h1 {
+          color: $color-main;
+          margin-bottom: 20px;
+        }
+      }
+    }
+
+    .error-help-box {
+      background-color: $color-w;
+      border-radius: 10px;
+      padding: 30px;
+    }
+  }
+}
+
+/* ***********************************
+ * 접속오류 - Mobile
+ *********************************** */
+.mobile-error-page {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  margin: 60px auto;
+
+  > img {
+    height: 150px;
+    margin-right: 10px;
+    margin-bottom: 40px;
+  }
+
+  > h4 {
+    color: $color-main;
+    margin-bottom: 40px;
+  }
+
+  > p {
+    text-align: center;
+  }
+}
+
+/* ***********************************
+ * 접속오류 - 404, Mac OS, Mobile 하단 안내문 공용
+ *********************************** */
+.error-help-box {
+  padding: 20px 30px;
+  border-radius: 10px;
+  background-color: $color-w;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 40px;
+
+  > p {
+    font-size: 16px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  > ul {
+    // 가로 정렬 옵션
+    &.horizontal {
+      display: flex;
+      gap: 40px;
+
+      li {
+        gap: 15px;
+        &:first-of-type {
+          margin-bottom: 0;
+        }
+
+        > p {
+          font-size: 16px;
+        }
+
+        br {
+          display: none;
+        }
+      }
+    }
+
+    li {
+      display: flex;
+
+      &:first-of-type {
+        margin-bottom: 10px;
+      }
+
+      > p {
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 1.6;
+
+        span {
+          font-size: 12px;
+          color: $color-g9;
+        }
+      }
+
+      > p.title {
+        min-width: 60px;
+        color: $color-dark;
+      }
+    }
+  }
+}

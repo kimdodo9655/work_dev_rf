@@ -65,6 +65,156 @@
     </form>
   </div>
 
+  <div class="tab-area">TAB AREA</div>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>기관구분</th>
+        <th>기관명칭</th>
+        <th>법인등록번호</th>
+        <th>대표자명</th>
+        <th>본점 주소</th>
+        <th>사용유무</th>
+        <th>상세</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>법무사사무소</td>
+        <td>뱅클법무사사무소</td>
+        <td>101111-1234567</td>
+        <td>김대표</td>
+        <td>서울특별시 용산구 이태원동 1234번지 뱅클법무사빌딩 201호</td>
+        <td>승인대기</td>
+        <td>
+          <button class="detail-btn" type="button">
+            <i class="fi fi-sr-angle-circle-right"></i>
+          </button>
+        </td>
+      </tr>
+      <tr>
+        <td>법무사사무소</td>
+        <td>뱅클법무사사무소</td>
+        <td>101111-1234567</td>
+        <td>김대표</td>
+        <td>서울특별시 용산구 이태원동 1234번지 뱅클법무사빌딩 201호</td>
+        <td>승인대기</td>
+        <td>
+          <button class="detail-btn" type="button">
+            <i class="fi fi-sr-angle-circle-right"></i>
+          </button>
+        </td>
+      </tr>
+      <tr>
+        <td>법무사사무소</td>
+        <td>뱅클법무사사무소</td>
+        <td>101111-1234567</td>
+        <td>김대표</td>
+        <td>서울특별시 용산구 이태원동 1234번지 뱅클법무사빌딩 201호</td>
+        <td>승인대기</td>
+        <td>
+          <button class="detail-btn" type="button">
+            <i class="fi fi-sr-angle-circle-right"></i>
+          </button>
+        </td>
+      </tr>
+      <tr>
+        <td>법무사사무소</td>
+        <td>뱅클법무사사무소</td>
+        <td>101111-1234567</td>
+        <td>김대표</td>
+        <td>서울특별시 용산구 이태원동 1234번지 뱅클법무사빌딩 201호</td>
+        <td>승인대기</td>
+        <td>
+          <button class="detail-btn" type="button">
+            <i class="fi fi-sr-angle-circle-right"></i>
+          </button>
+        </td>
+      </tr>
+      <tr>
+        <td>법무사사무소</td>
+        <td>뱅클법무사사무소</td>
+        <td>101111-1234567</td>
+        <td>김대표</td>
+        <td>서울특별시 용산구 이태원동 1234번지 뱅클법무사빌딩 201호</td>
+        <td>승인대기</td>
+        <td>
+          <button class="detail-btn" type="button">
+            <i class="fi fi-sr-angle-circle-right"></i>
+          </button>
+        </td>
+      </tr>
+      <tr>
+        <td>법무사사무소</td>
+        <td>뱅클법무사사무소</td>
+        <td>101111-1234567</td>
+        <td>김대표</td>
+        <td>서울특별시 용산구 이태원동 1234번지 뱅클법무사빌딩 201호</td>
+        <td>승인대기</td>
+        <td>
+          <button class="detail-btn" type="button">
+            <i class="fi fi-sr-angle-circle-right"></i>
+          </button>
+        </td>
+      </tr>
+      <tr>
+        <td>법무사사무소</td>
+        <td>뱅클법무사사무소</td>
+        <td>101111-1234567</td>
+        <td>김대표</td>
+        <td>서울특별시 용산구 이태원동 1234번지 뱅클법무사빌딩 201호</td>
+        <td>승인대기</td>
+        <td>
+          <button class="detail-btn" type="button">
+            <i class="fi fi-sr-angle-circle-right"></i>
+          </button>
+        </td>
+      </tr>
+      <tr>
+        <td>법무사사무소</td>
+        <td>뱅클법무사사무소</td>
+        <td>101111-1234567</td>
+        <td>김대표</td>
+        <td>서울특별시 용산구 이태원동 1234번지 뱅클법무사빌딩 201호</td>
+        <td>승인대기</td>
+        <td>
+          <button class="detail-btn" type="button">
+            <i class="fi fi-sr-angle-circle-right"></i>
+          </button>
+        </td>
+      </tr>
+      <tr>
+        <td>법무사사무소</td>
+        <td>뱅클법무사사무소</td>
+        <td>101111-1234567</td>
+        <td>김대표</td>
+        <td>서울특별시 용산구 이태원동 1234번지 뱅클법무사빌딩 201호</td>
+        <td>승인대기</td>
+        <td>
+          <button class="detail-btn" type="button">
+            <i class="fi fi-sr-angle-circle-right"></i>
+          </button>
+        </td>
+      </tr>
+      <tr>
+        <td>법무사사무소</td>
+        <td>뱅클법무사사무소</td>
+        <td>101111-1234567</td>
+        <td>김대표</td>
+        <td>서울특별시 용산구 이태원동 1234번지 뱅클법무사빌딩 201호</td>
+        <td>승인대기</td>
+        <td>
+          <button class="detail-btn" type="button">
+            <i class="fi fi-sr-angle-circle-right"></i>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <Pagination v-model:current-page="currentPage" :total-items="100" :items-per-page="10" />
+
   <router-link to="/estimate/create/REG-2024-001">test</router-link>
 </template>
 
@@ -74,7 +224,10 @@ import { computed, ref } from 'vue'
 import SearchDateRangePicker from '@/components/template/input/SearchDateRangePicker.vue'
 import SearchInput from '@/components/template/input/SearchInput.vue'
 import SearchSelect from '@/components/template/input/SearchSelect.vue'
+import Pagination from '@/components/template/PaginationItem.vue'
 import { useMessage } from '@/composables/useMessage'
+
+const currentPage = ref(1) // 현재 페이지 상태
 
 const { t } = useMessage()
 const handleSubmit = async () => {}
@@ -232,3 +385,12 @@ function handleSearch(value: string) {
   // API 호출 등
 }
 </script>
+
+<style>
+.tab-area {
+  width: 100%;
+  height: 60px;
+  margin: 20px 0;
+  background-color: #ffffff;
+}
+</style>

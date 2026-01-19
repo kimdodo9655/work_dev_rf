@@ -1,6 +1,8 @@
 /**
  * API 엔드포인트 상수
  * 모든 API 경로 한 곳에서 관리
+ *
+ * 260116 오전 api update 반영
  */
 export const API = {
   // [A01] 주소/등기소
@@ -118,7 +120,12 @@ export const API = {
     WORK_TYPES: '/api/codes/work-types', // [P06-14][GET] 업무 구분 목록 조회
     PAYMENT_STATUSES: '/api/codes/payment-statuses', // [P06-15][GET] 지급 상태 목록 조회
     ADMIN_INFO_LINK_TIME: '/api/codes/adminInfo-linkTime', // [P06-16][GET] 행정정보 연계 시점 목록 조회
-    USER_STATUSES: '/api/codes/user-statuses' // [P06-17][GET] 사용자 상태 목록 조회
+    USER_STATUSES: '/api/codes/user-statuses', // [P06-17][GET] 사용자 상태 목록 조회
+    ASSIGNMENT_WORKS: '/api/codes/assignment-works', // [P06-18][GET] 배정 업무 목록 조회
+    PROGRESS_STATUSES: '/api/codes/progress-statuses', // [P06-19][GET] 진행 상태 목록 조회
+    QUOTE_PROGRESS_STATUSES: '/api/codes/quote-progress-statuses', // [P06-20][GET] 등기 견적 진행 상태 목록 조회
+    ESTIMATE_WRITING_STATUSES: '/api/codes/estimate-writing-statuses', // [P06-21][GET] 등기 견적 작성 여부 목록 조회
+    ESTIMATE_SELECTION_STATUSES: '/api/codes/estimate-selection-statuses' // [P06-22][GET] 등기 견적 선정 상태 목록 조회
   },
 
   // [P07] 알림
@@ -137,7 +144,10 @@ export const API = {
   // [R00] 등기 테스트 데이터
   REGISTRY_TEST: {
     REQUEST_DATA: '/api/registry/requests/test-data', // [R00-01][POST] 등기의뢰 테스트 데이터 생성
-    PROGRESS_DATA: '/api/registry/progress/test-data' // [R00-02][POST] 등기진행 테스트 데이터 생성
+    PROGRESS_DATA: '/api/registry/progress/test-data', // [R00-02][POST] 등기진행 테스트 데이터 생성
+    SCHEDULER_GENERATE: '/api/registry/scheduler/test-data/generate', // [R00-03][POST] 등기 테스트 데이터 스케쥴러 수동 실행
+    SCHEDULER_GENERATE_MISSING: '/api/registry/scheduler/test-data/generate-missing-progress', // [R00-04][POST] 누락된 등기 진행 데이터 생성 스케쥴러
+    SCHEDULER_ASSIGN_MANAGERS: '/api/registry/scheduler/test-data/assign-managers' // [R00-05][POST] 등기 담당자 배정 스케쥴러 수동 실행
   },
 
   // [R00D] 등기의뢰-문서
@@ -173,32 +183,50 @@ export const API = {
   // [R02B] 등기진행-기본
   REGISTRY_PROGRESS: {
     LIST: '/api/registry/progress', // [R02B-01][GET] 진행현황 목록 조회
-    BASIC_INFO: (requestNumber: string) => `/api/registry/progress/${requestNumber}/basic-info`, // [R02B-02][GET] 업무 기본정보 조회
-    ASSIGN_MANAGER: (requestNumber: string) =>
-      `/api/registry/progress/${requestNumber}/assign-manager`, // [R02B-03][PATCH] 업무담당자 배정
-    LOAN_INFO: (requestNumber: string) => `/api/registry/progress/${requestNumber}/loan-info` // [R02B-04][GET] 대출 금융기관 정보 조회
+    BASIC_INFO: (registryManagementNumber: string) =>
+      `/api/registry/progress/${registryManagementNumber}/basic-info`, // [R02B-02][GET] 업무 기본정보 조회
+    ASSIGN_MANAGER: (registryManagementNumber: string) =>
+      `/api/registry/progress/${registryManagementNumber}/assign-manager`, // [R02B-03][PATCH] 업무담당자 배정
+    LOAN_INFO: (registryManagementNumber: string) =>
+      `/api/registry/progress/${registryManagementNumber}/loan-info` // [R02B-04][GET] 대출 금융기관 정보 조회
   },
 
   // [R02C] 등기진행-선순위대출
   REGISTRY_SENIOR_LOAN: {
-    LIST: (managementNumber: string) =>
-      `/api/registry/progress/${managementNumber}/senior-loan-repayments` // [R02C-01][GET] 선순위대출상환 정보 조회
+    LIST: (registryManagementNumber: string) =>
+      `/api/registry/progress/${registryManagementNumber}/senior-loan-repayments` // [R02C-01][GET] 선순위대출상환 정보 조회
   },
 
   // [R02D] 등기진행-등기유형
   REGISTRY_APPLICATION: {
-    CREATE: (managementNumber: string) => `/api/registry/applications/${managementNumber}`, // [R02D-02][POST] 등기유형 추가
-    DELETE: (managementNumber: string) => `/api/registry/applications/${managementNumber}`, // [R02D-03][DELETE] 등기유형 삭제
-    UPDATE: (managementNumber: string) => `/api/registry/applications/${managementNumber}`, // [R02D-04][PATCH] 등기유형 수정
+    CREATE: (registryManagementNumber: string) =>
+      `/api/registry/applications/${registryManagementNumber}`, // [R02D-02][POST] 등기유형 추가
+    DELETE: (registryManagementNumber: string) =>
+      `/api/registry/applications/${registryManagementNumber}`, // [R02D-03][DELETE] 등기유형 삭제
+    UPDATE: (registryManagementNumber: string) =>
+      `/api/registry/applications/${registryManagementNumber}`, // [R02D-04][PATCH] 등기유형 수정
     OWNERSHIP_TRANSFER: (applicationId: string | number) =>
       `/api/registry/applications/${applicationId}/ownership-transfer`, // [R02D-05][GET] 소유권이전 조회
-    MORTGAGE_INFO: (managementNumber: string) =>
-      `/api/registry/applications/mortgages/${managementNumber}/info`, // [R02D-06][GET] 근저당권설정 조회
-    LEGAL_AGENT: (managementNumber: string) =>
-      `/api/registry/applications/mortgages/${managementNumber}/legal-agent`, // [R02D-07][GET] 등기유형별 법무대리인 조회
-    TABS: (managementNumber: string) => `/api/registry/applications/${managementNumber}/tabs`, // [R02D-08][GET] 등기신청서 양식 목록 조회
+    MORTGAGE_INFO: (registryManagementNumber: string) =>
+      `/api/registry/applications/mortgages/${registryManagementNumber}/info`, // [R02D-06][GET] 근저당권설정 조회
+    LEGAL_AGENT: (registryManagementNumber: string) =>
+      `/api/registry/applications/mortgages/${registryManagementNumber}/legal-agent`, // [R02D-07][GET] 등기유형별 법무대리인 조회
+    TABS: (registryManagementNumber: string) =>
+      `/api/registry/applications/${registryManagementNumber}/tabs`, // [R02D-08][GET] 등기신청서 양식 목록 조회
     DOCUMENTS: (applicationId: string | number) =>
       `/api/registry/applications/${applicationId}/documents` // [R02D-09][GET] 등기신청서 전자문서 조회
+  },
+
+  // [R02E] 등기진행-전자서명 섹션
+  REGISTRY_E_SIGNATURE: {
+    LIST: (registryManagementNumber: string) =>
+      `/api/registry/progress/${registryManagementNumber}/e-signatures`, // [R02E-01][GET] 전자서명 진행 정보 조회
+    REQUEST: (registryManagementNumber: string, eSignatureId: string | number) =>
+      `/api/registry/progress/${registryManagementNumber}/e-signatures/${eSignatureId}/request`, // [R02E-02][POST] 전자서명 요청
+    COMPLETE: (registryManagementNumber: string, eSignatureId: string | number) =>
+      `/api/registry/progress/${registryManagementNumber}/e-signatures/${eSignatureId}/complete`, // [R02E-03][POST] 전자서명 완료
+    RE_REQUEST: (registryManagementNumber: string, eSignatureId: string | number) =>
+      `/api/registry/progress/${registryManagementNumber}/e-signatures/${eSignatureId}/re-request` // [R02E-04][POST] 전자서명 재요청
   },
 
   // [R02E] 등기진행-계약정보
@@ -237,6 +265,22 @@ export const API = {
       `/api/registry/applications/${applicationId}/certificates` // [R02G-02][PUT] 등기권리증 대체
   },
 
+  // [R02H] 등기진행-채권및세금 섹션
+  REGISTRY_FINANCIAL: {
+    DETAIL: (applicationId: string | number) =>
+      `/api/registry/applications/${applicationId}/mortgage/financial`, // [R02H-01][GET] 채권및세금 상세 조회
+    REPLACE: (applicationId: string | number) =>
+      `/api/registry/applications/${applicationId}/mortgage/financial` // [R02H-02][POST] 채권및세금 대체
+  },
+
+  // [R02I] 등기진행-세금 섹션
+  REGISTRY_TAX: {
+    DETAIL: (applicationId: string | number) =>
+      `/api/registry/applications/${applicationId}/ownership/tax`, // [R02I-01][GET] 세금 상세 조회
+    SAVE: (applicationId: string | number) =>
+      `/api/registry/applications/${applicationId}/ownership/tax` // [R02I-02][POST] 세금 수정
+  },
+
   // [R02J] 등기진행-첨부서면
   REGISTRY_ATTACHMENT: {
     LIST: (applicationId: string | number) =>
@@ -265,65 +309,98 @@ export const API = {
       `/api/registry/applications/${applicationId}/correction` // [R02L-02][PUT] 등기명의인표시경정 대체
   },
 
+  // [R02M] 등기진행-말소사항 섹션
+  REGISTRY_CANCELLATION: {
+    DETAIL: (applicationId: string | number) =>
+      `/api/registry/applications/${applicationId}/cancellations`, // [R02M-01][GET] 말소사항 상세 조회
+    REPLACE: (applicationId: string | number) =>
+      `/api/registry/applications/${applicationId}/cancellations` // [R02M-02][PUT] 말소사항 대체
+  },
+
   // [R02N] 등기진행-행정정보동의
   REGISTRY_ADMIN_INFO: {
-    LIST: (managementNumber: string) =>
-      `/api/registry/progress/${managementNumber}/admin-info-requests`, // [R02N-01][GET] 행정정보사전동의서 목록 조회
-    REPLACE: (managementNumber: string) =>
-      `/api/registry/progress/${managementNumber}/admin-info-requests`, // [R02N-02][PUT] 행정정보사전동의서 대체
-    DETAILS: (managementNumber: string) =>
-      `/api/registry/progress/${managementNumber}/admin-info-requests/details` // [R02N-03][GET] 행정정보사전동의서 상세 조회
+    LIST: (registryManagementNumber: string) =>
+      `/api/registry/progress/${registryManagementNumber}/admin-info-requests`, // [R02N-01][GET] 행정정보사전동의서 목록 조회
+    UPDATE: (registryManagementNumber: string) =>
+      `/api/registry/progress/${registryManagementNumber}/admin-info-requests`, // [R02N-02][PATCH] 행정정보사전동의서 수정
+    DETAILS: (registryManagementNumber: string) =>
+      `/api/registry/progress/${registryManagementNumber}/admin-info-requests/details` // [R02N-03][GET] 행정정보사전동의서 상세 조회
+  },
+
+  // [R02Q] 등기진행-국민주택채권 섹션
+  REGISTRY_HOUSING_BOND: {
+    DETAIL: (registryManagementNumber: string) =>
+      `/api/registry/progress/${registryManagementNumber}/housing-bonds`, // [R02Q-01][GET] 국민주택채권 상세 조회
+    SAVE: (registryManagementNumber: string, registryType: string) =>
+      `/api/registry/progress/${registryManagementNumber}/housing-bonds/${registryType}` // [R02Q-02][PUT] 국민주택채권 상세 저장
   },
 
   // [R02S] 등기진행-이전말소권리증
   REGISTRY_TRANSFER_CERTIFICATE: {
-    LIST: (managementNumber: string) =>
-      `/api/registry/progress/${managementNumber}/transfer-certificates`, // [R02S-01][GET] 이전/말소등기권리증 목록 조회
-    REPLACE: (managementNumber: string) =>
-      `/api/registry/progress/${managementNumber}/transfer-certificates`, // [R02S-02][PUT] 이전/말소등기권리증 대체
-    DETAIL: (managementNumber: string) =>
-      `/api/registry/progress/${managementNumber}/transfer-certificates/detail` // [R02S-03][GET] 이전/말소등기권리증 상세 조회
+    LIST: (registryManagementNumber: string) =>
+      `/api/registry/progress/${registryManagementNumber}/transfer-cancellation-certificates`, // [R02S-01][GET] 이전/말소등기권리증 목록 조회 + 경로 수정
+    REPLACE: (registryManagementNumber: string) =>
+      `/api/registry/progress/${registryManagementNumber}/transfer-cancellation-certificates`, // [R02S-02][PUT] 이전/말소등기권리증 대체 + 경로 수정
+    DETAIL: (registryManagementNumber: string) =>
+      `/api/registry/progress/${registryManagementNumber}/transfer-cancellation-certificates/detail` // [R02S-03][GET] 이전/말소등기권리증 상세 조회 + 경로 수정
   },
 
   // [R02T] 등기진행-신청사건
   REGISTRY_CASE: {
-    LIST: (managementNumber: string) => `/api/registry/progress/${managementNumber}/case-inquiries`, // [R02T-01][GET] 신청사건 목록 조회
-    REPLACE: (managementNumber: string) =>
-      `/api/registry/progress/${managementNumber}/case-inquiries`, // [R02T-02][PUT] 신청사건 대체
-    DETAILS: (managementNumber: string) =>
-      `/api/registry/progress/${managementNumber}/case-inquiries/details` // [R02T-03][GET] 신청사건 상세 조회
+    LIST: (registryManagementNumber: string) =>
+      `/api/registry/progress/${registryManagementNumber}/case-inquiries`, // [R02T-01][GET] 신청사건 목록 조회
+    UPDATE: (registryManagementNumber: string) =>
+      `/api/registry/progress/${registryManagementNumber}/case-inquiries`, // [R02T-02][PATCH] 신청사건 수정
+    DETAILS: (registryManagementNumber: string) =>
+      `/api/registry/progress/${registryManagementNumber}/case-inquiries/details` // [R02T-03][GET] 신청사건 상세 조회
   },
 
   // [R02U] 등기진행-접수정보
   REGISTRY_RECEIPT: {
-    LIST: (managementNumber: string) => `/api/registry/applications/${managementNumber}/receipts`, // [R02U-01][GET] 등기접수 목록 조회
-    REPLACE: (managementNumber: string) =>
-      `/api/registry/applications/${managementNumber}/receipts`, // [R02U-02][PUT] 등기접수 대체
-    DETAIL: (managementNumber: string) =>
-      `/api/registry/applications/${managementNumber}/receipts/detail` // [R02U-03][GET] 등기접수 상세 조회
+    LIST: (registryManagementNumber: string) =>
+      `/api/registry/applications/${registryManagementNumber}/receipts`, // [R02U-01][GET] 등기접수 목록 조회
+    UPDATE: (registryManagementNumber: string) =>
+      `/api/registry/applications/${registryManagementNumber}/receipts`, // [R02U-02][PATCH] 등기접수 수정
+    DETAIL: (registryManagementNumber: string) =>
+      `/api/registry/applications/${registryManagementNumber}/receipts/detail` // [R02U-03][GET] 등기접수 상세 조회
   },
 
   // [R02X] 등기진행-완료문서
   REGISTRY_COMPLETION: {
-    LIST: (managementNumber: string) =>
-      `/api/registry/progress/${managementNumber}/completion-documents`, // [R02X-01][GET] 등기완료 문서 목록 조회
-    DETAILS: (managementNumber: string) =>
-      `/api/registry/progress/${managementNumber}/completion-documents/details` // [R02X-02][GET] 등기완료 문서 상세 조회
+    LIST: (registryManagementNumber: string) =>
+      `/api/registry/progress/${registryManagementNumber}/completion-documents`, // [R02X-01][GET] 등기완료 문서 목록 조회
+    DETAILS: (registryManagementNumber: string) =>
+      `/api/registry/progress/${registryManagementNumber}/completion-documents/details`, // [R02X-02][GET] 등기완료 문서 상세 조회
+    UPLOAD_FULL: (registryManagementNumber: string) =>
+      `/api/registry/progress/${registryManagementNumber}/completion-documents/full-certificate/uploads`, // [R02X-03][POST] 등기사항전부증명서 문서 업로드
+    UPLOAD_POST: (registryManagementNumber: string) =>
+      `/api/registry/progress/${registryManagementNumber}/completion-documents/post-certificate/uploads`, // [R02X-04][POST] 사후등기필정보 문서 업로드
+    PREVIEW_FULL: (registryManagementNumber: string) =>
+      `/api/registry/progress/${registryManagementNumber}/completion-documents/full-certificate/preview`, // [R02X-05][GET] 등기사항전부증명서 Base64 보기
+    PREVIEW_POST: (registryManagementNumber: string) =>
+      `/api/registry/progress/${registryManagementNumber}/completion-documents/post-certificate/preview`, // [R02X-06][GET] 사후등기필정보 Base64 보기
+    DELETE_FULL: (registryManagementNumber: string, fileName: string) =>
+      `/api/registry/progress/${registryManagementNumber}/completion-documents/full-certificate/${fileName}`, // [R02X-07][DELETE] 등기사항전부증명서 문서 삭제
+    DELETE_POST: (registryManagementNumber: string, fileName: string) =>
+      `/api/registry/progress/${registryManagementNumber}/completion-documents/post-certificate/${fileName}` // [R02X-07][DELETE] 사후등기필정보 문서 삭제
   },
 
   // [R02Y] 등기진행-문서
   REGISTRY_PROGRESS_DOCUMENT: {
-    TEMP_UPLOAD: (managementNumber: string) =>
-      `/api/registry/progress/${managementNumber}/documents/temp`, // [R02Y-01][POST] 문서 임시 업로드
-    LIST: (managementNumber: string) => `/api/registry/progress/${managementNumber}/documents`, // [R02Y-02][GET] 문서 목록 조회
-    SAVE: (managementNumber: string) => `/api/registry/progress/${managementNumber}/documents`, // [R02Y-03][POST] 문서 저장
-    DELETE: (managementNumber: string) => `/api/registry/progress/${managementNumber}/documents`, // [R02Y-04][DELETE] 문서 삭제
-    DOWNLOAD: (managementNumber: string) =>
-      `/api/registry/progress/${managementNumber}/documents/download`, // [R02Y-05][GET] 문서 다운로드
-    DOWNLOAD_BASE64: (managementNumber: string) =>
-      `/api/registry/progress/${managementNumber}/documents/download/base64`, // [R02Y-06][GET] 문서 Base64 다운로드
-    DELETE_BY_APPLICATION: (managementNumber: string, applicationId: string | number) =>
-      `/api/registry/progress/${managementNumber}/applications/${applicationId}/documents` // [R02Y-07][DELETE] 신청번호 기준 문서 삭제
+    TEMP_UPLOAD: (registryManagementNumber: string) =>
+      `/api/registry/progress/${registryManagementNumber}/documents/temp`, // [R02Y-01][POST] 문서 임시 업로드
+    LIST: (registryManagementNumber: string) =>
+      `/api/registry/progress/${registryManagementNumber}/documents`, // [R02Y-02][GET] 문서 목록 조회
+    SAVE: (registryManagementNumber: string) =>
+      `/api/registry/progress/${registryManagementNumber}/documents`, // [R02Y-03][POST] 문서 저장
+    DELETE: (registryManagementNumber: string) =>
+      `/api/registry/progress/${registryManagementNumber}/documents`, // [R02Y-04][DELETE] 문서 삭제
+    DOWNLOAD: (registryManagementNumber: string) =>
+      `/api/registry/progress/${registryManagementNumber}/documents/download`, // [R02Y-05][GET] 문서 다운로드
+    DOWNLOAD_BASE64: (registryManagementNumber: string) =>
+      `/api/registry/progress/${registryManagementNumber}/documents/download/base64`, // [R02Y-06][GET] 문서 Base64 다운로드
+    DELETE_BY_APPLICATION: (registryManagementNumber: string, applicationId: string | number) =>
+      `/api/registry/progress/${registryManagementNumber}/applications/${applicationId}/documents` // [R02Y-07][DELETE] 신청번호 기준 문서 삭제
   },
 
   // [R03] 등기일정관리
@@ -333,26 +410,26 @@ export const API = {
 
   // [RPAC] RPA 사용자 PC 작업
   RPA: {
-    FULL_CERTIFICATE: (managementNumber: string) =>
-      `/api/registry/rpa/user-tasks/${managementNumber}/full-certificate`, // [RPAC-01][POST] 등기사항전부증명서 열람/발급 작업 등록
-    PROPERTY_DESCRIPTION: (managementNumber: string) =>
-      `/api/registry/rpa/user-tasks/${managementNumber}/property-description`, // [RPAC-02][POST] 부동산의표시 생성 작업 등록
-    REGISTRATION_PASSWORD: (managementNumber: string) =>
-      `/api/registry/rpa/user-tasks/${managementNumber}/registration-password`, // [RPAC-03][POST] 등기필정보 비밀번호 조회 작업 등록
-    ETAX_ACQUISITION: (managementNumber: string) =>
-      `/api/registry/rpa/user-tasks/${managementNumber}/etax-acquisition`, // [RPAC-04][POST] 이택스 취득세 작업 등록
-    ETAX_REGISTRATION: (managementNumber: string) =>
-      `/api/registry/rpa/user-tasks/${managementNumber}/etax-registration`, // [RPAC-05][POST] 이택스 등록면허세 작업 등록
-    WETAX_ACQUISITION: (managementNumber: string) =>
-      `/api/registry/rpa/user-tasks/${managementNumber}/wetax-acquisition`, // [RPAC-06][POST] 위택스 취득세 작업 등록
-    WETAX_REGISTRATION: (managementNumber: string) =>
-      `/api/registry/rpa/user-tasks/${managementNumber}/wetax-registration`, // [RPAC-07][POST] 위택스 등록면허세 작업 등록
-    REGISTRATION_CASE: (managementNumber: string) =>
-      `/api/registry/rpa/user-tasks/${managementNumber}/registration-case`, // [RPAC-08][POST] 등기 신청사건 조회 작업 등록
-    ADMIN_CONSENT: (managementNumber: string) =>
-      `/api/registry/rpa/user-tasks/${managementNumber}/admin-consent`, // [RPAC-09][POST] 행정정보 동의요청 작업 등록
-    REGISTRATION_APPLICATION: (managementNumber: string) =>
-      `/api/registry/rpa/user-tasks/${managementNumber}/registration-application`, // [RPAC-10][POST] 등기신청서 작성 작업 등록
+    FULL_CERTIFICATE: (registryManagementNumber: string) =>
+      `/api/registry/rpa/user-tasks/${registryManagementNumber}/full-certificate`, // [RPAC-01][POST] 등기사항전부증명서 열람/발급 작업 등록
+    PROPERTY_DESCRIPTION: (registryManagementNumber: string) =>
+      `/api/registry/rpa/user-tasks/${registryManagementNumber}/property-description`, // [RPAC-02][POST] 부동산의표시 생성 작업 등록
+    REGISTRATION_PASSWORD: (registryManagementNumber: string) =>
+      `/api/registry/rpa/user-tasks/${registryManagementNumber}/registration-password`, // [RPAC-03][POST] 등기필정보 비밀번호 조회 작업 등록
+    ETAX_ACQUISITION: (registryManagementNumber: string) =>
+      `/api/registry/rpa/user-tasks/${registryManagementNumber}/etax-acquisition`, // [RPAC-04][POST] 이택스 취득세 작업 등록
+    ETAX_REGISTRATION: (registryManagementNumber: string) =>
+      `/api/registry/rpa/user-tasks/${registryManagementNumber}/etax-registration`, // [RPAC-05][POST] 이택스 등록면허세 작업 등록
+    WETAX_ACQUISITION: (registryManagementNumber: string) =>
+      `/api/registry/rpa/user-tasks/${registryManagementNumber}/wetax-acquisition`, // [RPAC-06][POST] 위택스 취득세 작업 등록
+    WETAX_REGISTRATION: (registryManagementNumber: string) =>
+      `/api/registry/rpa/user-tasks/${registryManagementNumber}/wetax-registration`, // [RPAC-07][POST] 위택스 등록면허세 작업 등록
+    REGISTRATION_CASE: (registryManagementNumber: string) =>
+      `/api/registry/rpa/user-tasks/${registryManagementNumber}/registration-case`, // [RPAC-08][POST] 등기 신청사건 조회 작업 등록
+    ADMIN_CONSENT: (registryManagementNumber: string) =>
+      `/api/registry/rpa/user-tasks/${registryManagementNumber}/admin-consent`, // [RPAC-09][POST] 행정정보 동의요청 작업 등록
+    REGISTRATION_APPLICATION: (registryManagementNumber: string) =>
+      `/api/registry/rpa/user-tasks/${registryManagementNumber}/registration-application`, // [RPAC-10][POST] 등기신청서 작성 작업 등록
     TASK_DETAIL: (taskToken: string) => `/api/registry/rpa/user-tasks/${taskToken}`, // [RPAC-11][GET] RPA 작업 조회
     TASK_RESULT: (taskToken: string) => `/api/registry/rpa/user-tasks/${taskToken}/result` // [RPAC-12][PATCH] RPA 작업 결과 전달
   }

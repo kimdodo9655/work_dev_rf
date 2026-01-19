@@ -44,7 +44,7 @@ axiosRetry(api, {
 // ============================================================================
 let refreshPromise: Promise<void> | null = null
 let lastRefreshTime = 0 // 마지막 refresh 성공 시간
-const REFRESH_COOLDOWN = 60 * 1000 // 1분
+const REFRESH_COOLDOWN = 60 * 10000 // 10분
 
 const authChannel =
   typeof window !== 'undefined' ? new BroadcastChannel('auth-refresh-channel') : null

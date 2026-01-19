@@ -31,6 +31,9 @@ export const useAuthStore = defineStore('auth', () => {
   // 현재 시간 (타이머에서 매초 업데이트)
   const currentTime = ref(Math.floor(Date.now() / 1000))
 
+  // 자동 로그아웃 페이지 접근 플래그
+  const canAccessAutoLogoutPage = ref(false)
+
   // 타이머 인터벌 ID
   let timerInterval: ReturnType<typeof setInterval> | null = null
 
@@ -261,6 +264,9 @@ export const useAuthStore = defineStore('auth', () => {
 
     isLoggingOut = true
 
+    // 자동 로그아웃 페이지 접근 허용 플래그 설정
+    canAccessAutoLogoutPage.value = true
+
     stopTimer()
     clearAuth()
 
@@ -290,6 +296,7 @@ export const useAuthStore = defineStore('auth', () => {
     selectedBankCode,
     accessExpires,
     refreshExpires,
+    canAccessAutoLogoutPage,
 
     // Getters - 로그인 상태
     isLoggedIn,

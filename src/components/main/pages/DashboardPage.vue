@@ -128,7 +128,7 @@
       </div>
 
       <!-- line 02 -->
-      <div class="dashboard-row">
+      <div class="dashboard-row" v-if="true">
         <div class="dashboard-card">
           <h4>진행 상태별 업무 현황</h4>
 

@@ -65,7 +65,10 @@ export const MESSAGES = {
     download: '파일 다운로드',
     delete: '삭제',
     search: '검색',
-    reset: '초기화'
+    reset: '초기화',
+    noData: '조회 조건에 맞는 데이터가 존재하지 않습니다.',
+    integrated: '통합검색',
+    totalCount: '전체 <span>{count}</span>건'
   },
 
   header: {
@@ -78,7 +81,14 @@ export const MESSAGES = {
     privacy: '개인정보처리방침',
     copyright: 'COPYRIGHT ⓒ 2025 BANKCLEAR Inc. ALL RIGHTS RESERVED.'
   },
-
+  help: {
+    title: '서비스 이용 문의',
+    callTitle: '문의 전화',
+    callContent: '070-1234-1234',
+    timeTitle: '운영시간',
+    timeContent: '월~금 09:00~18:00',
+    timeSubContent: '(공휴일 제뢰)'
+  },
   estimate: {
     search: {
       registrationType: '등기유형 선택',
@@ -88,7 +98,6 @@ export const MESSAGES = {
       status: '진행상태 선택',
       writeStatus: '작성여부 선택',
       selectStatus: '선정여부 선택',
-      integrated: '통합검색',
       value: {
         ownershipTransfer: '소유권이전',
         estimateProgress: '견적진행',
@@ -103,11 +112,9 @@ export const MESSAGES = {
         selected: '선정',
         notSelected: '미선정',
         placeholder: '부동산 및 신청번호 입력',
-        noData: '조회 조건에 맞는 데이터가 존재하지 않습니다.',
         tabRequestStatus: '견적서 요청 현황',
         tabWriteStatus: '견적서 작성 현황',
-        tabCaseStatus: '사건 수임 현황',
-        totalCount: '전체 <span>{count}</span>건'
+        tabCaseStatus: '사건 수임 현황'
       }
     },
     table: {
@@ -130,6 +137,34 @@ export const MESSAGES = {
     forgetId: '아이디 기억하기',
     passwordSetup: '비밀번호 변경',
     signup: '아직 회원이 아니신가요?'
+  },
+  my: {
+    users: {
+      search: {
+        organizationType: '기관구분 선택',
+        organizationName: '기관명칭 선택',
+        branchName: '지점명칭 선택',
+        permission: '사용권한 선택',
+        emailVerification: '이메일 인증 선택',
+        activeStatus: '사용유무 선택',
+        searchPlaceholder: '아이디 및 사용자 이름 입력',
+        value: {
+          emailVerificationTrue: '인증 완료',
+          emailVerificationFalse: '인증 미완료'
+        }
+      },
+      table: {
+        number: '번호',
+        organizationType: '기관구분',
+        organizationName: '기관명칭',
+        branchName: '지점명칭',
+        userId: '아이디',
+        userName: '사용자 이름',
+        permission: '사용권한',
+        emailVerification: '이메일 인증',
+        activeStatus: '사용유무'
+      }
+    }
   }
 } as const
 

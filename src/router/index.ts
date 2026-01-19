@@ -59,8 +59,7 @@ const routes: RouteRecordRaw[] = [
   },
 
   // ============================================================================
-  // Pre-Auth 라우트 (로그인 전)
-  // ============================================================================
+  // Pre-Auth 라우트 (로그인 전)============================================================================
 
   /**
    * 로그인 페이지
@@ -108,6 +107,19 @@ const routes: RouteRecordRaw[] = [
     path: '/auth/auto-logout',
     name: 'AutoLogout',
     component: () => import('@/components/auth/pages/AutoLogoutPage.vue'),
+    beforeEnter: () => {
+      const authStore = useAuthStore()
+
+      // 플래그가 없으면 차단
+      if (!authStore.canAccessAutoLogoutPage) {
+        logger.warn('[ROUTER] Unauthorized auto-logout page access')
+        return '/auth/login'
+      }
+
+      // ✅ 플래그 소비 (일회용)
+      authStore.canAccessAutoLogoutPage = false
+      return true
+    },
     meta: {
       title: locale.pageTitle.auth.autoLogout,
       allowedAuthStates: ['pre-auth']

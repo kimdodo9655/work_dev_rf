@@ -131,6 +131,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { authAPI } from '@/api/services/auth'
+// import { useMessage } from '@/composables/useMessage'
 import locale from '@/locales/ko.json'
 import { useAuthStore } from '@/stores/auth'
 import { UserRoleLevel } from '@/types'
@@ -139,6 +140,7 @@ import { storage } from '@/utils/storage'
 const authStore = useAuthStore()
 const route = useRoute()
 const router = useRouter()
+// const { t } = useMessage()
 
 // Refs
 const breadcrumbsRef = ref<HTMLElement | null>(null)
