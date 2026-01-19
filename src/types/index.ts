@@ -59,3 +59,17 @@ export type { Bank, BankList } from '@/types/domains/bank'
 // 외부 링크 타입
 // ============================================================================
 export type { ExternalLinks } from '@/constants/externalLinks'
+
+// ============================================================================
+// 도메인: 주소
+// ============================================================================
+export type {
+  AddressAutocompleteParams,
+  AddressAutocompleteResponse,
+  AddressItem,
+  AddressSearchParams,
+  AddressSearchResponse,
+  RegistryOffice,
+  RegistryOfficeList,
+  ScrollInfo
+} from '@/types/domains/address'
