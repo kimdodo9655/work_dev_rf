@@ -22,6 +22,10 @@
         <router-view />
       </div>
 
+      <div class="test-content" v-if="layoutType === 'test'">
+        <router-view />
+      </div>
+
       <AppFooter v-if="shouldShowFooter" />
     </div>
 
@@ -51,6 +55,7 @@ const { initialize } = useAuthInitializer()
 // ============================================================================
 const layoutType = computed(() => {
   if (route.meta.layout === 'all') return 'all'
+  if (route.meta.layout === 'test') return 'test'
   if (authStore.authState === 'pre-auth') return 'pre-auth'
   return 'default'
 })
@@ -68,6 +73,7 @@ const wrapperClass = computed(() => {
 
   if (layoutType.value === 'pre-auth') classes.push('pre-auth-wrapper')
   if (layoutType.value === 'all') classes.push('all-content-wrapper')
+  if (layoutType.value === 'test') classes.push('test-content-wrapper')
   if (route.meta.mobile) classes.push('mob-wrapper')
 
   return classes

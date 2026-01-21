@@ -39,7 +39,17 @@ const routes: RouteRecordRaw[] = [
       allowedAuthStates: ['pre-auth', 'onboarding', 'auth']
     }
   },
-
+  {
+    path: '/test-api',
+    name: 'APITest',
+    component: () => import('@/components/dev/ApiTester.vue'),
+    meta: {
+      title: 'API 테스트',
+      layout: 'test',
+      allowedAuthStates: ['pre-auth', 'onboarding', 'auth'],
+      footerOff: true
+    }
+  },
   /**
    * Root 페이지
    *

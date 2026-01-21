@@ -30,6 +30,12 @@
     padding: 0;
   }
 
+  &.test-content-wrapper {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
   @media (max-width: 1439px) {
     width: 1240px;
     padding: 0;

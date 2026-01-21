@@ -1,5 +1,6 @@
 <template>
   <div class="test-area" style="background-color: #fff">
+    <ApiTester />
     <AddrTest />
     <RPATest />
     <h2>FloatingInput 테스트</h2>
@@ -560,6 +561,7 @@ import Pagination from '@/components/template/PaginationItem.vue'
 import { useCodes } from '@/composables/useCodes'
 
 import AddrTest from './AddrTest.vue'
+import ApiTester from './ApiTester.vue'
 
 // ✨ useCodes 사용
 const { codes, isLoading, loadError, fetchAllCodes, clearCache } = useCodes()

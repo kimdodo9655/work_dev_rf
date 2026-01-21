@@ -2,7 +2,7 @@
  * API 엔드포인트 상수
  * 모든 API 경로 한 곳에서 관리
  *
- * 260116 오전 api update 반영
+ * [260120 - 오전] api update 반영 total 177
  */
 export const API = {
   // [A01] 주소/등기소
@@ -165,7 +165,8 @@ export const API = {
   // [R01] 등기견적
   REGISTRY_ESTIMATE: {
     LIST: '/api/registry/estimates', // [R01-01][GET] 견적 목록 조회
-    INFO: (estimateId: string | number) => `/api/registry/estimates/${estimateId}/info`, // [R01-02][GET] 견적 기본 조회
+    INFO: (registryRequestNumber: string) =>
+      `/api/registry/estimates/requests/${registryRequestNumber}/info`, // [R01-02][GET] 등기의뢰 견적 대상 기본 정보 조회
     DETAILS: (estimateId: string | number) => `/api/registry/estimates/${estimateId}/details`, // [R01-03][GET] 견적서 상세 조회
     SUBMIT: (registryRequestNumber: string) =>
       `/api/registry/estimates/requests/${registryRequestNumber}/submit`, // [R01-04][POST] 견적서 제출
@@ -375,14 +376,14 @@ export const API = {
       `/api/registry/progress/${registryManagementNumber}/completion-documents/full-certificate/uploads`, // [R02X-03][POST] 등기사항전부증명서 문서 업로드
     UPLOAD_POST: (registryManagementNumber: string) =>
       `/api/registry/progress/${registryManagementNumber}/completion-documents/post-certificate/uploads`, // [R02X-04][POST] 사후등기필정보 문서 업로드
-    PREVIEW_FULL: (registryManagementNumber: string) =>
-      `/api/registry/progress/${registryManagementNumber}/completion-documents/full-certificate/preview`, // [R02X-05][GET] 등기사항전부증명서 Base64 보기
+    // PREVIEW_FULL: (registryManagementNumber: string) => `/api/registry/progress/${registryManagementNumber}/completion-documents/full-certificate/preview`,
+    // // [R02X-05][GET] 등기사항전부증명서 Base64 보기 ==>> R02X-06으로 기능 통합
     PREVIEW_POST: (registryManagementNumber: string) =>
-      `/api/registry/progress/${registryManagementNumber}/completion-documents/post-certificate/preview`, // [R02X-06][GET] 사후등기필정보 Base64 보기
+      `/api/registry/progress/${registryManagementNumber}/completion-documents/post-certificate/preview`, // [R02X-06][GET] 사후등기필정보, 등기사항전부증명서 Base64 보기
     DELETE_FULL: (registryManagementNumber: string, fileName: string) =>
       `/api/registry/progress/${registryManagementNumber}/completion-documents/full-certificate/${fileName}`, // [R02X-07][DELETE] 등기사항전부증명서 문서 삭제
     DELETE_POST: (registryManagementNumber: string, fileName: string) =>
-      `/api/registry/progress/${registryManagementNumber}/completion-documents/post-certificate/${fileName}` // [R02X-07][DELETE] 사후등기필정보 문서 삭제
+      `/api/registry/progress/${registryManagementNumber}/completion-documents/post-certificate/${fileName}` // [R02X-08][DELETE] 사후등기필정보 문서 삭제
   },
 
   // [R02Y] 등기진행-문서
