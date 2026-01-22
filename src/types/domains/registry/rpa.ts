@@ -9,6 +9,10 @@
 /**
  * RPA 작업 생성 응답
  * Schema: RpaUserTaskCreateResponse
+ * API: [RPAC-01] POST /api/registry/rpa/user-tasks/{registryManagementNumber}/full-certificate-view
+ * API: [RPAC-02] POST /api/registry/rpa/user-tasks/{registryManagementNumber}/property-description
+ * API: [RPAC-03] POST /api/registry/rpa/user-tasks/{registryManagementNumber}/registration-password
+ *      ... 외 8개
  */
 export interface RpaUserTaskCreateResponse {
   /** 작업 토큰 */
@@ -24,7 +28,7 @@ export interface RpaUserTaskCreateResponse {
 /**
  * RPA 작업 상세 응답
  * Schema: RpaUserTaskResponse
- * API: GET /api/registry/rpa/user-tasks/{taskToken}
+ * API: [RPAC-11] GET /api/registry/rpa/user-tasks/{taskToken}
  */
 export interface RpaUserTaskResponse {
   /** 작업 토큰 */
@@ -50,7 +54,7 @@ export interface RpaUserTaskResponse {
 /**
  * RPA 작업 결과 전달 요청
  * Schema: RpaUserTaskResultRequest
- * API: PATCH /api/registry/rpa/user-tasks/{taskToken}/result
+ * API: [RPAC-12] PATCH /api/registry/rpa/user-tasks/{taskToken}/result
  */
 export interface RpaUserTaskResultRequest {
   /** 작업 상태 (COMPLETED, FAILED) */
@@ -64,7 +68,8 @@ export interface RpaUserTaskResultRequest {
 /**
  * 등기사항전부증명서 열람/발급 작업 요청
  * Schema: FullCertificateTaskRequest
- * API: POST /api/registry/rpa/user-tasks/{registryManagementNumber}/full-certificate
+ * API: [RPAC-01] POST /api/registry/rpa/user-tasks/{registryManagementNumber}/full-certificate-view
+ * API: [RPAC-13] POST /api/registry/rpa/user-tasks/{registryManagementNumber}/full-certificate-issue
  */
 export interface FullCertificateTaskRequest {
   /** 부동산 고유번호 목록 */
@@ -76,7 +81,7 @@ export interface FullCertificateTaskRequest {
 /**
  * 부동산의표시 생성 작업 요청
  * Schema: PropertyDescriptionTaskRequest
- * API: POST /api/registry/rpa/user-tasks/{registryManagementNumber}/property-description
+ * API: [RPAC-02] POST /api/registry/rpa/user-tasks/{registryManagementNumber}/property-description
  */
 export interface PropertyDescriptionTaskRequest {
   /** 부동산 고유번호 */
@@ -86,7 +91,7 @@ export interface PropertyDescriptionTaskRequest {
 /**
  * 등기필정보 비밀번호 조회 작업 요청
  * Schema: RegistrationPasswordTaskRequest
- * API: POST /api/registry/rpa/user-tasks/{registryManagementNumber}/registration-password
+ * API: [RPAC-03] POST /api/registry/rpa/user-tasks/{registryManagementNumber}/registration-password
  */
 export interface RegistrationPasswordTaskRequest {
   /** 등기필정보 번호 */
@@ -96,7 +101,7 @@ export interface RegistrationPasswordTaskRequest {
 /**
  * 이택스 취득세 작업 요청
  * Schema: EtaxAcquisitionTaskRequest
- * API: POST /api/registry/rpa/user-tasks/{registryManagementNumber}/etax-acquisition
+ * API: [RPAC-04] POST /api/registry/rpa/user-tasks/{registryManagementNumber}/etax-acquisition
  */
 export interface EtaxAcquisitionTaskRequest {
   /** 신고 유형 */
@@ -108,7 +113,7 @@ export interface EtaxAcquisitionTaskRequest {
 /**
  * 이택스 등록면허세 작업 요청
  * Schema: EtaxRegistrationTaskRequest
- * API: POST /api/registry/rpa/user-tasks/{registryManagementNumber}/etax-registration
+ * API: [RPAC-05] POST /api/registry/rpa/user-tasks/{registryManagementNumber}/etax-registration
  */
 export interface EtaxRegistrationTaskRequest {
   /** 신고 유형 */
@@ -120,7 +125,7 @@ export interface EtaxRegistrationTaskRequest {
 /**
  * 위택스 취득세 작업 요청
  * Schema: WetaxAcquisitionTaskRequest
- * API: POST /api/registry/rpa/user-tasks/{registryManagementNumber}/wetax-acquisition
+ * API: [RPAC-06] POST /api/registry/rpa/user-tasks/{registryManagementNumber}/wetax-acquisition
  */
 export interface WetaxAcquisitionTaskRequest {
   /** 신고 유형 */
@@ -132,7 +137,7 @@ export interface WetaxAcquisitionTaskRequest {
 /**
  * 위택스 등록면허세 작업 요청
  * Schema: WetaxRegistrationTaskRequest
- * API: POST /api/registry/rpa/user-tasks/{registryManagementNumber}/wetax-registration
+ * API: [RPAC-07] POST /api/registry/rpa/user-tasks/{registryManagementNumber}/wetax-registration
  */
 export interface WetaxRegistrationTaskRequest {
   /** 신고 유형 */
@@ -144,19 +149,23 @@ export interface WetaxRegistrationTaskRequest {
 /**
  * 등기 신청사건 조회 작업 요청
  * Schema: RegistrationCaseQueryTaskRequest
- * API: POST /api/registry/rpa/user-tasks/{registryManagementNumber}/registration-case
+ * API: [RPAC-08] POST /api/registry/rpa/user-tasks/{registryManagementNumber}/registration-case
+ *
+ * @since 2025-01-22 - API 스키마 변경
+ * - 이전: receiptNumber, receiptYear
+ * - 현재: propertyUniqueNumber, progressPartyId
  */
 export interface RegistrationCaseQueryTaskRequest {
-  /** 접수번호 */
-  receiptNumber: string
-  /** 접수년도 */
-  receiptYear: string
+  /** 부동산 고유번호 */
+  propertyUniqueNumber: string
+  /** 신청인고유ID */
+  progressPartyId: number
 }
 
 /**
  * 행정정보 동의요청 작업 요청
  * Schema: AdminConsentTaskRequest
- * API: POST /api/registry/rpa/user-tasks/{registryManagementNumber}/admin-consent
+ * API: [RPAC-09] POST /api/registry/rpa/user-tasks/{registryManagementNumber}/admin-consent
  */
 export interface AdminConsentTaskRequest {
   /** 동의 대상자 정보 */
@@ -178,7 +187,7 @@ export interface ConsentTarget {
 /**
  * 등기신청서 작성 작업 요청
  * Schema: RegistrationApplicationTaskRequest
- * API: POST /api/registry/rpa/user-tasks/{registryManagementNumber}/registration-application
+ * API: [RPAC-10] POST /api/registry/rpa/user-tasks/{registryManagementNumber}/registration-application
  */
 export interface RegistrationApplicationTaskRequest {
   /** 신청서 ID */

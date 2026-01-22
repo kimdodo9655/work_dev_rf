@@ -59,7 +59,7 @@ export interface AdminInfoRequestListItem {
 /**
  * 행정정보 사전동의 목록 응답
  * Schema: RegistryApplicationAdminInfoRequestListResponse
- * API: GET /api/registry/applications/{managementNumber}/admin-info-requests
+ * API: [R02N-01] GET /api/registry/progress/{registryManagementNumber}/admin-info-requests/list
  */
 export interface AdminInfoRequestListResponse {
   /** 행정정보 사전동의요구서 목록 */
@@ -69,7 +69,7 @@ export interface AdminInfoRequestListResponse {
 /**
  * 행정정보 사전동의 저장 요청
  * Schema: RegistryApplicationAdminInfoRequestRequest
- * API: PUT /api/registry/applications/{managementNumber}/admin-info-requests
+ * API: [R02N-02] PATCH /api/registry/progress/{registryManagementNumber}/admin-info-requests
  */
 export interface AdminInfoRequestSaveRequest {
   /** 행정정보 사전동의서 정보 목록 */
@@ -123,7 +123,8 @@ export interface InputInfoItem {
 /**
  * 행정정보 사전동의 상세 응답
  * Schema: RegistryApplicationAdminInfoRequestResponse
- * API: GET /api/registry/applications/{managementNumber}/admin-info-requests/{adminInfoRequestId}
+ * API: [R02N-02] PATCH /api/registry/progress/{registryManagementNumber}/admin-info-requests
+ * API: [R02N-03] GET /api/registry/progress/{registryManagementNumber}/admin-info-requests/detail
  */
 export interface AdminInfoRequestDetailResponse {
   /** 행정정보 사전동의요구서 정보 */
@@ -135,7 +136,7 @@ export interface AdminInfoRequestDetailResponse {
 /**
  * 행정정보 동의 RPA 작업 요청
  * Schema: AdminConsentTaskRequest
- * API: POST /api/registry/rpa/user-tasks/{managementNumber}/admin-consent
+ * API: [RPAC-09] POST /api/registry/rpa/user-tasks/{registryManagementNumber}/admin-consent
  */
 export interface AdminConsentTaskRequest {
   /** 신청서 ID */

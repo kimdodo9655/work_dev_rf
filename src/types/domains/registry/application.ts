@@ -4,12 +4,29 @@
  *
  * OpenAPI Schema 기반으로 생성됨
  * 생성일: 2025-01-16
+ * 수정일: 2025-01-22 - API 방식 변경 (Request Body → Query Parameter)
  */
 
 /**
  * 등기 신청서 생성 요청
- * Schema: RegistryApplicationCreateRequest
- * API: POST /api/registry/applications/{registryManagementNumber}
+ *
+ * @deprecated API 방식이 변경되었습니다 (2025-01-22)
+ *
+ * **변경 사항:**
+ * - 이전: Request Body로 JSON 전송
+ * - 현재: Query Parameter로 전송
+ *
+ * **새로운 API 방식:**
+ * ```
+ * POST /api/registry/applications
+ *   ?registryManagementNumber={string}  (필수, 신규 추가)
+ *   &registryType={string}              (필수)
+ *   &registryCause={string}             (필수)
+ *   &registryMethod={string}            (필수)
+ *   &adminInfoLinkTime={string}         (필수)
+ * ```
+ *
+ * 이 타입은 하위 호환성을 위해 유지되지만 더 이상 API에서 사용되지 않습니다.
  */
 export interface RegistryApplicationCreateRequest {
   /** 등기 유형 */
@@ -24,8 +41,22 @@ export interface RegistryApplicationCreateRequest {
 
 /**
  * 등기 신청서 수정 요청
- * Schema: RegistryApplicationUpdateRequest
- * API: PATCH /api/registry/applications/{registryManagementNumber}
+ *
+ * @deprecated API 방식이 변경되었습니다 (2025-01-22)
+ *
+ * **변경 사항:**
+ * - 이전: Request Body로 JSON 전송
+ * - 현재: Query Parameter로 전송
+ * - **registryType 파라미터 삭제됨** (등기 유형은 수정 불가)
+ *
+ * **새로운 API 방식:**
+ * ```
+ * PATCH /api/registry/applications/{applicationId}
+ *   ?registryMethod={string}      (필수)
+ *   &adminInfoLinkTime={string}   (필수)
+ * ```
+ *
+ * 이 타입은 하위 호환성을 위해 유지되지만 더 이상 API에서 사용되지 않습니다.
  */
 export interface RegistryApplicationUpdateRequest {
   /** 등기 유형 */
@@ -39,13 +70,15 @@ export interface RegistryApplicationUpdateRequest {
 /**
  * 등기 신청서 양식 아이템
  * Schema: RegistryApplicationFormResponse
- * API: GET /api/registry/applications/{registryManagementNumber}/tabs
+ * API: [R02D-08] GET /api/registry/applications/tabs
  */
 export interface RegistryApplicationForm {
   /** 신청서 ID */
   applicationId: number
   /** 등기관리번호 */
   registryManagementNumber: string
+  /** 데이터 출처 (2025-01-22 추가) */
+  dataSource?: string
   /** 등기 유형 코드 */
   registryType: string
   /** 등기 유형 라벨 */
@@ -70,7 +103,7 @@ export interface RegistryApplicationDocumentSection {
 /**
  * 등기 신청서 전자문서 응답
  * Schema: RegistryApplicationDocumentResponse
- * API: GET /api/registry/applications/{applicationId}/documents
+ * API: [R02D-09] GET /api/registry/applications/{applicationId}/documents
  */
 export interface RegistryApplicationDocument {
   /** 신청서 ID */
@@ -92,7 +125,7 @@ export interface RegistryApplicationDocument {
 /**
  * 근저당권설정 정보 응답
  * Schema: RegistryApplicationMortgageInfoResponse
- * API: GET /api/registry/applications/mortgages/{registryManagementNumber}/info
+ * API: [R02D-06] GET /api/registry/applications/mortgages/{registryManagementNumber}/info
  */
 export interface MortgageInfo {
   /** 등기 유형명 */
@@ -112,7 +145,7 @@ export interface MortgageInfo {
 /**
  * 소유권이전 요약 정보
  * Schema: OwnershipTransferSummaryResponse
- * API: GET /api/registry/applications/{applicationId}/ownership-transfer
+ * API: [R02D-05] GET /api/registry/applications/{applicationId}/ownership-transfer
  */
 export interface OwnershipTransferSummary {
   /** 등기 유형 */
@@ -148,7 +181,6 @@ export interface LegalAgentInfo {
 
 /**
  * 등기 신청서 삭제 요청
- * API: DELETE /api/registry/applications/{registryManagementNumber}
  */
 export interface RegistryApplicationDeleteRequest {
   /** 신청서 ID */

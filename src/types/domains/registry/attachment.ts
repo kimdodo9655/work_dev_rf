@@ -65,7 +65,8 @@ export interface AttachmentOption {
 /**
  * 첨부서면 목록 응답
  * Schema: RegistryApplicationAttachmentResponse
- * API: GET /api/registry/applications/{applicationId}/attachments
+ * API: [R02J-01] GET /api/registry/applications/{applicationId}/attachments
+ * API: [R02J-02] PUT /api/registry/applications/{applicationId}/attachments
  */
 export interface AttachmentListResponse {
   /** 첨부서면 목록 */
@@ -81,7 +82,7 @@ export interface AttachmentListResponse {
 /**
  * 첨부서면 저장 요청
  * Schema: RegistryApplicationAttachmentReplaceRequest
- * API: PUT /api/registry/applications/{applicationId}/attachments
+ * API: [R02J-02] PUT /api/registry/applications/{applicationId}/attachments
  */
 export interface AttachmentSaveRequest {
   /** 첨부서면 정보 목록 */
@@ -91,7 +92,8 @@ export interface AttachmentSaveRequest {
 /**
  * 문서 업로드 응답
  * Schema: DocumentUploadResponse
- * API: POST /api/documents/upload
+ * API: [P02F-01] POST /api/organizations/{organizationId}/branches/{branchId}/documents/temp
+ * API: [R02Y-01] POST /api/registry/progress/{registryManagementNumber}/documents/temp
  */
 export interface DocumentUploadResponse {
   /** 임시 파일명 (문서 저장 시 사용) */
@@ -107,7 +109,10 @@ export interface DocumentUploadResponse {
 /**
  * 문서 다운로드 응답 (Base64)
  * Schema: DocumentDownloadBase64Response
- * API: GET /api/documents/download
+ * API: [P02F-06] GET /api/organizations/{organizationId}/branches/{branchId}/documents/download/base64
+ * API: [R00D-05] GET /api/registry/requests/{requestNumber}/documents/{fileName}/base64
+ * API: [R02J-04] GET /api/registry/applications/{applicationId}/attachments/preview
+ *      ... 외 3개
  */
 export interface DocumentDownloadResponse {
   /** 파일명 */
@@ -123,6 +128,8 @@ export interface DocumentDownloadResponse {
 /**
  * 문서 목록 항목
  * Schema: DocumentListResponse
+ * API: [P02F-02] GET /api/organizations/{organizationId}/branches/{branchId}/documents
+ * API: [R00D-01] GET /api/registry/requests/{requestNumber}/documents
  */
 export interface DocumentListItem {
   /** 문서 종류 코드 */
@@ -142,7 +149,8 @@ export interface DocumentListItem {
 /**
  * 문서 저장 요청
  * Schema: DocumentSaveRequest
- * API: POST /api/registry/applications/{applicationId}/documents
+ * API: [P02F-03] POST /api/organizations/{organizationId}/branches/{branchId}/documents
+ * API: [R02Y-03] POST /api/registry/progress/{registryManagementNumber}/documents
  */
 export interface DocumentSaveRequest {
   /** 문서 종류 */
@@ -156,6 +164,9 @@ export interface DocumentSaveRequest {
 /**
  * 문서 저장 응답
  * Schema: DocumentSaveResponse
+ * API: [P02F-03] POST /api/organizations/{organizationId}/branches/{branchId}/documents
+ * API: [R00D-02] POST /api/registry/requests/{requestNumber}/documents
+ * API: [R02Y-03] POST /api/registry/progress/{registryManagementNumber}/documents
  */
 export interface DocumentSaveResponse {
   /** 문서 ID */

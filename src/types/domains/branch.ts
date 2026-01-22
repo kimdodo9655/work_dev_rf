@@ -46,7 +46,6 @@ export interface UserAssignedBankItem {
 /**
  * 배정 금융기관 정보 (응답용)
  * Schema: AssignedBankInfo
- * API: UserDetailResponse.assignedBanks
  */
 export interface AssignedBankInfo {
   /** 등기 유형 */
@@ -85,7 +84,7 @@ export interface BranchItem {
 /**
  * 지점 생성 요청
  * Schema: BranchCreateRequest
- * API: POST /api/branches
+ * API: [P02A-04] POST /api/branches
  */
 export interface BranchCreateRequest {
   /** 기관 ID */
@@ -105,7 +104,7 @@ export interface BranchCreateRequest {
 /**
  * 지점 생성 응답
  * Schema: BranchCreateResponse
- * API: POST /api/branches
+ * API: [P02A-04] POST /api/branches
  */
 export interface BranchCreateResponse {
   /** 지점 ID */
@@ -117,7 +116,7 @@ export interface BranchCreateResponse {
 /**
  * 지점 수정 요청
  * Schema: BranchUpdateRequest
- * API: PATCH /api/branches/{branchId}
+ * API: [P02A-03] PATCH /api/branches/{branchId}
  *
  * 주의: branchName, businessRegistrationNumber, address는 수정 불가
  */
@@ -141,7 +140,7 @@ export interface BranchUpdateRequest {
 /**
  * 지점 상세 응답
  * Schema: BranchDetailResponse
- * API: GET /api/branches/{branchId}
+ * API: [P02A-02] GET /api/branches/{branchId}
  */
 export interface BranchDetailResponse {
   /** 지점 ID */
@@ -175,7 +174,7 @@ export interface BranchDetailResponse {
 /**
  * 지점 검색 응답 (목록)
  * Schema: BranchResponse
- * API: GET /api/branches/search
+ * API: [P02A-01] GET /api/branches/search
  */
 export interface BranchListItem {
   /** 순번 */
@@ -207,7 +206,7 @@ export interface BranchListItem {
 /**
  * 지점 옵션 응답 (선택 목록용)
  * Schema: BranchOptionResponse
- * API: GET /api/branches/options
+ * API: [P02A-05] GET /api/branches/options
  */
 export interface BranchOption {
   /** 지점 ID */
@@ -219,7 +218,7 @@ export interface BranchOption {
 /**
  * 지점 배정 금융기관 목록 응답
  * Schema: BranchAssignedBankResponse
- * API: GET /api/branches/{branchId}/assigned-banks
+ * API: [P02B-01] GET /api/branches/{branchId}/assigned-banks
  */
 export interface BranchAssignedBankResponse {
   /** 등기 유형 */
@@ -235,7 +234,7 @@ export interface BranchAssignedBankResponse {
 /**
  * 지점 지급계좌 정보
  * Schema: BranchPaymentAccountResponse
- * API: GET /api/branches/{branchId}/payment-accounts
+ * API: [P02C-01] GET /api/branches/{branchId}/payment-accounts
  */
 export interface BranchPaymentAccount {
   /** 지점 ID */
@@ -255,7 +254,7 @@ export interface BranchPaymentAccount {
 /**
  * 지점 인터넷등기소 계정 정보
  * Schema: BranchRegistryCredentialResponse
- * API: GET /api/branches/{branchId}/registry-credentials
+ * API: [P02D-01] GET /api/branches/{branchId}/registry-credentials
  */
 export interface BranchRegistryCredential {
   /** 지점 인터넷등기소 아이디 고유번호 */
@@ -276,7 +275,6 @@ export interface BranchRegistryCredential {
 
 /**
  * 지점 검색 파라미터
- * API: GET /api/branches/search
  */
 export interface BranchSearchParams {
   /** 기관 ID (필수) */
@@ -302,7 +300,6 @@ export type BranchListParams = BranchSearchParams
 
 /**
  * 사업자등록번호 중복 체크 요청
- * API: GET /api/branches/check-business-number
  */
 export interface CheckBusinessNumberParams {
   /** 사업자등록번호 */

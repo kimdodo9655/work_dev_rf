@@ -37,9 +37,19 @@ export type {
   ProgressStatistics,
   ProgressStatusCount,
   ProgressSummary,
+  RegistryLoanPaymentAccount,
+  RegistryLoanPaymentAccountDetailResponse,
+  RegistryLoanPaymentAccountListResponse,
+  RegistryLoanPaymentAccountReceiptUploadResponse,
+  RegistryLoanPaymentAccountSaveRequest,
   RegistryProgressBasic,
+  RegistryProgressESignatureTableResponse,
   RegistryProgressListItem,
   RegistryProgressLoan,
+  RegistryTaxAgency,
+  RegistryTaxAgencyDetailResponse,
+  RegistryTaxAgencyListResponse,
+  RegistryTaxAgencySaveRequest,
   ScheduleItem,
   ScheduleParams,
   TodayProgress
@@ -188,10 +198,12 @@ export type {
   CaseInquiryRequest,
   CaseInquiryResponse,
   CaseInquiryResultWrapper,
-  RegistrationCaseQueryTaskRequest as CaseQueryRpaRequest,
   ReceiptDetailResponse,
   ReceiptItem,
   ReceiptListItem,
   ReceiptListResponse,
   ReceiptSaveRequest
 } from './receipt'
+
+// CaseQueryRpaRequest는 rpa.ts의 RegistrationCaseQueryTaskRequest 별칭
+export type { RegistrationCaseQueryTaskRequest as CaseQueryRpaRequest } from './rpa'

@@ -30,7 +30,7 @@ export interface OrganizationItem {
 /**
  * 기관 생성 요청
  * Schema: OrganizationCreateRequest
- * API: POST /api/auth/register (회원가입에 포함)
+ * API: [P04-01] POST /api/auth/signup
  */
 export interface OrganizationCreateRequest {
   /** 기관 정보 */
@@ -50,6 +50,7 @@ export interface OrganizationCreateRequest {
 /**
  * 기관 생성 응답
  * Schema: OrganizationCreateResponse
+ * API: [P04-01] POST /api/auth/signup
  */
 export interface OrganizationCreateResponse {
   /** 기관 ID */
@@ -61,7 +62,6 @@ export interface OrganizationCreateResponse {
 /**
  * 기관 수정 요청
  * Schema: OrganizationUpdateRequest
- * API: PATCH /api/organizations/{organizationId}
  */
 export interface OrganizationUpdateRequest {
   /** 기관 구분 */
@@ -81,7 +81,7 @@ export interface OrganizationUpdateRequest {
 /**
  * 기관 상세 응답
  * Schema: OrganizationDetailResponse
- * API: GET /api/organizations/{organizationId}
+ * API: [P01-01] GET /api/organizations/{organizationId}
  */
 export interface OrganizationDetailResponse {
   /** 기관 ID */
@@ -107,7 +107,7 @@ export interface OrganizationDetailResponse {
 /**
  * 기관 옵션 응답 (선택 목록용)
  * Schema: OrganizationOptionResponse
- * API: GET /api/organizations/options
+ * API: [P01-02] GET /api/organizations/options
  */
 export interface OrganizationOption {
   /** 기관 ID */
@@ -124,7 +124,6 @@ export interface OrganizationOption {
 
 /**
  * 기관 목록 검색 파라미터
- * API: GET /api/organizations/search
  */
 export interface OrganizationSearchParams {
   /** 검색 키워드 */
@@ -148,7 +147,6 @@ export type OrganizationListParams = OrganizationSearchParams
 
 /**
  * 법인등록번호 중복 체크 요청
- * API: GET /api/organizations/check-registration-number
  */
 export interface CheckRegistrationNumberParams {
   /** 법인등록번호 */

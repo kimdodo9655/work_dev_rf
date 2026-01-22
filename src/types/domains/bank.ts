@@ -9,7 +9,8 @@
 /**
  * 금융기관 정보
  * Schema: BankResponse
- * API: GET /api/banks, GET /api/banks/{code}
+ * API: [P05-01] GET /api/banks
+ * API: [P05-02] GET /api/banks/{code}
  */
 export interface Bank {
   /** 금융기관 코드 */
@@ -24,6 +25,5 @@ export interface Bank {
 
 /**
  * 금융기관 목록
- * API: GET /api/banks
  */
 export type BankList = Bank[]

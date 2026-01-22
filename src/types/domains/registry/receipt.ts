@@ -72,7 +72,7 @@ export interface ReceiptListItem {
 /**
  * 접수정보 목록 응답
  * Schema: RegistryApplicationReceiptListResponse
- * API: GET /api/registry/applications/{managementNumber}/receipts
+ * API: [R02U-01] GET /api/registry/applications/{registryManagementNumber}/receipts/list
  */
 export interface ReceiptListResponse {
   /** 등기 접수 정보 목록 */
@@ -82,6 +82,7 @@ export interface ReceiptListResponse {
 /**
  * 지점 인터넷등기소 계정 정보
  * Schema: BranchRegistryCredentialResponse
+ * API: [P02D-01] GET /api/branches/{branchId}/registry-credentials
  */
 export interface BranchRegistryCredential {
   /** 지점 인터넷등기소 아이디 고유번호 */
@@ -103,7 +104,8 @@ export interface BranchRegistryCredential {
 /**
  * 접수정보 상세 응답
  * Schema: RegistryApplicationReceiptResponse
- * API: GET /api/registry/applications/{managementNumber}/receipts/details
+ * API: [R02U-02] PATCH /api/registry/applications/{registryManagementNumber}/receipts
+ * API: [R02U-03] GET /api/registry/applications/{registryManagementNumber}/receipts/detail
  */
 export interface ReceiptDetailResponse {
   /** 등기 접수 정보 */
@@ -115,7 +117,7 @@ export interface ReceiptDetailResponse {
 /**
  * 접수정보 저장 요청
  * Schema: RegistryApplicationReceiptReplaceRequest
- * API: PUT /api/registry/applications/{managementNumber}/receipts
+ * API: [R02U-02] PATCH /api/registry/applications/{registryManagementNumber}/receipts
  */
 export interface ReceiptSaveRequest {
   /** 등기 접수 정보 목록 */
@@ -176,7 +178,7 @@ export interface CaseInquiryResultWrapper {
 /**
  * 사건 조회 목록 응답
  * Schema: RegistryProgressCaseInquiryListResponse
- * API: GET /api/registry/progress/{managementNumber}/case-inquiries
+ * API: [R02T-01] GET /api/registry/progress/{registryManagementNumber}/case-inquiries/list
  */
 export interface CaseInquiryListResponse {
   /** 사건 조회 목록 */
@@ -186,7 +188,7 @@ export interface CaseInquiryListResponse {
 /**
  * 사건 조회 요청
  * Schema: RegistryProgressCaseInquiryRequest
- * API: POST /api/registry/progress/{managementNumber}/case-inquiries
+ * API: [R02T-02] PATCH /api/registry/progress/{registryManagementNumber}/case-inquiries
  */
 export interface CaseInquiryRequest {
   /** 접수번호 */
@@ -200,6 +202,7 @@ export interface CaseInquiryRequest {
 /**
  * 사건 조회 응답
  * Schema: RegistryProgressCaseInquiryResponse
+ * API: [R02T-03] GET /api/registry/progress/{registryManagementNumber}/case-inquiries/detail
  */
 export interface CaseInquiryResponse {
   /** 사건 조회 결과 */
@@ -207,13 +210,8 @@ export interface CaseInquiryResponse {
 }
 
 /**
- * 등기 사건 조회 RPA 작업 요청
- * Schema: RegistrationCaseQueryTaskRequest
- * API: POST /api/registry/rpa/user-tasks/{managementNumber}/registration-case
+ * @deprecated RegistrationCaseQueryTaskRequest는 rpa.ts에 정의되어 있습니다.
+ * import { RegistrationCaseQueryTaskRequest } from './rpa' 를 사용하세요.
+ *
+ * 이 타입은 중복 정의를 방지하기 위해 2025-01-22에 삭제되었습니다.
  */
-export interface RegistrationCaseQueryTaskRequest {
-  /** 접수번호 */
-  receiptNumber: string
-  /** 접수년도 */
-  receiptYear: string
-}

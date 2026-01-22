@@ -28,7 +28,8 @@ export interface PropertyItem {
 /**
  * 부동산 상세 응답
  * Schema: RegistryApplicationPropertyResponse
- * API: GET /api/registry/applications/{applicationId}/properties
+ * API: [R02F-01] GET /api/registry/applications/{applicationId}/properties
+ * API: [R02F-02] PUT /api/registry/applications/{applicationId}/properties
  */
 export interface RegistryApplicationPropertyResponse {
   /** 부동산 목록 */
@@ -51,7 +52,7 @@ export interface PropertyUniqueNumberOption {
 /**
  * 부동산 대체 요청
  * Schema: RegistryApplicationPropertyReplaceRequest
- * API: PUT /api/registry/applications/{applicationId}/properties
+ * API: [R02F-02] PUT /api/registry/applications/{applicationId}/properties
  */
 export interface PropertyReplaceRequest {
   /** 부동산 목록 */
@@ -61,7 +62,8 @@ export interface PropertyReplaceRequest {
 /**
  * 소유권이전 세금 정보
  * Schema: OwnershipTaxResponse
- * API: GET /api/registry/applications/{applicationId}/ownership/tax
+ * API: [R02I-01] GET /api/registry/applications/{applicationId}/ownership/tax/detail
+ * API: [R02I-02] POST /api/registry/applications/{applicationId}/ownership/tax
  */
 export interface OwnershipTaxResponse {
   /** 세금 정보 */
@@ -168,7 +170,6 @@ export interface FilingFeeResponse {
 
 /**
  * 소유권이전 세금 저장 요청
- * API: POST /api/registry/applications/{applicationId}/ownership/tax
  */
 export interface OwnershipTaxSaveRequest {
   /** 세금 정보 */
@@ -184,7 +185,8 @@ export interface OwnershipTaxSaveRequest {
 /**
  * 근저당권 채권/세금 정보
  * Schema: MortgageFinancialResponse
- * API: GET /api/registry/applications/{applicationId}/mortgage/financial
+ * API: [R02H-01] GET /api/registry/applications/{applicationId}/mortgage/financial
+ * API: [R02H-02] POST /api/registry/applications/{applicationId}/mortgage/financial
  */
 export interface MortgageFinancialResponse {
   /** 국민주택채권 */
@@ -201,7 +203,6 @@ export interface MortgageFinancialResponse {
 
 /**
  * 근저당권 채권/세금 저장 요청
- * API: POST /api/registry/applications/{applicationId}/mortgage/financial
  */
 export interface MortgageFinancialSaveRequest {
   /** 국민주택채권 */

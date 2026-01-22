@@ -130,7 +130,7 @@ export interface PublicChargeDetails {
 /**
  * 견적 기본 정보 응답
  * Schema: EstimateInfoResponse
- * API: GET /api/registry/estimates/requests/{registryRequestNumber}/info
+ * API: [R01-02] GET /api/registry/estimates/requests/{registryRequestNumber}/info
  */
 export interface EstimateInfo {
   /** 견적서 ID */
@@ -160,7 +160,7 @@ export interface EstimateInfo {
 /**
  * 견적 목록 아이템
  * Schema: EstimateListItemResponse
- * API: GET /api/registry/estimates
+ * API: [R01-01] GET /api/registry/estimates
  */
 export interface EstimateListItem {
   /** 견적서 ID (작성 완료된 경우) */
@@ -192,7 +192,7 @@ export interface EstimateListItem {
 /**
  * 견적서 상세 응답
  * Schema: EstimateDetailResponse
- * API: GET /api/registry/estimates/{estimateId}/details
+ * API: [R01-03] GET /api/registry/estimates/{estimateId}/details
  */
 export interface EstimateDetail {
   /** 견적서 ID */
@@ -222,7 +222,7 @@ export interface EstimateDetail {
 /**
  * 견적서 제출 요청
  * Schema: EstimateSubmitRequest
- * API: POST /api/registry/estimates/requests/{registryRequestNumber}/submit
+ * API: [R01-04] POST /api/registry/estimates/requests/{registryRequestNumber}/submit
  */
 export interface EstimateSubmitRequest {
   /** 등기 진행 방식 (ELECTRONIC: 전자, E_FORM: 전자서식, PAPER: 서면) */
@@ -273,7 +273,7 @@ export interface EstimateSubmitRequest {
 /**
  * 견적서 제출 응답
  * Schema: EstimateSubmitResponse
- * API: POST /api/registry/estimates/requests/{registryRequestNumber}/submit
+ * API: [R01-04] POST /api/registry/estimates/requests/{registryRequestNumber}/submit
  */
 export interface EstimateSubmitResponse {
   /** 견적서 ID */
@@ -297,7 +297,7 @@ export interface EstimateSubmitResponse {
 /**
  * 견적 현황 요약
  * Schema: RegistryEstimateSummaryResponse
- * API: GET /api/registry/progress/estimates/summary
+ * API: [R02A-03] GET /api/registry/progress/estimates/summary
  */
 export interface EstimateSummary {
   /** 견적 요청 건수 */
@@ -310,7 +310,6 @@ export interface EstimateSummary {
 
 /**
  * 견적 목록 조회 파라미터
- * API: GET /api/registry/estimates
  */
 export interface EstimateListParams {
   /** 검색 키워드 */

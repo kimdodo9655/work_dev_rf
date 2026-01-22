@@ -9,6 +9,10 @@
 /**
  * 공통코드 기본 인터페이스
  * Schema: CodeResponse
+ * API: [P06-01] GET /api/codes/organization-types
+ * API: [P06-02] GET /api/codes/organization-statuses
+ * API: [P06-03] GET /api/codes/qualified-types
+ *      ... 외 18개
  */
 export interface Code {
   /** 코드 값 (Enum name) */
@@ -20,6 +24,7 @@ export interface Code {
 /**
  * 권한 레벨 코드 (level 포함)
  * Schema: UserRoleLevelResponse
+ * API: [P06-05] GET /api/codes/user-role-levels
  */
 export interface RoleLevelCode extends Code {
   /** 권한 레벨 숫자 */

@@ -115,6 +115,7 @@ export interface RegistryOffice {
 /**
  * 등기소 목록 응답
  * Schema: RegistryOfficeResponse
+ * API: [A01-03] GET /api/registry-offices
  */
 export interface RegistryOfficeList {
   /** 등기소 목록 */

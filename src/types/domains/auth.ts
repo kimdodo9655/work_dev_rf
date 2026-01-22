@@ -9,7 +9,7 @@
 /**
  * 로그인 요청
  * Schema: LoginRequest
- * API: POST /api/auth/login
+ * API: [P04-02] POST /api/auth/login
  */
 export interface LoginRequest {
   /** 로그인 아이디 */
@@ -23,7 +23,7 @@ export interface LoginRequest {
 /**
  * 로그인 응답 데이터
  * Schema: LoginResponse
- * API: POST /api/auth/login
+ * API: [P04-02] POST /api/auth/login
  */
 export interface LoginData {
   /** 액세스 토큰 */
@@ -45,7 +45,7 @@ export interface LoginData {
 /**
  * 토큰 갱신 요청
  * Schema: TokenRefreshRequest
- * API: POST /api/auth/refresh
+ * API: [P04-04] POST /api/auth/refresh
  */
 export interface RefreshRequest {
   /** 리프레시 토큰 */
@@ -55,7 +55,7 @@ export interface RefreshRequest {
 /**
  * 토큰 갱신 응답 데이터
  * Schema: TokenRefreshResponse
- * API: POST /api/auth/refresh
+ * API: [P04-04] POST /api/auth/refresh
  */
 export interface RefreshData {
   /** 액세스 토큰 */
@@ -71,7 +71,7 @@ export interface RefreshData {
 /**
  * 비밀번호 설정 요청
  * Schema: SetPasswordRequest
- * API: POST /api/auth/password
+ * API: [P04-07] POST /api/auth/password
  */
 export interface SetPasswordRequest {
   /** 사용자 ID */
@@ -87,7 +87,8 @@ export interface SetPasswordRequest {
 /**
  * 이메일 인증 요청
  * Schema: EmailVerifyRequest
- * API: POST /api/auth/email-verify/validate
+ * API: [P04-05] POST /api/auth/email-verify/validate
+ * API: [P04-06] POST /api/auth/email-verify
  */
 export interface EmailVerifyRequest {
   /** 사용자 ID */
@@ -99,7 +100,7 @@ export interface EmailVerifyRequest {
 /**
  * 이메일 인증 응답
  * Schema: EmailVerifyResponse
- * API: POST /api/auth/email-verify/validate
+ * API: [P04-05] POST /api/auth/email-verify/validate
  */
 export interface EmailVerifyResponse {
   /** 사용자 ID */

@@ -35,7 +35,7 @@ export interface UserItem {
 /**
  * 사용자 생성 요청
  * Schema: UserCreateRequest
- * API: POST /api/users
+ * API: [P03-05] POST /api/users
  */
 export interface UserCreateRequest {
   /** 지점 ID */
@@ -51,7 +51,7 @@ export interface UserCreateRequest {
 /**
  * 사용자 생성 응답
  * Schema: UserCreateResponse
- * API: POST /api/users
+ * API: [P03-05] POST /api/users
  */
 export interface UserCreateResponse {
   /** 사용자 ID */
@@ -63,7 +63,7 @@ export interface UserCreateResponse {
 /**
  * 사용자 수정 요청
  * Schema: UserUpdateRequest
- * API: PATCH /api/users/{userId}
+ * API: [P03-04] PATCH /api/users/{userId}
  */
 export interface UserUpdateRequest {
   /** 지점 ID */
@@ -91,7 +91,7 @@ export interface UserUpdateRequest {
 /**
  * 내 정보 수정 요청
  * Schema: UserSelfUpdateRequest
- * API: PATCH /api/users/profile
+ * API: [P03-12] PATCH /api/users/profile
  */
 export interface UserSelfUpdateRequest {
   /** 이메일 */
@@ -109,7 +109,8 @@ export interface UserSelfUpdateRequest {
 /**
  * 사용자 상세 응답
  * Schema: UserDetailResponse
- * API: GET /api/users/{userId}, GET /api/users/profile
+ * API: [P03-01] GET /api/users/profile
+ * API: [P03-03] GET /api/users/{userId}
  */
 export interface UserDetailResponse {
   /** 지점 ID */
@@ -153,7 +154,7 @@ export interface UserDetailResponse {
 /**
  * 사용자 목록 아이템
  * Schema: UserResponse
- * API: GET /api/users/search
+ * API: [P03-02] GET /api/users/search
  */
 export interface UserListItem {
   /** 순번 */
@@ -191,7 +192,7 @@ export interface UserListItem {
 /**
  * 업무배정 가능 담당자 정보
  * Schema: UserAssignableResponse
- * API: GET /api/users/assignable
+ * API: [P03-08] GET /api/users/assignable
  */
 export interface UserAssignable {
   /** 사용자 ID */
@@ -207,7 +208,7 @@ export interface UserAssignable {
 /**
  * 담당 금융기관 요약 정보
  * Schema: UserAssignedBankSummaryResponse
- * API: GET /api/users/assigned-banks
+ * API: [P03-09] GET /api/users/assigned-banks
  */
 export interface UserAssignedBankSummary {
   /** 금융기관 코드 */
@@ -224,7 +225,6 @@ export interface UserAssignedBankSummary {
 
 /**
  * 사용자 검색 파라미터
- * API: GET /api/users/search
  */
 export interface UserSearchParams {
   /** 검색 키워드 */

@@ -41,7 +41,7 @@ export interface ProgressPartyOption {
 /**
  * 계약당사자 목록 응답
  * Schema: ContractPartyResponse
- * API: GET /api/registry/applications/{applicationId}/contracts/parties
+ * API: [R02E-01] GET /api/registry/applications/{applicationId}/contracts/parties
  */
 export interface ContractPartyResponse {
   /** 등기권리자 목록 */
@@ -79,7 +79,7 @@ export interface InterimPaymentResponse {
 /**
  * 소유권이전 계약정보 요청
  * Schema: OwnershipContractRequest
- * API: PUT /api/registry/applications/{applicationId}/contracts/ownership
+ * API: [R02E-04] PUT /api/registry/applications/{applicationId}/contracts/ownership
  */
 export interface OwnershipContractRequest {
   /** 계약 일자 */
@@ -101,7 +101,7 @@ export interface OwnershipContractRequest {
 /**
  * 소유권이전 계약정보 응답
  * Schema: OwnershipContractResponse
- * API: GET /api/registry/applications/{applicationId}/contracts/ownership
+ * API: [R02E-03] GET /api/registry/applications/{applicationId}/contracts/ownership
  */
 export interface OwnershipContractResponse {
   /** 계약 일자 */
@@ -143,7 +143,7 @@ export interface SecuredDebtScopeResponse {
 /**
  * 근저당권설정 계약정보 요청
  * Schema: MortgageContractRequest
- * API: PUT /api/registry/applications/{applicationId}/contracts/mortgage
+ * API: [R02E-06] PUT /api/registry/applications/{applicationId}/contracts/mortgage
  */
 export interface MortgageContractRequest {
   /** 계약 일자 */
@@ -171,7 +171,7 @@ export interface MortgageContractRequest {
 /**
  * 근저당권설정 계약정보 응답
  * Schema: MortgageContractResponse
- * API: GET /api/registry/applications/{applicationId}/contracts/mortgage
+ * API: [R02E-05] GET /api/registry/applications/{applicationId}/contracts/mortgage
  */
 export interface MortgageContractResponse {
   /** 계약 일자 */
@@ -210,7 +210,7 @@ export interface SurfaceRightPartyOption {
 /**
  * 지상권설정 계약정보 요청
  * Schema: SurfaceRightContractRequest
- * API: PUT /api/registry/applications/{applicationId}/contracts/surface-right
+ * API: [R02E-08] PUT /api/registry/applications/{applicationId}/contracts/surface-right
  */
 export interface SurfaceRightContractRequest {
   /** 계약 일자 */
@@ -232,7 +232,7 @@ export interface SurfaceRightContractRequest {
 /**
  * 지상권설정 계약정보 응답
  * Schema: SurfaceRightContractResponse
- * API: GET /api/registry/applications/{applicationId}/contracts/surface-right
+ * API: [R02E-07] GET /api/registry/applications/{applicationId}/contracts/surface-right
  */
 export interface SurfaceRightContractResponse {
   /** 계약 일자 */
@@ -255,7 +255,6 @@ export interface SurfaceRightContractResponse {
 
 /**
  * 계약당사자 일괄 저장 요청
- * API: PUT /api/registry/applications/{applicationId}/contracts/parties
  */
 export interface ContractPartyReplaceRequest {
   /** 등기권리자 목록 */

@@ -9,6 +9,7 @@
 /**
  * 선불지급수단 옵션
  * Schema: BranchPrepaidCardResponse
+ * API: [P02E-01] GET /api/branches/{branchId}/prepaid-cards
  */
 export interface BranchPrepaidCardOption {
   /** 선불지급수단 ID */
@@ -24,7 +25,6 @@ export interface BranchPrepaidCardOption {
 /**
  * 등기사항전부증명서 항목
  * Schema: FullCertificateItem
- * API: GET /api/registry/progress/{managementNumber}/full-certificates
  */
 export interface FullCertificateItem {
   /** 부동산 고유번호 */
@@ -131,7 +131,6 @@ export interface PropertyOwnerCertificateItem {
 /**
  * 소유자 권리증 항목 응답
  * Schema: PropertyOwnerCertificateItemResponse
- * API: GET /api/registry/applications/{applicationId}/property-owner-certificate
  */
 export interface PropertyOwnerCertificateItemResponse {
   /** 진행 부동산 소유자 고유번호 */
@@ -202,7 +201,7 @@ export interface TransferCancellationCertificateResponse {
 /**
  * 말소 권리증 목록 응답
  * Schema: RegistryProgressCancellationCertificateListResponse
- * API: GET /api/registry/progress/{managementNumber}/cancellation-certificates
+ * API: [R02S-01] GET /api/registry/progress/{registryManagementNumber}/transfer-cancellation-certificates
  */
 export interface CancellationCertificateListResponse {
   /** 권리증 목록 */
@@ -212,7 +211,8 @@ export interface CancellationCertificateListResponse {
 /**
  * 말소 권리증 상세 응답
  * Schema: RegistryProgressCancellationCertificateResponse
- * API: GET /api/registry/progress/{managementNumber}/cancellation-certificates/details
+ * API: [R02S-02] PUT /api/registry/progress/{registryManagementNumber}/transfer-cancellation-certificates
+ * API: [R02S-03] GET /api/registry/progress/{registryManagementNumber}/transfer-cancellation-certificates/detail
  */
 export interface CancellationCertificateDetailResponse {
   /** 등기권리증 목록 */
@@ -232,7 +232,7 @@ export interface CancellationCertificateDetailResponse {
 /**
  * 말소 권리증 저장 요청
  * Schema: RegistryProgressCancellationCertificateRequest
- * API: PUT /api/registry/progress/{managementNumber}/cancellation-certificates
+ * API: [R02S-02] PUT /api/registry/progress/{registryManagementNumber}/transfer-cancellation-certificates
  */
 export interface CancellationCertificateSaveRequest {
   /** 이전/말소 등기권리증 정보 목록 */
@@ -259,7 +259,7 @@ export interface PostCertificateItem {
 /**
  * 소유자 권리증 저장 요청
  * Schema: RegistryApplicationPropertyOwnerCertificateReplaceRequest
- * API: PUT /api/registry/applications/{applicationId}/property-owner-certificate
+ * API: [R02G-02] PUT /api/registry/applications/{applicationId}/certificates
  */
 export interface PropertyOwnerCertificateSaveRequest {
   /** 소유자 권리증 항목 목록 */
@@ -269,7 +269,8 @@ export interface PropertyOwnerCertificateSaveRequest {
 /**
  * 소유자 권리증 응답
  * Schema: RegistryApplicationPropertyOwnerCertificateResponse
- * API: GET /api/registry/applications/{applicationId}/property-owner-certificate
+ * API: [R02G-01] GET /api/registry/applications/{applicationId}/certificates
+ * API: [R02G-02] PUT /api/registry/applications/{applicationId}/certificates
  */
 export interface PropertyOwnerCertificateResponse {
   /** 소유자 권리증 항목 목록 */
