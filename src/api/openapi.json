@@ -2430,12 +2430,12 @@
         }
       }
     },
-    "/api/codes/assignment-works": {
+    "/api/codes/assigned-works": {
       "get": {
         "tags": ["[P06] 공통코드"],
         "summary": "[P06-18] 🅿️ 배정 업무 목록 조회",
-        "description": "AssignmentWork enum의 모든 값을 조회합니다. 인증이 필요하지 않은 공개 API입니다.",
-        "operationId": "getAssignmentWorks",
+        "description": "AssignedWork enum의 모든 값을 조회합니다. 인증이 필요하지 않은 공개 API입니다.",
+        "operationId": "getAssignedWorks",
         "responses": {
           "200": {
             "description": "배정 업무 목록 조회 성공",
@@ -2454,7 +2454,7 @@
       "get": {
         "tags": ["[P06] 공통코드"],
         "summary": "[P06-19] 🅿️ 진행 상태 목록 조회",
-        "description": "RegistryProgress.ProgressStatus enum의 모든 값을 조회합니다. 인증이 필요하지 않은 공개 API입니다.",
+        "description": "ProgressStatus enum의 모든 값을 조회합니다. 인증이 필요하지 않은 공개 API입니다.",
         "operationId": "getProgressStatuses",
         "responses": {
           "200": {
@@ -2519,6 +2519,26 @@
         "responses": {
           "200": {
             "description": "등기 견적 선정 상태 목록 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/codes/progress-types": {
+      "get": {
+        "tags": ["[P06] 공통코드"],
+        "summary": "[P06-23] 🅿️ 등기 진행 유형 목록 조회",
+        "description": "ProgressType enum의 모든 값을 조회합니다. 인증이 필요하지 않은 공개 API입니다.",
+        "operationId": "getProgressTypes",
+        "responses": {
+          "200": {
+            "description": "등기 진행 유형 목록 조회 성공",
             "content": {
               "*/*": {
                 "schema": {
@@ -3735,7 +3755,7 @@
             "example": "ALL"
           },
           {
-            "name": "assignmentWork",
+            "name": "assignedWork",
             "in": "query",
             "description": "배정업무",
             "required": true,
@@ -4022,6 +4042,37 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/RegistryProgressLoanResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/registry/progress/{registryManagementNumber}/process": {
+      "get": {
+        "tags": ["[R02B] 등기진행-기본"],
+        "summary": "[R02B-05] 등기진행 업무 프로세스 조회",
+        "description": "등기진행 업무 프로세스를 조회합니다.",
+        "operationId": "getRegistryProgressProcess",
+        "parameters": [
+          {
+            "name": "registryManagementNumber",
+            "in": "path",
+            "description": "등기관리번호",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "등기진행 업무 프로세스 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
                 }
               }
             }
@@ -14509,6 +14560,12 @@
         },
         "description": "등기 신청사건 상세 조회 정보"
       },
+      "ProgressType": {
+        "type": "string",
+        "description": "등기진행유형",
+        "example": "TYPE_04",
+        "enum": ["TYPE_01", "TYPE_02", "TYPE_04", "TYPE_05", "TYPE_07"]
+      },
       "RegistryProgressBasicResponse": {
         "type": "object",
         "properties": {
@@ -14537,6 +14594,9 @@
             "type": "string",
             "description": "업무구분",
             "example": "이전+설정"
+          },
+          "progressType": {
+            "$ref": "#/components/schemas/ProgressType"
           },
           "attachmentCnt": {
             "type": "integer",

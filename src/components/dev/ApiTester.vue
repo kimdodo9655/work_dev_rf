@@ -1209,17 +1209,24 @@ const parseOpenApiSpec = (spec: any) => {
       // Request Body 정보 추출 (✅ $ref 해석 추가)
       let requestBodySchema: any = null
       let requestBodyExample: any = null
-      if (operation.requestBody?.content?.['application/json']) {
-        const content = operation.requestBody.content['application/json']
-        let schema = content.schema
+      if (operation.requestBody?.content) {
+        // application/json 또는 application/json;charset=UTF-8 찾기
+        const contentType = Object.keys(operation.requestBody.content).find((key) =>
+          key.startsWith('application/json')
+        )
 
-        // ✅ $ref가 있으면 해석
-        if (schema?.$ref) {
-          schema = resolveRef(schema.$ref, spec)
+        if (contentType) {
+          const content = operation.requestBody.content[contentType]
+          let schema = content.schema
+
+          // ✅ $ref가 있으면 해석
+          if (schema?.$ref) {
+            schema = resolveRef(schema.$ref, spec)
+          }
+
+          requestBodySchema = schema
+          requestBodyExample = content.example || schema?.example
         }
-
-        requestBodySchema = schema
-        requestBodyExample = content.example || schema?.example
       }
 
       const endpoint: EndpointInfo = {
@@ -1467,6 +1474,12 @@ const generateExampleFromSchemaRecursive = (schema: any): any => {
 const generateExampleFromSchema = (schema: any): string => {
   if (schema.example) {
     return JSON.stringify(schema.example, null, 2)
+  }
+
+  if (schema.type === 'array') {
+    // array 타입 처리
+    const arrayValue = getDefaultValue(schema)
+    return JSON.stringify(arrayValue, null, 2)
   }
 
   if (schema.type === 'object' && schema.properties) {
