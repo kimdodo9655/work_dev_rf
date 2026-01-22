@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AlertDialog from '@/components/layout/AlertDialog.vue'
 import ConfirmDialog from '@/components/layout/ConfirmDialog.vue'
-import { useDialog } from '@/composables/useDialog'
+import { useDialog } from '@/composables/utils/useDialog'
 import type { AlertOptions, ConfirmOptions } from '@/types/dialog'
 
 const { state, close, handleConfirm, handleCancel } = useDialog()

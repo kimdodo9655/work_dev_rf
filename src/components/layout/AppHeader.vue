@@ -131,7 +131,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { authAPI } from '@/api/services/auth'
-// import { useMessage } from '@/composables/useMessage'
+// import { useMessage } from '@/composables/utils/useMessage'
 import locale from '@/locales/ko.json'
 import { useAuthStore } from '@/stores/auth'
 import { UserRoleLevel } from '@/types'

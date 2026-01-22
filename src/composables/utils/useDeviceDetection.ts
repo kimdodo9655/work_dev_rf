@@ -1,9 +1,20 @@
-// composables/useDeviceDetection.ts
+/**
+ * @file useDeviceDetection.ts
+ * @description 디바이스 감지 Composable (유틸리티)
+ */
+
 import { useRouter } from 'vue-router'
 
 export const useDeviceDetection = () => {
   const router = useRouter()
 
+  // ============================================================================
+  // Detection Functions
+  // ============================================================================
+
+  /**
+   * 디바이스 종류 감지
+   */
   const detectDevice = () => {
     const userAgent = navigator.userAgent.toLowerCase()
 
@@ -18,6 +29,9 @@ export const useDeviceDetection = () => {
     return { isMobile, isMacOS }
   }
 
+  /**
+   * 디바이스 체크 후 리다이렉트
+   */
   const checkAndRedirect = () => {
     const { isMobile, isMacOS } = detectDevice()
 
@@ -28,7 +42,12 @@ export const useDeviceDetection = () => {
     }
   }
 
+  // ============================================================================
+  // Return
+  // ============================================================================
+
   return {
+    // Detection Functions
     detectDevice,
     checkAndRedirect
   }

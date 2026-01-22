@@ -225,7 +225,7 @@ import SearchDateRangePicker from '@/components/template/input/SearchDateRangePi
 import SearchInput from '@/components/template/input/SearchInput.vue'
 import SearchSelect from '@/components/template/input/SearchSelect.vue'
 import Pagination from '@/components/template/PaginationItem.vue'
-import { useMessage } from '@/composables/useMessage'
+import { useMessage } from '@/composables/utils/useMessage'
 
 const currentPage = ref(1) // 현재 페이지 상태
 

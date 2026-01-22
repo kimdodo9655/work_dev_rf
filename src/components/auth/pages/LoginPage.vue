@@ -70,8 +70,8 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref } from 'vue'
 
-import { useAuth } from '@/composables/useAuth'
-import { useErrorHandler } from '@/composables/useErrorHandler'
+import { useAuth } from '@/composables/api/useAuth'
+import { useErrorHandler } from '@/composables/utils/useErrorHandler'
 import { logger } from '@/utils/logger'
 
 // ============================================================================

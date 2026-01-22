@@ -1,7 +1,15 @@
-// composables/useDialog.ts
+/**
+ * @file useDialog.ts
+ * @description 다이얼로그 관리 Composable (유틸리티)
+ */
+
 import { reactive } from 'vue'
 
 import type { AlertOptions, ConfirmOptions, DialogState } from '@/types/dialog'
+
+// ============================================================================
+// Global State
+// ============================================================================
 
 const state = reactive<DialogState>({
   isOpen: false,
@@ -10,7 +18,18 @@ const state = reactive<DialogState>({
   resolve: undefined
 })
 
+// ============================================================================
+// Composable
+// ============================================================================
+
 export const useDialog = () => {
+  // ============================================================================
+  // Dialog Functions
+  // ============================================================================
+
+  /**
+   * Alert 다이얼로그 표시
+   */
   const alert = (options: AlertOptions): Promise<boolean> => {
     return new Promise((resolve) => {
       state.isOpen = true
@@ -20,6 +39,9 @@ export const useDialog = () => {
     })
   }
 
+  /**
+   * Confirm 다이얼로그 표시
+   */
   const confirm = (options: ConfirmOptions): Promise<boolean> => {
     return new Promise((resolve) => {
       state.isOpen = true
@@ -29,6 +51,9 @@ export const useDialog = () => {
     })
   }
 
+  /**
+   * 다이얼로그 닫기
+   */
   const close = () => {
     state.isOpen = false
     if (state.resolve) {
@@ -41,6 +66,9 @@ export const useDialog = () => {
     }, 200)
   }
 
+  /**
+   * 확인 버튼 핸들러
+   */
   const handleConfirm = async () => {
     const options = state.options as AlertOptions | ConfirmOptions
 
@@ -60,6 +88,9 @@ export const useDialog = () => {
     }, 200)
   }
 
+  /**
+   * 취소 버튼 핸들러
+   */
   const handleCancel = async () => {
     const options = state.options as ConfirmOptions
 
@@ -79,11 +110,20 @@ export const useDialog = () => {
     }, 200)
   }
 
+  // ============================================================================
+  // Return
+  // ============================================================================
+
   return {
+    // State
     state,
+
+    // Dialog Functions
     alert,
     confirm,
     close,
+
+    // Event Handlers
     handleConfirm,
     handleCancel
   }

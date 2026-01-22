@@ -1,3 +1,9 @@
+/**
+ * @file useCodes.ts
+ * @description 공통코드 관련 Composable (조회 전용)
+ * @domain [P06] 공통코드
+ */
+
 import { computed, ref } from 'vue'
 
 import { codeAPI } from '@/api/services/code'
@@ -86,9 +92,10 @@ export function useCodes() {
   })
 
   // ============================================================================
-  // API 호출
+  // API Functions
   // ============================================================================
 
+  // [P06-*] 특정 카테고리 코드 조회
   /**
    * 특정 카테고리의 코드만 조회
    */
@@ -133,6 +140,7 @@ export function useCodes() {
     }
   }
 
+  // [P06-*] 모든 공통코드 일괄 조회
   /**
    * 모든 공통코드 일괄 조회
    */
@@ -314,11 +322,11 @@ export function useCodes() {
     isLoading,
     loadError,
 
-    // API
+    // API Functions
     fetchCodesByCategory,
     fetchAllCodes,
 
-    // Utilities
+    // Utility Functions
     getCodeLabel,
     getRoleLevel,
     getCodeOptions,

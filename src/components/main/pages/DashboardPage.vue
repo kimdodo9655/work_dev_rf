@@ -250,7 +250,7 @@
 import { ref } from 'vue'
 
 import FormSelect, { type SelectOption } from '@/components/template/input/UserSelect.vue'
-import { useExternalLinks } from '@/composables/useExternalLinks'
+import { useExternalLinks } from '@/composables/utils/useExternalLinks'
 
 const { links } = useExternalLinks()
 

@@ -1,4 +1,9 @@
-// composables/useAuth.ts
+/**
+ * @file useAuth.ts
+ * @description 인증 관련 Mutation Composable
+ * @domain [P04] 인증
+ */
+
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
@@ -17,9 +22,10 @@ export function useAuth() {
   // Mutations
   // ============================================================================
 
+  // [P04-02] 로그인 : useMutation
   /**
    * 로그인 Mutation
-   * API: /api/auth/login 🅿️
+   * API: POST /api/auth/login
    *
    * 로그인 프로세스:
    * 1. mutationFn: API 호출 함수 정의
@@ -53,9 +59,10 @@ export function useAuth() {
     }
   })
 
+  // [P04-03] 로그아웃 : useMutation
   /**
    * 로그아웃 Mutation
-   * API: /api/auth/logout 🅿️
+   * API: POST /api/auth/logout
    *
    * 로그아웃 프로세스:
    * 1. mutationFn: API 호출 함수 정의
@@ -82,9 +89,10 @@ export function useAuth() {
   })
 
   // ============================================================================
-  // Business Logic (Helper Functions)
+  // Helper Functions
   // ============================================================================
 
+  // [P04-02] 로그인 : 헬퍼 함수
   /**
    * 로그인 + 리다이렉트 헬퍼 함수
    *
@@ -132,6 +140,7 @@ export function useAuth() {
     await router.push(redirectPath)
   }
 
+  // [P04-03] 로그아웃 : 헬퍼 함수
   /**
    * 로그아웃 + 로그인 페이지 이동 헬퍼 함수
    *

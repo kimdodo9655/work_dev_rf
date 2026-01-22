@@ -558,7 +558,7 @@ import FloatingCustomSelect from '@/components/template/input/FloatingCustomSele
 import FloatingInnerSelect from '@/components/template/input/FloatingInnerSelect.vue'
 import FloatingInput from '@/components/template/input/FloatingInput.vue'
 import Pagination from '@/components/template/PaginationItem.vue'
-import { useCodes } from '@/composables/useCodes'
+import { useCodes } from '@/composables/api/useCodes'
 
 import AddrTest from './AddrTest.vue'
 import ApiTester from './ApiTester.vue'

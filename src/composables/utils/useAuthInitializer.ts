@@ -1,3 +1,8 @@
+/**
+ * @file useAuthInitializer.ts
+ * @description 인증 초기화 Composable (유틸리티)
+ */
+
 import { useRouter } from 'vue-router'
 
 import { useAuthStore } from '@/stores/auth'
@@ -11,6 +16,10 @@ import { storage } from '@/utils/storage'
 export function useAuthInitializer() {
   const authStore = useAuthStore()
   const router = useRouter()
+
+  // ============================================================================
+  // Validation Functions
+  // ============================================================================
 
   /**
    * 저장된 인증 정보의 유효성을 검사하고 로드

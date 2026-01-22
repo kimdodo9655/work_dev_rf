@@ -233,8 +233,8 @@
 import { computed, ref, watch } from 'vue'
 
 import { addressAPI } from '@/api/services/address'
-import { useAddress } from '@/composables/useAddress'
-import { useErrorHandler } from '@/composables/useErrorHandler'
+import { useAddress } from '@/composables/api/useAddress'
+import { useErrorHandler } from '@/composables/utils/useErrorHandler'
 import type { AddressItem, RegistryOffice } from '@/types'
 
 const {
