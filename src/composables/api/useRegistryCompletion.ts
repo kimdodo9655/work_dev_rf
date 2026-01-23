@@ -4,11 +4,11 @@
  * @domain [R02X] 등기진행-완료문서
  */
 
-//import { useMutation, useQueryClient } from '@tanstack/vue-query'
+// import { useMutation , useQueryClient } from '@tanstack/vue-query'
 import { computed } from 'vue'
 
 export function useRegistryCompletion() {
-  //const queryClient = useQueryClient()
+  // TODO: 구현 시 주석 제거 - const queryClient = useQueryClient()
 
   // ============================================================================
   // Mutations

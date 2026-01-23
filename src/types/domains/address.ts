@@ -120,6 +120,6 @@ export interface RegistryOffice {
 export interface RegistryOfficeList {
   /** 등기소 목록 */
   registryOffices: RegistryOffice[]
-  /** 페이지 정보 */
+  /** 페이지 정보, front 50개 */
   pageInfo: PageInfo
 }

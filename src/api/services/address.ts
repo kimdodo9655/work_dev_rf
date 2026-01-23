@@ -52,9 +52,10 @@ export const addressAPI = {
    * const response = await addressAPI.getRegistryOffices('서울')
    * console.log(response.data) // RegistryOffice[]
    */
-  async getRegistryOffices(keyword: string = '') {
+  async getRegistryOffices(keyword: string = '', size: number = 50) {
     return apiHelpers.get<ApiResponse<RegistryOfficeList>>(API.ADDRESS.REGISTRY_OFFICES, {
-      keyword
+      keyword,
+      size
     })
   }
 }

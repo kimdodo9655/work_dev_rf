@@ -4,11 +4,11 @@
  * @domain [R02G] 등기진행-등기권리증
  */
 
-//import { useMutation, useQueryClient } from '@tanstack/vue-query'
+// import { useMutation , useQueryClient } from '@tanstack/vue-query'
 import { computed } from 'vue'
 
 export function useRegistryCertificate() {
-  //const queryClient = useQueryClient()
+  // TODO: 구현 시 주석 제거 - const queryClient = useQueryClient()
 
   // ============================================================================
   // Mutations

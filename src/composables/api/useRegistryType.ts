@@ -4,11 +4,11 @@
  * @domain [R02D] 등기진행-등기유형
  */
 
-//import { useMutation, useQueryClient } from '@tanstack/vue-query'
+// import { useMutation , useQueryClient } from '@tanstack/vue-query'
 import { computed } from 'vue'
 
 export function useRegistryType() {
-  //const queryClient = useQueryClient()
+  // TODO: 구현 시 주석 제거 - const queryClient = useQueryClient()
 
   // ============================================================================
   // Mutations

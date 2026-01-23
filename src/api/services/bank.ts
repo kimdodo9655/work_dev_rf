@@ -27,6 +27,6 @@ export const bankAPI = {
    * console.log(response.data) // Bank
    */
   async getDetail(code: string) {
-    return apiHelpers.get<ApiResponse<Bank>>(API.BANK.DETAIL(code))
+    return apiHelpers.get<ApiResponse<Bank>>(`${API.BANK.LIST}/${code}`)
   }
 }

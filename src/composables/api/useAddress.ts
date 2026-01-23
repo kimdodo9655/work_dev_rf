@@ -2,6 +2,12 @@
  * @file useAddress.ts
  * @description 주소/등기소 관련 Composable (조회 전용)
  * @domain [A01] 주소/등기소
+ *
+ *
+ * [A01-01] 주소 검색
+ * [A01-02] 주소 자동 완성
+ * [A01-03] 등기소 목록 조회
+ *
  */
 
 import { ref } from 'vue'

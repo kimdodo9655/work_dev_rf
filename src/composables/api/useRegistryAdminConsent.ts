@@ -4,11 +4,11 @@
  * @domain [R02N] 등기진행-행정정보동의
  */
 
-//import { useMutation, useQueryClient } from '@tanstack/vue-query'
+// import { useMutation , useQueryClient } from '@tanstack/vue-query'
 import { computed } from 'vue'
 
 export function useRegistryAdminConsent() {
-  //const queryClient = useQueryClient()
+  // TODO: 구현 시 주석 제거 - const queryClient = useQueryClient()
 
   // ============================================================================
   // Mutations

@@ -4,11 +4,11 @@
  * @domain [P02D] 지점-인터넷등기소
  */
 
-//import { useMutation, useQueryClient } from '@tanstack/vue-query'
+// import { useMutation , useQueryClient } from '@tanstack/vue-query'
 import { computed } from 'vue'
 
 export function useBranchRegistry() {
-  //const queryClient = useQueryClient()
+  // TODO: 구현 시 주석 제거 - const queryClient = useQueryClient()
 
   // ============================================================================
   // Mutations

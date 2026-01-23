@@ -57,7 +57,12 @@ export function useCodes() {
     workTypes: [],
     paymentStatuses: [],
     adminInfoLinkTime: [],
-    userStatuses: [] // [P06-17] 추가
+    userStatuses: [], // [P06-17] 추가
+    progressStatuses: [], // [P06-18] 진행 상태
+    quoteProgressStatuses: [], // [P06-19] 등기 견적 진행 상태
+    estimateWritingStatuses: [], // [P06-20] 등기 견적 작성 여부
+    estimateSelectionStatuses: [], // [P06-21] 등기 견적 선정 상태
+    assignmentWorks: [] // [P06-22] 배정 업무
   })
 
   const isLoading = ref(false)
@@ -123,7 +128,27 @@ export function useCodes() {
         workTypes: codeAPI.getWorkTypes,
         paymentStatuses: codeAPI.getPaymentStatuses,
         adminInfoLinkTime: codeAPI.getAdminInfoLinkTime,
-        userStatuses: codeAPI.getUserStatuses // [P06-17] 추가
+        userStatuses: codeAPI.getUserStatuses, // [P06-17] 추가
+        // progressStatuses: codeAPI.getProgressStatuses, // [P06-18] 추가
+        // quoteProgressStatuses: codeAPI.getQuoteProgressStatuses, // [P06-19] 추가
+        // estimateWritingStatuses: codeAPI.getEstimateWritingStatuses, // [P06-20] 추가
+        // estimateSelectionStatuses: codeAPI.getEstimateSelectionStatuses, // [P06-21] 추가
+        // assignmentWorks: codeAPI.getAssignmentWorks // [P06-22] 추가
+        progressStatuses: function (): Promise<any> {
+          throw new Error('Function not implemented.')
+        },
+        quoteProgressStatuses: function (): Promise<any> {
+          throw new Error('Function not implemented.')
+        },
+        estimateWritingStatuses: function (): Promise<any> {
+          throw new Error('Function not implemented.')
+        },
+        estimateSelectionStatuses: function (): Promise<any> {
+          throw new Error('Function not implemented.')
+        },
+        assignmentWorks: function (): Promise<any> {
+          throw new Error('Function not implemented.')
+        }
       }
 
       const response = await apiMethodMap[category]()
@@ -170,6 +195,11 @@ export function useCodes() {
         payStatuses,
         adminLinkTime,
         userStats
+        // progressStats,
+        // quoteProgressStats,
+        // estimateWritingStats,
+        // estimateSelectionStats,
+        // assignmentWorks
       ] = await Promise.all([
         codeAPI.getOrganizationTypes(),
         codeAPI.getOrganizationStatuses(),
@@ -188,6 +218,11 @@ export function useCodes() {
         codeAPI.getPaymentStatuses(),
         codeAPI.getAdminInfoLinkTime(),
         codeAPI.getUserStatuses()
+        // codeAPI.getProgressStatuses(),
+        // codeAPI.getQuoteProgressStatuses(),
+        // codeAPI.getEstimateWritingStatuses(),
+        // codeAPI.getEstimateSelectionStatuses(),
+        // codeAPI.getAssignmentWorks()
       ])
 
       codes.value.organizationTypes = orgTypes.data || []
@@ -207,6 +242,11 @@ export function useCodes() {
       codes.value.paymentStatuses = payStatuses.data || []
       codes.value.adminInfoLinkTime = adminLinkTime.data || []
       codes.value.userStatuses = userStats.data || []
+      // codes.value.progressStatuses = progressStats.data || []
+      // codes.value.quoteProgressStatuses = quoteProgressStats.data || []
+      // codes.value.estimateWritingStatuses = estimateWritingStats.data || []
+      // codes.value.estimateSelectionStatuses = estimateSelectionStats.data || []
+      // codes.value.assignmentWorks = assignmentWorks.data || []
 
       const endTime = performance.now()
       const loadTime = (endTime - startTime).toFixed(2)
@@ -306,7 +346,12 @@ export function useCodes() {
       workTypes: [],
       paymentStatuses: [],
       adminInfoLinkTime: [],
-      userStatuses: []
+      userStatuses: [],
+      progressStatuses: [],
+      quoteProgressStatuses: [],
+      estimateWritingStatuses: [],
+      estimateSelectionStatuses: [],
+      assignmentWorks: []
     }
     loadError.value = null
     logger.info('[CODES] Cache cleared')

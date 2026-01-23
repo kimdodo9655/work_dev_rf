@@ -708,6 +708,14 @@ const groupedLoginUsers = computed(() => {
     }))
 })
 
+// ✅ 현재 로그인한 사용자의 상세 정보
+const currentUserInfo = computed(() => {
+  const loginId = storageData.value.loginId
+  if (!loginId) return null
+
+  return LOGIN_USERS.find((user) => user.로그인아이디 === loginId) || null
+})
+
 // ============================================================================
 // Auth Monitor - Storage 실시간 갱신
 // ============================================================================
@@ -880,6 +888,10 @@ const fetchAssignedBanks = async () => {
 
       // ✅ authStore에 저장 (내부에서 storage 처리)
       authStore.setBankCode(selectedBankCode.value)
+
+      // ✅ localStorage에도 직접 저장 (보험)
+      localStorage.setItem('bank_code', selectedBankCode.value)
+
       refreshStorageData()
     }
 
@@ -890,6 +902,10 @@ const fetchAssignedBanks = async () => {
     // 에러가 나도 기본값 유지
     selectedBankCode.value = 'bankclear'
     authStore.setBankCode('bankclear')
+
+    // ✅ localStorage에도 직접 저장 (보험)
+    localStorage.setItem('bank_code', 'bankclear')
+
     refreshStorageData()
     return []
   }
@@ -901,6 +917,10 @@ const handleBankCodeChange = () => {
 
   // ✅ authStore에 저장 (내부에서 storage 처리)
   authStore.setBankCode(selectedBankCode.value)
+
+  // ✅ localStorage에도 직접 저장 (보험)
+  localStorage.setItem('bank_code', selectedBankCode.value)
+
   refreshStorageData()
 }
 
@@ -976,6 +996,9 @@ const handleLogout = async () => {
     // ✅ 은행 목록 초기화
     assignedBanks.value = []
     selectedBankCode.value = 'bankclear'
+
+    // ✅ localStorage에서도 bank_code 제거
+    localStorage.removeItem('bank_code')
 
     console.log('Calling refreshStorageData()')
     refreshStorageData()
@@ -1072,6 +1095,9 @@ const handleBaseUrlChange = async (newMode: 'production' | 'local') => {
       // ✅ 은행 목록 초기화
       assignedBanks.value = []
       selectedBankCode.value = 'bankclear'
+
+      // ✅ localStorage에서도 bank_code 제거
+      localStorage.removeItem('bank_code')
 
       refreshStorageData()
     }
@@ -1658,55 +1684,6 @@ watch(
           </div>
         </div>
 
-        <!-- ✅ 로그인 상태일 때만 auth-info 표시 -->
-        <div v-if="authStore.isLoggedIn" class="header-center">
-          <div class="auth-info">
-            <div class="auth-info-item">
-              <span class="auth-info-label">Login</span>
-              <span class="auth-info-value">{{ storageData.loginId || '-' }}</span>
-            </div>
-            <div class="auth-info-item">
-              <span class="auth-info-label">User</span>
-              <span class="auth-info-value">{{ storageData.userId || '-' }}</span>
-            </div>
-            <div class="auth-info-item">
-              <span class="auth-info-label">Role</span>
-              <span class="auth-info-value">{{ storageData.roleLevel || '-' }}</span>
-            </div>
-
-            <!-- ✅ 은행 선택 select -->
-            <div class="auth-info-item bank-select-item">
-              <span class="auth-info-label">Bank</span>
-              <div style="display: flex; align-items: center; gap: 0.25rem">
-                <select
-                  v-model="selectedBankCode"
-                  @change="handleBankCodeChange"
-                  class="bank-select"
-                >
-                  <option v-if="assignedBanks.length === 0" value="bankclear">bankclear</option>
-                  <option v-for="bank in assignedBanks" :key="bank.bankCode" :value="bank.bankCode">
-                    {{ bank.bankName }}
-                  </option>
-                </select>
-                <span class="bank-debug"> ({{ assignedBanks.length }}) </span>
-              </div>
-            </div>
-
-            <div class="auth-info-item">
-              <span class="auth-info-label">Token</span>
-              <span
-                class="auth-info-value"
-                :class="{
-                  expiring: authStore.isExpiringSoon,
-                  expired: authStore.isExpired
-                }"
-              >
-                {{ authStore.formattedTime }}
-              </span>
-            </div>
-          </div>
-        </div>
-
         <div class="header-right">
           <!-- 현재 BASE URL 표시 -->
           <div class="current-base-url" :title="currentBaseUrl || '현재 도메인 사용'">
@@ -1890,6 +1867,75 @@ watch(
         </div>
       </div>
     </header>
+
+    <!-- ✅ 로그인 정보 영역 (헤더 아래) -->
+    <div v-if="authStore.isLoggedIn" class="auth-info-section">
+      <div class="auth-info">
+        <div class="auth-info-item">
+          <span class="auth-info-label">Login:</span>
+          <span class="auth-info-value">{{ storageData.loginId || '-' }}</span>
+        </div>
+
+        <!-- ✅ 은행 선택 select -->
+        <div class="auth-info-item bank-select-item">
+          <span class="auth-info-label">Bank:</span>
+          <div style="display: flex; align-items: center; gap: 0.25rem">
+            <select v-model="selectedBankCode" @change="handleBankCodeChange" class="bank-select">
+              <option v-if="assignedBanks.length === 0" value="bankclear">bankclear</option>
+              <option v-for="bank in assignedBanks" :key="bank.bankCode" :value="bank.bankCode">
+                {{ bank.bankName }}
+              </option>
+            </select>
+            <span class="bank-debug"> ({{ assignedBanks.length }}) </span>
+          </div>
+        </div>
+
+        <div class="auth-info-item">
+          <span class="auth-info-label">Token:</span>
+          <span
+            class="auth-info-value"
+            :class="{
+              expiring: authStore.isExpiringSoon,
+              expired: authStore.isExpired
+            }"
+          >
+            {{ authStore.formattedTime }}
+          </span>
+        </div>
+
+        <!-- 상세 정보 -->
+        <template v-if="currentUserInfo">
+          <div class="auth-info-item">
+            <span class="auth-info-label">기관ID:</span>
+            <span class="auth-info-value">{{ currentUserInfo.기관ID }}</span>
+          </div>
+          <div class="auth-info-item">
+            <span class="auth-info-label">사용자ID:</span>
+            <span class="auth-info-value">{{ currentUserInfo.사용자ID }}</span>
+          </div>
+          <div class="auth-info-item">
+            <span class="auth-info-label">권한값:</span>
+            <span class="auth-info-value">{{ currentUserInfo.권한값 }}</span>
+          </div>
+          <div class="auth-info-item">
+            <span class="auth-info-label">권한명:</span>
+            <span class="auth-info-value">{{ currentUserInfo.권한명 }}</span>
+          </div>
+          <div class="auth-info-item">
+            <span class="auth-info-label">기관명:</span>
+            <span class="auth-info-value">{{ currentUserInfo.기관명 }}</span>
+          </div>
+          <div class="auth-info-item">
+            <span class="auth-info-label">지점ID:</span>
+            <span class="auth-info-value">{{ currentUserInfo.지점ID }}</span>
+          </div>
+          <div class="auth-info-item">
+            <span class="auth-info-label">지점명:</span>
+            <span class="auth-info-value">{{ currentUserInfo.지점명 }}</span>
+          </div>
+        </template>
+      </div>
+    </div>
 
     <div class="content">
       <!-- 로딩 상태 -->
@@ -2227,13 +2273,6 @@ watch(
   min-width: 0;
 }
 
-.header-center {
-  flex: 0 1 auto;
-  display: flex;
-  justify-content: center;
-  min-width: 0;
-}
-
 .header-right {
   display: flex;
   align-items: center;
@@ -2272,7 +2311,15 @@ watch(
   color: var(--border-secondary);
 }
 
-/* Auth Info */
+/* Auth Info Section (헤더 아래 별도 영역) */
+.auth-info-section {
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-secondary);
+  padding: 0.75rem 2rem;
+  display: flex;
+  justify-content: center;
+}
+
 .auth-info {
   display: flex;
   gap: 1rem;
@@ -2281,22 +2328,21 @@ watch(
   background: var(--bg-primary);
   border: 1px solid var(--border-secondary);
   border-radius: 6px;
+  flex-wrap: wrap;
 }
 
 .auth-info-item {
   display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
+  flex-direction: row;
+  gap: 0.25rem;
   align-items: center;
-  min-width: 60px;
+  white-space: nowrap;
 }
 
 .auth-info-label {
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   color: var(--text-tertiary);
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
 }
 
 .auth-info-value {
