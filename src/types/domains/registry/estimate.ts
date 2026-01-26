@@ -4,11 +4,19 @@
  *
  * OpenAPI Schema 기반으로 생성됨
  * 생성일: 2025-01-16
+ * 최종 수정: 2025-01-26
  */
+
+/**
+ * 등기 진행 방식
+ * Schema: RegistryMethod (Enum)
+ */
+export type RegistryMethod = 'ELECTRONIC' | 'E_FORM' | 'PAPER'
 
 /**
  * 채권자 정보
  * Schema: ObligeeInfo
+ * API: [R01-02] GET /api/registry/estimates/requests/{registryRequestNumber}/info
  */
 export interface ObligeeInfo {
   /** 채권자명 */
@@ -61,14 +69,19 @@ export interface RegistryInfo {
 /**
  * 법무대리인 정보
  * Schema: LegalAgentInfo
+ * API: [R01-03] GET /api/registry/estimates/{estimateId}/details
  */
 export interface LegalAgentInfo {
   /** 법무사명 */
   name: string
+  /** 견적서 작성자 이름 (변경: qualifiedName → estimatorName) */
+  estimatorName: string
   /** 사무소명 */
   officeName: string
   /** 사무소 주소 */
   officeAddress: string
+  /** 법무대리인 지점 주소 (변경: branchPhone → branchAddress) */
+  branchAddress: string
   /** 전화번호 */
   phone: string
   /** 등록번호 */
@@ -203,8 +216,10 @@ export interface EstimateDetail {
   organizationId: number
   /** 지점 ID */
   branchId: number
-  /** 등기 진행 방식 (ELECTRONIC, E_FORM, PAPER) */
-  registryMethod: string
+  /** 견적서 작성자 사용자 ID */
+  estimatorUserId: number
+  /** 등기 진행 방식 (ELECTRONIC: 전자, E_FORM: 전자서식, PAPER: 서면) */
+  registryMethod: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
   /** 법무대리인 정보 */
   legalAgentInfo: LegalAgentInfo
   /** 보수료 상세 */
@@ -226,7 +241,7 @@ export interface EstimateDetail {
  */
 export interface EstimateSubmitRequest {
   /** 등기 진행 방식 (ELECTRONIC: 전자, E_FORM: 전자서식, PAPER: 서면) */
-  registryMethod: string
+  registryMethod: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
 
   // 보수료
   /** 기본 보수 */
@@ -265,9 +280,6 @@ export interface EstimateSubmitRequest {
   ruralSpecialTax: number
   /** 인지세 */
   stampTax: number
-
-  /** 유의사항 및 동의사항 동의 여부 */
-  agreed: boolean
 }
 
 /**
@@ -285,7 +297,7 @@ export interface EstimateSubmitResponse {
   /** 지점 ID */
   branchId: number
   /** 등기 진행 방식 */
-  registryMethod: string
+  registryMethod: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
   /** 보수료 합계 */
   totalFee: number
   /** 공과금 합계 */

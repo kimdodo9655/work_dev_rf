@@ -62,7 +62,8 @@ export function useCodes() {
     quoteProgressStatuses: [], // [P06-19] 등기 견적 진행 상태
     estimateWritingStatuses: [], // [P06-20] 등기 견적 작성 여부
     estimateSelectionStatuses: [], // [P06-21] 등기 견적 선정 상태
-    assignmentWorks: [] // [P06-22] 배정 업무
+    assignmentWorks: [], // [P06-22] 배정 업무
+    progressTypes: [] // [P06-23] 등기 진행 유형
   })
 
   const isLoading = ref(false)
@@ -129,26 +130,12 @@ export function useCodes() {
         paymentStatuses: codeAPI.getPaymentStatuses,
         adminInfoLinkTime: codeAPI.getAdminInfoLinkTime,
         userStatuses: codeAPI.getUserStatuses, // [P06-17] 추가
-        // progressStatuses: codeAPI.getProgressStatuses, // [P06-18] 추가
-        // quoteProgressStatuses: codeAPI.getQuoteProgressStatuses, // [P06-19] 추가
-        // estimateWritingStatuses: codeAPI.getEstimateWritingStatuses, // [P06-20] 추가
-        // estimateSelectionStatuses: codeAPI.getEstimateSelectionStatuses, // [P06-21] 추가
-        // assignmentWorks: codeAPI.getAssignmentWorks // [P06-22] 추가
-        progressStatuses: function (): Promise<any> {
-          throw new Error('Function not implemented.')
-        },
-        quoteProgressStatuses: function (): Promise<any> {
-          throw new Error('Function not implemented.')
-        },
-        estimateWritingStatuses: function (): Promise<any> {
-          throw new Error('Function not implemented.')
-        },
-        estimateSelectionStatuses: function (): Promise<any> {
-          throw new Error('Function not implemented.')
-        },
-        assignmentWorks: function (): Promise<any> {
-          throw new Error('Function not implemented.')
-        }
+        progressStatuses: codeAPI.getProgressStatuses, // [P06-18] 추가
+        quoteProgressStatuses: codeAPI.getQuoteProgressStatuses, // [P06-19] 추가
+        estimateWritingStatuses: codeAPI.getEstimateWritingStatuses, // [P06-20] 추가
+        estimateSelectionStatuses: codeAPI.getEstimateSelectionStatuses, // [P06-21] 추가
+        assignmentWorks: codeAPI.getAssignmentWorks, // [P06-22] 추가
+        progressTypes: codeAPI.getProgressTypes // [P06-23] 추가
       }
 
       const response = await apiMethodMap[category]()
@@ -194,12 +181,13 @@ export function useCodes() {
         workTypes,
         payStatuses,
         adminLinkTime,
-        userStats
-        // progressStats,
-        // quoteProgressStats,
-        // estimateWritingStats,
-        // estimateSelectionStats,
-        // assignmentWorks
+        userStats,
+        progressStats,
+        quoteProgressStats,
+        estimateWritingStats,
+        estimateSelectionStats,
+        assignmentWorks,
+        progressTypes
       ] = await Promise.all([
         codeAPI.getOrganizationTypes(),
         codeAPI.getOrganizationStatuses(),
@@ -217,12 +205,13 @@ export function useCodes() {
         codeAPI.getWorkTypes(),
         codeAPI.getPaymentStatuses(),
         codeAPI.getAdminInfoLinkTime(),
-        codeAPI.getUserStatuses()
-        // codeAPI.getProgressStatuses(),
-        // codeAPI.getQuoteProgressStatuses(),
-        // codeAPI.getEstimateWritingStatuses(),
-        // codeAPI.getEstimateSelectionStatuses(),
-        // codeAPI.getAssignmentWorks()
+        codeAPI.getUserStatuses(),
+        codeAPI.getProgressStatuses(),
+        codeAPI.getQuoteProgressStatuses(),
+        codeAPI.getEstimateWritingStatuses(),
+        codeAPI.getEstimateSelectionStatuses(),
+        codeAPI.getAssignmentWorks(),
+        codeAPI.getProgressTypes()
       ])
 
       codes.value.organizationTypes = orgTypes.data || []
@@ -242,11 +231,12 @@ export function useCodes() {
       codes.value.paymentStatuses = payStatuses.data || []
       codes.value.adminInfoLinkTime = adminLinkTime.data || []
       codes.value.userStatuses = userStats.data || []
-      // codes.value.progressStatuses = progressStats.data || []
-      // codes.value.quoteProgressStatuses = quoteProgressStats.data || []
-      // codes.value.estimateWritingStatuses = estimateWritingStats.data || []
-      // codes.value.estimateSelectionStatuses = estimateSelectionStats.data || []
-      // codes.value.assignmentWorks = assignmentWorks.data || []
+      codes.value.progressStatuses = progressStats.data || []
+      codes.value.quoteProgressStatuses = quoteProgressStats.data || []
+      codes.value.estimateWritingStatuses = estimateWritingStats.data || []
+      codes.value.estimateSelectionStatuses = estimateSelectionStats.data || []
+      codes.value.assignmentWorks = assignmentWorks.data || []
+      codes.value.progressTypes = progressTypes.data || []
 
       const endTime = performance.now()
       const loadTime = (endTime - startTime).toFixed(2)
@@ -351,7 +341,8 @@ export function useCodes() {
       quoteProgressStatuses: [],
       estimateWritingStatuses: [],
       estimateSelectionStatuses: [],
-      assignmentWorks: []
+      assignmentWorks: [],
+      progressTypes: [] // [P06-23] 추가
     }
     loadError.value = null
     logger.info('[CODES] Cache cleared')

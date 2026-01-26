@@ -2,36 +2,43 @@
 
 ## 📅 최종 수정일
 
-2025-01-22 - API 코드 주석 업데이트 (구분값 중복 해결)
+2025-01-26 - API 엔드포인트 195개 반영, R02W 영수증 타입 추가
 
 ## 📊 API 통계
 
-- **전체 엔드포인트:** 188개 (180 → 188, +8)
-- **전체 카테고리:** 42개 (39 → 42, +3)
-- **전체 스키마:** 232개
+- **전체 엔드포인트:** 195개 (188 → 195, +7개)
+- **전체 카테고리:** 43개 (42 → 43, +1개)
+- **삭제 예정 제외:** 3개 (R02D-05, R02D-06, R02D-07)
 
-## 🆕 최신 변경사항 (2025-01-22)
+## 🆕 최신 변경사항 (2025-01-26)
 
-### API 코드 주석 추가
+### 1. 엔티티 수정
+- **RegistryRequestEstimate** (견적 정보)
+  - `estimatorUserId` 필드 추가 (견적서 작성자 사용자 ID)
+  - `registryMethod` 타입 변경: `string` → `'ELECTRONIC' | 'E_FORM' | 'PAPER'`
 
-모든 타입 정의에 해당 API의 구분값(예: [P03-01], [R02D-08])이 주석으로 추가되었습니다.
+### 2. API 추가 (R02W 영수증)
+- [R02W-01] 등기 영수증 목록 조회
+- [R02W-02] 등기 영수증 상세 조회
+- [R02W-03] 등기 영수증 전자문서 생성
+- [R02W-04] 등기 영수증 전자문서 삭제
+- [R02W-05] 등기 영수증 전자문서 조회
 
-**예시:**
+### 3. API 수정
+- **[R01-03] 견적서 상세 조회**
+  - `LegalAgentInfo.qualifiedName` → `estimatorName`
+  - `LegalAgentInfo.branchPhone` → `branchAddress`
+  
+- **[R01-04] 견적서 제출**
+  - `agreed` 필드 삭제 (프론트엔드에서만 체크)
 
-```typescript
-/**
- * 지점 상세 정보
- * Schema: BranchDetailResponse
- * API: [P02A-02] GET /api/branches/{branchId}
- */
-export interface BranchDetailResponse { ... }
-```
+- **R02D → R02B 이동 (삭제 예정)**
+  - [R02D-05] → [R02B-05] 소유권이전 조회
+  - [R02D-06] → [R02B-06] 근저당권 조회
+  - [R02D-07] → [R02B-07] 법무대리인 조회
 
-### API 변경사항 반영
-
-- 등기 신청서 생성/수정 API 방식 변경 (Request Body → Query Parameter)
-- RPA 사건 조회 스키마 변경
-- 전자서명 타입 추가
+### 4. 공통코드 추가
+- **[P06-23]** 등기 진행 유형 목록 (`progressTypes`)
 
 ## 📦 포함 내용
 

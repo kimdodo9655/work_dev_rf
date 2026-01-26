@@ -34,6 +34,7 @@ export interface RoleLevelCode extends Code {
 /**
  * 공통코드 응답 타입
  * 모든 공통코드 카테고리를 포함
+ * API: [P06-01~23] GET /api/codes/*
  */
 export interface CodeResponse {
   /** 기관 구분 목록 */
@@ -80,6 +81,8 @@ export interface CodeResponse {
   estimateSelectionStatuses: Code[]
   /** 배정 업무 목록 */
   assignmentWorks: Code[]
+  /** 등기 진행 유형 목록 (P06-23) 🆕 */
+  progressTypes: Code[]
 }
 
 /**

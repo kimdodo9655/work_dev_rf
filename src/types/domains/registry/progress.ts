@@ -373,3 +373,76 @@ export interface RegistryLoanPaymentAccountReceiptUploadResponse {
   /** 업로드 일시 */
   uploadedAt: string
 }
+
+// ============================================================================
+// 등기 영수증 (R02W) 🆕
+// ============================================================================
+
+/**
+ * 등기 영수증 정보
+ * Schema: RegistryReceiptDocumentResponse
+ * API: [R02W-01] GET /api/registry/progress/{registryManagementNumber}/receipt-documents/list
+ * API: [R02W-02] GET /api/registry/progress/{registryManagementNumber}/receipt-documents/detail
+ */
+export interface RegistryReceiptDocument {
+  /** 영수증 ID */
+  receiptDocumentId?: number
+  /** 등기관리번호 */
+  registryManagementNumber?: string
+  /** 등기유형 */
+  registryType?: string
+  /** 접수번호 */
+  receiptNumber?: string
+  /** 접수일자 */
+  receiptDate?: string
+  /** 영수증 생성일시 */
+  createdAt?: string
+  /** 전자문서 생성 여부 */
+  hasDocument?: boolean
+}
+
+/**
+ * 등기 영수증 목록 응답
+ * Schema: RegistryReceiptDocumentListResponse
+ * API: [R02W-01] GET /api/registry/progress/{registryManagementNumber}/receipt-documents/list
+ */
+export interface RegistryReceiptDocumentListResponse {
+  /** 영수증 목록 */
+  receiptDocuments: RegistryReceiptDocument[]
+}
+
+/**
+ * 등기 영수증 상세 응답
+ * Schema: RegistryReceiptDocumentDetailResponse
+ * API: [R02W-02] GET /api/registry/progress/{registryManagementNumber}/receipt-documents/detail
+ */
+export interface RegistryReceiptDocumentDetailResponse {
+  /** 영수증 정보 */
+  receiptDocument: RegistryReceiptDocument
+}
+
+/**
+ * 등기 영수증 전자문서 생성 응답
+ * Schema: RegistryReceiptDocumentCreateResponse
+ * API: [R02W-03] POST /api/registry/progress/{registryManagementNumber}/receipt-documents/{receiptDocumentId}/document
+ */
+export interface RegistryReceiptDocumentCreateResponse {
+  /** 전자문서 생성 성공 여부 */
+  success: boolean
+  /** 생성일시 */
+  createdAt: string
+}
+
+/**
+ * 등기 영수증 전자문서 조회 응답
+ * Schema: RegistryReceiptDocumentGetResponse
+ * API: [R02W-05] GET /api/registry/progress/{registryManagementNumber}/receipt-documents/{receiptDocumentId}/document
+ */
+export interface RegistryReceiptDocumentGetResponse {
+  /** Base64 인코딩된 문서 데이터 */
+  documentData: string
+  /** 파일명 */
+  fileName: string
+  /** 문서 타입 */
+  contentType: string
+}

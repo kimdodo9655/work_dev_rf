@@ -155,5 +155,59 @@ export const codeAPI = {
    */
   async getUserStatuses() {
     return apiHelpers.get<ApiResponse<Code[]>>(API.CODE.USER_STATUSES)
+  },
+
+  /**
+   * [P06-18] 진행 상태 목록 조회
+   * @returns 진행 상태 코드 목록
+   * @throws {ApiError} 조회 실패 시
+   */
+  async getProgressStatuses() {
+    return apiHelpers.get<ApiResponse<Code[]>>(API.CODE.PROGRESS_STATUSES)
+  },
+
+  /**
+   * [P06-19] 등기 견적 진행 상태 목록 조회
+   * @returns 등기 견적 진행 상태 코드 목록
+   * @throws {ApiError} 조회 실패 시
+   */
+  async getQuoteProgressStatuses() {
+    return apiHelpers.get<ApiResponse<Code[]>>(API.CODE.QUOTE_PROGRESS_STATUSES)
+  },
+
+  /**
+   * [P06-20] 등기 견적 작성 여부 목록 조회
+   * @returns 등기 견적 작성 여부 코드 목록
+   * @throws {ApiError} 조회 실패 시
+   */
+  async getEstimateWritingStatuses() {
+    return apiHelpers.get<ApiResponse<Code[]>>(API.CODE.ESTIMATE_WRITING_STATUSES)
+  },
+
+  /**
+   * [P06-21] 등기 견적 선정 상태 목록 조회
+   * @returns 등기 견적 선정 상태 코드 목록
+   * @throws {ApiError} 조회 실패 시
+   */
+  async getEstimateSelectionStatuses() {
+    return apiHelpers.get<ApiResponse<Code[]>>(API.CODE.ESTIMATE_SELECTION_STATUSES)
+  },
+
+  /**
+   * [P06-22] 배정 업무 목록 조회
+   * @returns 배정 업무 코드 목록
+   * @throws {ApiError} 조회 실패 시
+   */
+  async getAssignmentWorks() {
+    return apiHelpers.get<ApiResponse<Code[]>>(API.CODE.ASSIGNMENT_WORKS)
+  },
+
+  /**
+   * [P06-23] 등기 진행 유형 목록 조회
+   * @returns 등기 진행 유형 코드 목록
+   * @throws {ApiError} 조회 실패 시
+   */
+  async getProgressTypes() {
+    return apiHelpers.get<ApiResponse<Code[]>>(API.CODE.PROGRESS_TYPES)
   }
 }

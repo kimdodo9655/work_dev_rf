@@ -63,6 +63,12 @@ interface CategoryGroup {
   endpoints: EndpointInfo[]
 }
 
+// ✅ Schema 타입 정의
+interface SchemaInfo {
+  name: string
+  schema: any
+}
+
 // ✅ 할당된 은행 타입 정의
 interface AssignedBank {
   bankCode: string
@@ -96,6 +102,7 @@ const showLoginModal = ref(false)
 const selectedLoginUser = ref<any>(null)
 const loginId = ref('')
 const password = ref('P@ssw0rd1!')
+const showUserListDropdown = ref(false)
 
 // ✅ OpenAPI 스펙 전체 저장 ($ref 해석용)
 // eslint-disable-next-line vue/no-dupe-keys
@@ -108,6 +115,13 @@ const selectedBankCode = ref<string>('bankclear') // 기본값 'bankclear'
 // ✅ 토스트 상태 관리
 const toastMessage = ref<string>('')
 const showToast = ref<boolean>(false)
+
+// ============================================================================
+// ✅ 새로운 상태: 탭 및 Schemas
+// ============================================================================
+const activeTab = ref<'apis' | 'schemas'>('apis')
+const schemas = ref<SchemaInfo[]>([])
+const selectedSchema = ref<SchemaInfo | null>(null)
 
 // ============================================================================
 // 로그인 사용자 목록
@@ -708,12 +722,81 @@ const groupedLoginUsers = computed(() => {
     }))
 })
 
+// ✅ 회원정보 드롭다운용: 기관별 그룹화 + 권한 높은 순서
+const groupedAndSortedUsers = computed(() => {
+  const groups = new Map<string, Array<(typeof LOGIN_USERS)[number]>>()
+
+  LOGIN_USERS.forEach((user) => {
+    const key = user.기관명
+    const existingGroup = groups.get(key)
+
+    if (existingGroup) {
+      existingGroup.push(user)
+    } else {
+      groups.set(key, [user])
+    }
+  })
+
+  // 시스템관리 기관을 최우선으로, 나머지는 기관명으로 정렬
+  return Array.from(groups.entries())
+    .sort((a, b) => {
+      const isSystemA = a[0] === '시스템관리 기관'
+      const isSystemB = b[0] === '시스템관리 기관'
+
+      if (isSystemA) return -1
+      if (isSystemB) return 1
+
+      return a[0].localeCompare(b[0])
+    })
+    .map(([기관명, users]) => ({
+      기관명,
+      // 권한값 내림차순 (높은 권한부터)
+      users: users.sort((a, b) => Number(b.권한값) - Number(a.권한값))
+    }))
+})
+
 // ✅ 현재 로그인한 사용자의 상세 정보
 const currentUserInfo = computed(() => {
   const loginId = storageData.value.loginId
   if (!loginId) return null
 
   return LOGIN_USERS.find((user) => user.로그인아이디 === loginId) || null
+})
+
+// ============================================================================
+// ✅ Schemas 필터링 및 검색
+// ============================================================================
+const filteredSchemas = computed(() => {
+  if (activeTab.value !== 'schemas') return []
+
+  if (!searchQuery.value.trim()) {
+    return schemas.value
+  }
+
+  const query = searchQuery.value.toLowerCase()
+  return schemas.value.filter((schema) => schema.name.toLowerCase().includes(query))
+})
+
+// ============================================================================
+// ✅ Schema 상세 정보 (properties 파싱)
+// ============================================================================
+const schemaProperties = computed(() => {
+  if (!selectedSchema.value) return []
+
+  const schema = selectedSchema.value.schema
+  const properties = schema.properties || {}
+  const required = schema.required || []
+
+  return Object.entries(properties).map(([name, prop]: [string, any]) => ({
+    name,
+    type: prop.type || 'object',
+    description: prop.description || '',
+    required: required.includes(name),
+    example: prop.example,
+    enum: prop.enum,
+    format: prop.format,
+    items: prop.items
+  }))
 })
 
 // ============================================================================
@@ -795,6 +878,11 @@ watch(selectedLoginUser, (user) => {
   if (user) {
     loginId.value = user.로그인아이디
   }
+})
+
+// ✅ 탭 변경 시 검색어 초기화
+watch(activeTab, () => {
+  searchQuery.value = ''
 })
 
 // ============================================================================
@@ -1206,6 +1294,15 @@ const parseOpenApiSpec = (spec: any) => {
   // ✅ OpenAPI 스펙 저장 ($ref 해석을 위해)
   openApiSpec.value = spec
 
+  // ✅ Schemas 추출
+  const componentsSchemas = spec.components?.schemas || {}
+  schemas.value = Object.entries(componentsSchemas)
+    .map(([name, schema]) => ({
+      name,
+      schema: schema as any
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name))
+
   const groups = new Map<string, CategoryGroup>()
 
   if (!spec.paths) return []
@@ -1429,7 +1526,16 @@ const selectEndpoint = (endpoint: EndpointInfo) => {
   }
 }
 
+// ============================================================================
+// ✅ Schema 선택
+// ============================================================================
+const selectSchema = (schema: SchemaInfo) => {
+  selectedSchema.value = schema
+}
+
+// ============================================================================
 // 스키마에서 기본값 생성 (재귀적으로 처리)
+// ============================================================================
 const getDefaultValue = (schema: any): any => {
   if (schema.example !== undefined) return schema.example
   if (schema.default !== undefined) return schema.default
@@ -1583,8 +1689,135 @@ const executeRequest = async () => {
 }
 
 const copyToClipboard = (text: string) => {
-  navigator.clipboard.writeText(text)
-  showToastMessage('복사되었습니다! 📋')
+  try {
+    // HTTP 환경에서도 작동하는 execCommand 방식 사용
+    const textarea = document.createElement('textarea')
+    textarea.value = text
+
+    // 화면에 보이지 않도록 설정
+    textarea.style.position = 'fixed'
+    textarea.style.top = '0'
+    textarea.style.left = '0'
+    textarea.style.width = '2em'
+    textarea.style.height = '2em'
+    textarea.style.padding = '0'
+    textarea.style.border = 'none'
+    textarea.style.outline = 'none'
+    textarea.style.boxShadow = 'none'
+    textarea.style.background = 'transparent'
+    textarea.style.opacity = '0'
+
+    document.body.appendChild(textarea)
+
+    // iOS 지원
+    textarea.contentEditable = 'true'
+    textarea.readOnly = false
+
+    // 텍스트 선택
+    if (navigator.userAgent.match(/ipad|iphone/i)) {
+      const range = document.createRange()
+      range.selectNodeContents(textarea)
+      const selection = window.getSelection()
+      selection?.removeAllRanges()
+      selection?.addRange(range)
+      textarea.setSelectionRange(0, 999999)
+    } else {
+      textarea.select()
+    }
+
+    // 복사 실행
+    const success = document.execCommand('copy')
+    document.body.removeChild(textarea)
+
+    if (success) {
+      showToastMessage('복사되었습니다! 📋')
+    } else {
+      console.error('[CLIPBOARD] 복사 실패')
+      showToastMessage('복사에 실패했습니다')
+    }
+  } catch (err) {
+    console.error('[CLIPBOARD] 복사 에러:', err)
+    showToastMessage('복사에 실패했습니다')
+  }
+}
+
+const copyAllRequestInfo = () => {
+  if (!selectedEndpoint.value) return
+
+  const info: string[] = []
+
+  // 제목
+  info.push('═══════════════════════════════════════')
+  info.push('📡 API 요청/응답 정보')
+  info.push('═══════════════════════════════════════')
+  info.push('')
+
+  // 기본 정보
+  info.push(`🔹 API: ${selectedEndpoint.value.summary.replace(/\[.*?\]\[.*?\]\s*/, '')}`)
+  info.push(`🔹 코드: [${selectedEndpoint.value.code}]`)
+  info.push(`🔹 메서드: ${selectedEndpoint.value.method}`)
+  info.push(`🔹 URL: ${buildUrl.value}`)
+  info.push(`🔹 상태: ${statusCode.value || 'N/A'}`)
+  info.push(`🔹 응답시간: ${requestTime.value}ms`)
+  info.push('')
+
+  // Path Parameters
+  if (pathParameters.value.length > 0) {
+    info.push('───────────────────────────────────────')
+    info.push('📍 Path Parameters')
+    info.push('───────────────────────────────────────')
+    pathParameters.value.forEach((param) => {
+      const value = pathParams.value[param.name]
+      info.push(`${param.name}: ${value}${param.description ? ` (${param.description})` : ''}`)
+    })
+    info.push('')
+  }
+
+  // Query Parameters
+  if (queryParameters.value.length > 0 && Object.keys(queryParams.value).length > 0) {
+    info.push('───────────────────────────────────────')
+    info.push('🔗 Query Parameters')
+    info.push('───────────────────────────────────────')
+    Object.entries(queryParams.value).forEach(([key, value]) => {
+      if (value !== '' && value !== null && value !== undefined) {
+        info.push(`${key}: ${value}`)
+      }
+    })
+    info.push('')
+  }
+
+  // Request Body
+  if (
+    requestBody.value &&
+    requestBody.value.trim() !== '' &&
+    requestBody.value.trim() !== '{\n  \n}'
+  ) {
+    info.push('───────────────────────────────────────')
+    info.push('📦 Request Body')
+    info.push('───────────────────────────────────────')
+    info.push(requestBody.value)
+    info.push('')
+  }
+
+  // Response
+  if (response.value) {
+    info.push('───────────────────────────────────────')
+    info.push('✅ Response')
+    info.push('───────────────────────────────────────')
+    info.push(JSON.stringify(response.value, null, 2))
+  }
+
+  if (error.value) {
+    info.push('───────────────────────────────────────')
+    info.push('❌ Error')
+    info.push('───────────────────────────────────────')
+    info.push(error.value)
+  }
+
+  info.push('')
+  info.push('═══════════════════════════════════════')
+
+  copyToClipboard(info.join('\n'))
 }
 
 const showToastMessage = (message: string) => {
@@ -1603,6 +1836,10 @@ const formatJson = () => {
   } catch {
     // Invalid JSON
   }
+}
+
+const toggleUserListDropdown = () => {
+  showUserListDropdown.value = !showUserListDropdown.value
 }
 
 // ============================================================================
@@ -1675,23 +1912,39 @@ watch(
         <div class="header-left">
           <h1 class="title">
             <span class="icon">⚡</span>
-            전자등기 API Tester
+            API Tester
           </h1>
           <div class="stats">
             <span class="stat">{{ categories.length }} 카테고리</span>
             <span class="stat-divider">•</span>
-            <span class="stat">{{ totalEndpointsCount }} 엔드포인트</span>
+            <span class="stat">{{ totalEndpointsCount }} APIs</span>
+            <span class="stat-divider">•</span>
+            <span class="stat">{{ schemas.length }} Schemas</span>
           </div>
         </div>
 
         <div class="header-right">
-          <!-- 현재 BASE URL 표시 -->
-          <div class="current-base-url" :title="currentBaseUrl || '현재 도메인 사용'">
-            <span class="base-url-label">BASE:</span>
-            <span class="base-url-value">{{ currentBaseUrl || '(current)' }}</span>
+          <!-- ✅ APIs / Schemas 토글 -->
+          <div class="view-toggle">
+            <button
+              class="view-toggle-btn"
+              :class="{ active: activeTab === 'apis' }"
+              @click="activeTab = 'apis'"
+              title="API 엔드포인트 목록"
+            >
+              📡 APIs
+            </button>
+            <button
+              class="view-toggle-btn"
+              :class="{ active: activeTab === 'schemas' }"
+              @click="activeTab = 'schemas'"
+              title="Schema 모델 목록"
+            >
+              📦 Schemas
+            </button>
           </div>
 
-          <!-- BASE URL 전환 버튼 - handleBaseUrlChange 사용 -->
+          <!-- BASE URL 전환 버튼 -->
           <div class="base-url-toggle">
             <button
               class="base-url-btn"
@@ -1711,9 +1964,8 @@ watch(
             </button>
           </div>
 
-          <!-- 나머지 버튼들... -->
           <button
-            class="theme-toggle-btn"
+            class="icon-btn"
             @click="toggleTheme"
             :title="`${theme === 'dark' ? '라이트' : '다크'} 모드로 전환`"
           >
@@ -1722,29 +1974,37 @@ watch(
 
           <button
             v-if="authStore.isLoggedIn"
-            class="token-refresh-btn"
+            class="icon-btn"
             @click="refreshToken"
             title="토큰 갱신"
           >
             🔄 연장
           </button>
+
           <button
             v-if="authStore.isLoggedIn"
-            class="logout-btn"
+            class="icon-btn logout"
             @click="handleLogout"
             title="로그아웃"
           >
-            🚪 로그아웃
+            로그아웃
           </button>
-          <button v-else class="login-btn" @click="handleLogin" title="로그인">🔑 로그인</button>
+          <button v-else class="icon-btn login" @click="handleLogin" title="로그인">
+            🔑 로그인
+          </button>
 
-          <div v-if="uploadedFileName" class="uploaded-info">
-            <span class="uploaded-label">📄 {{ uploadedFileName }}</span>
-            <button class="reset-btn" @click="resetToDefault" title="기본 JSON으로 되돌리기">
-              ↻
-            </button>
-          </div>
-          <button class="upload-btn" @click="showUploadModal = true">📤 JSON 업로드</button>
+          <button
+            v-if="uploadedFileName"
+            class="icon-btn reset"
+            @click="resetToDefault"
+            :title="`${uploadedFileName} - 기본으로 되돌리기`"
+          >
+            ↻ 초기화
+          </button>
+
+          <button class="icon-btn" @click="showUploadModal = true" title="JSON 업로드">
+            📤 업로드
+          </button>
         </div>
       </div>
 
@@ -1787,8 +2047,8 @@ watch(
                     :label="group.기관명"
                   >
                     <option v-for="user in group.users" :key="user.로그인아이디" :value="user">
-                      {{ user.로그인아이디 }} | {{ user.이름 }} | {{ user.권한명 }} |
-                      {{ user.지점명 }} | 상태: {{ user.상태 }}
+                      {{ user.로그인아이디 }} | ID: {{ user.사용자ID }} | {{ user.이름 }} |
+                      {{ user.권한명 }} | {{ user.지점명 }} | 상태: {{ user.상태 }}
                     </option>
                   </optgroup>
                 </select>
@@ -1892,13 +2152,7 @@ watch(
 
         <div class="auth-info-item">
           <span class="auth-info-label">Token:</span>
-          <span
-            class="auth-info-value"
-            :class="{
-              expiring: authStore.isExpiringSoon,
-              expired: authStore.isExpired
-            }"
-          >
+          <span class="auth-info-value timer-red">
             {{ authStore.formattedTime }}
           </span>
         </div>
@@ -1935,6 +2189,37 @@ watch(
           </div>
         </template>
       </div>
+
+      <!-- ✅ 회원정보 버튼 (auth-info 밖) -->
+      <button class="user-list-btn" @click="toggleUserListDropdown">
+        👥 회원정보 {{ showUserListDropdown ? '▲' : '▼' }}
+      </button>
+
+      <!-- ✅ 전체 회원정보 드롭다운 리스트 -->
+      <div v-if="showUserListDropdown" class="user-list-dropdown">
+        <div class="user-list-header">
+          <h3>전체 회원정보 ({{ LOGIN_USERS.length }}명)</h3>
+        </div>
+        <div class="user-list-content">
+          <div v-for="group in groupedAndSortedUsers" :key="group.기관명" class="user-optgroup">
+            <div class="user-optgroup-label">{{ group.기관명 }}</div>
+            <div v-for="user in group.users" :key="user.사용자ID" class="user-list-item-compact">
+              {{ user.이름 }}({{ user.사용자ID }}), {{ user.권한명 }}, {{ user.기관명 }}({{
+                user.기관ID
+              }}), {{ user.지점명 }}({{ user.지점ID }}), {{ user.로그인아이디 }}, 이메일인증:
+              {{ user.이메일인증 }}, 상태:
+              <span
+                :class="{
+                  'status-active': user.상태 === '사용',
+                  'status-pending': user.상태 === '승인대기',
+                  'status-temp': user.상태 === '임시승인'
+                }"
+                >{{ user.상태 }}</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="content">
@@ -1953,227 +2238,347 @@ watch(
 
       <!-- 정상 상태 -->
       <template v-else>
-        <!-- 사이드바 -->
-        <aside class="sidebar">
-          <div class="search-box">
-            <input
-              v-model="searchQuery"
-              type="text"
-              placeholder="🔍 API 검색..."
-              class="search-input"
-            />
-          </div>
-
-          <div class="endpoint-list">
-            <div v-for="category in filteredCategories" :key="category.name" class="category">
-              <button class="category-header" @click="toggleCategory(category.name)">
-                <span class="category-icon">
-                  {{ expandedCategories.has(category.name) ? '▼' : '▶' }}
-                </span>
-                <div class="category-info">
-                  <span class="category-name">{{ category.name }}</span>
-                  <span class="category-code">{{ category.code }}</span>
-                </div>
-                <span class="category-count">{{ category.endpoints.length }}</span>
-              </button>
-
-              <div v-if="expandedCategories.has(category.name)" class="endpoints">
-                <button
-                  v-for="endpoint in category.endpoints"
-                  :key="endpoint.id"
-                  class="endpoint"
-                  :class="{
-                    active: selectedEndpoint?.id === endpoint.id,
-                    [endpoint.method.toLowerCase()]: true
-                  }"
-                  @click="selectEndpoint(endpoint)"
-                >
-                  <span class="endpoint-method">{{ endpoint.method }}</span>
-                  <div class="endpoint-info">
-                    <span class="endpoint-summary">{{
-                      endpoint.summary.replace(/\[.*?\]\[.*?\]\s*/, '')
-                    }}</span>
-                    <span class="endpoint-code">{{ endpoint.code }}</span>
-                  </div>
-                </button>
-              </div>
-            </div>
-          </div>
-        </aside>
-
-        <!-- 메인 콘텐츠 -->
-        <main class="main">
-          <div v-if="!selectedEndpoint" class="empty">
-            <div class="empty-icon">🎯</div>
-            <h2>엔드포인트를 선택하세요</h2>
-            <p>좌측 목록에서 테스트할 API를 선택하세요</p>
-          </div>
-
-          <div v-else class="detail">
-            <!-- 헤더 -->
-            <div class="detail-header">
-              <div class="detail-title-row">
-                <span class="method-badge" :class="selectedEndpoint.method.toLowerCase()">
-                  {{ selectedEndpoint.method }}
-                </span>
-                <code class="detail-path">{{ buildUrl }}</code>
-                <button class="icon-btn" @click="copyToClipboard(buildUrl)" title="URL 복사">
-                  📋
-                </button>
-              </div>
-              <div class="detail-meta">
-                <span class="detail-code">[{{ selectedEndpoint.code }}]</span>
-                <span class="detail-summary">{{
-                  selectedEndpoint.summary.replace(/\[.*?\]\[.*?\]\s*/, '')
-                }}</span>
-              </div>
-              <p v-if="selectedEndpoint.description" class="detail-description">
-                {{ selectedEndpoint.description }}
-              </p>
+        <!-- APIs 탭 -->
+        <template v-if="activeTab === 'apis'">
+          <!-- 사이드바 -->
+          <aside class="sidebar">
+            <div class="search-box">
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="🔍 API 검색..."
+                class="search-input"
+              />
             </div>
 
-            <!-- 파라미터 섹션 -->
-            <div class="params">
-              <!-- Path Parameters -->
-              <div v-if="pathParameters.length > 0" class="param-section">
-                <h3 class="param-title">
-                  <span class="param-title-icon">📍</span>
-                  Path Parameters
-                  <span class="param-hint">※ 모든 필드 필수</span>
-                </h3>
-                <div class="param-grid">
-                  <div v-for="param in pathParameters" :key="param.name" class="param-row">
-                    <label class="param-label">
-                      <span class="param-name">{{ param.name }}</span>
-                      <span v-if="param.required" class="required">*</span>
-                      <span v-if="param.description" class="param-desc">{{
-                        param.description
-                      }}</span>
-                    </label>
-                    <input
-                      v-model="pathParams[param.name]"
-                      type="text"
-                      :placeholder="param.example || `Enter ${param.name}`"
-                      class="param-input"
-                    />
+            <div class="endpoint-list">
+              <div v-for="category in filteredCategories" :key="category.name" class="category">
+                <button class="category-header" @click="toggleCategory(category.name)">
+                  <span class="category-icon">
+                    {{ expandedCategories.has(category.name) ? '▼' : '▶' }}
+                  </span>
+                  <div class="category-info">
+                    <span class="category-name">{{ category.name }}</span>
+                    <span class="category-code">{{ category.code }}</span>
                   </div>
+                  <span class="category-count">{{ category.endpoints.length }}</span>
+                </button>
+
+                <div v-if="expandedCategories.has(category.name)" class="endpoints">
+                  <button
+                    v-for="endpoint in category.endpoints"
+                    :key="endpoint.id"
+                    class="endpoint"
+                    :class="{
+                      active: selectedEndpoint?.id === endpoint.id,
+                      [endpoint.method.toLowerCase()]: true
+                    }"
+                    @click="selectEndpoint(endpoint)"
+                  >
+                    <span class="endpoint-method">{{ endpoint.method }}</span>
+                    <div class="endpoint-info">
+                      <span class="endpoint-summary">{{
+                        endpoint.summary.replace(/\[.*?\]\[.*?\]\s*/, '')
+                      }}</span>
+                      <span class="endpoint-code">{{ endpoint.code }}</span>
+                    </div>
+                  </button>
                 </div>
               </div>
+            </div>
+          </aside>
 
-              <!-- Query Parameters -->
-              <div v-if="queryParameters.length > 0" class="param-section">
-                <h3 class="param-title">
-                  <span class="param-title-icon">🔗</span>
-                  Query Parameters
-                </h3>
-                <div class="param-grid">
-                  <div v-for="param in queryParameters" :key="param.name" class="param-row">
-                    <label class="param-label">
-                      <span class="param-name">{{ param.name }}</span>
-                      <span v-if="param.required" class="required">*</span>
-                      <span v-if="param.description" class="param-desc">{{
-                        param.description
-                      }}</span>
-                    </label>
-                    <input
-                      v-model="queryParams[param.name]"
-                      :type="
-                        param.schema.type === 'integer' || param.schema.type === 'number'
-                          ? 'number'
-                          : 'text'
-                      "
-                      :placeholder="param.example || `Enter ${param.name}`"
-                      :required="param.required"
-                      class="param-input"
-                    />
-                  </div>
+          <!-- 메인 콘텐츠 -->
+          <main class="main">
+            <div v-if="!selectedEndpoint" class="empty">
+              <div class="empty-icon">🎯</div>
+              <h2>엔드포인트를 선택하세요</h2>
+              <p>좌측 목록에서 테스트할 API를 선택하세요</p>
+            </div>
+
+            <div v-else class="detail">
+              <!-- 헤더 -->
+              <div class="detail-header">
+                <div class="detail-title-row">
+                  <span class="method-badge" :class="selectedEndpoint.method.toLowerCase()">
+                    {{ selectedEndpoint.method }}
+                  </span>
+                  <code class="detail-path">{{ buildUrl }}</code>
+                  <button class="icon-btn" @click="copyToClipboard(buildUrl)" title="URL 복사">
+                    📋
+                  </button>
                 </div>
+                <div class="detail-meta">
+                  <span class="detail-code">[{{ selectedEndpoint.code }}]</span>
+                  <span class="detail-summary">{{
+                    selectedEndpoint.summary.replace(/\[.*?\]\[.*?\]\s*/, '')
+                  }}</span>
+                </div>
+                <p v-if="selectedEndpoint.description" class="detail-description">
+                  {{ selectedEndpoint.description }}
+                </p>
               </div>
 
-              <!-- Request Body -->
-              <div v-if="hasRequestBody" class="param-section">
-                <div class="param-header">
+              <!-- 파라미터 섹션 -->
+              <div class="params">
+                <!-- Path Parameters -->
+                <div v-if="pathParameters.length > 0" class="param-section">
                   <h3 class="param-title">
-                    <span class="param-title-icon">📦</span>
-                    Request Body (JSON)
+                    <span class="param-title-icon">📍</span>
+                    Path Parameters
+                    <span class="param-hint">※ 모든 필드 필수</span>
                   </h3>
-                  <button class="format-btn" @click="formatJson">{ } Format</button>
-                </div>
-
-                <!-- 필드 정보 표시 -->
-                <div v-if="requestBodyFields.length > 0" class="body-fields-info">
-                  <div class="body-fields-header">필드 정보</div>
-                  <div class="body-fields-list">
-                    <div
-                      v-for="field in requestBodyFields"
-                      :key="field.name"
-                      class="body-field-item"
-                    >
-                      <span class="body-field-name">{{ field.name }}</span>
-                      <span v-if="field.required" class="required">*</span>
-                      <span class="body-field-type">({{ field.type }})</span>
-                      <span v-if="field.description" class="body-field-desc"
-                        >: {{ field.description }}</span
-                      >
+                  <div class="param-grid">
+                    <div v-for="param in pathParameters" :key="param.name" class="param-row">
+                      <label class="param-label">
+                        <span class="param-name">{{ param.name }}</span>
+                        <span v-if="param.required" class="required">*</span>
+                        <span v-if="param.description" class="param-desc">{{
+                          param.description
+                        }}</span>
+                      </label>
+                      <input
+                        v-model="pathParams[param.name]"
+                        type="text"
+                        :placeholder="param.example || `Enter ${param.name}`"
+                        class="param-input"
+                      />
                     </div>
                   </div>
                 </div>
 
-                <textarea v-model="requestBody" class="body-textarea" />
-              </div>
-            </div>
-
-            <!-- 실행 버튼 -->
-            <div class="actions">
-              <button
-                class="execute-btn"
-                :class="{ loading: isLoading }"
-                :disabled="isLoading"
-                @click="executeRequest"
-              >
-                <span v-if="isLoading">⏳ 실행 중...</span>
-                <span v-else>▶ 실행</span>
-              </button>
-            </div>
-
-            <!-- 응답 섹션 -->
-            <div v-if="response || error" class="response">
-              <div class="response-header">
-                <div class="response-title">
-                  <h3>Response</h3>
-                  <div class="response-meta">
-                    <span
-                      v-if="statusCode"
-                      class="status-badge"
-                      :class="statusCode < 300 ? 'success' : 'error'"
-                    >
-                      {{ statusCode }}
-                    </span>
-                    <span class="time">{{ requestTime }}ms</span>
+                <!-- Query Parameters -->
+                <div v-if="queryParameters.length > 0" class="param-section">
+                  <h3 class="param-title">
+                    <span class="param-title-icon">🔗</span>
+                    Query Parameters
+                  </h3>
+                  <div class="param-grid">
+                    <div v-for="param in queryParameters" :key="param.name" class="param-row">
+                      <label class="param-label">
+                        <span class="param-name">{{ param.name }}</span>
+                        <span v-if="param.required" class="required">*</span>
+                        <span v-if="param.description" class="param-desc">{{
+                          param.description
+                        }}</span>
+                      </label>
+                      <input
+                        v-model="queryParams[param.name]"
+                        :type="
+                          param.schema.type === 'integer' || param.schema.type === 'number'
+                            ? 'number'
+                            : 'text'
+                        "
+                        :placeholder="param.example || `Enter ${param.name}`"
+                        :required="param.required"
+                        class="param-input"
+                      />
+                    </div>
                   </div>
                 </div>
+
+                <!-- Request Body -->
+                <div v-if="hasRequestBody" class="param-section">
+                  <div class="param-header">
+                    <h3 class="param-title">
+                      <span class="param-title-icon">📦</span>
+                      Request Body (JSON)
+                    </h3>
+                    <button class="format-btn" @click="formatJson">{ } Format</button>
+                  </div>
+
+                  <!-- 필드 정보 표시 -->
+                  <div v-if="requestBodyFields.length > 0" class="body-fields-info">
+                    <div class="body-fields-header">필드 정보</div>
+                    <div class="body-fields-list">
+                      <div
+                        v-for="field in requestBodyFields"
+                        :key="field.name"
+                        class="body-field-item"
+                      >
+                        <span class="body-field-name">{{ field.name }}</span>
+                        <span v-if="field.required" class="required">*</span>
+                        <span class="body-field-type">({{ field.type }})</span>
+                        <span v-if="field.description" class="body-field-desc"
+                          >: {{ field.description }}</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+
+                  <textarea v-model="requestBody" class="body-textarea" />
+                </div>
+              </div>
+
+              <!-- 실행 버튼 -->
+              <div class="actions">
                 <button
-                  v-if="response"
-                  class="icon-btn"
-                  @click="copyToClipboard(JSON.stringify(response, null, 2))"
+                  class="execute-btn"
+                  :class="{ loading: isLoading }"
+                  :disabled="isLoading"
+                  @click="executeRequest"
                 >
-                  📋 복사
+                  <span v-if="isLoading">⏳ 실행 중...</span>
+                  <span v-else>▶ 실행</span>
                 </button>
               </div>
 
-              <div v-if="error" class="error-box">
-                <div class="error-icon">❌</div>
-                <div class="error-content">
-                  <div class="error-message">{{ error }}</div>
+              <!-- 응답 섹션 -->
+              <div v-if="response || error" class="response">
+                <div class="response-header">
+                  <div class="response-title">
+                    <h3>Response</h3>
+                    <div class="response-meta">
+                      <span
+                        v-if="statusCode"
+                        class="status-badge"
+                        :class="statusCode < 300 ? 'success' : 'error'"
+                      >
+                        {{ statusCode }}
+                      </span>
+                      <span class="time">{{ requestTime }}ms</span>
+                    </div>
+                  </div>
+                  <div class="response-actions">
+                    <button
+                      v-if="response"
+                      class="icon-btn"
+                      @click="copyAllRequestInfo"
+                      title="요청/응답 전체 복사"
+                    >
+                      📋 전체 복사
+                    </button>
+                    <button
+                      v-if="response"
+                      class="icon-btn"
+                      @click="copyToClipboard(JSON.stringify(response, null, 2))"
+                      title="응답만 복사"
+                    >
+                      📄 응답 복사
+                    </button>
+                  </div>
                 </div>
+
+                <div v-if="error" class="error-box">
+                  <div class="error-icon">❌</div>
+                  <div class="error-content">
+                    <div class="error-message">{{ error }}</div>
+                  </div>
+                </div>
+
+                <pre v-if="response" class="response-body">{{
+                  JSON.stringify(response, null, 2)
+                }}</pre>
+              </div>
+            </div>
+          </main>
+        </template>
+
+        <!-- ✅ Schemas 탭 -->
+        <template v-else-if="activeTab === 'schemas'">
+          <!-- 사이드바 -->
+          <aside class="sidebar">
+            <div class="search-box">
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="🔍 Schema 검색..."
+                class="search-input"
+              />
+            </div>
+
+            <div class="schema-list">
+              <button
+                v-for="schema in filteredSchemas"
+                :key="schema.name"
+                class="schema-item"
+                :class="{ active: selectedSchema?.name === schema.name }"
+                @click="selectSchema(schema)"
+              >
+                <span class="schema-icon">📦</span>
+                <span class="schema-name">{{ schema.name }}</span>
+              </button>
+            </div>
+          </aside>
+
+          <!-- 메인 콘텐츠 -->
+          <main class="main">
+            <div v-if="!selectedSchema" class="empty">
+              <div class="empty-icon">📦</div>
+              <h2>Schema를 선택하세요</h2>
+              <p>좌측 목록에서 확인할 Schema를 선택하세요</p>
+            </div>
+
+            <div v-else class="detail">
+              <!-- Schema 헤더 -->
+              <div class="detail-header">
+                <div class="detail-title-row">
+                  <span class="schema-badge">SCHEMA</span>
+                  <code class="detail-path">{{ selectedSchema.name }}</code>
+                  <button
+                    class="icon-btn"
+                    @click="copyToClipboard(selectedSchema.name)"
+                    title="이름 복사"
+                  >
+                    📋
+                  </button>
+                </div>
+                <p v-if="selectedSchema.schema.description" class="detail-description">
+                  {{ selectedSchema.schema.description }}
+                </p>
               </div>
 
-              <pre v-if="response" class="response-body">{{
-                JSON.stringify(response, null, 2)
-              }}</pre>
+              <!-- Properties 섹션 -->
+              <div class="params">
+                <div class="param-section">
+                  <h3 class="param-title">
+                    <span class="param-title-icon">📝</span>
+                    Properties
+                  </h3>
+                  <div v-if="schemaProperties.length > 0" class="param-grid">
+                    <div v-for="prop in schemaProperties" :key="prop.name" class="param-row">
+                      <label class="param-label">
+                        <span class="param-name">{{ prop.name }}</span>
+                        <span v-if="prop.required" class="required">*</span>
+                        <span class="param-desc">
+                          <span class="body-field-type"
+                            >({{ prop.type }}{{ prop.format ? `:${prop.format}` : '' }})</span
+                          >
+                          <span v-if="prop.description"> - {{ prop.description }}</span>
+                        </span>
+                      </label>
+                      <div class="param-info">
+                        <div v-if="prop.example !== undefined" class="param-example">
+                          예제: <code>{{ JSON.stringify(prop.example) }}</code>
+                        </div>
+                        <div v-if="prop.enum" class="param-enum">
+                          가능한 값: <code>{{ prop.enum.join(', ') }}</code>
+                        </div>
+                        <div v-if="prop.items" class="param-array-items">
+                          배열 아이템 타입: <code>{{ prop.items.type || 'object' }}</code>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div v-else class="empty-properties">
+                    <p>Properties가 정의되지 않았습니다.</p>
+                  </div>
+                </div>
+
+                <!-- Schema JSON 표시 -->
+                <div class="param-section">
+                  <h3 class="param-title">
+                    <span class="param-title-icon">{ }</span>
+                    Schema Definition (JSON)
+                  </h3>
+                  <pre class="schema-json">{{
+                    JSON.stringify(selectedSchema.schema, null, 2)
+                  }}</pre>
+                </div>
+              </div>
             </div>
-          </div>
-        </main>
+          </main>
+        </template>
       </template>
     </div>
   </div>
@@ -2254,7 +2659,7 @@ watch(
 .header {
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-primary);
-  padding: 0.875rem 1.5rem;
+  padding: 0.75rem 1rem;
   flex-shrink: 0;
 }
 
@@ -2262,13 +2667,13 @@ watch(
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1rem;
   flex-shrink: 0;
   min-width: 0;
 }
@@ -2276,22 +2681,39 @@ watch(
 .header-right {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
   flex-shrink: 0;
 }
 
 .title {
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 700;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.375rem;
   color: var(--accent-primary);
   white-space: nowrap;
 }
 
 .icon {
-  font-size: 1.5rem;
+  font-size: 1.125rem;
+}
+
+.stats {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.stat {
+  font-weight: 500;
+}
+
+.stat-divider {
+  color: var(--border-secondary);
 }
 
 .stats {
@@ -2317,7 +2739,10 @@ watch(
   border-bottom: 1px solid var(--border-secondary);
   padding: 0.75rem 2rem;
   display: flex;
+  align-items: center;
+  gap: 1rem;
   justify-content: center;
+  position: relative;
 }
 
 .auth-info {
@@ -2363,6 +2788,145 @@ watch(
   font-weight: 700;
 }
 
+/* ✅ 타이머 빨간색 */
+.auth-info-value.timer-red {
+  color: #ef4444 !important;
+  font-weight: 700;
+}
+
+/* ✅ 회원정보 버튼 */
+.user-list-btn {
+  padding: 0.375rem 0.75rem;
+  background: var(--accent-primary);
+  border: 1px solid var(--accent-primary);
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  margin-left: 1rem;
+}
+
+.user-list-btn:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+/* ✅ 회원정보 드롭다운 */
+.user-list-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 40px;
+  /* width: calc(100% - 4rem); */
+  /* max-width: 900px; */
+  margin-top: 0.5rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-secondary);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  animation: slideDown 0.2s ease;
+  z-index: 100;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    /* transform: translateX(-50%) translateY(-10px); */
+  }
+  to {
+    opacity: 1;
+    /* transform: translateX(-50%) translateY(0); */
+  }
+}
+
+.user-list-header {
+  padding: 0.75rem 1rem;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-secondary);
+}
+
+.user-list-header h3 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.user-list-content {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.user-list-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.user-list-content::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+.user-list-content::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+
+.user-optgroup {
+  margin-bottom: 1rem;
+}
+
+.user-optgroup:last-child {
+  margin-bottom: 0;
+}
+
+.user-optgroup-label {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-secondary);
+  border-left: 3px solid var(--accent-primary);
+  margin-bottom: 0.25rem;
+}
+
+.user-list-item-compact {
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-secondary);
+  border-radius: 4px;
+  margin-bottom: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--text-primary);
+  font-family: 'SF Mono', Monaco, monospace;
+  line-height: 1.6;
+  transition: all 0.15s;
+}
+
+.user-list-item-compact:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--accent-primary);
+  transform: translateX(4px);
+}
+
+.user-list-item-compact .status-active {
+  color: var(--success-light);
+  font-weight: 600;
+}
+
+.user-list-item-compact .status-pending {
+  color: var(--warning);
+  font-weight: 600;
+}
+
+.user-list-item-compact .status-temp {
+  color: #f59e0b;
+  font-weight: 600;
+}
+
 /* 은행 선택 select */
 .bank-select-item {
   min-width: 140px;
@@ -2401,125 +2965,61 @@ watch(
 }
 
 /* 테마 토글 버튼 */
-.theme-toggle-btn {
-  padding: 0.5rem 0.875rem;
+/* Header Icon Buttons */
+.icon-btn {
+  padding: 0.375rem 0.75rem;
   background: var(--bg-tertiary);
   border: 1px solid var(--border-secondary);
   border-radius: 6px;
   color: var(--text-primary);
-  font-size: 1.125rem;
+  font-size: 0.75rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
   white-space: nowrap;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.25rem;
 }
 
-.theme-toggle-btn:hover {
+.icon-btn:hover {
   background: var(--border-secondary);
   border-color: var(--border-hover);
   transform: translateY(-1px);
 }
 
-.token-refresh-btn {
-  padding: 0.5rem 0.875rem;
-  background: var(--success);
-  border: none;
-  border-radius: 6px;
-  color: #ffffff;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-}
-
-.token-refresh-btn:hover {
-  background: var(--success-hover);
-  transform: translateY(-1px);
-}
-
-.login-btn,
-.logout-btn {
-  padding: 0.5rem 0.875rem;
-  border: none;
-  border-radius: 6px;
-  color: #ffffff;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-}
-
-.login-btn {
+.icon-btn.login {
   background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: #ffffff;
 }
 
-.login-btn:hover {
+.icon-btn.login:hover {
   background: var(--accent-hover);
-  transform: translateY(-1px);
+  border-color: var(--accent-hover);
 }
 
-.logout-btn {
+.icon-btn.logout {
   background: var(--error);
-}
-
-.logout-btn:hover {
-  background: var(--error-light);
-  transform: translateY(-1px);
-}
-
-.uploaded-info {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-secondary);
-  border-radius: 6px;
-}
-
-.uploaded-label {
-  font-size: 0.75rem;
-  color: var(--accent-primary);
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.reset-btn {
-  padding: 0.25rem 0.5rem;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-secondary);
-  border-radius: 4px;
-  color: var(--text-secondary);
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.reset-btn:hover {
-  background: var(--border-secondary);
-  color: var(--text-primary);
-}
-
-.upload-btn {
-  padding: 0.5rem 0.875rem;
-  background: var(--accent-primary);
-  border: none;
-  border-radius: 6px;
+  border-color: var(--error);
   color: #ffffff;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
 }
 
-.upload-btn:hover {
-  background: var(--accent-hover);
-  transform: translateY(-1px);
+.icon-btn.logout:hover {
+  background: var(--error-light);
+  border-color: var(--error-light);
+}
+
+.icon-btn.reset {
+  background: var(--warning);
+  border-color: var(--warning);
+  color: #ffffff;
+}
+
+.icon-btn.reset:hover {
+  background: #f59e0b;
+  border-color: #f59e0b;
 }
 
 /* Modal */
@@ -3479,6 +3979,12 @@ watch(
   font-size: 0.75rem;
 }
 
+.response-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .status-badge {
   padding: 0.25rem 0.625rem;
   border-radius: 12px;
@@ -3563,11 +4069,11 @@ watch(
 }
 
 .base-url-btn {
-  padding: 0.5rem 0.875rem;
+  padding: 0.375rem 0.625rem;
   background: transparent;
   border: none;
   color: var(--text-secondary);
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
@@ -3598,38 +4104,6 @@ watch(
 
 .base-url-btn.active:hover {
   background: var(--accent-hover);
-}
-
-/* 현재 BASE URL 표시 */
-.current-base-url {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.5rem 0.875rem;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-secondary);
-  border-radius: 6px;
-  max-width: 250px;
-  overflow: hidden;
-}
-
-.base-url-label {
-  font-size: 0.6875rem;
-  color: var(--text-tertiary);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  flex-shrink: 0;
-}
-
-.base-url-value {
-  font-size: 0.75rem;
-  color: var(--accent-primary);
-  font-weight: 600;
-  font-family: 'SF Mono', Monaco, monospace;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 /* 토스트 메시지 */
@@ -3679,5 +4153,175 @@ watch(
     transform: translateY(100px);
     opacity: 0;
   }
+}
+
+/* ============================================================================
+   Schemas 탭 스타일
+   ============================================================================ */
+
+/* View Toggle (APIs / Schemas) */
+.view-toggle {
+  display: flex;
+  gap: 0;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-secondary);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.view-toggle-btn {
+  padding: 0.375rem 0.625rem;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  position: relative;
+}
+
+.view-toggle-btn:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 60%;
+  width: 1px;
+  background: var(--border-secondary);
+}
+
+.view-toggle-btn:hover {
+  background: var(--border-secondary);
+  color: var(--text-primary);
+}
+
+.view-toggle-btn.active {
+  background: var(--accent-primary);
+  color: #ffffff;
+}
+
+.view-toggle-btn.active:hover {
+  background: var(--accent-hover);
+}
+
+/* Schema List */
+.schema-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  overflow-y: auto;
+}
+
+.schema-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background: transparent;
+  border: none;
+  border-left: 3px solid transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--text-primary);
+}
+
+.schema-item:hover {
+  background: var(--bg-tertiary);
+  border-left-color: var(--accent-primary);
+}
+
+.schema-item.active {
+  background: var(--bg-tertiary);
+  border-left-color: var(--accent-primary);
+}
+
+.schema-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.schema-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: 'SF Mono', Monaco, monospace;
+  word-break: break-word;
+}
+
+.schema-badge {
+  padding: 0.25rem 0.75rem;
+  background: rgba(88, 166, 255, 0.15);
+  border-radius: 4px;
+  color: var(--accent-primary);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.schema-json {
+  padding: 1rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-secondary);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  font-family: 'SF Mono', Monaco, monospace;
+  overflow-x: auto;
+  max-height: 500px;
+  overflow-y: auto;
+  margin: 0;
+}
+
+.schema-json::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.schema-json::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+.schema-json::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+
+.param-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.param-example,
+.param-enum,
+.param-array-items {
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-family: inherit;
+}
+
+.param-example code,
+.param-enum code,
+.param-array-items code {
+  color: var(--accent-primary);
+  font-family: 'SF Mono', Monaco, monospace;
+  background: transparent;
+  padding: 0;
+}
+
+.empty-properties {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
 }
 </style>

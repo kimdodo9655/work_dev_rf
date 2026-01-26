@@ -1,10 +1,5 @@
 <template>
   <div class="test-area" style="background-color: #fff">
-    <ApiTester />
-    <AddrTest />
-    <RPATest />
-    <h2>FloatingInput 테스트</h2>
-
     <!-- 공통코드 테스트 섹션 -->
     <div class="code-test-section">
       <h3>공통코드 일괄 호출 테스트</h3>
@@ -36,8 +31,14 @@
         <div class="code-group">
           <h4>[P06-01] 기관 구분 ({{ codes.organizationTypes.length }}개)</h4>
           <div class="code-items">
-            <span v-for="code in codes.organizationTypes" :key="code.code" class="code-chip">
-              {{ code.description }}
+            <span
+              v-for="code in codes.organizationTypes"
+              :key="code.code"
+              class="code-chip"
+              @click="copyCode(code.code)"
+              style="cursor: pointer"
+            >
+              [{{ code.code }}] {{ code.description }}
             </span>
           </div>
         </div>
@@ -45,8 +46,14 @@
         <div class="code-group">
           <h4>[P06-02] 기관 상태 ({{ codes.organizationStatuses.length }}개)</h4>
           <div class="code-items">
-            <span v-for="code in codes.organizationStatuses" :key="code.code" class="code-chip">
-              {{ code.description }}
+            <span
+              v-for="code in codes.organizationStatuses"
+              :key="code.code"
+              class="code-chip"
+              @click="copyCode(code.code)"
+              style="cursor: pointer"
+            >
+              [{{ code.code }}] {{ code.description }}
             </span>
           </div>
         </div>
@@ -54,8 +61,14 @@
         <div class="code-group">
           <h4>[P06-03] 자격자 구분 ({{ codes.qualifiedTypes.length }}개)</h4>
           <div class="code-items">
-            <span v-for="code in codes.qualifiedTypes" :key="code.code" class="code-chip">
-              {{ code.description }}
+            <span
+              v-for="code in codes.qualifiedTypes"
+              :key="code.code"
+              class="code-chip"
+              @click="copyCode(code.code)"
+              style="cursor: pointer"
+            >
+              [{{ code.code }}] {{ code.description }}
             </span>
           </div>
         </div>
@@ -63,8 +76,14 @@
         <div class="code-group">
           <h4>[P06-04] 지점 상태 ({{ codes.branchStatuses.length }}개)</h4>
           <div class="code-items">
-            <span v-for="code in codes.branchStatuses" :key="code.code" class="code-chip">
-              {{ code.description }}
+            <span
+              v-for="code in codes.branchStatuses"
+              :key="code.code"
+              class="code-chip"
+              @click="copyCode(code.code)"
+              style="cursor: pointer"
+            >
+              [{{ code.code }}] {{ code.description }}
             </span>
           </div>
         </div>
@@ -72,8 +91,14 @@
         <div class="code-group">
           <h4>[P06-05] 사용자 권한 레벨 ({{ codes.userRoleLevels.length }}개)</h4>
           <div class="code-items">
-            <span v-for="code in codes.userRoleLevels" :key="code.code" class="code-chip">
-              {{ code.description }} (Level: {{ code.level }})
+            <span
+              v-for="code in codes.userRoleLevels"
+              :key="code.code"
+              class="code-chip"
+              @click="copyCode(code.code)"
+              style="cursor: pointer"
+            >
+              [{{ code.code }}] {{ code.description }} (Level: {{ code.level }})
             </span>
           </div>
         </div>
@@ -81,8 +106,14 @@
         <div class="code-group">
           <h4>[P06-06] 등기 유형 ({{ codes.registryTypes.length }}개)</h4>
           <div class="code-items">
-            <span v-for="code in codes.registryTypes" :key="code.code" class="code-chip">
-              {{ code.description }}
+            <span
+              v-for="code in codes.registryTypes"
+              :key="code.code"
+              class="code-chip"
+              @click="copyCode(code.code)"
+              style="cursor: pointer"
+            >
+              [{{ code.code }}] {{ code.description }}
             </span>
           </div>
         </div>
@@ -90,8 +121,14 @@
         <div class="code-group">
           <h4>[P06-07] 등기 원인 ({{ codes.registryCauses.length }}개)</h4>
           <div class="code-items">
-            <span v-for="code in codes.registryCauses" :key="code.code" class="code-chip">
-              {{ code.description }}
+            <span
+              v-for="code in codes.registryCauses"
+              :key="code.code"
+              class="code-chip"
+              @click="copyCode(code.code)"
+              style="cursor: pointer"
+            >
+              [{{ code.code }}] {{ code.description }}
             </span>
           </div>
         </div>
@@ -99,8 +136,14 @@
         <div class="code-group">
           <h4>[P06-08] 당사자 구분 ({{ codes.partyTypes.length }}개)</h4>
           <div class="code-items">
-            <span v-for="code in codes.partyTypes" :key="code.code" class="code-chip">
-              {{ code.description }}
+            <span
+              v-for="code in codes.partyTypes"
+              :key="code.code"
+              class="code-chip"
+              @click="copyCode(code.code)"
+              style="cursor: pointer"
+            >
+              [{{ code.code }}] {{ code.description }}
             </span>
           </div>
         </div>
@@ -108,8 +151,14 @@
         <div class="code-group">
           <h4>[P06-09] 부동산 구분 ({{ codes.propertyTypes.length }}개)</h4>
           <div class="code-items">
-            <span v-for="code in codes.propertyTypes" :key="code.code" class="code-chip">
-              {{ code.description }}
+            <span
+              v-for="code in codes.propertyTypes"
+              :key="code.code"
+              class="code-chip"
+              @click="copyCode(code.code)"
+              style="cursor: pointer"
+            >
+              [{{ code.code }}] {{ code.description }}
             </span>
           </div>
         </div>
@@ -117,8 +166,14 @@
         <div class="code-group">
           <h4>[P06-10] 구분 ({{ codes.sections.length }}개)</h4>
           <div class="code-items">
-            <span v-for="code in codes.sections" :key="code.code" class="code-chip">
-              {{ code.description }}
+            <span
+              v-for="code in codes.sections"
+              :key="code.code"
+              class="code-chip"
+              @click="copyCode(code.code)"
+              style="cursor: pointer"
+            >
+              [{{ code.code }}] {{ code.description }}
             </span>
           </div>
         </div>
@@ -126,8 +181,14 @@
         <div class="code-group">
           <h4>[P06-11] 등기 방법 ({{ codes.registryMethods.length }}개)</h4>
           <div class="code-items">
-            <span v-for="code in codes.registryMethods" :key="code.code" class="code-chip">
-              {{ code.description }}
+            <span
+              v-for="code in codes.registryMethods"
+              :key="code.code"
+              class="code-chip"
+              @click="copyCode(code.code)"
+              style="cursor: pointer"
+            >
+              [{{ code.code }}] {{ code.description }}
             </span>
           </div>
         </div>
@@ -135,8 +196,14 @@
         <div class="code-group">
           <h4>[P06-12] 채권최고액 범위 구분 ({{ codes.securedDebtScopeTypes.length }}개)</h4>
           <div class="code-items">
-            <span v-for="code in codes.securedDebtScopeTypes" :key="code.code" class="code-chip">
-              {{ code.description }}
+            <span
+              v-for="code in codes.securedDebtScopeTypes"
+              :key="code.code"
+              class="code-chip"
+              @click="copyCode(code.code)"
+              style="cursor: pointer"
+            >
+              [{{ code.code }}] {{ code.description }}
             </span>
           </div>
         </div>
@@ -144,8 +211,14 @@
         <div class="code-group">
           <h4>[P06-13] 증명서 구분 ({{ codes.certificateTypes.length }}개)</h4>
           <div class="code-items">
-            <span v-for="code in codes.certificateTypes" :key="code.code" class="code-chip">
-              {{ code.description }}
+            <span
+              v-for="code in codes.certificateTypes"
+              :key="code.code"
+              class="code-chip"
+              @click="copyCode(code.code)"
+              style="cursor: pointer"
+            >
+              [{{ code.code }}] {{ code.description }}
             </span>
           </div>
         </div>
@@ -153,8 +226,14 @@
         <div class="code-group">
           <h4>[P06-14] 업무 구분 ({{ codes.workTypes.length }}개)</h4>
           <div class="code-items">
-            <span v-for="code in codes.workTypes" :key="code.code" class="code-chip">
-              {{ code.description }}
+            <span
+              v-for="code in codes.workTypes"
+              :key="code.code"
+              class="code-chip"
+              @click="copyCode(code.code)"
+              style="cursor: pointer"
+            >
+              [{{ code.code }}] {{ code.description }}
             </span>
           </div>
         </div>
@@ -162,8 +241,14 @@
         <div class="code-group">
           <h4>[P06-15] 지급 상태 ({{ codes.paymentStatuses.length }}개)</h4>
           <div class="code-items">
-            <span v-for="code in codes.paymentStatuses" :key="code.code" class="code-chip">
-              {{ code.description }}
+            <span
+              v-for="code in codes.paymentStatuses"
+              :key="code.code"
+              class="code-chip"
+              @click="copyCode(code.code)"
+              style="cursor: pointer"
+            >
+              [{{ code.code }}] {{ code.description }}
             </span>
           </div>
         </div>
@@ -171,8 +256,14 @@
         <div class="code-group">
           <h4>[P06-16] 행정정보 연계 시점 ({{ codes.adminInfoLinkTime.length }}개)</h4>
           <div class="code-items">
-            <span v-for="code in codes.adminInfoLinkTime" :key="code.code" class="code-chip">
-              {{ code.description }}
+            <span
+              v-for="code in codes.adminInfoLinkTime"
+              :key="code.code"
+              class="code-chip"
+              @click="copyCode(code.code)"
+              style="cursor: pointer"
+            >
+              [{{ code.code }}] {{ code.description }}
             </span>
           </div>
         </div>
@@ -180,13 +271,117 @@
         <div class="code-group">
           <h4>[P06-17] 사용자 상태 ({{ codes.userStatuses.length }}개)</h4>
           <div class="code-items">
-            <span v-for="code in codes.userStatuses" :key="code.code" class="code-chip">
-              {{ code.description }}
+            <span
+              v-for="code in codes.userStatuses"
+              :key="code.code"
+              class="code-chip"
+              @click="copyCode(code.code)"
+              style="cursor: pointer"
+            >
+              [{{ code.code }}] {{ code.description }}
+            </span>
+          </div>
+        </div>
+
+        <div class="code-group">
+          <h4>[P06-18] 진행 상태 ({{ codes.progressStatuses.length }}개)</h4>
+          <div class="code-items">
+            <span
+              v-for="code in codes.progressStatuses"
+              :key="code.code"
+              class="code-chip"
+              @click="copyCode(code.code)"
+              style="cursor: pointer"
+            >
+              [{{ code.code }}] {{ code.description }}
+            </span>
+          </div>
+        </div>
+
+        <div class="code-group">
+          <h4>[P06-19] 등기 견적 진행 상태 ({{ codes.quoteProgressStatuses.length }}개)</h4>
+          <div class="code-items">
+            <span
+              v-for="code in codes.quoteProgressStatuses"
+              :key="code.code"
+              class="code-chip"
+              @click="copyCode(code.code)"
+              style="cursor: pointer"
+            >
+              [{{ code.code }}] {{ code.description }}
+            </span>
+          </div>
+        </div>
+
+        <div class="code-group">
+          <h4>[P06-20] 등기 견적 작성 여부 ({{ codes.estimateWritingStatuses.length }}개)</h4>
+          <div class="code-items">
+            <span
+              v-for="code in codes.estimateWritingStatuses"
+              :key="code.code"
+              class="code-chip"
+              @click="copyCode(code.code)"
+              style="cursor: pointer"
+            >
+              [{{ code.code }}] {{ code.description }}
+            </span>
+          </div>
+        </div>
+
+        <div class="code-group">
+          <h4>[P06-21] 등기 견적 선정 상태 ({{ codes.estimateSelectionStatuses.length }}개)</h4>
+          <div class="code-items">
+            <span
+              v-for="code in codes.estimateSelectionStatuses"
+              :key="code.code"
+              class="code-chip"
+            >
+              [{{ code.code }}] {{ code.description }}
+            </span>
+          </div>
+        </div>
+
+        <div class="code-group">
+          <h4>[P06-22] 배정 업무 ({{ codes.assignmentWorks.length }}개)</h4>
+          <div class="code-items">
+            <span
+              v-for="code in codes.assignmentWorks"
+              :key="code.code"
+              class="code-chip"
+              @click="copyCode(code.code)"
+              style="cursor: pointer"
+            >
+              [{{ code.code }}] {{ code.description }}
+            </span>
+          </div>
+        </div>
+
+        <div class="code-group">
+          <h4>[P06-23] 등기 진행 유형 ({{ codes.progressTypes.length }}개)</h4>
+          <div class="code-items">
+            <span
+              v-for="code in codes.progressTypes"
+              :key="code.code"
+              class="code-chip"
+              @click="copyCode(code.code)"
+              style="cursor: pointer"
+            >
+              [{{ code.code }}] {{ code.description }}
             </span>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- ✨ 토스트 알림 -->
+    <Transition name="toast">
+      <div v-if="showToast" class="toast-notification">
+        {{ toastMessage }}
+      </div>
+    </Transition>
+    <AddrTest />
+    <RPATest />
+    <h2>FloatingInput 테스트</h2>
 
     <div class="container">
       <!-- 1. 기본 단일 input -->
@@ -561,10 +756,13 @@ import Pagination from '@/components/template/PaginationItem.vue'
 import { useCodes } from '@/composables/api/useCodes'
 
 import AddrTest from './AddrTest.vue'
-import ApiTester from './ApiTester.vue'
 
 // ✨ useCodes 사용
 const { codes, isLoading, loadError, fetchAllCodes, clearCache } = useCodes()
+
+// ✨ 토스트 상태
+const showToast = ref(false)
+const toastMessage = ref('')
 
 // 공통코드 로드 핸들러
 async function handleLoadAllCodes() {
@@ -580,6 +778,72 @@ async function handleLoadAllCodes() {
 function handleClearCodes() {
   clearCache()
   console.log('🗑️ 공통코드 데이터 초기화 완료')
+}
+
+// ✨ 코드 복사 핸들러
+function copyCode(code: string) {
+  try {
+    // HTTP 환경에서도 작동하는 execCommand 방식 사용
+    const textarea = document.createElement('textarea')
+    textarea.value = code
+
+    // 화면에 보이지 않도록 설정
+    textarea.style.position = 'fixed'
+    textarea.style.top = '0'
+    textarea.style.left = '0'
+    textarea.style.width = '2em'
+    textarea.style.height = '2em'
+    textarea.style.padding = '0'
+    textarea.style.border = 'none'
+    textarea.style.outline = 'none'
+    textarea.style.boxShadow = 'none'
+    textarea.style.background = 'transparent'
+    textarea.style.opacity = '0'
+
+    document.body.appendChild(textarea)
+
+    // iOS 지원
+    textarea.contentEditable = 'true'
+    textarea.readOnly = false
+
+    // 텍스트 선택
+    if (navigator.userAgent.match(/ipad|iphone/i)) {
+      const range = document.createRange()
+      range.selectNodeContents(textarea)
+      const selection = window.getSelection()
+      selection?.removeAllRanges()
+      selection?.addRange(range)
+      textarea.setSelectionRange(0, 999999)
+    } else {
+      textarea.select()
+    }
+
+    // 복사 실행
+    const success = document.execCommand('copy')
+    document.body.removeChild(textarea)
+
+    if (success) {
+      toastMessage.value = `코드 "${code}" 복사됨`
+      showToast.value = true
+      setTimeout(() => {
+        showToast.value = false
+      }, 2000)
+    } else {
+      console.error('❌ 복사 실패')
+      toastMessage.value = '복사 실패'
+      showToast.value = true
+      setTimeout(() => {
+        showToast.value = false
+      }, 2000)
+    }
+  } catch (error) {
+    console.error('❌ 복사 에러:', error)
+    toastMessage.value = '복사 실패'
+    showToast.value = true
+    setTimeout(() => {
+      showToast.value = false
+    }, 2000)
+  }
 }
 
 const currentPage = ref(1) // 현재 페이지 상태
@@ -952,10 +1216,49 @@ h3 {
   font-size: 13px;
   color: #1f2937;
   transition: all 0.2s ease;
+  user-select: none;
 
   &:hover {
     background: #f3f4f6;
     border-color: #9ca3af;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
+
+  &:active {
+    transform: translateY(0);
+    background: #e5e7eb;
+    border-color: #6b7280;
+  }
+}
+
+// ✨ 토스트 알림
+.toast-notification {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  padding: 12px 24px;
+  background: #1f2937;
+  color: white;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+}
+
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.3s ease;
+}
+
+.toast-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.toast-leave-to {
+  opacity: 0;
+  transform: translateY(-20px);
 }
 </style>

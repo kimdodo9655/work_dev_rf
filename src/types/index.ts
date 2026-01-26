@@ -158,7 +158,8 @@ export type {
   ObligorInfo,
   PropertyInfo,
   PublicChargeDetails,
-  RegistryInfo
+  RegistryInfo,
+  RegistryMethod
 } from './domains/registry'
 
 // ============================================================================
@@ -181,6 +182,11 @@ export type {
   RegistryProgressESignatureTableResponse,
   RegistryProgressListItem,
   RegistryProgressLoan,
+  RegistryReceiptDocument,
+  RegistryReceiptDocumentCreateResponse,
+  RegistryReceiptDocumentDetailResponse,
+  RegistryReceiptDocumentGetResponse,
+  RegistryReceiptDocumentListResponse,
   RegistryTaxAgency,
   RegistryTaxAgencyDetailResponse,
   RegistryTaxAgencyListResponse,
