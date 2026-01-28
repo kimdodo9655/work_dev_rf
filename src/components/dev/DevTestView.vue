@@ -342,10 +342,10 @@
         </div>
 
         <div class="code-group">
-          <h4>[P06-22] 배정 업무 ({{ codes.assignmentWorks.length }}개)</h4>
+          <h4>[P06-22] 배정 업무 ({{ codes.assignedWorks.length }}개)</h4>
           <div class="code-items">
             <span
-              v-for="code in codes.assignmentWorks"
+              v-for="code in codes.assignedWorks"
               :key="code.code"
               class="code-chip"
               @click="copyCode(code.code)"

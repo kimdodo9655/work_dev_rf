@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
 import type { AuthState } from '@/types'
+import type { TokenRefreshResponse } from '@/types'
 import { UserRoleLevel } from '@/types'
 import { handleInvalidAuthState, isValidAuthData } from '@/utils/authValidator'
 import { logger } from '@/utils/logger'
@@ -124,16 +125,26 @@ export const useAuthStore = defineStore('auth', () => {
     startTimer()
   }
 
-  function updateTokens(data: {
-    accessToken: string
-    refreshToken: string
-    accessTokenExpiresIn: number
-    refreshTokenExpiresIn: number
-  }) {
+  function updateTokens(data: TokenRefreshResponse) {
+    // ✅ 필수 값 검증 (없으면 예외)
+    if (
+      !data.accessToken ||
+      !data.refreshToken ||
+      data.accessTokenExpiresIn == null ||
+      data.refreshTokenExpiresIn == null
+    ) {
+      throw new Error('Invalid auth data')
+    }
+
     logger.info('[AUTH] 토큰 갱신 성공')
 
     // storage에 저장
-    storage.updateTokens(data)
+    storage.updateTokens({
+      accessToken: data.accessToken,
+      refreshToken: data.refreshToken,
+      accessTokenExpiresIn: data.accessTokenExpiresIn,
+      refreshTokenExpiresIn: data.refreshTokenExpiresIn
+    })
 
     // state 업데이트
     accessExpires.value = data.accessTokenExpiresIn

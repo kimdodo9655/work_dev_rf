@@ -34,7 +34,7 @@ import { useRouter } from 'vue-router'
 
 import { bankAPI } from '@/api/services/bank'
 import { useAuthStore } from '@/stores/auth'
-import type { Bank } from '@/types'
+import type { BankResponse } from '@/types'
 import { logger } from '@/utils/logger'
 
 const router = useRouter()
@@ -48,8 +48,22 @@ const { data: bankResponse } = useQuery({
   queryFn: () => bankAPI.getList()
 })
 
-// 금융기관 목록
-const banks = computed(() => bankResponse.value?.data || [])
+// 금융기관 목록 (ApiResponse<GetBanksResponse> 구조)
+const banks = computed<BankResponse[]>(() => {
+  if (!bankResponse.value?.data) return []
+
+  // GetBanksResponse가 배열이면 직접 반환
+  if (Array.isArray(bankResponse.value.data)) {
+    return bankResponse.value.data
+  }
+
+  // GetBanksResponse가 { banks: [] } 형태면 banks 속성 반환
+  if ('banks' in bankResponse.value.data && Array.isArray(bankResponse.value.data.banks)) {
+    return bankResponse.value.data.banks
+  }
+
+  return []
+})
 
 // ============================================================================
 // 금융기관 선택 상태
@@ -57,7 +71,7 @@ const banks = computed(() => bankResponse.value?.data || [])
 const selectedBankCode = ref<string | null>(null)
 
 // 금융기관 클릭 (선택만 하고 이동은 안함)
-const handleClickBank = (bank: Bank) => {
+const handleClickBank = (bank: BankResponse) => {
   // 비활성 금융기관은 선택 불가
   if (!bank.isActive) {
     logger.warn('[BANK_SELECT] Inactive bank clicked', { bank })
@@ -71,7 +85,7 @@ const handleClickBank = (bank: Bank) => {
   })
 
   // 선택된 금융기관 코드 저장 (로컬 상태에만)
-  selectedBankCode.value = bank.code
+  selectedBankCode.value = bank.code || null
 }
 
 // ============================================================================
@@ -96,7 +110,9 @@ const handleConfirmSelection = () => {
   })
 
   // Store에 금융기관 코드 저장 (이제 실제로 저장)
-  authStore.setBankCode(selectedBank.code)
+  if (selectedBank.code) {
+    authStore.setBankCode(selectedBank.code)
+  }
 
   // 대시보드로 이동
   router.push('/dashboard')

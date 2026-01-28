@@ -1,350 +1,244 @@
-/**
- * 타입 통합 Export
- * @file src/types/index.ts
- *
- * 최신 OpenAPI 스펙(api-docs.json) 기반 + 프로젝트 커스텀 타입
- * 생성일: 2025-01-21
- * 수정일: 2025-01-21 (API 문서 기반 재검증)
- */
+// ============================================================================
+// 공통 API 응답 타입
+// ============================================================================
+export type { ApiResponse } from '@/types/api/common.types'
 
 // ============================================================================
-// 공통 API 타입
+// 공통 타입
 // ============================================================================
-export type { ApiResponse, Pageable, PageRequest, PaginatedResponse, Sort } from './api'
+export * from '@/types/api/common.types'
 
 // ============================================================================
-// 에러 관련 타입 (프로젝트 커스텀)
+// 에러 타입
 // ============================================================================
-export type { ApiError } from './error'
-export { isApiError, toApiError } from './error'
+export type { ApiError } from '@/types/error'
+export { isApiError, toApiError } from '@/types/error'
 
 // ============================================================================
-// 공통 유틸리티 타입 (프로젝트 커스텀)
-// ============================================================================
-export type { CustomSelectEmits, CustomSelectProps, SelectOption, TableColumn } from './common'
-
-// ============================================================================
-// 다이얼로그 타입 (프로젝트 커스텀)
-// ============================================================================
-export type { AlertOptions, ConfirmOptions, DialogState } from './dialog'
-
-// ============================================================================
-// 도메인: Address (주소)
+// 유틸리티 타입
 // ============================================================================
 export type {
-  AddressAutocompleteParams,
-  AddressAutocompleteResponse,
-  AddressItem,
-  AddressSearchParams,
-  AddressSearchResponse,
-  PageInfo,
-  RegistryOffice,
-  RegistryOfficeList,
-  ScrollInfo
-} from './domains/address'
+  CustomSelectEmits,
+  CustomSelectProps,
+  SelectOption,
+  TableColumn
+} from '@/types/common'
 
 // ============================================================================
-// 도메인: Auth (인증)
+// 다이얼로그 타입
+// ============================================================================
+export type { AlertOptions, ConfirmOptions, DialogState } from '@/types/dialog'
+
+// ============================================================================
+// 클라이언트 상태 관리 타입
+// ============================================================================
+export type { AuthState, RoleLevelType } from '@/types/store'
+export { getRoleLevelValue, hasPermission, UserRoleLevel } from '@/types/store'
+
+// ============================================================================
+// 공통코드
 // ============================================================================
 export type {
-  AuthState,
-  LoginData,
-  LoginRequest,
-  RefreshData,
-  RefreshRequest,
-  UserRoleCodeType
-} from './domains/auth'
-export { getUserRoleCode, getUserRoleLevel, UserRoleCode, UserRoleLevel } from './domains/auth'
-
-// ============================================================================
-// 도메인: Bank (금융기관)
-// ============================================================================
-export type { Bank, BankList } from './domains/bank'
-
-// ============================================================================
-// 도메인: Code (공통코드)
-// ============================================================================
-export type {
+  ApiAction,
   Code,
   CodeKey,
   CodeMap,
   CodeResponse,
+  EmailDomain,
+  GetAdminInfoLinkTimeResponse,
+  GetAssignedWorksResponse,
+  GetBranchStatusesResponse,
+  GetCertificateTypesResponse,
+  GetEstimateSelectionStatusesResponse,
+  GetEstimateWritingStatusesResponse,
+  GetOrganizationStatusesResponse,
+  GetOrganizationTypesResponse,
+  GetPartyRolesForRequestResponse,
+  GetPartyRolesResponse,
+  GetPartyTypesResponse,
+  GetPaymentStatusesResponse,
+  GetProgressStatusesResponse,
+  GetProgressTypesResponse,
+  GetPropertyTypesResponse,
+  GetQualifiedTypesResponse,
+  GetQuoteProgressStatusesResponse,
+  GetRegistryCausesResponse,
+  GetRegistryMethodsResponse,
+  GetRegistryTypesForAssignResponse,
+  GetRegistryTypesResponse,
+  GetSectionsResponse,
+  GetSecuredDebtScopeTypesResponse,
+  GetUserRoleLevelsResponse,
+  GetUserStatusesResponse,
+  GetWorkTypesResponse,
+  RepresentativePosition,
   RoleLevelCode,
-  RoleLevelCodeMap
-} from './domains/code'
+  RoleLevelCodeMap,
+  UserPosition
+} from '@/types/api/code.types'
 export {
   API_ACTIONS,
+  codesToMap,
+  codesToSelectOptions,
   EMAIL_DOMAINS,
+  getCodeDescription,
   REPRESENTATIVE_POSITIONS,
+  roleLevelCodesToMap,
   toSelectOptions,
   USER_POSITIONS
-} from './domains/code'
+} from '@/types/api/code.types'
 
 // ============================================================================
-// 도메인: Branch (지점)
+// 인증
 // ============================================================================
 export type {
-  AssignedBankInfo,
-  BranchAssignedBank,
-  BranchAssignedBankItem,
-  BranchAssignedBankResponse,
-  BranchCreateRequest,
-  BranchCreateResponse,
-  BranchDetailResponse,
-  BranchItem,
-  BranchListParams,
-  BranchOption,
-  BranchPaymentAccount,
-  BranchRegistryCredential,
-  BranchUpdateRequest,
-  RegistryTypeForAssign,
-  UserAssignedBank,
-  UserAssignedBankItem
-} from './domains/branch'
-
-// ============================================================================
-// 도메인: Notification (알림 & 공지사항)
-// ============================================================================
-export type {
-  Notice,
-  NotificationCreateRequest,
-  NotificationDetail,
-  NotificationListResponse
-} from './domains/notification'
-
-// ============================================================================
-// 도메인: Organization (기관)
-// ============================================================================
-export type {
+  EmailVerifyRequest,
+  EmailVerifyResponse,
+  LoginRequest,
+  LoginResponse,
+  LogoutResponse,
   OrganizationCreateRequest,
   OrganizationCreateResponse,
-  OrganizationDetailResponse,
-  OrganizationItem,
-  OrganizationListParams,
-  OrganizationOption,
-  OrganizationUpdateRequest
-} from './domains/organization'
+  RefreshTokenRequest,
+  RefreshTokenResponse,
+  SetPasswordRequest,
+  SignUpRequest,
+  SignUpResponse,
+  TokenRefreshRequest,
+  TokenRefreshResponse,
+  ValidateEmailTokenRequest,
+  ValidateEmailTokenResponse,
+  VerifyEmail_1Request
+} from '@/types/api/auth.types'
 
 // ============================================================================
-// 도메인: User (사용자)
+// 사용자
 // ============================================================================
 export type {
-  UserAssignable,
-  UserAssignedBankSummary,
+  ApproveUserParams,
+  ApproveUserResponse,
+  AssignedBankInfo,
+  CheckDuplicateEmailQuery,
+  CheckDuplicateEmailResponse,
+  CheckDuplicateLoginIdQuery,
+  CheckDuplicateLoginIdResponse,
+  CreateUserRequest,
+  CreateUserResponse,
+  GetAssignableUsersQuery,
+  GetAssignableUsersResponse,
+  GetProfileResponse,
+  GetUserDetailParams,
+  GetUserDetailResponse,
+  SearchUsersQuery,
+  SearchUsersResponse,
+  UpdateProfileRequest,
+  UpdateProfileResponse,
+  UpdateUserParams,
+  UpdateUserRequest,
+  UpdateUserResponse,
+  UserAssignableResponse,
+  UserAssignedBankSummaryResponse,
   UserCreateRequest,
   UserCreateResponse,
   UserDetailResponse,
-  UserItem,
-  UserListItem,
-  UserListParams,
+  UserResponse,
   UserSelfUpdateRequest,
-  UserUpdateRequest
-} from './domains/user'
+  UserStatus,
+  UserUpdateRequest,
+  VerifyEmailParams,
+  VerifyEmailResponse
+} from '@/types/api/user.types'
 
 // ============================================================================
-// 도메인: Registry - 견적 (Estimate)
+// 금융기관
 // ============================================================================
 export type {
-  EstimateDetail,
-  EstimateInfo,
-  EstimateListItem,
-  EstimateListParams,
-  EstimateSubmitRequest,
-  EstimateSubmitResponse,
-  EstimateSummary,
-  FeeDetails,
-  LegalAgentInfo,
-  ObligeeInfo,
-  ObligorInfo,
-  PropertyInfo,
-  PublicChargeDetails,
-  RegistryInfo,
-  RegistryMethod
-} from './domains/registry'
+  BankResponse,
+  GetBankParams,
+  GetBankResponse,
+  GetBanksResponse
+} from '@/types/api/bank.types'
 
 // ============================================================================
-// 도메인: Registry - 진행 (Progress)
+// 주소
 // ============================================================================
 export type {
-  AssignManagerRequest,
-  DailySchedule,
-  ProgressListParams,
-  ProgressSchedules,
-  ProgressStatistics,
-  ProgressStatusCount,
-  ProgressSummary,
-  RegistryLoanPaymentAccount,
-  RegistryLoanPaymentAccountDetailResponse,
-  RegistryLoanPaymentAccountListResponse,
-  RegistryLoanPaymentAccountReceiptUploadResponse,
-  RegistryLoanPaymentAccountSaveRequest,
-  RegistryProgressBasic,
-  RegistryProgressESignatureTableResponse,
-  RegistryProgressListItem,
-  RegistryProgressLoan,
-  RegistryReceiptDocument,
-  RegistryReceiptDocumentCreateResponse,
-  RegistryReceiptDocumentDetailResponse,
-  RegistryReceiptDocumentGetResponse,
-  RegistryReceiptDocumentListResponse,
-  RegistryTaxAgency,
-  RegistryTaxAgencyDetailResponse,
-  RegistryTaxAgencyListResponse,
-  RegistryTaxAgencySaveRequest,
-  ScheduleItem,
-  ScheduleParams,
-  TodayProgress
-} from './domains/registry'
+  AddressAutocompleteResponse,
+  AddressItem,
+  AddressSearchResponseSwagger,
+  GetAddressSuggestionsQuery,
+  GetAddressSuggestionsResponse,
+  GetRegistryOfficesQuery,
+  GetRegistryOfficesResponse,
+  RegistryOfficeDetailResponse,
+  RegistryOfficeResponse,
+  SearchAddressesQuery,
+  SearchAddressesResponse
+} from '@/types/api/address.types'
 
 // ============================================================================
-// 도메인: Registry - 신청서 (Application)
+// 기관
 // ============================================================================
-export type {
-  MortgageInfo,
-  OwnershipTransferSummary,
-  RegistryApplicationCreateRequest,
-  RegistryApplicationDeleteRequest,
-  RegistryApplicationDocument,
-  RegistryApplicationDocumentSection,
-  RegistryApplicationForm,
-  RegistryApplicationUpdateRequest
-} from './domains/registry'
+export * from '@/types/api/organization.types'
 
 // ============================================================================
-// 도메인: Registry - 계약 (Contract)
+// 지점
 // ============================================================================
-export type {
-  ContractPartyDetail,
-  ContractPartyReplaceRequest,
-  ContractPartyResponse,
-  InterimPayment,
-  InterimPaymentResponse,
-  MortgageContractRequest,
-  MortgageContractResponse,
-  OwnershipContractRequest,
-  OwnershipContractResponse,
-  ProgressPartyOption,
-  SecuredDebtScopeRequest,
-  SecuredDebtScopeResponse,
-  SurfaceRightContractRequest,
-  SurfaceRightContractResponse,
-  SurfaceRightPartyOption
-} from './domains/registry'
+export * from '@/types/api/branch.types'
+export * from '@/types/api/branch-bank.types'
+export * from '@/types/api/branch-document.types'
+export * from '@/types/api/branch-payment.types'
+export * from '@/types/api/branch-prepaid.types'
+export * from '@/types/api/branch-registry.types'
 
 // ============================================================================
-// 도메인: Registry - 부동산 & 세금 (Property & Tax)
+// 알림
 // ============================================================================
-export type {
-  BondPropertyRequest,
-  BondPropertyResponse,
-  FilingFeeRequest,
-  FilingFeeResponse,
-  MortgageFinancialResponse,
-  MortgageFinancialSaveRequest,
-  OwnershipTaxResponse,
-  OwnershipTaxSaveRequest,
-  PropertyItem,
-  PropertyReplaceRequest,
-  PropertyUniqueNumberOption,
-  RegistryApplicationPropertyResponse,
-  StampTaxRequest,
-  StampTaxResponse,
-  TaxInfoRequest,
-  TaxInfoResponse
-} from './domains/registry'
+export * from '@/types/api/notification.types'
 
 // ============================================================================
-// 도메인: Registry - RPA (자동화)
+// 공지사항
 // ============================================================================
-export type {
-  AdminConsentTaskRequest,
-  ConsentTarget,
-  EtaxAcquisitionTaskRequest,
-  EtaxRegistrationTaskRequest,
-  FullCertificateTaskRequest,
-  PropertyDescriptionTaskRequest,
-  RegistrationApplicationTaskRequest,
-  RegistrationCaseQueryTaskRequest,
-  RegistrationPasswordTaskRequest,
-  RpaUserTaskCreateResponse,
-  RpaUserTaskResponse,
-  RpaUserTaskResultRequest,
-  WetaxAcquisitionTaskRequest,
-  WetaxRegistrationTaskRequest
-} from './domains/registry'
-export { RpaTaskStatus, RpaTaskType } from './domains/registry'
+export * from '@/types/api/notice.types'
 
 // ============================================================================
-// 도메인: Registry - 권리증/증명서 (Certificate)
+// 등기
 // ============================================================================
-export type {
-  BranchPrepaidCardOption,
-  CancellationCertificateDetailResponse,
-  CancellationCertificateItem,
-  CancellationCertificateListItem,
-  CancellationCertificateListResponse,
-  CancellationCertificateSaveRequest,
-  FullCertificateItem,
-  PostCertificateItem,
-  PropertyOwnerCertificateItem,
-  PropertyOwnerCertificateItemResponse,
-  PropertyOwnerCertificateResponse,
-  PropertyOwnerCertificateSaveRequest,
-  TransferCancellationCertificateResponse
-} from './domains/registry'
+export * from '@/types/api/registry-admin-consent.types'
+export * from '@/types/api/registry-attachment.types'
+export * from '@/types/api/registry-cancellation.types'
+export * from '@/types/api/registry-case.types'
+export * from '@/types/api/registry-certificate.types'
+export * from '@/types/api/registry-change.types'
+export * from '@/types/api/registry-completion.types'
+export * from '@/types/api/registry-contract.types'
+export * from '@/types/api/registry-correction.types'
+export * from '@/types/api/registry-dashboard.types'
+export * from '@/types/api/registry-debt-tax.types'
+export * from '@/types/api/registry-housing-bond.types'
+export * from '@/types/api/registry-loan-account.types'
+export * from '@/types/api/registry-prior-loan.types'
+export * from '@/types/api/registry-progress.types'
+export * from '@/types/api/registry-progress-document.types'
+export * from '@/types/api/registry-property.types'
+export * from '@/types/api/registry-quote.types'
+export * from '@/types/api/registry-receipt.types'
+export * from '@/types/api/registry-receipt-document.types'
+export * from '@/types/api/registry-request-document.types'
+export * from '@/types/api/registry-schedule.types'
+export * from '@/types/api/registry-signature.types'
+export * from '@/types/api/registry-tax.types'
+export * from '@/types/api/registry-tax-report.types'
+export * from '@/types/api/registry-test.types'
+export * from '@/types/api/registry-transfer-certificate.types'
+export * from '@/types/api/registry-type.types'
 
 // ============================================================================
-// 도메인: Registry - 행정정보 동의 (Admin Info)
+// RPA
 // ============================================================================
-export type {
-  AdminConsentStatus,
-  AdminConsentTarget,
-  AdminInfoRequestDetailResponse,
-  AdminInfoRequestItem,
-  AdminInfoRequestListItem,
-  AdminInfoRequestListResponse,
-  AdminInfoRequestSaveRequest,
-  BasicInfoItem,
-  InputInfoItem
-} from './domains/registry'
+export * from '@/types/api/rpa.types'
 
 // ============================================================================
-// 도메인: Registry - 첨부서면 (Attachment)
+// 외부 링크
 // ============================================================================
-export type {
-  AttachmentItem,
-  AttachmentItemResponse,
-  AttachmentListResponse,
-  AttachmentOption,
-  AttachmentSaveRequest,
-  DocumentDownloadResponse,
-  DocumentListItem,
-  DocumentSaveRequest,
-  DocumentSaveResponse,
-  DocumentUploadResponse
-} from './domains/registry'
-export { AttachmentType, SubmissionMethod } from './domains/registry'
-
-// ============================================================================
-// 도메인: Registry - 접수정보 (Receipt)
-// ============================================================================
-export type {
-  ApplicationReceiptItem,
-  CaseInquiryItem,
-  CaseInquiryListItem,
-  CaseInquiryListResponse,
-  CaseInquiryRequest,
-  CaseInquiryResponse,
-  CaseInquiryResultWrapper,
-  ReceiptDetailResponse,
-  ReceiptItem,
-  ReceiptListItem,
-  ReceiptListResponse,
-  ReceiptSaveRequest
-} from './domains/registry'
-
-// ============================================================================
-// 외부 링크 타입 (프로젝트 고유)
-// ============================================================================
-// 프로젝트에 해당 파일이 없으면 주석 처리하세요
 export type { ExternalLinks } from '@/constants/externalLinks'

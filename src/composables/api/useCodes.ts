@@ -7,33 +7,19 @@
 import { computed, ref } from 'vue'
 
 import { codeAPI } from '@/api/services/code'
-import type { Code, SelectOption } from '@/types'
 import type {
+  Code,
   CodeKey,
   CodeMap,
   CodeResponse,
   RoleLevelCode,
-  RoleLevelCodeMap
-} from '@/types/domains/code'
+  RoleLevelCodeMap,
+  SelectOption
+} from '@/types'
 import { logger } from '@/utils/logger'
 
 /**
  * 공통코드 관리 Composable
- *
- * @example
- * const { codes, isLoading, fetchAllCodes, getCodeLabel, getCodeOptions } = useCodes()
- *
- * // 전체 코드 일괄 조회
- * await fetchAllCodes()
- *
- * // 특정 카테고리만 조회
- * await fetchCodesByCategory('organizationStatuses')
- *
- * // 코드 라벨 조회
- * const label = getCodeLabel('organizationStatuses', 'ACTIVE') // '사용'
- *
- * // SelectOption 변환
- * const options = getCodeOptions('organizationStatuses') // [{ value: 'ACTIVE', label: '사용' }, ...]
  */
 export function useCodes() {
   // ============================================================================
@@ -57,13 +43,16 @@ export function useCodes() {
     workTypes: [],
     paymentStatuses: [],
     adminInfoLinkTime: [],
-    userStatuses: [], // [P06-17] 추가
-    progressStatuses: [], // [P06-18] 진행 상태
-    quoteProgressStatuses: [], // [P06-19] 등기 견적 진행 상태
-    estimateWritingStatuses: [], // [P06-20] 등기 견적 작성 여부
-    estimateSelectionStatuses: [], // [P06-21] 등기 견적 선정 상태
-    assignmentWorks: [], // [P06-22] 배정 업무
-    progressTypes: [] // [P06-23] 등기 진행 유형
+    userStatuses: [],
+    assignedWorks: [], // ⚠️ CodeResponse에는 assignedWorks
+    progressStatuses: [],
+    quoteProgressStatuses: [],
+    estimateWritingStatuses: [],
+    estimateSelectionStatuses: [],
+    progressTypes: [],
+    partyRoles: [], // ⚠️ API 없음 - 빈 배열로 초기화만
+    partyRolesForRequest: [], // ⚠️ API 없음 - 빈 배열로 초기화만
+    registryTypesForAssign: [] // ⚠️ API 없음 - 빈 배열로 초기화만
   })
 
   const isLoading = ref(false)
@@ -73,9 +62,6 @@ export function useCodes() {
   // 빠른 조회를 위한 Map (computed)
   // ============================================================================
 
-  /**
-   * 각 코드 카테고리별 Map 생성
-   */
   const codeMaps = computed(() => {
     const maps: Record<string, CodeMap | RoleLevelCodeMap> = {}
 
@@ -101,7 +87,6 @@ export function useCodes() {
   // API Functions
   // ============================================================================
 
-  // [P06-*] 특정 카테고리 코드 조회
   /**
    * 특정 카테고리의 코드만 조회
    */
@@ -129,13 +114,17 @@ export function useCodes() {
         workTypes: codeAPI.getWorkTypes,
         paymentStatuses: codeAPI.getPaymentStatuses,
         adminInfoLinkTime: codeAPI.getAdminInfoLinkTime,
-        userStatuses: codeAPI.getUserStatuses, // [P06-17] 추가
-        progressStatuses: codeAPI.getProgressStatuses, // [P06-18] 추가
-        quoteProgressStatuses: codeAPI.getQuoteProgressStatuses, // [P06-19] 추가
-        estimateWritingStatuses: codeAPI.getEstimateWritingStatuses, // [P06-20] 추가
-        estimateSelectionStatuses: codeAPI.getEstimateSelectionStatuses, // [P06-21] 추가
-        assignmentWorks: codeAPI.getAssignmentWorks, // [P06-22] 추가
-        progressTypes: codeAPI.getProgressTypes // [P06-23] 추가
+        userStatuses: codeAPI.getUserStatuses,
+        assignedWorks: codeAPI.getAssignmentWorks, // ⚠️ API는 getAssignmentWorks
+        progressStatuses: codeAPI.getProgressStatuses,
+        quoteProgressStatuses: codeAPI.getQuoteProgressStatuses,
+        estimateWritingStatuses: codeAPI.getEstimateWritingStatuses,
+        estimateSelectionStatuses: codeAPI.getEstimateSelectionStatuses,
+        progressTypes: codeAPI.getProgressTypes,
+        // ⚠️ 아래 3개는 API 메서드가 없으므로 더미 함수 반환
+        partyRoles: async () => ({ data: [] }),
+        partyRolesForRequest: async () => ({ data: [] }),
+        registryTypesForAssign: async () => ({ data: [] })
       }
 
       const response = await apiMethodMap[category]()
@@ -152,7 +141,6 @@ export function useCodes() {
     }
   }
 
-  // [P06-*] 모든 공통코드 일괄 조회
   /**
    * 모든 공통코드 일괄 조회
    */
@@ -182,12 +170,13 @@ export function useCodes() {
         payStatuses,
         adminLinkTime,
         userStats,
+        assignmentWorks, // ⚠️ 변수명: assignmentWorks (API 메서드명과 일치)
         progressStats,
         quoteProgressStats,
         estimateWritingStats,
         estimateSelectionStats,
-        assignmentWorks,
         progressTypes
+        // ⚠️ partyRoles, partyRolesForRequest, registryTypesForAssign는 API 없음
       ] = await Promise.all([
         codeAPI.getOrganizationTypes(),
         codeAPI.getOrganizationStatuses(),
@@ -206,12 +195,13 @@ export function useCodes() {
         codeAPI.getPaymentStatuses(),
         codeAPI.getAdminInfoLinkTime(),
         codeAPI.getUserStatuses(),
+        codeAPI.getAssignmentWorks(), // ⚠️ API는 getAssignmentWorks
         codeAPI.getProgressStatuses(),
         codeAPI.getQuoteProgressStatuses(),
         codeAPI.getEstimateWritingStatuses(),
         codeAPI.getEstimateSelectionStatuses(),
-        codeAPI.getAssignmentWorks(),
         codeAPI.getProgressTypes()
+        // ⚠️ 아래 3개는 API 없음
       ])
 
       codes.value.organizationTypes = orgTypes.data || []
@@ -231,12 +221,16 @@ export function useCodes() {
       codes.value.paymentStatuses = payStatuses.data || []
       codes.value.adminInfoLinkTime = adminLinkTime.data || []
       codes.value.userStatuses = userStats.data || []
+      codes.value.assignedWorks = assignmentWorks.data || [] // ⚠️ assignedWorks에 저장
       codes.value.progressStatuses = progressStats.data || []
       codes.value.quoteProgressStatuses = quoteProgressStats.data || []
       codes.value.estimateWritingStatuses = estimateWritingStats.data || []
       codes.value.estimateSelectionStatuses = estimateSelectionStats.data || []
-      codes.value.assignmentWorks = assignmentWorks.data || []
       codes.value.progressTypes = progressTypes.data || []
+      // ⚠️ 아래 3개는 API 없으므로 빈 배열 유지
+      codes.value.partyRoles = []
+      codes.value.partyRolesForRequest = []
+      codes.value.registryTypesForAssign = []
 
       const endTime = performance.now()
       const loadTime = (endTime - startTime).toFixed(2)
@@ -256,9 +250,6 @@ export function useCodes() {
   // 유틸리티 함수
   // ============================================================================
 
-  /**
-   * 코드로 라벨(설명) 조회
-   */
   function getCodeLabel(category: CodeKey, code: string): string {
     const map = codeMaps.value[category]
 
@@ -271,17 +262,11 @@ export function useCodes() {
     return codeMap.get(code) || code
   }
 
-  /**
-   * 권한 레벨 조회 (userRoleLevels 전용)
-   */
   function getRoleLevel(code: string): number | null {
     const map = codeMaps.value.userRoleLevels as RoleLevelCodeMap
     return map.get(code)?.level ?? null
   }
 
-  /**
-   * 코드 배열을 SelectOption 배열로 변환
-   */
   function getCodeOptions(category: CodeKey): SelectOption[] {
     const codeList = codes.value[category]
 
@@ -295,9 +280,6 @@ export function useCodes() {
     }))
   }
 
-  /**
-   * 코드 존재 여부 확인
-   */
   function hasCode(category: CodeKey, code: string): boolean {
     const map = codeMaps.value[category]
 
@@ -308,16 +290,10 @@ export function useCodes() {
     return (map as CodeMap).has(code)
   }
 
-  /**
-   * 특정 카테고리의 모든 코드 목록 조회
-   */
   function getCodes(category: CodeKey): Code[] | RoleLevelCode[] {
     return codes.value[category] || []
   }
 
-  /**
-   * 캐시 초기화
-   */
   function clearCache() {
     codes.value = {
       organizationTypes: [],
@@ -337,12 +313,15 @@ export function useCodes() {
       paymentStatuses: [],
       adminInfoLinkTime: [],
       userStatuses: [],
+      assignedWorks: [],
       progressStatuses: [],
       quoteProgressStatuses: [],
       estimateWritingStatuses: [],
       estimateSelectionStatuses: [],
-      assignmentWorks: [],
-      progressTypes: [] // [P06-23] 추가
+      progressTypes: [],
+      partyRoles: [],
+      partyRolesForRequest: [],
+      registryTypesForAssign: []
     }
     loadError.value = null
     logger.info('[CODES] Cache cleared')

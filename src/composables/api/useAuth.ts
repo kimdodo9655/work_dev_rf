@@ -22,9 +22,8 @@ export function useAuth() {
   // Mutations
   // ============================================================================
 
-  // [P04-02] 로그인 : useMutation
   /**
-   * 로그인 Mutation
+   * [P04-02] 로그인 Mutation
    * API: POST /api/auth/login
    *
    * 로그인 프로세스:
@@ -42,14 +41,40 @@ export function useAuth() {
 
     // 2. 로그인 성공 시 처리
     onSuccess: (response) => {
+      // ✅ ApiResponse<LoginResponse> 구조에서 data 추출
+      const loginData = response.data
+
+      // ✅ 필수 필드 검증
+      if (
+        !loginData?.accessToken ||
+        !loginData?.refreshToken ||
+        !loginData?.loginId ||
+        loginData?.userId === undefined ||
+        loginData?.roleLevel === undefined
+      ) {
+        logger.error('[AUTH] Invalid login response', { loginData })
+        throw new Error('Invalid login response')
+      }
+
       // 2-1. 스토어에 인증 정보 저장
-      store.setAuth(response.data)
+      store.setAuth({
+        accessToken: loginData.accessToken,
+        refreshToken: loginData.refreshToken,
+        accessTokenExpiresIn: loginData.accessTokenExpiresIn || 0,
+        refreshTokenExpiresIn: loginData.refreshTokenExpiresIn || 0,
+        loginId: loginData.loginId,
+        userId: loginData.userId,
+        roleLevel: loginData.roleLevel
+      })
 
       // 2-2. auth 관련 쿼리 캐시 무효화
       queryClient.invalidateQueries({ queryKey: ['auth'] })
 
       // 2-3. 성공 로그
-      logger.info('[AUTH] Login successful')
+      logger.info('[AUTH] Login successful', {
+        loginId: loginData.loginId,
+        userId: loginData.userId
+      })
     },
 
     // 3. 로그인 실패 시 처리
@@ -59,9 +84,8 @@ export function useAuth() {
     }
   })
 
-  // [P04-03] 로그아웃 : useMutation
   /**
-   * 로그아웃 Mutation
+   * [P04-03] 로그아웃 Mutation
    * API: POST /api/auth/logout
    *
    * 로그아웃 프로세스:
@@ -92,9 +116,8 @@ export function useAuth() {
   // Helper Functions
   // ============================================================================
 
-  // [P04-02] 로그인 : 헬퍼 함수
   /**
-   * 로그인 + 리다이렉트 헬퍼 함수
+   * [P04-02] 로그인 + 리다이렉트 헬퍼 함수
    *
    * 실행 순서:
    * 1. loginMutation.mutateAsync() 호출
@@ -140,9 +163,8 @@ export function useAuth() {
     await router.push(redirectPath)
   }
 
-  // [P04-03] 로그아웃 : 헬퍼 함수
   /**
-   * 로그아웃 + 로그인 페이지 이동 헬퍼 함수
+   * [P04-03] 로그아웃 + 로그인 페이지 이동 헬퍼 함수
    *
    * 실행 순서:
    * 1. logoutMutation.mutateAsync() 호출

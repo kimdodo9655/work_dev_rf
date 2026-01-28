@@ -153,8 +153,8 @@
 
                   <div v-else-if="filteredRegistryOffices.length > 0" class="registry-list">
                     <div
-                      v-for="office in filteredRegistryOffices"
-                      :key="office.id"
+                      v-for="(office, index) in filteredRegistryOffices"
+                      :key="office.id || index"
                       class="registry-item"
                       @click="selectRegistryOffice(office)"
                     >
@@ -235,7 +235,7 @@ import { computed, ref, watch } from 'vue'
 import { addressAPI } from '@/api/services/address'
 import { useAddress } from '@/composables/api/useAddress'
 import { useErrorHandler } from '@/composables/utils/useErrorHandler'
-import type { AddressItem, RegistryOffice } from '@/types'
+import type { AddressItem, RegistryOfficeDetailResponse } from '@/types'
 
 const {
   addresses,
@@ -258,14 +258,13 @@ const registryKeyword = ref('')
 const selectedResult = ref('')
 const confirmedAddress = ref('')
 
-const registryOffices = ref<RegistryOffice[]>([])
+const registryOffices = ref<RegistryOfficeDetailResponse[]>([])
 const isLoadingRegistry = ref(false)
 
 let autocompleteTimer: ReturnType<typeof setTimeout> | null = null
 let registrySearchTimer: ReturnType<typeof setTimeout> | null = null
 
 const filteredRegistryOffices = computed(() => {
-  // API에서 검색된 결과를 그대로 사용
   console.log('🔄 filteredRegistryOffices computed 실행:', registryOffices.value.length, '개')
   return registryOffices.value
 })
@@ -278,8 +277,6 @@ const openModal = async (mode: 'search' | 'autocomplete' | 'registry') => {
   autocompleteKeyword.value = ''
   registryKeyword.value = ''
   selectedResult.value = ''
-
-  // 등기소 모드는 검색어 입력 시에만 API 호출
 }
 
 const closeModal = () => {
@@ -311,15 +308,15 @@ const loadMore = async () => {
 }
 
 const selectAddress = (address: AddressItem) => {
-  selectedResult.value = address.roadAddress
+  selectedResult.value = address.roadAddress || ''
 }
 
 const selectSuggestion = (suggestion: string) => {
   selectedResult.value = suggestion
 }
 
-const selectRegistryOffice = (office: RegistryOffice) => {
-  selectedResult.value = `${office.name} (${office.jurisdictionArea})`
+const selectRegistryOffice = (office: RegistryOfficeDetailResponse) => {
+  selectedResult.value = `${office.name || ''} (${office.jurisdictionArea || ''})`
 }
 
 const loadRegistryOffices = async () => {
@@ -327,7 +324,6 @@ const loadRegistryOffices = async () => {
   try {
     const keyword = registryKeyword.value.trim()
 
-    // 최소 2자 이상 입력해야 검색
     if (keyword.length < 2) {
       registryOffices.value = []
       isLoadingRegistry.value = false
@@ -338,15 +334,15 @@ const loadRegistryOffices = async () => {
 
     const response = await addressAPI.getRegistryOffices(keyword)
     console.log('✅ 등기소 API 응답:', response)
-    console.log('📋 등기소 데이터:', response.data)
 
-    // API 응답 구조: { registryOffices: [...], pageInfo: {...} }
-    registryOffices.value = response.data.registryOffices || []
+    // ✅ response.data.registryOffices로 접근
+    registryOffices.value = response.data?.registryOffices || []
+
     console.log('📊 등기소 목록 업데이트:', registryOffices.value)
   } catch (error) {
     console.error('❌ 등기소 로드 실패:', error)
     handleError(error, 'LOAD_REGISTRY_OFFICES')
-    registryOffices.value = [] // 에러 시 빈 배열
+    registryOffices.value = []
   } finally {
     isLoadingRegistry.value = false
   }
@@ -380,13 +376,11 @@ watch(isModalOpen, (newVal) => {
   }
 })
 
-// 등기소 검색어 실시간 감시
 watch(
   registryKeyword,
   (newValue) => {
     console.log('👀 registryKeyword 변경:', newValue, 'length:', newValue.length)
 
-    // 2글자 미만이면 결과 초기화
     if (newValue.length < 2) {
       registryOffices.value = []
       if (registrySearchTimer) {
@@ -396,16 +390,15 @@ watch(
       return
     }
 
-    // 2글자 이상이면 디바운스 적용하여 검색
     if (registrySearchTimer) {
       clearTimeout(registrySearchTimer)
     }
 
     registrySearchTimer = setTimeout(async () => {
       await loadRegistryOffices()
-    }, 100) // 100ms 디바운스
+    }, 100)
   },
-  { flush: 'sync' } // 동기적으로 즉시 실행
+  { flush: 'sync' }
 )
 </script>
 
