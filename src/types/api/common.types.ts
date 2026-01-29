@@ -183,27 +183,124 @@ export interface BranchPrepaidCardResponse {
 
 /** 계약 당사자 상세 */
 export interface ContractPartyDetail {
+  /** 신청서 당사자 ID */
   partyId?: number
-  partyName?: string
-  partyRole?: string
-  partyType?: string
+  /** 진행 당사자 ID */
+  progressPartyId?: number
+  /** 신청인 역할 */
+  partyRole?: 'REGISTRY_OBLIGOR' | 'REGISTRY_OBLIGEE' | 'DEBTOR'
+  /** 신청인 역할명 */
+  partyRoleName?: string
+  /** 당사자 구분 */
+  partyType?: 'DOMESTIC' | 'OVERSEAS_KOREAN' | 'FOREIGNER' | 'CORPORATION'
+  /** 당사자 구분명 */
+  partyTypeName?: string
+  /** 성명/법인명 */
+  name?: string
+  /** 주민등록번호/사업자등록번호 */
+  registrationNumber?: string
+  /** 연락처 */
+  contact?: string
+  /** 국적 */
+  nationality?: string
+  /** 이메일 */
+  email?: string
+  /** 주소 */
+  address?: string
+  /** 상세주소 */
+  addressDetail?: string
+  /** 대표자 구분 */
+  representativeType?: 'DOMESTIC' | 'OVERSEAS_KOREAN' | 'FOREIGNER' | 'CORPORATION'
+  /** 대표자 직책 */
+  representativePosition?: string
+  /** 대표자 성명 */
+  representativeName?: string
+  /** 대표자 국적 */
+  representativeNationality?: string
+  /** 채무자와 동일 여부 */
+  isSameAsDebtor?: boolean
+  /** 이전 지분 분모 */
+  transferShareDenominator?: number
+  /** 이전 지분 분자 */
+  transferShareNumerator?: number
+  /** 취급지점 */
+  handlingBranch?: string
 }
 
 /** 계약 당사자 응답 */
 export interface ContractPartyResponse {
-  parties?: ContractPartyDetail[]
+  /** 등기의무자 목록 */
+  obligors?: ContractPartyDetail[]
+  /** 등기권리자 목록 */
+  obligees?: ContractPartyDetail[]
+  /** 채무자 목록 */
+  debtors?: ContractPartyDetail[]
+  /** 진행당사자 선택 옵션 */
+  progressPartyOptions?: ProgressPartyOption[]
 }
 
 /** 진행 당사자 옵션 */
 export interface ProgressPartyOption {
-  partyId?: number
-  partyName?: string
+  /** 진행당사자 ID */
+  progressPartyId?: number
+  /** 데이터 출처 */
+  dataSource?: 'REQUEST' | 'MANUAL'
+  /** 당사자 구분 */
+  partyType?: 'DOMESTIC' | 'OVERSEAS_KOREAN' | 'FOREIGNER' | 'CORPORATION'
+  /** 성명/법인명 */
+  name?: string
+  /** 주민등록번호/사업자등록번호 */
+  registrationNumber?: string
+  /** 연락처 */
+  contact?: string
+  /** 국적 */
+  nationality?: string
+  /** 이메일 */
+  email?: string
+  /** 주소 */
+  address?: string
+  /** 상세주소 */
+  addressDetail?: string
+  /** 대표자 구분 */
+  representativeType?: 'DOMESTIC' | 'OVERSEAS_KOREAN' | 'FOREIGNER' | 'CORPORATION'
+  /** 대표자 직책 */
+  representativePosition?: string
+  /** 대표자 성명 */
+  representativeName?: string
+  /** 대표자 국적 */
+  representativeNationality?: string
+  /** 취급지점 */
+  handlingBranch?: string
 }
 
 /** 당사자 교체 요청 */
 export interface RegistryApplicationPartyReplaceRequest {
-  oldPartyId?: number
-  newPartyId?: number
+  /** 계약당사자 정보 목록 */
+  partyItems: PartyItemRequest[]
+}
+
+/** 당사자 항목 요청 */
+export interface PartyItemRequest {
+  /** 신청서 당사자 ID */
+  id?: number
+  /** 진행 당사자 ID */
+  progressPartyId?: number
+  /** 신청인구분 */
+  partyRole?: string
+  /** 등록번호구분 */
+  partyType?: 'DOMESTIC' | 'OVERSEAS_KOREAN' | 'FOREIGNER' | 'CORPORATION'
+  /** 신청인명 */
+  name?: string
+  /** 주민등록번호 */
+  registrationNumber?: string
+  /** 연락처 */
+  contact?: string
+  /** 국적 */
+  nationality?: string
+  /** 기본주소 */
+  address?: string
+  /** 상세주소 */
+  addressDetail?: string
 }
 
 // ============================================================================

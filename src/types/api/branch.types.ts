@@ -55,6 +55,8 @@ export interface UpdateBranchParams {
 
 export type UpdateBranchRequest = BranchUpdateRequest
 
+export type UpdateBranchResponse = BranchDetailResponse
+
 /**
  * P02A-04
  * POST /api/branches

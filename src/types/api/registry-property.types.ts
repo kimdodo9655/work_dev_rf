@@ -61,6 +61,8 @@ export interface RegistryApplicationPropertyItemResponse {
   jurisdictionRegistryOffice?: string
   /** 부동산표시 */
   propertyDescription?: string
+  /** 지상권 여부 */
+  isSurfaceRight?: boolean
   /** 설정등기방식 */
   establishmentRegistryMethod?: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
   /** 설정관할등기소 */

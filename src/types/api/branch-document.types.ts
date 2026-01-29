@@ -97,6 +97,8 @@ export interface DownloadDocumentParams {
   branchId: number
 }
 
+export type DownloadDocumentResponse = Blob
+
 /**
  * P02F-06
  * GET /api/organizations/{organizationId}/branches/{branchId}/documents/download/base64

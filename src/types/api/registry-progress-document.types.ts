@@ -90,6 +90,8 @@ export interface DownloadDocument_2Params {
   registryManagementNumber: string
 }
 
+export type DownloadDocument_2Response = Blob
+
 /**
  * R02Y-06
  * GET /api/registry/progress/{registryManagementNumber}/documents/download/base64

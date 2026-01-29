@@ -2233,12 +2233,12 @@
     "/api/codes/party-types": {
       "get": {
         "tags": ["[P06] 공통코드"],
-        "summary": "[P06-08] 🅿️ 당사자 구분 목록 조회",
+        "summary": "[P06-08] 🅿️ 등록번호 구분 목록 조회",
         "description": "PartyType enum의 모든 값을 조회합니다. 인증이 필요하지 않은 공개 API입니다.",
         "operationId": "getPartyTypes",
         "responses": {
           "200": {
-            "description": "당사자 구분 목록 조회 성공",
+            "description": "등록번호 구분 목록 조회 성공",
             "content": {
               "*/*": {
                 "schema": {
@@ -2787,7 +2787,7 @@
         }
       }
     },
-    "/api/registry/requests/test-data": {
+    "/api/registry/test-data/requests": {
       "post": {
         "tags": ["[R00] 등기 테스트 데이터"],
         "summary": "[R00-01] 🅿️ 등기의뢰 테스트 데이터 생성",
@@ -2840,7 +2840,7 @@
         }
       }
     },
-    "/api/registry/progress/test-data": {
+    "/api/registry/test-data/progress": {
       "post": {
         "tags": ["[R00] 등기 테스트 데이터"],
         "summary": "[R00-02] 🅿️ 등기진행 테스트 데이터 생성",
@@ -2902,7 +2902,7 @@
         }
       }
     },
-    "/api/registry/scheduler/test-data/generate": {
+    "/api/registry/test-data/scheduler/generate": {
       "post": {
         "tags": ["[R00] 등기 테스트 데이터"],
         "summary": "[R00-03] 🅿️ 등기 테스트 데이터 스케쥴러 수동 실행",
@@ -2922,7 +2922,7 @@
         }
       }
     },
-    "/api/registry/scheduler/test-data/generate-missing-progress": {
+    "/api/registry/test-data/scheduler/generate-missing-progress": {
       "post": {
         "tags": ["[R00] 등기 테스트 데이터"],
         "summary": "[R00-04] 🅿️ 누락된 등기 진행 데이터 생성 스케쥴러 수동 실행",
@@ -2942,7 +2942,7 @@
         }
       }
     },
-    "/api/registry/scheduler/test-data/assign-managers": {
+    "/api/registry/test-data/scheduler/assign-managers": {
       "post": {
         "tags": ["[R00] 등기 테스트 데이터"],
         "summary": "[R00-05] 🅿️ 등기 담당자 배정 스케쥴러 수동 실행",
@@ -2955,6 +2955,156 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResultVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/registry/test-data/combine": {
+      "post": {
+        "tags": ["[R00] 등기 테스트 데이터"],
+        "summary": "[R00-06] 🅿️ 진행 유형별 등기 의뢰+진행 테스트 데이터 생성",
+        "description": "지정한 등기 진행 유형별로 등기의뢰 및 등기진행 테스트 데이터를 생성합니다.",
+        "operationId": "createRegistryTypeComboTestData",
+        "parameters": [
+          {
+            "name": "organizationName",
+            "in": "query",
+            "description": "법무대리인명칭 (Organization 테이블의 organization_name 값)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "법무법인 태평양"
+            },
+            "example": "법무법인 태평양"
+          },
+          {
+            "name": "progressType",
+            "in": "query",
+            "description": "진행 유형 (ProgressType 코드값)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["TYPE_01", "TYPE_02", "TYPE_04", "TYPE_05", "TYPE_07"]
+            },
+            "example": "TYPE_01"
+          },
+          {
+            "name": "registryMethod",
+            "in": "query",
+            "description": "등기 방식 (RegistryMethod 코드값)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
+            },
+            "example": "ELECTRONIC"
+          },
+          {
+            "name": "numberOfProperties",
+            "in": "query",
+            "description": "부동산 개수",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "example": 1
+          },
+          {
+            "name": "hasAdditionalPropertyInfo",
+            "in": "query",
+            "description": "부동산 추가 정보 생성 여부",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "example": false
+          },
+          {
+            "name": "numberOfSurfaceRights",
+            "in": "query",
+            "description": "지상권 설정 부동산 수",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "example": 1
+          },
+          {
+            "name": "numberOfBuyers",
+            "in": "query",
+            "description": "담보제공자 수",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "example": 1
+          },
+          {
+            "name": "hasAdditionalBuyerInfo",
+            "in": "query",
+            "description": "담보제공자 추가 정보 생성 여부",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "example": false
+          },
+          {
+            "name": "numberOfBuyersAsDebtors",
+            "in": "query",
+            "description": "담보제공자와 동일한 채무자 수",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "example": 1
+          },
+          {
+            "name": "numberOfIndependentDebtors",
+            "in": "query",
+            "description": "담보제공자와 무관한 채무자 수",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "example": 0
+          },
+          {
+            "name": "hasScopeOfSecuredDebt",
+            "in": "query",
+            "description": "피담보채무의범위 포함 여부",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "example": false
+          },
+          {
+            "name": "hasRegistryRightCertificate",
+            "in": "query",
+            "description": "등기권리증 정보 생성 여부",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "example": false
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "진행 유형별 등기 의뢰+진행 테스트 데이터 생성 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistryProgressTestDataResponse"
                 }
               }
             }
@@ -7910,6 +8060,48 @@
         }
       }
     },
+    "/api/registry/rpa/user-tasks/{registryManagementNumber}/ownership-tax": {
+      "post": {
+        "tags": ["[RPAC] RPA 사용자 PC 작업"],
+        "summary": "[RPAC-12] 세금신고 자동 작성 작업 등록",
+        "description": "세금신고 자동 작성을 위한 RPA 작업을 등록합니다.",
+        "operationId": "createTaxAutoFillTask",
+        "parameters": [
+          {
+            "name": "registryManagementNumber",
+            "in": "path",
+            "description": "등기관리번호",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "RG20250101-0001"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaxAutoFillTaskRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "작업 등록 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RpaUserTaskCreateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/registry/rpa/user-tasks/{taskToken}/result": {
       "patch": {
         "tags": ["[RPAC] RPA 사용자 PC 작업"],
@@ -9390,6 +9582,11 @@
             "example": "BUILDING",
             "enum": ["LAND", "BUILDING", "COLLECTIVE_BUILDING"]
           },
+          "isSurfaceRight": {
+            "type": "boolean",
+            "description": "지상권여부",
+            "example": false
+          },
           "propertyAddress": {
             "type": "string",
             "description": "부동산주소",
@@ -10149,6 +10346,9 @@
             "type": "string"
           },
           "representativeNationality": {
+            "type": "string"
+          },
+          "handlingBranch": {
             "type": "string"
           }
         },
@@ -11505,6 +11705,233 @@
           }
         }
       },
+      "RegistryRequestTestDataResponse": {
+        "type": "object",
+        "properties": {
+          "registryRequestNumber": {
+            "type": "string",
+            "description": "등기신청번호",
+            "example": "BC20251127000011"
+          },
+          "requestBankCode": {
+            "type": "string",
+            "description": "의뢰금융기관코드",
+            "example": "bankclear"
+          },
+          "workType": {
+            "type": "string",
+            "description": "업무구분",
+            "example": "ESTABLISHMENT"
+          },
+          "registryReceiptDate": {
+            "type": "string",
+            "description": "등기접수일자",
+            "format": "date",
+            "example": "2025-12-05"
+          },
+          "loanExecutionDate": {
+            "type": "string",
+            "description": "대출실행일자",
+            "format": "date",
+            "example": "2025-12-10"
+          },
+          "bankName": {
+            "type": "string",
+            "description": "금융기관명",
+            "example": "뱅크클리어"
+          },
+          "branchName": {
+            "type": "string",
+            "description": "지점명",
+            "example": "강남지점"
+          },
+          "managerName": {
+            "type": "string",
+            "description": "담당자명",
+            "example": "홍길동"
+          },
+          "managerPosition": {
+            "type": "string",
+            "description": "담당자직급",
+            "example": "대리"
+          },
+          "managerPhone": {
+            "type": "string",
+            "description": "담당자전화번호",
+            "example": "010-1234-5678"
+          },
+          "managerMessage": {
+            "type": "string",
+            "description": "담당자전달사항",
+            "example": "빠른 처리 부탁드립니다."
+          },
+          "organizationName": {
+            "type": "string",
+            "description": "후행법무대리인명칭",
+            "example": "법무법인 태평양"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "생성일시",
+            "format": "date-time"
+          }
+        },
+        "description": "등기의뢰 테스트 데이터 응답"
+      },
+      "ApiResultRegistryRequestTestDataResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "code": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/RegistryRequestTestDataResponse"
+          }
+        }
+      },
+      "RegistryProgressTestDataResponse": {
+        "type": "object",
+        "properties": {
+          "registryManagementNumber": {
+            "type": "string",
+            "description": "등기관리번호",
+            "example": "RM20251202000012"
+          },
+          "registryRequestNumber": {
+            "type": "string",
+            "description": "등기신청번호",
+            "example": "BC20251127000011"
+          },
+          "organizationId": {
+            "type": "integer",
+            "description": "기관ID",
+            "format": "int64",
+            "example": 1
+          },
+          "branchId": {
+            "type": "integer",
+            "description": "지점ID (null일 수 있음)",
+            "format": "int64"
+          },
+          "managerUserId": {
+            "type": "integer",
+            "description": "담당자ID (null일 수 있음)",
+            "format": "int64"
+          },
+          "workType": {
+            "type": "string",
+            "description": "업무구분",
+            "example": "TRANSFER_AND_ESTABLISHMENT",
+            "enum": ["ESTABLISHMENT", "TRANSFER_AND_ESTABLISHMENT"]
+          },
+          "workTypeDescription": {
+            "type": "string",
+            "description": "업무구분 설명",
+            "example": "이전+설정"
+          },
+          "assignedWork": {
+            "type": "string",
+            "description": "배정업무",
+            "example": "이전,설정"
+          },
+          "registryRequestDate": {
+            "type": "string",
+            "description": "등기의뢰일자",
+            "format": "date",
+            "example": "2025-12-03"
+          },
+          "registryReceiptDate": {
+            "type": "string",
+            "description": "등기접수일자",
+            "format": "date",
+            "example": "2025-12-10"
+          },
+          "loanExecutionDate": {
+            "type": "string",
+            "description": "대출실행일자",
+            "format": "date",
+            "example": "2025-12-11"
+          },
+          "progressStatus": {
+            "type": "string",
+            "description": "진행상태",
+            "example": "ASSIGN_MANAGER",
+            "enum": [
+              "ASSIGN_MANAGER",
+              "INSPECT_REGISTRY_INFO",
+              "REQUEST_RESUBMISSION",
+              "REGISTER_APPLICATION_INFO",
+              "REQUEST_ADMIN_INFO_CONSENT",
+              "OBLIGOR_E_SIGNATURE",
+              "OBLIGEE_E_SIGNATURE",
+              "TAX_DECLARATION_AGENCY",
+              "PURCHASE_HOUSING_BOND",
+              "REGISTER_LOAN_ACCOUNT",
+              "WAITING_LOAN_PAYMENT",
+              "LOAN_PAYMENT_COMPLETED",
+              "REGISTER_TRANSFER_CERTIFICATE",
+              "CREATE_APPLICATION",
+              "INTERNET_REGISTRY_E_SIGNATURE",
+              "REQUEST_CASE_DELEGATION",
+              "WAITING_CASE_DELEGATION",
+              "CASE_DELEGATION_COMPLETED",
+              "REGISTRY_RECEIVED",
+              "CREATE_COST_STATEMENT",
+              "REGISTER_COMPLETION_DOCUMENTS",
+              "SUBMIT_COMPLETION_DOCUMENTS",
+              "REGISTRY_COMPLETED",
+              "REGISTRY_CANCELLED"
+            ]
+          },
+          "progressStatusDescription": {
+            "type": "string",
+            "description": "진행상태 설명",
+            "example": "담당자배정"
+          },
+          "repaymentCancellationSubject": {
+            "type": "string",
+            "description": "상환말소주체 (null일 수 있음)",
+            "example": "null"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "생성일시",
+            "format": "date-time"
+          }
+        },
+        "description": "등기진행 테스트 데이터 응답"
+      },
+      "ApiResultRegistryProgressTestDataResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "code": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/RegistryProgressTestDataResponse"
+          }
+        }
+      },
       "WetaxRegistrationTaskRequest": {
         "required": ["applicationId"],
         "type": "object",
@@ -11637,6 +12064,19 @@
         },
         "description": "부동산의표시 생성 작업 요청"
       },
+      "TaxAutoFillTaskRequest": {
+        "required": ["applicationId"],
+        "type": "object",
+        "properties": {
+          "applicationId": {
+            "type": "integer",
+            "description": "신청서 ID",
+            "format": "int64",
+            "example": 456
+          }
+        },
+        "description": "세금신고 자동 작성 작업 요청"
+      },
       "FullCertificateTaskRequest": {
         "required": ["cardNumber", "propertyUniqueNumber"],
         "type": "object",
@@ -11727,100 +12167,6 @@
         },
         "description": "문서 저장 응답"
       },
-      "RegistryRequestTestDataResponse": {
-        "type": "object",
-        "properties": {
-          "registryRequestNumber": {
-            "type": "string",
-            "description": "등기신청번호",
-            "example": "BC20251127000011"
-          },
-          "requestBankCode": {
-            "type": "string",
-            "description": "의뢰금융기관코드",
-            "example": "bankclear"
-          },
-          "workType": {
-            "type": "string",
-            "description": "업무구분",
-            "example": "ESTABLISHMENT"
-          },
-          "registryReceiptDate": {
-            "type": "string",
-            "description": "등기접수일자",
-            "format": "date",
-            "example": "2025-12-05"
-          },
-          "loanExecutionDate": {
-            "type": "string",
-            "description": "대출실행일자",
-            "format": "date",
-            "example": "2025-12-10"
-          },
-          "bankName": {
-            "type": "string",
-            "description": "금융기관명",
-            "example": "뱅크클리어"
-          },
-          "branchName": {
-            "type": "string",
-            "description": "지점명",
-            "example": "강남지점"
-          },
-          "managerName": {
-            "type": "string",
-            "description": "담당자명",
-            "example": "홍길동"
-          },
-          "managerPosition": {
-            "type": "string",
-            "description": "담당자직급",
-            "example": "대리"
-          },
-          "managerPhone": {
-            "type": "string",
-            "description": "담당자전화번호",
-            "example": "010-1234-5678"
-          },
-          "managerMessage": {
-            "type": "string",
-            "description": "담당자전달사항",
-            "example": "빠른 처리 부탁드립니다."
-          },
-          "organizationName": {
-            "type": "string",
-            "description": "후행법무대리인명칭",
-            "example": "법무법인 태평양"
-          },
-          "createdAt": {
-            "type": "string",
-            "description": "생성일시",
-            "format": "date-time"
-          }
-        },
-        "description": "등기의뢰 테스트 데이터 응답"
-      },
-      "ApiResultRegistryRequestTestDataResponse": {
-        "type": "object",
-        "properties": {
-          "status": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "code": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "message": {
-            "type": "string"
-          },
-          "data": {
-            "$ref": "#/components/schemas/RegistryRequestTestDataResponse"
-          }
-        }
-      },
       "RegistryProgressESignatureCompleteRequest": {
         "type": "object",
         "properties": {
@@ -11901,102 +12247,6 @@
           },
           "data": {
             "$ref": "#/components/schemas/DocumentSaveResponse"
-          }
-        }
-      },
-      "RegistryProgressTestDataResponse": {
-        "type": "object",
-        "properties": {
-          "registryManagementNumber": {
-            "type": "string",
-            "description": "등기관리번호",
-            "example": "RM20251202000012"
-          },
-          "registryRequestNumber": {
-            "type": "string",
-            "description": "등기신청번호",
-            "example": "BC20251127000011"
-          },
-          "organizationId": {
-            "type": "integer",
-            "description": "기관ID",
-            "format": "int64",
-            "example": 1
-          },
-          "branchId": {
-            "type": "integer",
-            "description": "지점ID (null일 수 있음)",
-            "format": "int64"
-          },
-          "managerUserId": {
-            "type": "integer",
-            "description": "담당자ID (null일 수 있음)",
-            "format": "int64"
-          },
-          "workType": {
-            "type": "string",
-            "description": "업무구분",
-            "example": "TRANSFER_AND_ESTABLISHMENT"
-          },
-          "registryRequestDate": {
-            "type": "string",
-            "description": "등기의뢰일자",
-            "format": "date",
-            "example": "2025-12-03"
-          },
-          "registryReceiptDate": {
-            "type": "string",
-            "description": "등기접수일자",
-            "format": "date",
-            "example": "2025-12-10"
-          },
-          "loanExecutionDate": {
-            "type": "string",
-            "description": "대출실행일자",
-            "format": "date",
-            "example": "2025-12-11"
-          },
-          "assignedWork": {
-            "type": "string",
-            "description": "배정업무",
-            "example": "이전,설정"
-          },
-          "progressStatus": {
-            "type": "string",
-            "description": "진행상태",
-            "example": "ASSIGN_MANAGER"
-          },
-          "repaymentCancellationSubject": {
-            "type": "string",
-            "description": "상환말소주체 (null일 수 있음)",
-            "example": "null"
-          },
-          "createdAt": {
-            "type": "string",
-            "description": "생성일시",
-            "format": "date-time"
-          }
-        },
-        "description": "등기진행 테스트 데이터 응답"
-      },
-      "ApiResultRegistryProgressTestDataResponse": {
-        "type": "object",
-        "properties": {
-          "status": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "code": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "message": {
-            "type": "string"
-          },
-          "data": {
-            "$ref": "#/components/schemas/RegistryProgressTestDataResponse"
           }
         }
       },

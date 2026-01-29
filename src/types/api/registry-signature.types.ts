@@ -30,6 +30,8 @@ export interface RequestESignatureParams {
   eSignatureId: number
 }
 
+export type RequestESignatureResponse = RegistryProgressESignatureResponse
+
 /**
  * R02O-03
  * POST /api/registry/progress/{registryManagementNumber}/e-signatures/{eSignatureId}/complete
@@ -43,6 +45,8 @@ export interface CompleteESignatureParams {
 
 export type CompleteESignatureRequest = RegistryProgressESignatureCompleteRequest
 
+export type CompleteESignatureResponse = RegistryProgressESignatureResponse
+
 /**
  * R02O-04
  * POST /api/registry/progress/{registryManagementNumber}/e-signatures/{eSignatureId}/re-request
@@ -53,6 +57,8 @@ export interface ReRequestESignatureParams {
   /** 전자서명 ID */
   eSignatureId: number
 }
+
+export type ReRequestESignatureResponse = RegistryProgressESignatureResponse
 
 /**
  * R02O-05

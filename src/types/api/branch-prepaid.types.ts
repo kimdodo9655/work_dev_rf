@@ -27,6 +27,8 @@ export interface UpdateBranchPrepaidCardsParams {
 
 export type UpdateBranchPrepaidCardsRequest = BranchPrepaidCardItem[]
 
+export type UpdateBranchPrepaidCardsResponse = BranchPrepaidCardResponse[]
+
 // ==================== Schemas ====================
 
 /** 지점 선불지급수단 항목 */

@@ -27,6 +27,8 @@ export interface UpdateBranchRegistryCredentialsParams {
 
 export type UpdateBranchRegistryCredentialsRequest = BranchRegistryCredentialItem[]
 
+export type UpdateBranchRegistryCredentialsResponse = BranchRegistryCredentialResponse[]
+
 // ==================== Schemas ====================
 
 /** 지점 인터넷등기소 아이디 항목 */

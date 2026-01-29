@@ -25,6 +25,8 @@ export interface UpdateBranchPaymentAccountsParams {
 
 export type UpdateBranchPaymentAccountsRequest = BranchPaymentAccountItem[]
 
+export type UpdateBranchPaymentAccountsResponse = BranchPaymentAccountResponse[]
+
 // ==================== Schemas ====================
 
 /** 지급계좌 구분 */

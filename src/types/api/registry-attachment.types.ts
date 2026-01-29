@@ -43,6 +43,8 @@ export interface DownloadApplicationAttachmentParams {
   applicationId: number
 }
 
+export type DownloadApplicationAttachmentResponse = Blob
+
 /**
  * R02J-04
  * GET /api/registry/applications/{applicationId}/attachments/preview

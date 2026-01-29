@@ -2,8 +2,8 @@
  * API 엔드포인트 상수
  * 모든 API 경로를 한 곳에서 관리
  *
- * @generated 2025-01-27
- * @total 200개 엔드포인트
+ * @generated 2025-01-28
+ * @total 202개 엔드포인트
  * @categories 43개
  */
 export const API = {
@@ -149,11 +149,12 @@ export const API = {
 
   // [R00] 등기 테스트 데이터
   REGISTRY_TEST: {
-    CREATE_REQUEST: '/api/registry/requests/test-data', // [R00-01][POST] 등기의뢰 테스트 데이터 생성
-    CREATE_PROGRESS: '/api/registry/progress/test-data', // [R00-02][POST] 등기진행 테스트 데이터 생성
-    GENERATE: '/api/registry/scheduler/test-data/generate', // [R00-03][POST] 등기 테스트 데이터 스케쥴러 수동 실행
-    GENERATE_MISSING_PROGRESS: '/api/registry/scheduler/test-data/generate-missing-progress', // [R00-04][POST] 누락된 등기 진행 데이터 생성 스케쥴러 수동 실행
-    ASSIGN_MANAGERS: '/api/registry/scheduler/test-data/assign-managers' // [R00-05][POST] 등기 담당자 배정 스케쥴러 수동 실행
+    CREATE_REQUEST: '/api/registry/test-data/requests', // [R00-01][POST] 등기의뢰 테스트 데이터 생성
+    CREATE_PROGRESS: '/api/registry/test-data/progress', // [R00-02][POST] 등기진행 테스트 데이터 생성
+    GENERATE: '/api/registry/test-data/scheduler/generate', // [R00-03][POST] 등기 테스트 데이터 스케쥴러 수동 실행
+    GENERATE_MISSING_PROGRESS: '/api/registry/test-data/scheduler/generate-missing-progress', // [R00-04][POST] 누락된 등기 진행 데이터 생성 스케쥴러 수동 실행
+    ASSIGN_MANAGERS: '/api/registry/test-data/scheduler/assign-managers', // [R00-05][POST] 등기 담당자 배정 스케쥴러 수동 실행
+    CREATE_COMBINE: '/api/registry/test-data/combine' // [R00-06][POST] 진행 유형별 등기 의뢰+진행 테스트 데이터 생성
   },
 
   // [R00D] 등기의뢰-문서
@@ -480,8 +481,10 @@ export const API = {
     CREATE_10: (registryManagementNumber: string | number) =>
       `/api/registry/rpa/user-tasks/${registryManagementNumber}/registration-application`, // [RPAC-10][POST] 등기신청서 작성 작업 등록
     USER_TASKS: (taskToken: string | number) => `/api/registry/rpa/user-tasks/${taskToken}`, // [RPAC-11][GET] RPA 작업 조회
+    CREATE_OWNERSHIP_TAX: (registryManagementNumber: string | number) =>
+      `/api/registry/rpa/user-tasks/${registryManagementNumber}/ownership-tax`, // [RPAC-12][POST] 세금신고 자동 작성 작업 등록
     RESULT: (taskToken: string | number) => `/api/registry/rpa/user-tasks/${taskToken}/result`, // [RPAC-12][PATCH] RPA 작업 결과 전달
-    CREATE_11: (registryManagementNumber: string | number) =>
+    CREATE_FULL_CERTIFICATE_ISSUE: (registryManagementNumber: string | number) =>
       `/api/registry/rpa/user-tasks/${registryManagementNumber}/full-certificate-issue` // [RPAC-13][POST] 등기사항전부증명서 발급 작업 등록
   }
 } as const

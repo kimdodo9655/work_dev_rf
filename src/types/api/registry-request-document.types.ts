@@ -59,6 +59,8 @@ export interface DownloadDocument_1Params {
   fileName: string
 }
 
+export type DownloadDocument_1Response = Blob
+
 /**
  * R00D-04
  * DELETE /api/registry/requests/{requestNumber}/documents/{fileName}

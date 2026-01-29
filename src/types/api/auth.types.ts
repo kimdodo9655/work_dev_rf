@@ -52,10 +52,14 @@ export type ValidateEmailTokenResponse = EmailVerifyResponse
  */
 export type VerifyEmail_1Request = EmailVerifyRequest
 
+export type VerifyEmail_1Response = ApiResultVoid
+
 /**
  * P04-07
  * POST /api/auth/password
  */
+export type SetPasswordResponse = ApiResultVoid
+
 // ==================== Schemas ====================
 
 /** 이메일 인증 요청 */

@@ -27,6 +27,8 @@ export interface UpdateBranchAssignedBanksParams {
 
 export type UpdateBranchAssignedBanksRequest = BranchAssignedBankItem[]
 
+export type UpdateBranchAssignedBanksResponse = BranchAssignedBankResponse[]
+
 // ==================== Schemas ====================
 
 /** 지점 배정 금융기관 응답 */
