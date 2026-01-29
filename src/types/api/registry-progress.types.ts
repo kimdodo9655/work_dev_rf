@@ -160,6 +160,17 @@ export interface GetRegistryProgressProcessParams {
 
 export type GetRegistryProgressProcessResponse = string
 
+/**
+ * R02B-09
+ * PATCH /api/registry/progress/{registryManagementNumber}/process/change
+ */
+export interface ChangeRegistryProgressProcessParams {
+  /** 등기관리번호 */
+  registryManagementNumber: string
+}
+
+export type ChangeRegistryProgressProcessResponse = void
+
 // ==================== Schemas ====================
 
 /** 등기진행 - 업무담당자 배정 요청 */

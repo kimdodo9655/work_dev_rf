@@ -204,7 +204,9 @@ export const API = {
     LEGAL_AGENT: (registryManagementNumber: string | number) =>
       `/api/registry/progress/${registryManagementNumber}/legal-agent`, // [R02B-07][GET] 법무대리인 정보 조회
     PROCESS: (registryManagementNumber: string | number) =>
-      `/api/registry/progress/${registryManagementNumber}/process` // [R02B-08][GET] 등기진행 업무 프로세스 조회
+      `/api/registry/progress/${registryManagementNumber}/process`, // [R02B-08][GET] 등기진행 업무 프로세스 조회
+    CHANGE_PROCESS: (registryManagementNumber: string | number) =>
+      `/api/registry/progress/${registryManagementNumber}/process/change` // [R02B-09][PATCH] 등기진행 상태 변경
   },
 
   // [R02C] 등기진행-선순위대출
@@ -481,8 +483,6 @@ export const API = {
     CREATE_10: (registryManagementNumber: string | number) =>
       `/api/registry/rpa/user-tasks/${registryManagementNumber}/registration-application`, // [RPAC-10][POST] 등기신청서 작성 작업 등록
     USER_TASKS: (taskToken: string | number) => `/api/registry/rpa/user-tasks/${taskToken}`, // [RPAC-11][GET] RPA 작업 조회
-    CREATE_OWNERSHIP_TAX: (registryManagementNumber: string | number) =>
-      `/api/registry/rpa/user-tasks/${registryManagementNumber}/ownership-tax`, // [RPAC-12][POST] 세금신고 자동 작성 작업 등록
     RESULT: (taskToken: string | number) => `/api/registry/rpa/user-tasks/${taskToken}/result`, // [RPAC-12][PATCH] RPA 작업 결과 전달
     CREATE_FULL_CERTIFICATE_ISSUE: (registryManagementNumber: string | number) =>
       `/api/registry/rpa/user-tasks/${registryManagementNumber}/full-certificate-issue` // [RPAC-13][POST] 등기사항전부증명서 발급 작업 등록

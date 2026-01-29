@@ -257,10 +257,6 @@ export interface SurfaceRightContractRequest {
   establishmentScope?: string
   /** 설정 목적 */
   establishmentPurpose?: string
-  /** 의무자 계약당사자 ID */
-  obligorPartyId?: number
-  /** 권리자 계약당사자 ID */
-  obligeePartyId?: number
 }
 
 export interface SurfaceRightContractResponse {
@@ -274,18 +270,4 @@ export interface SurfaceRightContractResponse {
   establishmentScope?: string
   /** 설정 목적 */
   establishmentPurpose?: string
-  /** 의무자 계약당사자 ID */
-  obligorPartyId?: number
-  /** 권리자 계약당사자 ID */
-  obligeePartyId?: number
-  /** 지상권 관련 당사자 옵션 */
-  partyOptions?: SurfaceRightPartyOption[]
-}
-
-/** 지상권 관련 당사자 옵션 */
-export interface SurfaceRightPartyOption {
-  partyId?: number
-  progressPartyId?: number
-  name?: string
-  address?: string
 }

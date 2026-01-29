@@ -148,24 +148,6 @@ export type GetTaskResponse = RpaUserTaskResponse
 
 /**
  * RPAC-12
- * POST /api/registry/rpa/user-tasks/{registryManagementNumber}/ownership-tax
- */
-export interface CreateOwnershipTaxTaskParams {
-  /** 등기관리번호 */
-  registryManagementNumber: string
-}
-
-export type CreateOwnershipTaxTaskRequest = TaxAutoFillTaskRequest
-
-export type CreateOwnershipTaxTaskResponse = RpaUserTaskCreateResponse
-
-// operationId 매칭을 위한 alias
-export type CreateTaxAutoFillTaskParams = CreateOwnershipTaxTaskParams
-export type CreateTaxAutoFillTaskRequest = CreateOwnershipTaxTaskRequest
-export type CreateTaxAutoFillTaskResponse = CreateOwnershipTaxTaskResponse
-
-/**
- * RPAC-12
  * PATCH /api/registry/rpa/user-tasks/{taskToken}/result
  */
 export interface SubmitResultParams {
