@@ -213,7 +213,7 @@
     </tbody>
   </table>
 
-  <Pagination v-model:current-page="currentPage" :total-items="100" :items-per-page="10" />
+  <Pagination v-model:current-page="currentPage" :total-items="200" :items-per-page="10" />
 
   <router-link to="/estimate/create/REG-2024-001">test</router-link>
 </template>

@@ -32,7 +32,7 @@ import { useQuery } from '@tanstack/vue-query'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { bankAPI } from '@/api/services/bank'
+import { bankAPI } from '@/api/services_old/bank'
 import { useAuthStore } from '@/stores/auth'
 import type { BankResponse } from '@/types'
 import { logger } from '@/utils/logger'

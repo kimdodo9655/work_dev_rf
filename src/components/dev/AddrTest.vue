@@ -232,7 +232,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 
-import { addressAPI } from '@/api/services/address'
+import { addressAPI } from '@/api/services_old/address'
 import { useAddress } from '@/composables/api/useAddress'
 import { useErrorHandler } from '@/composables/utils/useErrorHandler'
 import type { AddressItem, RegistryOfficeDetailResponse } from '@/types'

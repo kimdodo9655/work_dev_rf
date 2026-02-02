@@ -1,56 +1,68 @@
+// --------------------------------------------------
+// [P04] 인증
+// --------------------------------------------------
+
 import { apiHelpers } from '@/api/client'
 import { API } from '@/api/endpoints'
 import type {
-  ApiResponse,
-  LoginRequest,
-  LoginResponse,
+  LogoutResponse,
   RefreshTokenRequest,
-  TokenRefreshResponse
+  RefreshTokenResponse,
+  SignUpRequest,
+  SignUpResponse,
+  ValidateEmailTokenRequest,
+  ValidateEmailTokenResponse,
+  VerifyEmail_1Request
 } from '@/types'
+import type { SetPasswordResponse, VerifyEmail_1Response } from '@/types/api'
 
 export const authAPI = {
-  /**
-   * 로그인
-   * @param data - 로그인 정보 (아이디, 비밀번호)
-   * @returns 로그인 응답 (액세스 토큰, 리프레시 토큰, 사용자 정보)
-   * @throws {ApiError} 로그인 실패 시
-   *
-   * @example
-   * const response = await authAPI.login({
-   *   loginId: 'admin',
-   *   password: 'password123'
-   * })
-   * console.log(response.data) // LoginResponse
-   */
-  async login(data: LoginRequest) {
-    return apiHelpers.post<ApiResponse<LoginResponse>>(API.AUTH.LOGIN, data)
+  async signup(data: SignUpRequest) {
+    // --------------------------------------------------
+    // [P04-01][POST - /api/auth/signup] 회원가입
+    // --------------------------------------------------
+    return apiHelpers.post<SignUpResponse>(API.AUTH.SIGNUP, data)
   },
 
-  /**
-   * 토큰 갱신
-   * @param data - 리프레시 토큰
-   * @returns 갱신된 토큰 정보
-   * @throws {ApiError} 토큰 갱신 실패 시
-   *
-   * @example
-   * const response = await authAPI.refresh({
-   *   refreshToken: 'eyJhbGc...'
-   * })
-   * console.log(response.data) // TokenRefreshResponse
-   */
-  async refresh(data: RefreshTokenRequest) {
-    return apiHelpers.post<ApiResponse<TokenRefreshResponse>>(API.AUTH.REFRESH, data)
+  async login() {
+    // --------------------------------------------------
+    // [P04-02][POST - /api/auth/login] 로그인
+    // --------------------------------------------------
+    return apiHelpers.post(API.AUTH.LOGIN)
   },
 
-  /**
-   * 로그아웃
-   * @returns 로그아웃 성공 여부
-   * @throws {ApiError} 로그아웃 실패 시
-   *
-   * @example
-   * await authAPI.logout()
-   */
   async logout() {
-    return apiHelpers.post<ApiResponse<void>>(API.AUTH.LOGOUT)
+    // --------------------------------------------------
+    // [P04-03][POST - /api/auth/logout] 로그아웃
+    // --------------------------------------------------
+    return apiHelpers.post<LogoutResponse>(API.AUTH.LOGOUT)
+  },
+
+  async refresh(data: RefreshTokenRequest) {
+    // --------------------------------------------------
+    // [P04-04][POST - /api/auth/refresh] 토큰 갱신
+    // --------------------------------------------------
+    return apiHelpers.post<RefreshTokenResponse>(API.AUTH.REFRESH, data)
+  },
+
+  async emailVerifyValidate(data: ValidateEmailTokenRequest) {
+    // --------------------------------------------------
+    // [P04-05][POST - /api/auth/email-verify/validate] 이메일 토큰 검증
+    // --------------------------------------------------
+    return apiHelpers.post<ValidateEmailTokenResponse>(API.AUTH.EMAIL_VERIFY_VALIDATE, data)
+  },
+
+  async emailVerify(data: VerifyEmail_1Request) {
+    // --------------------------------------------------
+    // [P04-06][POST - /api/auth/email-verify] 이메일 인증 완료
+    // --------------------------------------------------
+    return apiHelpers.post<VerifyEmail_1Response>(API.AUTH.EMAIL_VERIFY, data)
+  },
+
+  async setPassword() {
+    // --------------------------------------------------
+    // [P04-07][POST - /api/auth/password] 비밀번호 설정
+    // --------------------------------------------------
+    return apiHelpers.post<SetPasswordResponse>(API.AUTH.PASSWORD)
   }
 }

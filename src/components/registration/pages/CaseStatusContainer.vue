@@ -1,516 +1,937 @@
 <template>
-  <div>
-    <!-- 데이터 개수 조절 패널 -->
-    <div style="margin-bottom: 20px; padding: 15px; background: #f5f5f5; border-radius: 5px">
-      <h3 style="margin-top: 0">테스트 패널 (Mock API)</h3>
-      <div style="margin-bottom: 10px">
-        <label
-          >데이터 개수:
+  <section class="registry-progress">
+    <!-- 검색 패널 -->
+    <form class="search-panel" @submit.prevent="handleSearch(true)">
+      <div class="grid">
+        <label class="field">
+          <span class="label">업무구분</span>
+          <select v-model="filters.workType" :disabled="codesLoading">
+            <option value="ALL">전체</option>
+            <option v-for="c in workTypes" :key="c.code" :value="c.code">
+              {{ c.description }}
+            </option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span class="label">배정업무</span>
+          <select v-model="filters.assignedWork" :disabled="codesLoading">
+            <option value="ALL">전체</option>
+            <option v-for="c in assignmentWorks" :key="c.code" :value="c.description">
+              {{ c.description }}
+            </option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span class="label">등기방식</span>
+          <select v-model="filters.registryMethod" :disabled="codesLoading">
+            <option value="ALL">전체</option>
+            <option v-for="c in registryMethods" :key="c.code" :value="c.code">
+              {{ c.description }}
+            </option>
+          </select>
+        </label>
+
+        <!-- ✅ 담당자: assignable API 결과로 구성 -->
+        <label class="field">
+          <span class="label">업무담당자</span>
+          <select v-model="filters.managerUserId" :disabled="assignableLoading">
+            <option v-if="roleLevelValue !== 30" value="ALL">전체</option>
+            <option value="-1">미배정</option>
+            <option v-for="u in assignableUsers" :key="u.userId" :value="String(u.userId)">
+              {{ u.userName }}
+            </option>
+          </select>
+          <small v-if="assignableError" class="hint error-text">{{ assignableError }}</small>
+        </label>
+
+        <div class="field">
+          <span class="label">등기의뢰일자</span>
+          <div class="range">
+            <input type="date" v-model="filters.registryRequestStartDate" />
+            <span>~</span>
+            <input type="date" v-model="filters.registryRequestEndDate" />
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="label">등기접수일자</span>
+          <div class="range">
+            <input type="date" v-model="filters.registryReceiptStartDate" />
+            <span>~</span>
+            <input type="date" v-model="filters.registryReceiptEndDate" />
+          </div>
+        </div>
+
+        <label class="field">
+          <span class="label">진행상태</span>
+          <select v-model="filters.progressStatus" :disabled="codesLoading">
+            <option value="ALL">전체</option>
+            <option v-for="c in progressStatuses" :key="c.code" :value="c.code">
+              {{ c.description }}
+            </option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span class="label">통합검색</span>
           <input
-            type="number"
-            v-model.number="dataCount"
-            min="0"
-            style="width: 100px; padding: 5px"
-        /></label>
-        <span style="margin-left: 10px"
-          >현재: <strong>{{ dataCount }}</strong
-          >개</span
-        >
-      </div>
-      <div>
-        <button @click="setDataCount(0)" style="margin: 2px; padding: 5px 10px">0개</button>
-        <button @click="setDataCount(3)" style="margin: 2px; padding: 5px 10px">3개</button>
-        <button @click="setDataCount(5)" style="margin: 2px; padding: 5px 10px">5개</button>
-        <button @click="setDataCount(10)" style="margin: 2px; padding: 5px 10px">10개</button>
-        <button @click="setDataCount(15)" style="margin: 2px; padding: 5px 10px">15개</button>
-        <button @click="setDataCount(50)" style="margin: 2px; padding: 5px 10px">50개</button>
-        <button @click="setDataCount(100)" style="margin: 2px; padding: 5px 10px">100개</button>
-        <button @click="setDataCount(220)" style="margin: 2px; padding: 5px 10px">
-          220개 (22페이지)
-        </button>
-      </div>
-      <div style="margin-top: 10px; font-size: 12px; color: #666">
-        💡 1번: 버튼 / 2번: 셀렉트 / 3번: 텍스트 (완료 상태) | 행 클릭 시 상세 페이지 이동
-      </div>
-    </div>
-
-    <div class="table-area">
-      <!-- 총 개수 표시 -->
-      <div style="text-align: right; margin-bottom: 10px">
-        총 <strong>{{ apiResponse.data.totalElements }}</strong
-        >건
+            v-model.trim="filters.keyword"
+            placeholder="부동산 주소 또는 신청번호"
+            @keydown.enter.prevent="handleSearch(true)"
+          />
+        </label>
       </div>
 
-      <table class="data-table">
+      <div class="actions">
+        <button type="submit" :disabled="loading">검색</button>
+        <button type="button" class="ghost" @click="handleReset" :disabled="loading">초기화</button>
+      </div>
+
+      <div v-if="codesError" class="inline-error">{{ codesError }}</div>
+    </form>
+
+    <!-- 테이블 -->
+    <div class="table-wrap">
+      <div v-if="errorMessage" class="inline-error">{{ errorMessage }}</div>
+
+      <table class="table">
         <thead>
           <tr>
-            <th
-              v-for="col in columns"
-              :key="col.key"
-              :style="{ width: col.width, textAlign: col.align || 'left' }"
-            >
-              {{ col.label }}
-            </th>
+            <th style="width: 80px">번호</th>
+            <th style="width: 200px">등기신청번호</th>
+            <th style="width: 140px">업무구분</th>
+            <th style="width: 160px">배정업무</th>
+            <th style="width: 120px">등기방식</th>
+            <th>부동산주소</th>
+            <th style="width: 130px">의뢰일자</th>
+            <th style="width: 130px">접수일자</th>
+            <th style="width: 160px">담당자</th>
+            <th style="width: 140px">진행상태</th>
           </tr>
         </thead>
+
         <tbody>
-          <!-- 데이터가 없을 때 -->
-          <template v-if="allData.length === 0">
-            <tr class="empty-row">
-              <td
-                :colspan="columns.length"
-                :style="{
-                  textAlign: 'center',
-                  verticalAlign: 'middle',
-                  color: '#999',
-                  fontSize: '16px'
-                }"
-              >
-                <i class="fi fi-ss-problem-solving"></i>
-                조회된 데이터가 없습니다.
-              </td>
-            </tr>
-          </template>
+          <tr v-if="loading">
+            <td colspan="10" class="muted">불러오는 중…</td>
+          </tr>
 
-          <!-- 데이터가 있을 때 -->
-          <template v-else>
-            <!-- 실제 데이터 행 -->
-            <tr
-              v-for="row in paginatedData"
-              :key="row.rowNum"
-              class="data-row"
-              @click="handleRowClick(row)"
-            >
-              <td v-for="col in columns" :key="col.key" :style="{ textAlign: col.align || 'left' }">
-                <!-- 업무담당자 컬럼 특수 처리 -->
-                <template v-if="col.key === 'managerUserName'">
-                  <!-- 버튼: 담당자 미배정 -->
-                  <button
-                    v-if="getManagerDisplayType(row) === 'button'"
-                    @click="(e) => handleAssignManager(e, row)"
-                    class="assign-button"
-                  >
-                    담당자 배정
-                  </button>
+          <tr v-else-if="rows.length === 0">
+            <td colspan="10" class="muted">조회 결과가 없습니다.</td>
+          </tr>
 
-                  <!-- 셀렉트: 담당자 변경 가능 -->
-                  <select
-                    v-else-if="getManagerDisplayType(row) === 'select'"
-                    :value="row.managerUserName || ''"
-                    @click.stop
-                    @change="
-                      (e) => handleManagerChange(e, row, (e.target as HTMLSelectElement).value)
-                    "
-                    class="manager-select"
-                  >
-                    <option v-for="manager in managerOptions" :key="manager" :value="manager">
-                      {{ manager }}
-                    </option>
-                  </select>
+          <tr
+            v-else
+            v-for="r in rows"
+            :key="r.registryManagementNumber"
+            class="row"
+            @click="goDetail(r.registryManagementNumber)"
+          >
+            <td>{{ r.rowNum }}</td>
+            <td>{{ r.registryRequestNumber }}</td>
+            <td>{{ r.workType }}</td>
+            <td>{{ r.assignedWork }}</td>
+            <td>{{ r.registryMethod }}</td>
+            <td class="ellipsis">{{ r.propertyAddress ?? '-' }}</td>
+            <td>{{ r.registryRequestDate }}</td>
+            <td>{{ r.registryReceiptDate }}</td>
 
-                  <!-- 텍스트: 변경 불가 (완료 상태) -->
-                  <span v-else>
-                    {{ row.managerUserName || '-' }}
-                  </span>
-                </template>
+            <!-- ✅ 담당자 컬럼: 권한에 따라 렌더링 -->
+            <td>
+              <!-- USER(30): 미배정이면 배정받기 버튼 -->
+              <template v-if="isUser30 && isUnassigned(r.managerUserName)">
+                <button
+                  type="button"
+                  class="assign-btn"
+                  :disabled="assigningSet.has(r.registryManagementNumber) || !userId"
+                  @click.stop="handleAssignMyself(r.registryManagementNumber)"
+                >
+                  {{ assigningSet.has(r.registryManagementNumber) ? '처리중…' : '배정받기' }}
+                </button>
+              </template>
 
-                <!-- 일반 컬럼 -->
-                <template v-else>
-                  {{ getCellValue(row, col.key) }}
-                </template>
-              </td>
-            </tr>
+              <!-- 관리자(30 초과): 담당자 선택 셀렉트 -->
+              <template v-else-if="isAboveUser30">
+                <select
+                  class="inline-select"
+                  :value="rowSelectedManager.get(r.registryManagementNumber) ?? ''"
+                  :disabled="assigningSet.has(r.registryManagementNumber) || assignableLoading"
+                  @click.stop
+                  @change.stop="(e) => onAdminSelectChange(r.registryManagementNumber, e)"
+                >
+                  <option value="" disabled>담당자 선택</option>
+                  <!-- ❌ 미배정 옵션 제거 -->
+                  <option v-for="u in assignableUsers" :key="u.userId" :value="String(u.userId)">
+                    {{ u.userName }}
+                  </option>
+                </select>
+              </template>
 
-            <!-- 빈 행 (높이 유지용) -->
-            <tr v-for="i in emptyRows" :key="`empty-${i}`" class="empty-data-row">
-              <td v-for="col in columns" :key="col.key">&nbsp;</td>
-            </tr>
-          </template>
+              <!-- 그 외: 텍스트 -->
+              <template v-else>
+                {{ r.managerUserName }}
+              </template>
+            </td>
+
+            <td>{{ r.progressStatus }}</td>
+          </tr>
         </tbody>
       </table>
-
-      <!-- 페이지네이션 컴포넌트 사용 -->
-      <Pagination
-        v-if="allData.length > 0"
-        :total-items="allData.length"
-        :items-per-page="itemsPerPage"
-        :current-page="currentPage"
-        @update:current-page="currentPage = $event"
-      />
     </div>
-  </div>
+
+    <!-- 페이지네이션 -->
+    <div class="pagination">
+      <div class="left">
+        총 <b>{{ totalElements }}</b
+        >건 · {{ page + 1 }} / {{ totalPages || 1 }}
+      </div>
+      <div class="right">
+        <button type="button" @click="movePage(0)" :disabled="loading || page === 0">처음</button>
+        <button type="button" @click="movePage(page - 1)" :disabled="loading || page === 0">
+          이전
+        </button>
+
+        <!-- ✅ 페이지 번호 버튼들 -->
+        <div class="page-buttons">
+          <button
+            v-for="p in pageButtons"
+            :key="p.key"
+            type="button"
+            class="page-btn"
+            :class="{ active: p.pageIndex === page }"
+            :disabled="loading || p.disabled"
+            @click="!p.disabled && movePage(p.pageIndex)"
+          >
+            {{ p.label }}
+          </button>
+        </div>
+
+        <label class="page-size">
+          <select v-model.number="size" @change="onChangePageSize" :disabled="loading">
+            <option :value="10">10</option>
+            <option v-if="MAX_PAGE_SIZE >= 20" :value="20">20</option>
+            <option v-if="MAX_PAGE_SIZE >= 50" :value="50">50</option>
+          </select>
+        </label>
+
+        <button
+          type="button"
+          @click="movePage(page + 1)"
+          :disabled="loading || page >= lastPageIndex"
+        >
+          다음
+        </button>
+        <button
+          type="button"
+          @click="movePage(lastPageIndex)"
+          :disabled="loading || totalPages === 0"
+        >
+          마지막
+        </button>
+      </div>
+    </div>
+
+    <!-- 🔧 개발용 -->
+    <div class="debug-role">
+      <strong>roleLevel:</strong>
+      <span>{{ roleLevel }}</span>
+      <span class="muted"> (roleLevelValue: {{ roleLevelValue }}, userId: {{ userId }})</span>
+    </div>
+  </section>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 
-import Pagination from '@/components/template/PaginationItem.vue'
-import { logger } from '@/utils/logger'
+import { registryProgressAPI } from '@/api/services/registry'
+import { userAPI } from '@/api/services/user'
+import { codeAPI } from '@/api/services_old/code'
+import { useAuthStore } from '@/stores/auth'
+import type { Code, GetAssignableUsersQuery, SearchRegistryProgresssListQuery } from '@/types'
 
-// 타입 정의
-interface Column {
-  key: string
-  label: string
-  width?: string
-  align?: 'left' | 'center' | 'right'
+// Auth Store
+const authStore = useAuthStore()
+const roleLevel = computed(() => authStore.roleLevel)
+const roleLevelValue = computed(() => roleLevel.value ?? 0)
+const userId = computed(() => authStore.userId)
+
+const isUser30 = computed(() => roleLevelValue.value === 30)
+const isAboveUser30 = computed(() => roleLevelValue.value > 30)
+
+function unwrapData<T>(res: any): T {
+  if (res?.data && typeof res.data === 'object' && 'data' in res.data) return res.data.data as T
+  if (res && typeof res === 'object' && 'data' in res) return res.data as T
+  return undefined as unknown as T
 }
 
-interface RegistrationData {
+function toApiDate(ymd: string) {
+  return ymd.replace(/-/g, '')
+}
+function toYMD(d: Date) {
+  const yyyy = d.getFullYear()
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
+}
+function addMonths(base: Date, months: number) {
+  const d = new Date(base)
+  d.setMonth(d.getMonth() + months)
+  return d
+}
+function clampRangeWithin3Months(start: string, end: string) {
+  const s = new Date(start)
+  const e = new Date(end)
+  const maxEnd = addMonths(s, 3)
+  if (e > maxEnd) return { start, end: toYMD(maxEnd) }
+  return { start, end }
+}
+
+function isUnassigned(name: string) {
+  return name === '미배정' || !name
+}
+
+function findUserIdByName(name: string): string {
+  if (!name || name === '미배정') return ''
+  const hit = assignableUsers.value.find((u) => u.userName === name)
+  return hit ? String(hit.userId) : ''
+}
+
+const router = useRouter()
+
+/** =======================
+ * 코드 옵션
+ * ======================= */
+const workTypes = ref<Code[]>([])
+const assignmentWorks = ref<Code[]>([])
+const registryMethods = ref<Code[]>([])
+const progressStatuses = ref<Code[]>([])
+const codesLoading = ref(false)
+const codesError = ref('')
+
+async function loadCodes() {
+  codesLoading.value = true
+  codesError.value = ''
+  try {
+    const [wt, aw, rm, ps] = await Promise.all([
+      codeAPI.getWorkTypes(),
+      codeAPI.getAssignmentWorks(),
+      codeAPI.getRegistryMethods(),
+      codeAPI.getProgressStatuses()
+    ])
+    workTypes.value = unwrapData<Code[]>(wt) ?? []
+    assignmentWorks.value = unwrapData<Code[]>(aw) ?? []
+    registryMethods.value = unwrapData<Code[]>(rm) ?? []
+    progressStatuses.value = unwrapData<Code[]>(ps) ?? []
+  } catch (e: any) {
+    codesError.value = e?.message ?? '코드 목록 로딩 실패'
+    workTypes.value = []
+    assignmentWorks.value = []
+    registryMethods.value = []
+    progressStatuses.value = []
+  } finally {
+    codesLoading.value = false
+  }
+}
+
+/** =======================
+ * 담당자 옵션: /api/users/assignable
+ * ======================= */
+type AssignableUser = { userId: string | number; userName: string }
+const assignableUsers = ref<AssignableUser[]>([])
+const assignableLoading = ref(false)
+const assignableError = ref('')
+
+const filters = reactive({
+  workType: 'ALL',
+  assignedWork: 'ALL',
+  registryMethod: 'ALL',
+  managerUserId: 'ALL',
+  registryRequestStartDate: '',
+  registryRequestEndDate: '',
+  registryReceiptStartDate: '',
+  registryReceiptEndDate: '',
+  progressStatus: 'ALL',
+  keyword: ''
+})
+
+function ensureUserDefaultManager(users: AssignableUser[]) {
+  if (!isUser30.value) return
+  if (!Array.isArray(users)) return
+
+  const [firstUser] = users
+  if (!firstUser) return
+
+  // ✅ TS 경고 피하려고 users[0] 직접 접근하지 말고 구조분해 + 가드 유지
+  const firstId = String(firstUser.userId)
+
+  if (!filters.managerUserId || filters.managerUserId === 'ALL' || filters.managerUserId === '-1') {
+    filters.managerUserId = firstId
+  }
+}
+
+async function loadAssignableUsers() {
+  assignableLoading.value = true
+  assignableError.value = ''
+  try {
+    const query: GetAssignableUsersQuery = {}
+    if (filters.assignedWork !== 'ALL') query.assignedWork = filters.assignedWork
+
+    const res: any = await userAPI.assignable(query)
+    const list = unwrapData<any>(res)
+
+    const users: AssignableUser[] = Array.isArray(list)
+      ? list
+      : Array.isArray(list?.content)
+        ? list.content
+        : []
+
+    assignableUsers.value = users
+    ensureUserDefaultManager(users)
+  } catch (e: any) {
+    assignableError.value = e?.message ?? '담당자 목록 로딩 실패'
+    assignableUsers.value = []
+  } finally {
+    assignableLoading.value = false
+  }
+}
+
+/** =======================
+ * 날짜 기본값
+ * ======================= */
+const today = new Date()
+const defaultRequestStart = toYMD(addMonths(today, -1))
+const defaultRequestEnd = toYMD(today)
+const defaultReceiptStart = toYMD(today)
+const defaultReceiptEnd = toYMD(addMonths(today, 1))
+
+filters.registryRequestStartDate = defaultRequestStart
+filters.registryRequestEndDate = defaultRequestEnd
+filters.registryReceiptStartDate = defaultReceiptStart
+filters.registryReceiptEndDate = defaultReceiptEnd
+
+function resolveManagerUserIdForApi(v: string): string | null {
+  if (!v) return null
+  if (v === 'ALL') return 'ALL'
+  if (v === '-1') return '-1'
+  return v
+}
+
+/** =======================
+ * 목록/페이지네이션
+ * ======================= */
+type Row = {
   rowNum: number
   registryRequestNumber: string
+  registryManagementNumber: string
   workType: string
-  assignmentType: string
-  registryMethod: string | null
+  assignedWork: string
+  registryMethod: string
   propertyAddress: string | null
   registryRequestDate: string
   registryReceiptDate: string
-  managerUserId: number | null
-  managerUserName: string | null
+  managerUserName: string
   progressStatus: string
 }
 
-interface ApiResponse {
-  status: number
-  code: string
-  title: string
-  message: string
-  data: {
-    content: RegistrationData[]
-    pageable: {
-      pageNumber: number
-      pageSize: number
-      sort: {
-        sorted: boolean
-        unsorted: boolean
-        empty: boolean
-      }
-      offset: number
-      paged: boolean
-      unpaged: boolean
+const loading = ref(false)
+const errorMessage = ref('')
+const rows = ref<Row[]>([])
+const totalElements = ref(0)
+const totalPages = ref(0)
+const page = ref(0)
+const size = ref(10)
+
+const lastPageIndex = computed(() => Math.max(0, (totalPages.value || 1) - 1))
+
+function buildQuery(nextPage1Base: number): SearchRegistryProgresssListQuery {
+  const req = clampRangeWithin3Months(
+    filters.registryRequestStartDate,
+    filters.registryRequestEndDate
+  )
+  const rcp = clampRangeWithin3Months(
+    filters.registryReceiptStartDate,
+    filters.registryReceiptEndDate
+  )
+
+  const managerUserId = resolveManagerUserIdForApi(filters.managerUserId)
+
+  const query: any = {
+    workType: filters.workType,
+    assignedWork: filters.assignedWork,
+    registryMethod: filters.registryMethod,
+    progressStatus: filters.progressStatus,
+
+    registryRequestStartDate: toApiDate(req.start),
+    registryRequestEndDate: toApiDate(req.end),
+    registryReceiptStartDate: toApiDate(rcp.start),
+    registryReceiptEndDate: toApiDate(rcp.end),
+
+    page: nextPage1Base,
+    size: size.value
+  }
+
+  if (managerUserId !== null) query.managerUserId = managerUserId
+  if (filters.keyword) query.keyword = filters.keyword
+
+  return query as SearchRegistryProgresssListQuery
+}
+
+/** ✅ 서버 totalPages 신뢰하지 않고 안전 계산(페이지 사이즈 변경 시 에러 방지 핵심) */
+function calcTotalPagesSafe(totalEl: number, pageSize: number) {
+  const s = Math.max(1, Number(pageSize) || 1)
+  const t = Math.max(0, Number(totalEl) || 0)
+  return Math.max(1, Math.ceil(t / s)) // UI 표기상 최소 1
+}
+
+async function fetchList(resetPage: boolean) {
+  loading.value = true
+  errorMessage.value = ''
+  try {
+    if (resetPage) page.value = 0
+
+    const query = buildQuery(page.value + 1)
+    const res: any = await registryProgressAPI.getList(query)
+
+    const data = res?.data?.data ?? res?.data ?? res
+    rows.value = data?.content ?? []
+    totalElements.value = Number(data?.totalElements ?? 0)
+
+    // ✅ totalPages는 안전 계산 값으로 덮어씀(백엔드가 이상하게 주거나, size 바뀌며 꼬이는 케이스 방지)
+    totalPages.value = calcTotalPagesSafe(totalElements.value, size.value)
+
+    // ✅ 혹시 현재 page가 범위 밖이면 보정하고 한 번 더 조회 (이게 "size가 전체보다 크면 오류" 케이스 대부분 잡음)
+    if (page.value > lastPageIndex.value) {
+      page.value = lastPageIndex.value
+      const query2 = buildQuery(page.value + 1)
+      const res2: any = await registryProgressAPI.getList(query2)
+      const data2 = res2?.data?.data ?? res2?.data ?? res2
+      rows.value = data2?.content ?? rows.value
+      totalElements.value = Number(data2?.totalElements ?? totalElements.value)
+      totalPages.value = calcTotalPagesSafe(totalElements.value, size.value)
     }
-    totalElements: number
-    totalPages: number
-    last: boolean
-    numberOfElements: number
-    first: boolean
-    size: number
-    number: number
-    sort: {
-      sorted: boolean
-      unsorted: boolean
-      empty: boolean
-    }
-    empty: boolean
+
+    hydrateRowSelectedManager()
+  } catch (e: any) {
+    errorMessage.value = e?.message ?? '목록 조회 실패'
+    rows.value = []
+    totalElements.value = 0
+    totalPages.value = 0
+  } finally {
+    loading.value = false
   }
 }
 
-// 컬럼 정의 (API 필드명에 맞춤)
-const columns: Column[] = [
-  { key: 'rowNum', label: '번호', width: '70px', align: 'center' },
-  { key: 'registryRequestNumber', label: '등기신청번호', width: '150px' },
-  { key: 'workType', label: '업무구분', width: '100px', align: 'center' },
-  { key: 'assignmentType', label: '배정업무', width: '80px', align: 'center' },
-  { key: 'registryMethod', label: '등기방식', width: '100px', align: 'center' },
-  { key: 'propertyAddress', label: '부동산표시', width: '300px' },
-  { key: 'registryRequestDate', label: '등기의뢰일자', width: '120px', align: 'center' },
-  { key: 'registryReceiptDate', label: '등기접수일자', width: '120px', align: 'center' },
-  { key: 'managerUserName', label: '업무담당자', width: '180px' },
-  { key: 'progressStatus', label: '진행상태', width: '150px' }
-]
-
-// 담당자 목록 (실제로는 API에서 가져와야 함)
-const managerOptions = ['홍길동', '김영희', '박철수', '이민수', '최지영']
-
-// Mock API 데이터 생성 함수
-const generateMockApiResponse = (count: number): ApiResponse => {
-  const baseContent: RegistrationData[] = [
-    {
-      rowNum: 1,
-      registryRequestNumber: 'BC20251203000001',
-      workType: 'ESTABLISHMENT',
-      assignmentType: '설정',
-      registryMethod: 'ELECTRONIC',
-      propertyAddress: '서울특별시 강남구 테헤란로 123, 456호',
-      registryRequestDate: '2024-12-01',
-      registryReceiptDate: '2024-12-02',
-      managerUserId: null,
-      managerUserName: null,
-      progressStatus: 'ASSIGN_MANAGER'
-    },
-    {
-      rowNum: 2,
-      registryRequestNumber: 'BC20251203000002',
-      workType: 'TRANSFER_ESTABLISHMENT',
-      assignmentType: '이전+설정',
-      registryMethod: 'PAPER',
-      propertyAddress: '서울특별시 서초구 서초대로 789',
-      registryRequestDate: '2024-12-01',
-      registryReceiptDate: '2024-12-03',
-      managerUserId: 14,
-      managerUserName: '김영희',
-      progressStatus: 'REGISTRY_REQUEST'
-    },
-    {
-      rowNum: 3,
-      registryRequestNumber: 'BC20251203000003',
-      workType: 'ESTABLISHMENT',
-      assignmentType: '설정',
-      registryMethod: 'E_FORM',
-      propertyAddress: '경기도 성남시 분당구 정자동 101-5',
-      registryRequestDate: '2024-12-02',
-      registryReceiptDate: '2024-12-04',
-      managerUserId: 15,
-      managerUserName: '박철수',
-      progressStatus: 'CUSTOMER_E_SIGN'
-    }
-  ]
-
-  if (count <= 3) {
-    const content = baseContent.slice(0, count)
-    return {
-      status: 200,
-      code: 'S_OK',
-      title: '요청 성공',
-      message: '요청이 성공적으로 처리되었습니다.',
-      data: {
-        content,
-        pageable: {
-          pageNumber: 0,
-          pageSize: 10,
-          sort: { sorted: true, unsorted: false, empty: false },
-          offset: 0,
-          paged: true,
-          unpaged: false
-        },
-        totalElements: count,
-        totalPages: Math.ceil(count / 10),
-        last: true,
-        numberOfElements: count,
-        first: true,
-        size: 10,
-        number: 0,
-        sort: { sorted: true, unsorted: false, empty: false },
-        empty: count === 0
-      }
-    }
-  }
-
-  const additionalContent = Array.from({ length: count - 3 }, (_, i): RegistrationData => {
-    const idx = i + 4
-    return {
-      rowNum: idx,
-      registryRequestNumber: `BC${20251203000000 + idx}`,
-      workType: 'ESTABLISHMENT',
-      assignmentType: '설정',
-      registryMethod: null,
-      propertyAddress: null,
-      registryRequestDate: '2024-12-03',
-      registryReceiptDate: '2024-12-03',
-      managerUserId: null,
-      managerUserName: null,
-      progressStatus: 'ASSIGN_MANAGER'
-    }
-  })
-
-  const content = [...baseContent, ...additionalContent]
-
-  return {
-    status: 200,
-    code: 'S_OK',
-    title: '요청 성공',
-    message: '요청이 성공적으로 처리되었습니다.',
-    data: {
-      content,
-      pageable: {
-        pageNumber: 0,
-        pageSize: 10,
-        sort: { sorted: true, unsorted: false, empty: false },
-        offset: 0,
-        paged: true,
-        unpaged: false
-      },
-      totalElements: count,
-      totalPages: Math.ceil(count / 10),
-      last: count <= 10,
-      numberOfElements: Math.min(count, 10),
-      first: true,
-      size: 10,
-      number: 0,
-      sort: { sorted: true, unsorted: false, empty: false },
-      empty: count === 0
-    }
-  }
+function handleSearch(reset: boolean) {
+  fetchList(reset)
 }
 
-// 테스트용 데이터 개수 조절
-const dataCount = ref(220)
-const apiResponse = computed(() => generateMockApiResponse(dataCount.value))
-const allData = computed(() => apiResponse.value.data.content)
+async function handleReset() {
+  filters.workType = 'ALL'
+  filters.assignedWork = 'ALL'
+  filters.registryMethod = 'ALL'
+  filters.progressStatus = 'ALL'
+  filters.keyword = ''
 
-// 페이지네이션 상태
-const currentPage = ref(1)
-const itemsPerPage = 10
+  filters.registryRequestStartDate = defaultRequestStart
+  filters.registryRequestEndDate = defaultRequestEnd
+  filters.registryReceiptStartDate = defaultReceiptStart
+  filters.registryReceiptEndDate = defaultReceiptEnd
 
-// 현재 페이지 데이터
-const paginatedData = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage
-  const end = start + itemsPerPage
-  return allData.value.slice(start, end)
+  filters.managerUserId = isUser30.value ? '' : 'ALL'
+
+  await loadAssignableUsers()
+  fetchList(true)
+}
+
+function movePage(next: number) {
+  const clamped = Math.min(Math.max(next, 0), lastPageIndex.value)
+  if (clamped === page.value) return
+  page.value = clamped
+  fetchList(false)
+}
+
+function goDetail(registryManagementNumber: string) {
+  router.push({ name: 'RegistrationDetail', params: { caseId: registryManagementNumber } })
+}
+
+/** =======================
+ * ✅ 페이지네이션 UI 추가: 페이지 버튼 + size 변경 안전 처리
+ * ======================= */
+// 템플릿이 이 상수를 참조함
+const MAX_PAGE_SIZE = 50 as const
+
+function onChangePageSize() {
+  // ✅ size 바꿀 때 page가 유지되면 out-of-range로 백엔드가 터질 수 있음 → 무조건 0부터
+  // ✅ 혹시 이상 값 들어오면 보정
+  const v = Number(size.value)
+  if (!Number.isFinite(v) || v <= 0) size.value = 10
+  if (size.value > MAX_PAGE_SIZE) size.value = MAX_PAGE_SIZE
+  handleSearch(true)
+}
+
+type PageButton = {
+  key: string
+  label: string
+  pageIndex: number
+  disabled: boolean
+}
+
+const pageButtons = computed<PageButton[]>(() => {
+  const tp = Math.max(1, totalPages.value || 1)
+  const current = Math.min(Math.max(page.value, 0), tp - 1)
+
+  // 보여줄 버튼 개수(홀수 추천)
+  const windowSize = 5
+  const half = Math.floor(windowSize / 2)
+
+  let start = Math.max(0, current - half)
+  let end = Math.min(tp - 1, start + windowSize - 1)
+  start = Math.max(0, end - (windowSize - 1))
+
+  const items: PageButton[] = []
+
+  // 첫 페이지
+  items.push({ key: 'p-0', label: '1', pageIndex: 0, disabled: current === 0 })
+
+  // 앞쪽 생략
+  if (start > 1) {
+    items.push({ key: 'ellipsis-left', label: '…', pageIndex: current, disabled: true })
+  }
+
+  // 중간 구간
+  for (let i = Math.max(1, start); i <= Math.min(end, tp - 2); i += 1) {
+    items.push({
+      key: `p-${i}`,
+      label: String(i + 1),
+      pageIndex: i,
+      disabled: i === current
+    })
+  }
+
+  // 뒤쪽 생략
+  if (end < tp - 2) {
+    items.push({ key: 'ellipsis-right', label: '…', pageIndex: current, disabled: true })
+  }
+
+  // 마지막 페이지 (tp가 1이면 이미 첫 페이지와 동일)
+  if (tp > 1) {
+    items.push({
+      key: `p-${tp - 1}`,
+      label: String(tp),
+      pageIndex: tp - 1,
+      disabled: current === tp - 1
+    })
+  }
+
+  return items
 })
 
-// 빈 행 개수 계산
-const emptyRows = computed(() => {
-  if (allData.value.length === 0) return 0
-  const current = paginatedData.value.length
-  return current < itemsPerPage ? itemsPerPage - current : 0
+/** =======================
+ * ✅ R02B-03 배정 API 공통 호출
+ * ======================= */
+const assigningSet = ref<Set<string>>(new Set())
+
+async function callAssignManager(
+  registryManagementNumber: string,
+  managerUserIdToAssign: number | string
+) {
+  if (assigningSet.value.has(registryManagementNumber)) return
+  assigningSet.value.add(registryManagementNumber)
+
+  try {
+    const res: any = await registryProgressAPI.assignManager({
+      registryManagementNumber,
+      managerUserId: managerUserIdToAssign
+    } as any)
+
+    const msg = res?.data?.message ?? res?.message ?? '업무담당자 배정이 완료되었습니다.'
+    window.alert(msg)
+
+    await fetchList(false)
+  } catch (e: any) {
+    const msg = e?.message ?? '업무담당자 배정에 실패했습니다.'
+    window.alert(msg)
+  } finally {
+    assigningSet.value.delete(registryManagementNumber)
+  }
+}
+
+async function handleAssignMyself(registryManagementNumber: string) {
+  if (!isUser30.value) return
+  if (!userId.value) {
+    window.alert('사용자 정보가 없습니다. 다시 로그인해 주세요.')
+    return
+  }
+  await callAssignManager(registryManagementNumber, userId.value)
+}
+
+/** 관리자(30 초과): 셀렉트 렌더/선택 */
+const rowSelectedManager = ref<Map<string, string>>(new Map())
+
+function hydrateRowSelectedManager() {
+  const m = new Map(rowSelectedManager.value)
+
+  for (const r of rows.value) {
+    const currentSelected = findUserIdByName(r.managerUserName)
+    const existing = m.get(r.registryManagementNumber)
+    if (!existing) m.set(r.registryManagementNumber, currentSelected)
+    else m.set(r.registryManagementNumber, existing)
+  }
+
+  rowSelectedManager.value = m
+}
+
+async function handleAdminSelectChange(registryManagementNumber: string, selected: string) {
+  if (!selected) return
+
+  const userLabel =
+    assignableUsers.value.find((u) => String(u.userId) === selected)?.userName ?? selected
+
+  const ok = window.confirm(`담당자를 "${userLabel}"(으)로 배정하시겠습니까?`)
+  if (!ok) {
+    const r = rows.value.find((x) => x.registryManagementNumber === registryManagementNumber)
+    const rollback = r ? findUserIdByName(r.managerUserName) : ''
+    const m = new Map(rowSelectedManager.value)
+    m.set(registryManagementNumber, rollback)
+    rowSelectedManager.value = m
+    return
+  }
+
+  const m = new Map(rowSelectedManager.value)
+  m.set(registryManagementNumber, selected)
+  rowSelectedManager.value = m
+
+  await callAssignManager(registryManagementNumber, selected)
+}
+
+function onAdminSelectChange(registryManagementNumber: string, e: Event) {
+  const value = (e.target as HTMLSelectElement | null)?.value ?? ''
+  handleAdminSelectChange(registryManagementNumber, value)
+}
+
+/** ✅ 배정업무 변경 시 assignable 호출 */
+watch(
+  () => filters.assignedWork,
+  async () => {
+    filters.managerUserId = isUser30.value ? '' : 'ALL'
+    await loadAssignableUsers()
+  }
+)
+
+/** ✅ roleLevel이 늦게 들어오는 케이스 대비 */
+watch(
+  () => roleLevelValue.value,
+  async (lv) => {
+    if (lv === 30) {
+      if (!assignableUsers.value.length) {
+        await loadAssignableUsers()
+      } else {
+        ensureUserDefaultManager(assignableUsers.value)
+      }
+    }
+  },
+  { immediate: true }
+)
+
+onMounted(async () => {
+  await loadCodes()
+  await loadAssignableUsers()
+  await fetchList(true)
 })
-
-// 업무담당자 표시 타입 결정 로직
-const getManagerDisplayType = (row: RegistrationData) => {
-  if (!row.managerUserName) {
-    return 'button'
-  }
-
-  if (
-    row.progressStatus === 'CUSTOMER_E_SIGN' ||
-    row.progressStatus === 'SUBMIT_COMPLETION_DOCUMENTS'
-  ) {
-    return 'text'
-  }
-
-  return 'select'
-}
-
-// 행 클릭 핸들러
-const handleRowClick = (row: RegistrationData) => {
-  logger.info('[REGISTRY] 행 클릭', { registryRequestNumber: row.registryRequestNumber })
-  // TODO: 상세 페이지로 이동
-  // router.push(`/registry/detail/${row.registryRequestNumber}`)
-}
-
-// 이벤트 핸들러
-const handleAssignManager = (event: Event, row: RegistrationData) => {
-  event.stopPropagation() // 행 클릭 이벤트 전파 방지
-  logger.info('[REGISTRY] 담당자 배정 버튼 클릭', {
-    registryRequestNumber: row.registryRequestNumber
-  })
-  // TODO: 담당자 배정 모달 열기
-}
-
-const handleManagerChange = (event: Event, row: RegistrationData, newManager: string) => {
-  event.stopPropagation() // 행 클릭 이벤트 전파 방지
-  logger.info('[REGISTRY] 담당자 변경', {
-    registryRequestNumber: row.registryRequestNumber,
-    newManager
-  })
-  // TODO: API 호출하여 담당자 변경
-}
-
-// 일반 셀 값 가져오기
-const getCellValue = (row: RegistrationData, key: string): string => {
-  const value = row[key as keyof RegistrationData]
-  if (value === null || value === undefined) return '-'
-  return String(value)
-}
-
-// 데이터 개수 변경 함수
-const setDataCount = (count: number) => {
-  dataCount.value = count
-  currentPage.value = 1
-}
 </script>
 
-<style scoped>
-.table-area {
-  background-color: #ffffff;
-  border-radius: 10px;
-  width: 100%;
-  height: auto;
-  overflow: hidden;
+<style scoped lang="scss">
+.registry-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-/* 테이블 기본 스타일 */
-.data-table {
+.search-panel {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px;
+  background: #fff;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 12px;
+  color: #374151;
+}
+
+.hint {
+  font-size: 11px;
+  color: #6b7280;
+  line-height: 1.3;
+}
+
+.error-text {
+  color: #b91c1c;
+}
+
+.range {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+input,
+select {
+  font-size: 14px;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  outline: none;
+}
+
+.actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+button {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #111827;
+  color: #fff;
+  cursor: pointer;
+}
+
+button.ghost {
+  background: #fff;
+  color: #111827;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.table-wrap {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.table {
   width: 100%;
   border-collapse: collapse;
-  background-color: white;
+}
+
+th,
+td {
+  padding: 10px;
+  border-bottom: 1px solid #f3f4f6;
+  text-align: left;
+  font-size: 13px;
+}
+
+thead th {
+  background: #f9fafb;
+  font-weight: 600;
+}
+
+.row {
+  cursor: pointer;
+}
+
+.row:hover td {
+  background: #f9fafb;
+}
+
+.muted {
+  text-align: center;
+  color: #6b7280;
+}
+
+.ellipsis {
+  max-width: 360px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 2px;
+}
+
+.pagination .right {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.page-size select {
+  height: 34px;
+}
+
+.inline-error {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+  color: #b91c1c;
   font-size: 12px;
 }
 
-/* 헤더 스타일 */
-.data-table thead th {
-  background-color: #f8f9fa;
-  padding: 12px 8px;
-  border: 1px solid #dee2e6;
-  font-weight: 600;
-  color: #495057;
-  white-space: nowrap;
+// @media (max-width: 1100px) {
+//   .grid {
+//     grid-template-columns: repeat(2, minmax(0, 1fr));
+//   }
+// }
+
+.debug-role {
+  margin-top: 6px;
+  font-size: 14px;
+  color: #6b7280;
+  text-align: right;
 }
 
-/* 데이터 행 스타일 */
-.data-table tbody tr.data-row {
-  height: 60px;
-  transition: all 0.2s ease;
+.assign-btn {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #111827;
+  color: #fff;
   cursor: pointer;
+  font-size: 12px;
 }
-
-.data-table tbody tr.data-row:hover {
-  color: #007bff;
-  background-color: #e2edff;
+.assign-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
-
-.data-table tbody td {
-  padding: 8px;
-  border: 1px solid #dee2e6;
-  vertical-align: middle;
-}
-
-/* 빈 데이터 행 (높이 유지용) */
-.data-table tbody tr.empty-data-row {
-  height: 60px;
-  pointer-events: none;
-}
-
-.data-table tbody tr.empty-data-row:hover {
-  background-color: transparent;
-  outline: none;
-}
-
-/* 빈 상태 행 */
-.data-table tbody tr.empty-row {
-  height: 500px;
-}
-
-/* 담당자 배정 버튼 */
-.assign-button {
-  padding: 6px 12px;
-  background-color: #28a745;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 13px;
-  transition: background-color 0.2s;
-}
-
-.assign-button:hover {
-  background-color: #218838;
-}
-
-/* 담당자 셀렉트 */
-.manager-select {
-  width: 100%;
-  padding: 6px 8px;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  font-size: 13px;
-  cursor: pointer;
-  background-color: white;
-}
-
-.manager-select:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+.inline-select {
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  font-size: 12px;
 }
 </style>

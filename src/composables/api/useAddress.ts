@@ -10,7 +10,7 @@
 
 import { ref } from 'vue'
 
-import { addressAPI } from '@/api/services/address'
+import { addressAPI } from '@/api/services_old/address'
 import { useErrorHandler } from '@/composables/utils/useErrorHandler'
 import type { AddressItem } from '@/types'
 import { logger } from '@/utils/logger'

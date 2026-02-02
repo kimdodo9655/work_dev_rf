@@ -8,7 +8,7 @@ import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { authAPI } from '@/api/services/auth'
+import { authAPI } from '@/api/services_old/auth'
 import { useAuthStore } from '@/stores/auth'
 import type { LoginRequest } from '@/types'
 import { logger } from '@/utils/logger'

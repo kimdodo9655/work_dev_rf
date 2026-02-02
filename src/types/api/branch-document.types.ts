@@ -68,6 +68,7 @@ export type SaveDocumentResponse = DocumentSaveResponse
  * DELETE /api/organizations/{organizationId}/branches/{branchId}/documents
  */
 export interface DeleteDocumentQuery {
+  documentId: any
   /** 파일명 */
   fileName: string
 }

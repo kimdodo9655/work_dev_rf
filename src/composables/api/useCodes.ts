@@ -6,7 +6,7 @@
 
 import { computed, ref } from 'vue'
 
-import { codeAPI } from '@/api/services/code'
+import { codeAPI } from '@/api/services_old/code'
 import type {
   Code,
   CodeKey,
