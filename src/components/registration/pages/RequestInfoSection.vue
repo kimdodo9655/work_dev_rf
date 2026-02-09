@@ -562,7 +562,7 @@ watch(
   padding: 10px 12px;
   border: 1px solid #f3f4f6;
   border-radius: 10px;
-  background: #fafafa;
+  background: #eee;
   font-size: 13px;
   color: #111827;
 }

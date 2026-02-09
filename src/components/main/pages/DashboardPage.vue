@@ -130,13 +130,15 @@
       <!-- line 02 -->
       <div class="dashboard-row" v-if="true">
         <div class="dashboard-card">
-          <h4>진행 상태별 업무 현황</h4>
+          <h4>사건 처리 현황</h4>
 
           <!-- TODO: 임시영역 -->
           <div class="catbox">
-            <i class="fi fi-sr-cat"></i>
+            <!-- <i class="fi fi-sr-cat"></i>
             <p>This area is in a Schrödinger state.</p>
-            <i class="fi fi-rr-box-open"></i>
+            <i class="fi fi-rr-box-open"></i> -->
+
+            <DashboardChart />
           </div>
         </div>
       </div>
@@ -251,6 +253,8 @@ import { ref } from 'vue'
 
 import FormSelect, { type SelectOption } from '@/components/template/input/UserSelect.vue'
 import { useExternalLinks } from '@/composables/utils/useExternalLinks'
+
+import DashboardChart from './DashboardChart.vue'
 
 const { links } = useExternalLinks()
 
@@ -641,7 +645,7 @@ const handleClick = (tab: DateTab) => {
 
 // TODO: 임시영역
 .catbox {
-  background-color: #eeeeee;
+  // background-color: #eeeeee;
   height: 300px;
   display: flex;
   align-items: center;

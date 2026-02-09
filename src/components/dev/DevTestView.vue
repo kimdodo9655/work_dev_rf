@@ -742,6 +742,8 @@
     </div>
 
     <Pagination v-model:current-page="currentPage" :total-items="100" :items-per-page="10" />
+
+    <PdfTest />
   </div>
 </template>
 
@@ -756,6 +758,7 @@ import Pagination from '@/components/template/PaginationItem.vue'
 import { useCodes } from '@/composables/api/useCodes'
 
 import AddrTest from './AddrTest.vue'
+import PdfTest from './PdfTest.vue'
 
 // ✨ useCodes 사용
 const { codes, isLoading, loadError, fetchAllCodes, clearCache } = useCodes()

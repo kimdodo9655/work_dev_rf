@@ -99,11 +99,12 @@ function handleAdminLoaded(hasData: boolean) {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  padding: 40px 20px 80px;
 }
 
 .accordion {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 20px;
 }
 </style>

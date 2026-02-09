@@ -27,7 +27,7 @@ const emit = defineEmits<{
 <style scoped lang="scss">
 .acc-section {
   background: #fff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #ddd;
   border-radius: 10px;
   overflow: hidden;
 }
@@ -44,7 +44,7 @@ const emit = defineEmits<{
   cursor: pointer;
 
   &:hover {
-    background: #fafafa;
+    background: #eee;
   }
 }
 
@@ -64,7 +64,7 @@ const emit = defineEmits<{
 }
 
 .acc-body {
-  border-top: 1px solid #f3f4f6;
+  border-top: 1px solid #ddd;
   padding: 12px;
 }
 </style>

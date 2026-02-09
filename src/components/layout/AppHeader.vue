@@ -5,7 +5,7 @@
         <nav>
           <!-- 로고 -->
           <router-link v-if="authStore.authState === 'auth'" to="/">
-            <img class="logo" src="@/assets/images/logo/test_bank_logo.png" alt="logo" />
+            <img class="logo" src="@/assets/images/logo/bankclear_logo_bk.png" alt="logo" />
           </router-link>
 
           <img
