@@ -1,4 +1,1891 @@
+<!-- <script setup lang="ts">
+// 2줄 이상의 테이블
+
+import { nextTick, onMounted, ref, watch } from 'vue'
+
+interface Page {
+  content: PageContent[]
+  lines: number
+  maxLines: number
+}
+
+interface PageContent {
+  type: 'text' | 'table'
+  data: string | TableData
+}
+
+interface TableCell {
+  content?: string // skip일 때는 content가 없을 수 있음
+  rowspan?: number
+  skip?: boolean
+}
+
+interface TableData {
+  headers: string[]
+  rows: (string | TableCell)[][]
+}
+
+const text = ref(`여기에 긴 텍스트를 입력하세요.
+테이블도 자동으로 페이지가 나뉩니다.`)
+
+const tableData = ref<TableData>({
+  headers: ['카테고리', 'data 01', 'data 02'],
+  rows: [
+    [{ content: 'data', rowspan: 10 }, '123', '456'],
+    [
+      { skip: true },
+      '매우 긴 텍스트가 들어가면 자동으로 줄바꿈이 일어나고 행 높이가 늘어납니다. 이런 경우에도 정확히 측정되어 페이지 분할이 됩니다.매우 긴 텍스트가 들어가면 자동으로 줄바꿈이 일어나고 행 높이가 늘어납니다. 이런 경우에도 정확히 측정되어 페이지 분할이 됩니다.매우 긴 텍스트가 들어가면 자동으로 줄바꿈이 일어나고 행 높이가 늘어납니다. 이런 경우에도 정확히 측정되어 페이지 분할이 됩니다.',
+      '456'
+    ],
+    [{ skip: true }, '123', '456'],
+    [
+      { skip: true },
+      '123',
+      '이것도 긴 텍스트입니다. 여러 줄에 걸쳐서 표시되면 행 높이가 자동으로 늘어나게 됩니다.'
+    ],
+    [{ skip: true }, '123', '456'],
+    [{ skip: true }, '123', '456'],
+    [{ skip: true }, '123', '456'],
+    [{ skip: true }, '123', '456'],
+    [{ skip: true }, '123', '456'],
+    [{ skip: true }, '123', '456']
+  ]
+})
+
+const title = ref('문서 제목')
+const fontSize = ref(12)
+const lineHeight = ref(1.6)
+const pages = ref<Page[]>([])
+
+// A4 용지 크기 (mm)
+const A4_WIDTH = 210
+const A4_HEIGHT = 297
+const PADDING = 14
+const CONTENT_PADDING_PX = 20
+const TITLE_PADDING_BOTTOM_MM = 5
+
+const mmToPx = (mm: number) => mm * 3.7795
+
+const addTableRow = () => {
+  const rowNum = tableData.value.rows.length + 1
+  tableData.value.rows.push([{ skip: true }, `${rowNum * 123}`, `${rowNum * 456}`])
+  // 첫 번째 행의 rowspan 업데이트
+  const firstCell = tableData.value.rows[0]?.[0]
+  if (firstCell && typeof firstCell === 'object' && firstCell.rowspan) {
+    firstCell.rowspan = tableData.value.rows.length
+  }
+}
+
+const getCellContent = (cell: string | TableCell): string => {
+  return typeof cell === 'string' ? cell : cell.content || ''
+}
+
+const isSkipCell = (cell: string | TableCell): boolean => {
+  return typeof cell === 'object' && cell.skip === true
+}
+
+const getRowspan = (cell: string | TableCell): number => {
+  return typeof cell === 'object' && cell.rowspan ? cell.rowspan : 1
+}
+
+// 단일 행의 높이를 측정 (헤더 없이 tbody만)
+const measureSingleRow = (row: (string | TableCell)[], measurer: HTMLElement): number => {
+  const table = document.createElement('table')
+  table.style.cssText = `
+    width: 100%;
+    border-collapse: collapse;
+    font-size: ${fontSize.value}px;
+    line-height: ${lineHeight.value};
+  `
+
+  const tbody = document.createElement('tbody')
+  const tr = document.createElement('tr')
+  row.forEach((cell) => {
+    const td = document.createElement('td')
+    td.textContent = getCellContent(cell)
+    td.style.cssText = 'border: 1px solid #e5e7eb; padding: 8px; word-break: break-word;'
+    tr.appendChild(td)
+  })
+  tbody.appendChild(tr)
+  table.appendChild(tbody)
+
+  measurer.appendChild(table)
+  const height = table.offsetHeight
+  measurer.removeChild(table)
+
+  return height
+}
+
+const measureTableHeader = (headers: string[], measurer: HTMLElement): number => {
+  const table = document.createElement('table')
+  table.style.cssText = `
+    width: 100%;
+    border-collapse: collapse;
+    font-size: ${fontSize.value}px;
+    line-height: ${lineHeight.value};
+  `
+
+  const thead = document.createElement('thead')
+  const headerRow = document.createElement('tr')
+  headers.forEach((h) => {
+    const th = document.createElement('th')
+    th.textContent = h
+    th.style.cssText =
+      'border: 1px solid #e5e7eb; padding: 8px; text-align: left; background: #f9fafb; font-weight: 600;'
+    headerRow.appendChild(th)
+  })
+  thead.appendChild(headerRow)
+  table.appendChild(thead)
+
+  measurer.appendChild(table)
+  const height = table.offsetHeight
+  measurer.removeChild(table)
+
+  return height
+}
+
+const calculatePages = async () => {
+  if (!text.value && tableData.value.rows.length === 0) {
+    pages.value = []
+    return
+  }
+
+  await nextTick()
+
+  // 타이틀 높이 측정
+  const titleMeasurer = document.createElement('div')
+  titleMeasurer.style.cssText = `
+    position: absolute;
+    visibility: hidden;
+    font-size: ${fontSize.value}px;
+    line-height: ${lineHeight.value};
+    font-weight: 700;
+    margin: 0;
+  `
+  titleMeasurer.textContent = title.value
+  document.body.appendChild(titleMeasurer)
+  const titleHeightPx = titleMeasurer.offsetHeight
+  document.body.removeChild(titleMeasurer)
+
+  const contentWidthPx = mmToPx(A4_WIDTH - PADDING * 2) - CONTENT_PADDING_PX * 2
+
+  // 텍스트 측정용
+  const textMeasurer = document.createElement('div')
+  textMeasurer.style.cssText = `
+    position: absolute;
+    visibility: hidden;
+    width: ${contentWidthPx}px;
+    padding: 0;
+    font-size: ${fontSize.value}px;
+    line-height: ${lineHeight.value};
+    white-space: pre-wrap;
+    word-break: break-word;
+    box-sizing: border-box;
+  `
+  document.body.appendChild(textMeasurer)
+
+  // 테이블 측정용
+  const tableMeasurer = document.createElement('div')
+  tableMeasurer.style.cssText = `
+    position: absolute;
+    visibility: hidden;
+    width: ${contentWidthPx}px;
+    box-sizing: border-box;
+  `
+  document.body.appendChild(tableMeasurer)
+
+  textMeasurer.textContent = 'A'
+  const singleLineHeight = textMeasurer.offsetHeight
+
+  // 테이블 헤더 높이 측정
+  const headerHeight = measureTableHeader(tableData.value.headers, tableMeasurer)
+
+  const firstPageAvailableHeightPx =
+    mmToPx(A4_HEIGHT - PADDING * 2) - titleHeightPx - mmToPx(TITLE_PADDING_BOTTOM_MM)
+  const firstPageTextHeightPx = firstPageAvailableHeightPx - CONTENT_PADDING_PX * 2 - 2
+  const firstPageMaxLines = Math.floor(firstPageTextHeightPx / singleLineHeight)
+
+  const otherPageAvailableHeightPx = mmToPx(A4_HEIGHT - PADDING * 2)
+  const otherPageTextHeightPx = otherPageAvailableHeightPx - CONTENT_PADDING_PX * 2 - 2
+  const otherPageMaxLines = Math.floor(otherPageTextHeightPx / singleLineHeight)
+
+  const pagesList: Page[] = []
+  let currentPageContent: PageContent[] = []
+  let currentPageHeightPx = 0
+  let isFirstPage = true
+
+  // 텍스트 처리
+  if (text.value) {
+    const paragraphs = text.value.split('\n')
+    let currentText = ''
+
+    for (const paragraph of paragraphs) {
+      const words = paragraph.split(' ')
+
+      for (const word of words) {
+        const testText =
+          currentText + (currentText && !currentText.endsWith('\n') ? ' ' : '') + word
+        textMeasurer.textContent = testText
+
+        const currentMaxHeightPx = isFirstPage ? firstPageTextHeightPx : otherPageTextHeightPx
+
+        if (
+          textMeasurer.offsetHeight + currentPageHeightPx > currentMaxHeightPx &&
+          currentText.trim()
+        ) {
+          currentPageContent.push({ type: 'text', data: currentText.trim() })
+
+          const currentMaxLines = isFirstPage ? firstPageMaxLines : otherPageMaxLines
+          pagesList.push({
+            content: currentPageContent,
+            lines: Math.ceil(currentPageHeightPx / singleLineHeight),
+            maxLines: currentMaxLines
+          })
+
+          currentPageContent = []
+          currentPageHeightPx = 0
+          currentText = word
+          isFirstPage = false
+        } else {
+          currentText = testText
+        }
+      }
+      currentText += '\n'
+    }
+
+    if (currentText.trim()) {
+      textMeasurer.textContent = currentText
+      currentPageContent.push({ type: 'text', data: currentText.trim() })
+      currentPageHeightPx += textMeasurer.offsetHeight
+    }
+  }
+
+  // 테이블 처리 - 각 행을 단순하게 측정
+  if (tableData.value.rows.length > 0) {
+    let currentTableRows: (string | TableCell)[][] = []
+    let isNewTable = true
+    let currentGroupFirstCell = ''
+
+    for (let i = 0; i < tableData.value.rows.length; i++) {
+      const row = tableData.value.rows[i]
+      if (!row) continue
+
+      const firstCell = row[0]
+
+      // 새로운 그룹이 시작되면 저장
+      if (firstCell && !isSkipCell(firstCell)) {
+        currentGroupFirstCell = getCellContent(firstCell)
+      }
+
+      // 단일 행의 높이 측정 (skip 무시하고 모든 셀 표시)
+      const measureRow = row.map((cell, idx) => {
+        if (idx === 0 && cell && isSkipCell(cell)) {
+          return currentGroupFirstCell
+        }
+        return cell
+      })
+
+      const rowHeight = measureSingleRow(measureRow, tableMeasurer)
+      const additionalHeight = isNewTable ? headerHeight + rowHeight : rowHeight
+      const currentMaxHeightPx = isFirstPage ? firstPageTextHeightPx : otherPageTextHeightPx
+
+      // 한 행이 페이지보다 큰 경우 처리
+      if (additionalHeight > currentMaxHeightPx) {
+        // 현재까지 쌓인 테이블이 있으면 먼저 저장
+        if (currentTableRows.length > 0) {
+          const finalRows = [...currentTableRows]
+          if (finalRows[0]) {
+            finalRows[0] = [...finalRows[0]]
+            finalRows[0][0] = { content: currentGroupFirstCell, rowspan: finalRows.length }
+          }
+
+          currentPageContent.push({
+            type: 'table',
+            data: {
+              headers: tableData.value.headers,
+              rows: finalRows
+            }
+          })
+
+          const currentMaxLines = isFirstPage ? firstPageMaxLines : otherPageMaxLines
+          pagesList.push({
+            content: currentPageContent,
+            lines: Math.ceil(currentPageHeightPx / singleLineHeight),
+            maxLines: currentMaxLines
+          })
+
+          currentPageContent = []
+          currentPageHeightPx = 0
+          currentTableRows = []
+          isFirstPage = false
+        }
+
+        // 큰 행을 단독 페이지로
+        const newPageRow = row.map((cell, idx) => {
+          if (idx === 0 && cell && isSkipCell(cell)) {
+            return { content: currentGroupFirstCell, rowspan: 1 }
+          }
+          return cell
+        })
+
+        currentPageContent.push({
+          type: 'table',
+          data: {
+            headers: tableData.value.headers,
+            rows: [newPageRow]
+          }
+        })
+
+        pagesList.push({
+          content: currentPageContent,
+          lines: Math.ceil(additionalHeight / singleLineHeight),
+          maxLines: otherPageMaxLines
+        })
+
+        currentPageContent = []
+        currentPageHeightPx = 0
+        currentTableRows = []
+        isFirstPage = false
+        isNewTable = true
+        continue
+      }
+
+      // 페이지를 넘어가는지 확인
+      if (
+        currentPageHeightPx + additionalHeight > currentMaxHeightPx &&
+        currentTableRows.length > 0
+      ) {
+        // 첫 행의 rowspan을 현재 행 수로 조정해서 저장
+        const finalRows = [...currentTableRows]
+        if (finalRows[0]) {
+          finalRows[0] = [...finalRows[0]]
+          finalRows[0][0] = { content: currentGroupFirstCell, rowspan: finalRows.length }
+        }
+
+        currentPageContent.push({
+          type: 'table',
+          data: {
+            headers: tableData.value.headers,
+            rows: finalRows
+          }
+        })
+
+        const currentMaxLines = isFirstPage ? firstPageMaxLines : otherPageMaxLines
+        pagesList.push({
+          content: currentPageContent,
+          lines: Math.ceil(currentPageHeightPx / singleLineHeight),
+          maxLines: currentMaxLines
+        })
+
+        // 새 페이지 시작
+        currentPageContent = []
+        currentPageHeightPx = 0
+
+        // 현재 행을 새 페이지 첫 행으로
+        const newPageRow = row.map((cell, idx) => {
+          if (idx === 0 && cell && isSkipCell(cell)) {
+            return currentGroupFirstCell
+          }
+          return cell
+        })
+
+        currentTableRows = [newPageRow]
+        currentPageHeightPx = headerHeight + rowHeight
+        isFirstPage = false
+        isNewTable = true
+      } else {
+        // 현재 페이지에 행 추가
+        currentTableRows.push(row)
+        currentPageHeightPx += additionalHeight
+        isNewTable = false
+      }
+    }
+
+    // 남은 테이블 행이 있으면 추가 (rowspan 조정)
+    if (currentTableRows.length > 0) {
+      const finalRows = [...currentTableRows]
+      if (finalRows[0]) {
+        finalRows[0] = [...finalRows[0]]
+        const firstCell = finalRows[0][0]
+        if (firstCell && isSkipCell(firstCell)) {
+          finalRows[0][0] = { content: currentGroupFirstCell, rowspan: finalRows.length }
+        } else if (firstCell) {
+          finalRows[0][0] = { content: getCellContent(firstCell), rowspan: finalRows.length }
+        }
+      }
+
+      currentPageContent.push({
+        type: 'table',
+        data: {
+          headers: tableData.value.headers,
+          rows: finalRows
+        }
+      })
+    }
+  }
+
+  // 마지막 페이지
+  if (currentPageContent.length > 0) {
+    const currentMaxLines = isFirstPage ? firstPageMaxLines : otherPageMaxLines
+    pagesList.push({
+      content: currentPageContent,
+      lines: Math.ceil(currentPageHeightPx / singleLineHeight),
+      maxLines: currentMaxLines
+    })
+  }
+
+  document.body.removeChild(textMeasurer)
+  document.body.removeChild(tableMeasurer)
+  pages.value = pagesList
+}
+
+watch(
+  [text, tableData, fontSize, lineHeight, title],
+  () => {
+    calculatePages()
+  },
+  { deep: true }
+)
+
+onMounted(() => {
+  calculatePages()
+})
+</script>
+
 <template>
+  <div class="container">
+    <div class="controls">
+      <div class="control-group">
+        <label>문서 제목:</label>
+        <input v-model="title" type="text" placeholder="제목을 입력하세요..." />
+      </div>
+
+      <div class="control-group">
+        <label>폰트 크기: {{ fontSize }}px</label>
+        <input v-model.number="fontSize" type="range" min="8" max="24" step="1" />
+      </div>
+
+      <div class="control-group">
+        <label>줄 간격: {{ lineHeight }}</label>
+        <input v-model.number="lineHeight" type="range" min="1" max="2.5" step="0.1" />
+      </div>
+
+      <div class="control-group">
+        <label>텍스트 입력:</label>
+        <textarea v-model="text" rows="5" placeholder="여기에 텍스트를 입력하세요..." />
+      </div>
+
+      <div class="control-group">
+        <label>테이블 행 추가:</label>
+        <button @click="addTableRow" class="btn-add">행 추가</button>
+      </div>
+
+      <button @click="calculatePages" class="btn-calculate">다시 계산</button>
+
+      <div class="info">
+        <div>총 페이지: {{ pages.length }}</div>
+      </div>
+    </div>
+
+    <div class="pages-wrapper">
+      <div v-for="(page, index) in pages" :key="index" class="paper">
+        <div v-if="index === 0" class="page-header">
+          <h1
+            class="title"
+            :style="{
+              fontSize: fontSize + 'px',
+              lineHeight: lineHeight
+            }"
+          >
+            {{ title }}
+          </h1>
+        </div>
+
+        <div class="page-number">Page {{ index + 1 }} / {{ pages.length }}</div>
+
+        <div
+          class="content"
+          :style="{
+            fontSize: fontSize + 'px',
+            lineHeight: lineHeight
+          }"
+        >
+          <template v-for="(item, idx) in page.content" :key="idx">
+            <div v-if="item.type === 'text'" class="text-content">
+              {{ item.data }}
+            </div>
+            <table v-else-if="item.type === 'table'" class="table-content">
+              <thead>
+                <tr>
+                  <th v-for="(header, hIdx) in (item.data as TableData).headers" :key="hIdx">
+                    {{ header }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, rIdx) in (item.data as TableData).rows" :key="rIdx">
+                  <template v-for="(cell, cIdx) in row" :key="cIdx">
+                    <td v-if="!isSkipCell(cell)" :rowspan="getRowspan(cell)">
+                      {{ getCellContent(cell) }}
+                    </td>
+                  </template>
+                </tr>
+              </tbody>
+            </table>
+          </template>
+        </div>
+      </div>
+
+      <div v-if="pages.length === 0" class="empty-state">
+        텍스트나 테이블을 입력하면 여기에 페이지가 표시됩니다.
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.container {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+.controls {
+  width: 300px;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  height: fit-content;
+  position: sticky;
+  top: 20px;
+}
+
+.control-group {
+  margin-bottom: 20px;
+}
+
+.control-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.control-group input[type='range'] {
+  width: 100%;
+}
+
+.control-group input[type='text'] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-family: inherit;
+}
+
+.control-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.btn-calculate,
+.btn-add {
+  width: 100%;
+  padding: 10px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.btn-add {
+  background: #10b981;
+}
+
+.btn-calculate:hover {
+  background: #2563eb;
+}
+
+.btn-add:hover {
+  background: #059669;
+}
+
+.info {
+  margin-top: 15px;
+  padding: 10px;
+  background: #f3f4f6;
+  border-radius: 4px;
+  text-align: center;
+  font-weight: 500;
+  color: #374151;
+}
+
+.pages-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  align-items: center;
+}
+
+.paper {
+  width: 210mm;
+  height: 297mm;
+  padding: 14mm;
+  background: #fff;
+  border: 1px solid #ddd;
+  color: #111827;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-header {
+  flex-shrink: 0;
+  padding-bottom: 5mm;
+}
+
+.title {
+  margin: 0;
+  font-weight: 700;
+  color: #111827;
+}
+
+.page-number {
+  position: absolute;
+  top: 8mm;
+  right: 14mm;
+  font-size: 10px;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.content {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  padding: 20px;
+  border-radius: 2px;
+  background: #fafafa;
+  box-sizing: border-box;
+  flex: 1;
+}
+
+.text-content {
+  margin-bottom: 15px;
+  white-space: pre-wrap;
+}
+
+.table-content {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 15px;
+}
+
+.table-content th,
+.table-content td {
+  border: 1px solid #e5e7eb;
+  padding: 8px;
+  text-align: left;
+  word-break: break-word;
+}
+
+.table-content th {
+  background: #f9fafb;
+  font-weight: 600;
+}
+
+.table-content tbody tr:nth-child(even) {
+  background: #f9fafb;
+}
+
+.empty-state {
+  padding: 40px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+@media print {
+  .container {
+    display: block;
+    padding: 0;
+    background: white;
+  }
+
+  .controls {
+    display: none;
+  }
+
+  .pages-wrapper {
+    gap: 0;
+  }
+
+  .paper {
+    box-shadow: none;
+    border: none;
+    margin: 0;
+    page-break-after: always;
+  }
+
+  .paper:last-child {
+    page-break-after: auto;
+  }
+
+  .content {
+    background: white;
+    border-color: #000;
+  }
+}
+</style> -->
+
+<!-- <script setup lang="ts">
+// 병합 테이블
+
+import { nextTick, onMounted, ref, watch } from 'vue'
+
+interface Page {
+  text: string
+  lines: number
+  maxLines: number
+}
+
+const testText = '테스트용 텍스트\n\t테스트용 텍스트\n테스트용 텍스트'
+
+const text = ref(`여기에 긴 텍스트를 입력하세요.
+여러 줄의 텍스트가 들어가면
+자동으로 페이지가 나뉩니다.
+
+새로운 문단도 인식됩니다.
+A4 용지 크기에 맞춰서 자동으로 페이지가 추가됩니다.
+이제 마지막 줄이 잘리지 않고 정확히 줄 단위로 분할됩니다.
+한 문단이 길어도 페이지를 최대한 채운 후 다음 페이지로 넘어갑니다.`)
+
+const title = ref('문서 제목')
+const fontSize = ref(12)
+const lineHeight = ref(1.6)
+const pages = ref<Page[]>([])
+
+// A4 용지 크기 (mm)
+const A4_WIDTH = 210
+const A4_HEIGHT = 297
+const PADDING = 14
+const CONTENT_PADDING_PX = 20 // 본문 내부 패딩 (px)
+const TITLE_PADDING_BOTTOM_MM = 5 // 타이틀 하단 패딩 (mm)
+
+// mm를 픽셀로 변환
+const mmToPx = (mm: number) => mm * 3.7795
+
+const calculatePages = async () => {
+  if (!text.value) {
+    pages.value = []
+    return
+  }
+
+  await nextTick()
+
+  // 타이틀의 실제 높이 측정 (px)
+  const titleMeasurer = document.createElement('div')
+  titleMeasurer.style.cssText = `
+    position: absolute;
+    visibility: hidden;
+    font-size: ${fontSize.value}px;
+    line-height: ${lineHeight.value};
+    font-weight: 700;
+    margin: 0;
+  `
+  titleMeasurer.textContent = title.value
+  document.body.appendChild(titleMeasurer)
+  const titleHeightPx = titleMeasurer.offsetHeight
+  document.body.removeChild(titleMeasurer)
+
+  // 본문 영역의 너비 계산 (content 내부 실제 텍스트 영역)
+  const contentWidthPx = mmToPx(A4_WIDTH - PADDING * 2) - CONTENT_PADDING_PX * 2
+
+  // 임시 측정용 div 생성
+  const measurer = document.createElement('div')
+  measurer.style.cssText = `
+    position: absolute;
+    visibility: hidden;
+    width: ${contentWidthPx}px;
+    padding: 0;
+    font-size: ${fontSize.value}px;
+    line-height: ${lineHeight.value};
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: #111827;
+    box-sizing: border-box;
+  `
+  document.body.appendChild(measurer)
+
+  // 한 줄의 높이 계산
+  measurer.textContent = 'A'
+  const singleLineHeight = measurer.offsetHeight
+
+  // 첫 페이지: 전체 높이에서 paper padding, title, title padding을 뺀 후 content 영역 계산
+  const firstPageAvailableHeightPx =
+    mmToPx(A4_HEIGHT - PADDING * 2) - titleHeightPx - mmToPx(TITLE_PADDING_BOTTOM_MM)
+  const firstPageTextHeightPx = firstPageAvailableHeightPx - CONTENT_PADDING_PX * 2 - 2
+  const firstPageMaxLines = Math.floor(firstPageTextHeightPx / singleLineHeight)
+
+  // 두 번째 페이지부터: title 없이 계산
+  const otherPageAvailableHeightPx = mmToPx(A4_HEIGHT - PADDING * 2)
+  const otherPageTextHeightPx = otherPageAvailableHeightPx - CONTENT_PADDING_PX * 2 - 2
+  const otherPageMaxLines = Math.floor(otherPageTextHeightPx / singleLineHeight)
+
+  const pagesList: Page[] = []
+  const paragraphs = text.value.split('\n')
+
+  let currentPageText = ''
+  let isFirstPage = true
+
+  for (let i = 0; i < paragraphs.length; i++) {
+    const paragraph = paragraphs[i]
+
+    // 빈 줄 처리
+    if (paragraph === '') {
+      const testText = currentPageText + '\n'
+      measurer.textContent = testText
+      const testLines = Math.ceil(measurer.offsetHeight / singleLineHeight)
+      const currentMaxLines = isFirstPage ? firstPageMaxLines : otherPageMaxLines
+
+      if (testLines <= currentMaxLines) {
+        currentPageText = testText
+      } else {
+        // 페이지 저장
+        measurer.textContent = currentPageText
+        pagesList.push({
+          text: currentPageText.trim(),
+          lines: Math.ceil(measurer.offsetHeight / singleLineHeight),
+          maxLines: currentMaxLines
+        })
+        currentPageText = '\n'
+        isFirstPage = false
+      }
+      continue
+    }
+
+    // 문단을 단어 단위로 분할
+    const words = paragraph.split(' ')
+
+    for (let j = 0; j < words.length; j++) {
+      const word = words[j]
+      const separator =
+        j === 0 && currentPageText && !currentPageText.endsWith('\n')
+          ? ' '
+          : j === 0 && currentPageText
+            ? ''
+            : j === 0
+              ? ''
+              : ' '
+      const testText = currentPageText + separator + word
+
+      measurer.textContent = testText
+      const testLines = Math.ceil(measurer.offsetHeight / singleLineHeight)
+      const currentMaxLines = isFirstPage ? firstPageMaxLines : otherPageMaxLines
+
+      if (testLines > currentMaxLines) {
+        // 현재 페이지 저장
+        if (currentPageText.trim()) {
+          measurer.textContent = currentPageText
+          pagesList.push({
+            text: currentPageText.trim(),
+            lines: Math.ceil(measurer.offsetHeight / singleLineHeight),
+            maxLines: currentMaxLines
+          })
+        }
+
+        // 새 페이지 시작
+        currentPageText = word
+        isFirstPage = false
+      } else {
+        currentPageText = testText
+      }
+    }
+
+    // 문단 끝에 줄바꿈 추가 (마지막 문단이 아닌 경우)
+    if (i < paragraphs.length - 1) {
+      currentPageText += '\n'
+    }
+  }
+
+  // 마지막 페이지 추가
+  if (currentPageText.trim()) {
+    measurer.textContent = currentPageText
+    const currentMaxLines = isFirstPage ? firstPageMaxLines : otherPageMaxLines
+    pagesList.push({
+      text: currentPageText.trim(),
+      lines: Math.ceil(measurer.offsetHeight / singleLineHeight),
+      maxLines: currentMaxLines
+    })
+  }
+
+  document.body.removeChild(measurer)
+  pages.value = pagesList
+}
+
+// 텍스트나 폰트 변경 시 재계산
+watch([text, fontSize, lineHeight, title], () => {
+  calculatePages()
+})
+
+onMounted(() => {
+  calculatePages()
+})
+</script>
+
+<template>
+  <div style="white-space: pre-wrap">{{ testText }}</div>
+  <div class="container">
+    <div class="controls">
+      <div class="control-group">
+        <label>문서 제목:</label>
+        <input v-model="title" type="text" placeholder="제목을 입력하세요..." />
+      </div>
+
+      <div class="control-group">
+        <label>폰트 크기: {{ fontSize }}px</label>
+        <input v-model.number="fontSize" type="range" min="8" max="24" step="1" />
+      </div>
+
+      <div class="control-group">
+        <label>줄 간격: {{ lineHeight }}</label>
+        <input v-model.number="lineHeight" type="range" min="1" max="2.5" step="0.1" />
+      </div>
+
+      <div class="control-group">
+        <label>텍스트 입력:</label>
+        <textarea v-model="text" rows="10" placeholder="여기에 텍스트를 입력하세요..." />
+      </div>
+
+      <button @click="calculatePages" class="btn-calculate">다시 계산</button>
+
+      <div class="info">
+        <div>총 페이지: {{ pages.length }}</div>
+        <div v-if="pages.length > 0" class="info-detail">
+          첫 페이지: 최대 {{ pages[0]?.maxLines }}줄 (현재 {{ pages[0]?.lines }}줄)
+        </div>
+        <div v-if="pages.length > 1" class="info-detail">
+          나머지: 최대 {{ pages[1]?.maxLines }}줄
+        </div>
+      </div>
+    </div>
+
+    <div class="pages-wrapper">
+      <div v-for="(page, index) in pages" :key="index" class="paper">
+        <div v-if="index === 0" class="page-header">
+          <h1
+            class="title"
+            :style="{
+              fontSize: fontSize + 'px',
+              lineHeight: lineHeight
+            }"
+          >
+            {{ title }}
+          </h1>
+        </div>
+
+        <div class="page-number">Page {{ index + 1 }} / {{ pages.length }}</div>
+
+        <div
+          class="content"
+          :style="{
+            fontSize: fontSize + 'px',
+            lineHeight: lineHeight
+          }"
+        >
+          {{ page.text }}
+        </div>
+      </div>
+
+      <div v-if="pages.length === 0" class="empty-state">
+        텍스트를 입력하면 여기에 페이지가 표시됩니다.
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.container {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+.controls {
+  width: 300px;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  height: fit-content;
+  position: sticky;
+  top: 20px;
+}
+
+.control-group {
+  margin-bottom: 20px;
+}
+
+.control-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.control-group input[type='range'] {
+  width: 100%;
+}
+
+.control-group input[type='text'] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-family: inherit;
+}
+
+.control-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.btn-calculate {
+  width: 100%;
+  padding: 10px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.btn-calculate:hover {
+  background: #2563eb;
+}
+
+.info {
+  margin-top: 15px;
+  padding: 10px;
+  background: #f3f4f6;
+  border-radius: 4px;
+  text-align: center;
+  font-weight: 500;
+  color: #374151;
+}
+
+.info-detail {
+  margin-top: 5px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.pages-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  align-items: center;
+}
+
+.paper {
+  width: 210mm;
+  height: 297mm;
+  padding: 14mm;
+  background: #fff;
+  border: 1px solid #ddd;
+  color: #111827;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-header {
+  flex-shrink: 0;
+  padding-bottom: 5mm;
+}
+
+.title {
+  margin: 0;
+  font-weight: 700;
+  color: #111827;
+}
+
+.page-number {
+  position: absolute;
+  top: 8mm;
+  right: 14mm;
+  font-size: 10px;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.content {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  padding: 20px;
+  border-radius: 2px;
+  background: #fafafa;
+  box-sizing: border-box;
+  flex: 1;
+}
+
+.empty-state {
+  padding: 40px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+/* 인쇄용 스타일 */
+@media print {
+  .container {
+    display: block;
+    padding: 0;
+    background: white;
+  }
+
+  .controls {
+    display: none;
+  }
+
+  .pages-wrapper {
+    gap: 0;
+  }
+
+  .paper {
+    box-shadow: none;
+    border: none;
+    margin: 0;
+    page-break-after: always;
+  }
+
+  .paper:last-child {
+    page-break-after: auto;
+  }
+
+  .content {
+    background: white;
+    border-color: #000;
+  }
+}
+</style> -->
+
+<!-- <script setup lang="ts">
+import { ref, watch, nextTick, onMounted } from 'vue'
+
+interface Page {
+  content: PageContent[]
+  lines: number
+  maxLines: number
+}
+
+interface PageContent {
+  type: 'text' | 'table'
+  data: string | TableData
+}
+
+interface TableCell {
+  content: string
+  rowspan?: number
+  skip?: boolean
+}
+
+interface TableData {
+  headers: string[]
+  rows: (string | TableCell)[][]
+}
+
+const text = ref(`여기에 긴 텍스트를 입력하세요.
+테이블도 자동으로 페이지가 나뉩니다.`)
+
+const tableData = ref<TableData>({
+  headers: ['카테고리', 'data 01', 'data 02'],
+  rows: [
+    [{ content: 'data', rowspan: 10 }, '123', '456'],
+    [{ skip: true }, '123', '456'],
+    [{ skip: true }, '123', '456'],
+    [{ skip: true }, '123', '456'],
+    [{ skip: true }, '123', '456'],
+    [{ skip: true }, '123', '456'],
+    [{ skip: true }, '123', '456'],
+    [{ skip: true }, '123', '456'],
+    [{ skip: true }, '123', '456'],
+    [{ skip: true }, '123', '456']
+  ]
+})
+
+const title = ref('문서 제목')
+const fontSize = ref(12)
+const lineHeight = ref(1.6)
+const pages = ref<Page[]>([])
+
+// A4 용지 크기 (mm)
+const A4_WIDTH = 210
+const A4_HEIGHT = 297
+const PADDING = 14
+const CONTENT_PADDING_PX = 20
+const TITLE_PADDING_BOTTOM_MM = 5
+
+const mmToPx = (mm: number) => mm * 3.7795
+
+const addTableRow = () => {
+  const rowNum = tableData.value.rows.length + 1
+  tableData.value.rows.push([{ skip: true }, `${rowNum * 123}`, `${rowNum * 456}`])
+  // 첫 번째 행의 rowspan 업데이트
+  const firstCell = tableData.value.rows[0][0]
+  if (typeof firstCell === 'object' && firstCell.rowspan) {
+    firstCell.rowspan = tableData.value.rows.length
+  }
+}
+
+const getCellContent = (cell: string | TableCell): string => {
+  return typeof cell === 'string' ? cell : cell.content
+}
+
+const isSkipCell = (cell: string | TableCell): boolean => {
+  return typeof cell === 'object' && cell.skip === true
+}
+
+const getRowspan = (cell: string | TableCell): number => {
+  return typeof cell === 'object' && cell.rowspan ? cell.rowspan : 1
+}
+
+// 단일 행의 높이를 측정 (헤더 없이 tbody만)
+const measureSingleRow = (row: (string | TableCell)[], measurer: HTMLElement): number => {
+  const table = document.createElement('table')
+  table.style.cssText = `
+    width: 100%;
+    border-collapse: collapse;
+    font-size: ${fontSize.value}px;
+    line-height: ${lineHeight.value};
+  `
+
+  const tbody = document.createElement('tbody')
+  const tr = document.createElement('tr')
+  row.forEach((cell) => {
+    const td = document.createElement('td')
+    td.textContent = getCellContent(cell)
+    td.style.cssText = 'border: 1px solid #e5e7eb; padding: 8px;'
+    tr.appendChild(td)
+  })
+  tbody.appendChild(tr)
+  table.appendChild(tbody)
+
+  measurer.appendChild(table)
+  const height = table.offsetHeight
+  measurer.removeChild(table)
+
+  return height
+}
+
+const measureTableHeader = (headers: string[], measurer: HTMLElement): number => {
+  const table = document.createElement('table')
+  table.style.cssText = `
+    width: 100%;
+    border-collapse: collapse;
+    font-size: ${fontSize.value}px;
+    line-height: ${lineHeight.value};
+  `
+
+  const thead = document.createElement('thead')
+  const headerRow = document.createElement('tr')
+  headers.forEach((h) => {
+    const th = document.createElement('th')
+    th.textContent = h
+    th.style.cssText =
+      'border: 1px solid #e5e7eb; padding: 8px; text-align: left; background: #f9fafb; font-weight: 600;'
+    headerRow.appendChild(th)
+  })
+  thead.appendChild(headerRow)
+  table.appendChild(thead)
+
+  measurer.appendChild(table)
+  const height = table.offsetHeight
+  measurer.removeChild(table)
+
+  return height
+}
+
+const calculatePages = async () => {
+  if (!text.value && tableData.value.rows.length === 0) {
+    pages.value = []
+    return
+  }
+
+  await nextTick()
+
+  // 타이틀 높이 측정
+  const titleMeasurer = document.createElement('div')
+  titleMeasurer.style.cssText = `
+    position: absolute;
+    visibility: hidden;
+    font-size: ${fontSize.value}px;
+    line-height: ${lineHeight.value};
+    font-weight: 700;
+    margin: 0;
+  `
+  titleMeasurer.textContent = title.value
+  document.body.appendChild(titleMeasurer)
+  const titleHeightPx = titleMeasurer.offsetHeight
+  document.body.removeChild(titleMeasurer)
+
+  const contentWidthPx = mmToPx(A4_WIDTH - PADDING * 2) - CONTENT_PADDING_PX * 2
+
+  // 텍스트 측정용
+  const textMeasurer = document.createElement('div')
+  textMeasurer.style.cssText = `
+    position: absolute;
+    visibility: hidden;
+    width: ${contentWidthPx}px;
+    padding: 0;
+    font-size: ${fontSize.value}px;
+    line-height: ${lineHeight.value};
+    white-space: pre-wrap;
+    word-break: break-word;
+    box-sizing: border-box;
+  `
+  document.body.appendChild(textMeasurer)
+
+  // 테이블 측정용
+  const tableMeasurer = document.createElement('div')
+  tableMeasurer.style.cssText = `
+    position: absolute;
+    visibility: hidden;
+    width: ${contentWidthPx}px;
+    box-sizing: border-box;
+  `
+  document.body.appendChild(tableMeasurer)
+
+  textMeasurer.textContent = 'A'
+  const singleLineHeight = textMeasurer.offsetHeight
+
+  // 테이블 헤더 높이 측정
+  const headerHeight = measureTableHeader(tableData.value.headers, tableMeasurer)
+
+  const firstPageAvailableHeightPx =
+    mmToPx(A4_HEIGHT - PADDING * 2) - titleHeightPx - mmToPx(TITLE_PADDING_BOTTOM_MM)
+  const firstPageTextHeightPx = firstPageAvailableHeightPx - CONTENT_PADDING_PX * 2 - 2
+  const firstPageMaxLines = Math.floor(firstPageTextHeightPx / singleLineHeight)
+
+  const otherPageAvailableHeightPx = mmToPx(A4_HEIGHT - PADDING * 2)
+  const otherPageTextHeightPx = otherPageAvailableHeightPx - CONTENT_PADDING_PX * 2 - 2
+  const otherPageMaxLines = Math.floor(otherPageTextHeightPx / singleLineHeight)
+
+  const pagesList: Page[] = []
+  let currentPageContent: PageContent[] = []
+  let currentPageHeightPx = 0
+  let isFirstPage = true
+
+  // 텍스트 처리
+  if (text.value) {
+    const paragraphs = text.value.split('\n')
+    let currentText = ''
+
+    for (const paragraph of paragraphs) {
+      const words = paragraph.split(' ')
+
+      for (const word of words) {
+        const testText =
+          currentText + (currentText && !currentText.endsWith('\n') ? ' ' : '') + word
+        textMeasurer.textContent = testText
+
+        const currentMaxHeightPx = isFirstPage ? firstPageTextHeightPx : otherPageTextHeightPx
+
+        if (
+          textMeasurer.offsetHeight + currentPageHeightPx > currentMaxHeightPx &&
+          currentText.trim()
+        ) {
+          textMeasurer.textContent = currentText
+          const textHeight = textMeasurer.offsetHeight
+          currentPageContent.push({ type: 'text', data: currentText.trim() })
+
+          const currentMaxLines = isFirstPage ? firstPageMaxLines : otherPageMaxLines
+          pagesList.push({
+            content: currentPageContent,
+            lines: Math.ceil(currentPageHeightPx / singleLineHeight),
+            maxLines: currentMaxLines
+          })
+
+          currentPageContent = []
+          currentPageHeightPx = 0
+          currentText = word
+          isFirstPage = false
+        } else {
+          currentText = testText
+        }
+      }
+      currentText += '\n'
+    }
+
+    if (currentText.trim()) {
+      textMeasurer.textContent = currentText
+      const textHeight = textMeasurer.offsetHeight
+      currentPageContent.push({ type: 'text', data: currentText.trim() })
+      currentPageHeightPx += textHeight
+    }
+  }
+
+  // 테이블 처리 - 각 행을 단순하게 측정
+  if (tableData.value.rows.length > 0) {
+    let currentTableRows: (string | TableCell)[][] = []
+    let isNewTable = true
+    let currentGroupFirstCell = ''
+
+    for (let i = 0; i < tableData.value.rows.length; i++) {
+      const row = tableData.value.rows[i]
+      const firstCell = row[0]
+
+      // 새로운 그룹이 시작되면 저장
+      if (!isSkipCell(firstCell)) {
+        currentGroupFirstCell = getCellContent(firstCell)
+      }
+
+      // 단일 행의 높이 측정 (skip 무시하고 모든 셀 표시)
+      const measureRow = row.map((cell, idx) => {
+        if (idx === 0 && isSkipCell(cell)) {
+          return currentGroupFirstCell
+        }
+        return cell
+      })
+
+      const rowHeight = measureSingleRow(measureRow, tableMeasurer)
+      const additionalHeight = isNewTable ? headerHeight + rowHeight : rowHeight
+      const currentMaxHeightPx = isFirstPage ? firstPageTextHeightPx : otherPageTextHeightPx
+
+      // 페이지를 넘어가는지 확인
+      if (
+        currentPageHeightPx + additionalHeight > currentMaxHeightPx &&
+        currentTableRows.length > 0
+      ) {
+        // 첫 행의 rowspan을 현재 행 수로 조정해서 저장
+        const finalRows = [...currentTableRows]
+        finalRows[0] = [...finalRows[0]]
+        finalRows[0][0] = { content: currentGroupFirstCell, rowspan: finalRows.length }
+
+        currentPageContent.push({
+          type: 'table',
+          data: {
+            headers: tableData.value.headers,
+            rows: finalRows
+          }
+        })
+
+        const currentMaxLines = isFirstPage ? firstPageMaxLines : otherPageMaxLines
+        pagesList.push({
+          content: currentPageContent,
+          lines: Math.ceil(currentPageHeightPx / singleLineHeight),
+          maxLines: currentMaxLines
+        })
+
+        // 새 페이지 시작
+        currentPageContent = []
+        currentPageHeightPx = 0
+
+        // 현재 행을 새 페이지 첫 행으로
+        const newPageRow = row.map((cell, idx) => {
+          if (idx === 0 && isSkipCell(cell)) {
+            return currentGroupFirstCell
+          }
+          return cell
+        })
+
+        currentTableRows = [newPageRow]
+        currentPageHeightPx = headerHeight + rowHeight
+        isFirstPage = false
+        isNewTable = true
+      } else {
+        // 현재 페이지에 행 추가
+        currentTableRows.push(row)
+        currentPageHeightPx += additionalHeight
+        isNewTable = false
+      }
+    }
+
+    // 남은 테이블 행이 있으면 추가 (rowspan 조정)
+    if (currentTableRows.length > 0) {
+      const finalRows = [...currentTableRows]
+      finalRows[0] = [...finalRows[0]]
+      if (isSkipCell(finalRows[0][0])) {
+        finalRows[0][0] = { content: currentGroupFirstCell, rowspan: finalRows.length }
+      } else {
+        const firstCell = finalRows[0][0]
+        finalRows[0][0] = { content: getCellContent(firstCell), rowspan: finalRows.length }
+      }
+
+      currentPageContent.push({
+        type: 'table',
+        data: {
+          headers: tableData.value.headers,
+          rows: finalRows
+        }
+      })
+    }
+  }
+
+  // 마지막 페이지
+  if (currentPageContent.length > 0) {
+    const currentMaxLines = isFirstPage ? firstPageMaxLines : otherPageMaxLines
+    pagesList.push({
+      content: currentPageContent,
+      lines: Math.ceil(currentPageHeightPx / singleLineHeight),
+      maxLines: currentMaxLines
+    })
+  }
+
+  document.body.removeChild(textMeasurer)
+  document.body.removeChild(tableMeasurer)
+  pages.value = pagesList
+}
+
+watch(
+  [text, tableData, fontSize, lineHeight, title],
+  () => {
+    calculatePages()
+  },
+  { deep: true }
+)
+
+onMounted(() => {
+  calculatePages()
+})
+</script>
+
+<template>
+  <div class="container">
+    <div class="controls">
+      <div class="control-group">
+        <label>문서 제목:</label>
+        <input v-model="title" type="text" placeholder="제목을 입력하세요..." />
+      </div>
+
+      <div class="control-group">
+        <label>폰트 크기: {{ fontSize }}px</label>
+        <input v-model.number="fontSize" type="range" min="8" max="24" step="1" />
+      </div>
+
+      <div class="control-group">
+        <label>줄 간격: {{ lineHeight }}</label>
+        <input v-model.number="lineHeight" type="range" min="1" max="2.5" step="0.1" />
+      </div>
+
+      <div class="control-group">
+        <label>텍스트 입력:</label>
+        <textarea v-model="text" rows="5" placeholder="여기에 텍스트를 입력하세요..." />
+      </div>
+
+      <div class="control-group">
+        <label>테이블 행 추가:</label>
+        <button @click="addTableRow" class="btn-add">행 추가</button>
+      </div>
+
+      <button @click="calculatePages" class="btn-calculate">다시 계산</button>
+
+      <div class="info">
+        <div>총 페이지: {{ pages.length }}</div>
+      </div>
+    </div>
+
+    <div class="pages-wrapper">
+      <div v-for="(page, index) in pages" :key="index" class="paper">
+        <div v-if="index === 0" class="page-header">
+          <h1
+            class="title"
+            :style="{
+              fontSize: fontSize + 'px',
+              lineHeight: lineHeight
+            }"
+          >
+            {{ title }}
+          </h1>
+        </div>
+
+        <div class="page-number">Page {{ index + 1 }} / {{ pages.length }}</div>
+
+        <div
+          class="content"
+          :style="{
+            fontSize: fontSize + 'px',
+            lineHeight: lineHeight
+          }"
+        >
+          <template v-for="(item, idx) in page.content" :key="idx">
+            <div v-if="item.type === 'text'" class="text-content">
+              {{ item.data }}
+            </div>
+            <table v-else-if="item.type === 'table'" class="table-content">
+              <thead>
+                <tr>
+                  <th v-for="(header, hIdx) in (item.data as TableData).headers" :key="hIdx">
+                    {{ header }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, rIdx) in (item.data as TableData).rows" :key="rIdx">
+                  <template v-for="(cell, cIdx) in row" :key="cIdx">
+                    <td v-if="!isSkipCell(cell)" :rowspan="getRowspan(cell)">
+                      {{ getCellContent(cell) }}
+                    </td>
+                  </template>
+                </tr>
+              </tbody>
+            </table>
+          </template>
+        </div>
+      </div>
+
+      <div v-if="pages.length === 0" class="empty-state">
+        텍스트나 테이블을 입력하면 여기에 페이지가 표시됩니다.
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.container {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+.controls {
+  width: 300px;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  height: fit-content;
+  position: sticky;
+  top: 20px;
+}
+
+.control-group {
+  margin-bottom: 20px;
+}
+
+.control-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.control-group input[type='range'] {
+  width: 100%;
+}
+
+.control-group input[type='text'] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-family: inherit;
+}
+
+.control-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.btn-calculate,
+.btn-add {
+  width: 100%;
+  padding: 10px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.btn-add {
+  background: #10b981;
+}
+
+.btn-calculate:hover {
+  background: #2563eb;
+}
+
+.btn-add:hover {
+  background: #059669;
+}
+
+.info {
+  margin-top: 15px;
+  padding: 10px;
+  background: #f3f4f6;
+  border-radius: 4px;
+  text-align: center;
+  font-weight: 500;
+  color: #374151;
+}
+
+.pages-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  align-items: center;
+}
+
+.paper {
+  width: 210mm;
+  height: 297mm;
+  padding: 14mm;
+  background: #fff;
+  border: 1px solid #ddd;
+  color: #111827;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-header {
+  flex-shrink: 0;
+  padding-bottom: 5mm;
+}
+
+.title {
+  margin: 0;
+  font-weight: 700;
+  color: #111827;
+}
+
+.page-number {
+  position: absolute;
+  top: 8mm;
+  right: 14mm;
+  font-size: 10px;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.content {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  padding: 20px;
+  border-radius: 2px;
+  background: #fafafa;
+  box-sizing: border-box;
+  flex: 1;
+}
+
+.text-content {
+  margin-bottom: 15px;
+  white-space: pre-wrap;
+}
+
+.table-content {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 15px;
+}
+
+.table-content th,
+.table-content td {
+  border: 1px solid #e5e7eb;
+  padding: 8px;
+  text-align: left;
+}
+
+.table-content th {
+  background: #f9fafb;
+  font-weight: 600;
+}
+
+.table-content tbody tr:nth-child(even) {
+  background: #f9fafb;
+}
+
+.empty-state {
+  padding: 40px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+@media print {
+  .container {
+    display: block;
+    padding: 0;
+    background: white;
+  }
+
+  .controls {
+    display: none;
+  }
+
+  .pages-wrapper {
+    gap: 0;
+  }
+
+  .paper {
+    box-shadow: none;
+    border: none;
+    margin: 0;
+    page-break-after: always;
+  }
+
+  .paper:last-child {
+    page-break-after: auto;
+  }
+
+  .content {
+    background: white;
+    border-color: #000;
+  }
+}
+</style> -->
+
+<template>
+  <div style="width: 1000px; height: 1000px">
+    <PdfViewer
+      :src="previewUrl"
+      app-title="BankClear Web Viewer"
+      address-path="/viewer/pdf?id=123"
+      download-name="statement.pdf"
+    />
+  </div>
+
   <div class="pdf-maker">
     <section class="panel">
       <h3 class="title">PDF 생성 & 첨부 업로드</h3>
@@ -101,6 +1988,8 @@
 
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, reactive, ref } from 'vue'
+
+import PdfViewer from '../doc-templates/PdfViewer.vue'
 
 type StatusType = 'info' | 'ok' | 'err'
 const status = reactive<{ type: StatusType; msg: string }>({ type: 'info', msg: '' })

@@ -2373,12 +2373,12 @@
     "/api/codes/payment-statuses": {
       "get": {
         "tags": ["[P06] 공통코드"],
-        "summary": "[P06-15] 🅿️ 지급 상태 목록 조회",
+        "summary": "[P06-15] 🅿️ 납부 여부 목록 조회",
         "description": "PaymentStatus enum의 모든 값을 조회합니다. 인증이 필요하지 않은 공개 API입니다.",
         "operationId": "getPaymentStatuses",
         "responses": {
           "200": {
-            "description": "지급 상태 목록 조회 성공",
+            "description": "납부 여부 목록 조회 성공",
             "content": {
               "*/*": {
                 "schema": {
@@ -2390,12 +2390,12 @@
         }
       }
     },
-    "/api/codes/adminInfo-linkTime": {
+    "/api/codes/admin-info-link-times": {
       "get": {
         "tags": ["[P06] 공통코드"],
         "summary": "[P06-16] 🅿️ 행정정보 연계 시점 목록 조회",
         "description": "AdminInfoLinkTime enum의 모든 값을 조회합니다. 인증이 필요하지 않은 공개 API입니다.",
-        "operationId": "getAdminInfoLinkTime",
+        "operationId": "getAdminInfoLinkTimes",
         "responses": {
           "200": {
             "description": "행정정보 연계 시점 목록 조회 성공",
@@ -2603,6 +2603,366 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/CodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/codes/action-types": {
+      "get": {
+        "tags": ["[P06] 공통코드"],
+        "summary": "[P06-27] 🅿️ action 구분 목록 조회",
+        "description": "ActionType enum의 모든 값을 조회합니다. 인증이 필요하지 않은 공개 API입니다.",
+        "operationId": "getActionTypes",
+        "responses": {
+          "200": {
+            "description": "action 구분 목록 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/codes/bond-purchase-types": {
+      "get": {
+        "tags": ["[P06] 공통코드"],
+        "summary": "[P06-28] 🅿️ 국민주택채권 매입 구분 목록 조회",
+        "description": "BondPurchaseType enum의 모든 값을 조회합니다. 인증이 필요하지 않은 공개 API입니다.",
+        "operationId": "getBondPurchaseTypes",
+        "responses": {
+          "200": {
+            "description": "국민주택채권 매입 구분 목록 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/codes/correction-types": {
+      "get": {
+        "tags": ["[P06] 공통코드"],
+        "summary": "[P06-29] 🅿️ 경정사항 구분 목록 조회",
+        "description": "CorrectionType enum의 모든 값을 조회합니다. 인증이 필요하지 않은 공개 API입니다.",
+        "operationId": "getCorrectionTypes",
+        "responses": {
+          "200": {
+            "description": "경정사항 구분 목록 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/codes/data-sources": {
+      "get": {
+        "tags": ["[P06] 공통코드"],
+        "summary": "[P06-30] 🅿️ 데이터 출처 목록 조회",
+        "description": "DataSource enum의 모든 값을 조회합니다. 인증이 필요하지 않은 공개 API입니다.",
+        "operationId": "getDataSources",
+        "responses": {
+          "200": {
+            "description": "데이터 출처 목록 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/codes/e-signature-methods": {
+      "get": {
+        "tags": ["[P06] 공통코드"],
+        "summary": "[P06-31] 🅿️ 전자서명 방식 목록 조회",
+        "description": "ESignatureMethod enum의 모든 값을 조회합니다. 인증이 필요하지 않은 공개 API입니다.",
+        "operationId": "getESignatureMethods",
+        "responses": {
+          "200": {
+            "description": "전자서명 방식 목록 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/codes/e-signature-statuses": {
+      "get": {
+        "tags": ["[P06] 공통코드"],
+        "summary": "[P06-32] 🅿️ 전자서명 진행 상태 목록 조회",
+        "description": "ESignatureStatus enum의 모든 값을 조회합니다. 인증이 필요하지 않은 공개 API입니다.",
+        "operationId": "getESignatureStatuses",
+        "responses": {
+          "200": {
+            "description": "전자서명 진행 상태 목록 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/codes/file-progress-document-types": {
+      "get": {
+        "tags": ["[P06] 공통코드"],
+        "summary": "[P06-33] 🅿️ 등기 진행 문서 종류 코드 목록 조회",
+        "description": "FileProgressDocumentType enum의 모든 값을 조회합니다. 인증이 필요하지 않은 공개 API입니다.",
+        "operationId": "getFileProgressDocumentTypes",
+        "responses": {
+          "200": {
+            "description": "등기 진행 문서 종류 코드 목록 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/codes/file-registry-types": {
+      "get": {
+        "tags": ["[P06] 공통코드"],
+        "summary": "[P06-34] 🅿️ 파일 등기 유형 목록 조회",
+        "description": "FileRegistryType enum의 모든 값을 조회합니다. 인증이 필요하지 않은 공개 API입니다.",
+        "operationId": "getFileRegistryTypes",
+        "responses": {
+          "200": {
+            "description": "파일 등기 유형 목록 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/codes/file-request-document-types": {
+      "get": {
+        "tags": ["[P06] 공통코드"],
+        "summary": "[P06-35] 🅿️ 등기 의뢰 문서 종류 코드 목록 조회",
+        "description": "FileRequestDocumentType enum의 모든 값을 조회합니다. 인증이 필요하지 않은 공개 API입니다.",
+        "operationId": "getFileRequestDocumentTypes",
+        "responses": {
+          "200": {
+            "description": "등기 의뢰 문서 종류 코드 목록 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/codes/ownership-types": {
+      "get": {
+        "tags": ["[P06] 공통코드"],
+        "summary": "[P06-36] 🅿️ 소유 형태 구분 목록 조회",
+        "description": "OwnershipType enum의 모든 값을 조회합니다. 인증이 필요하지 않은 공개 API입니다.",
+        "operationId": "getOwnershipTypes",
+        "responses": {
+          "200": {
+            "description": "소유 형태 구분 목록 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/codes/process-actions": {
+      "get": {
+        "tags": ["[P06] 공통코드"],
+        "summary": "[P06-37] 🅿️ 등기 진행 단계별 가능한 액션(버튼) 목록 조회",
+        "description": "ProcessAction enum의 모든 값을 조회합니다. 인증이 필요하지 않은 공개 API입니다.",
+        "operationId": "getProcessActions",
+        "responses": {
+          "200": {
+            "description": "등기 진행 단계별 가능한 액션(버튼) 목록 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/codes/property-build-types": {
+      "get": {
+        "tags": ["[P06] 공통코드"],
+        "summary": "[P06-38] 🅿️ 부동산 구분(세금신고) 목록 조회",
+        "description": "PropertyBuildType enum의 모든 값을 조회합니다. 인증이 필요하지 않은 공개 API입니다.",
+        "operationId": "getPropertyBuildTypes",
+        "responses": {
+          "200": {
+            "description": "부동산 구분(세금신고) 목록 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/codes/rpa-user-task-statuses": {
+      "get": {
+        "tags": ["[P06] 공통코드"],
+        "summary": "[P06-39] 🅿️ RPA 사용자 PC 작업 상태 목록 조회",
+        "description": "RpaUserTaskStatus enum의 모든 값을 조회합니다. 인증이 필요하지 않은 공개 API입니다.",
+        "operationId": "getRpaUserTaskStatuses",
+        "responses": {
+          "200": {
+            "description": "RPA 사용자 PC 작업 상태 목록 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/codes/rpa-user-task-types": {
+      "get": {
+        "tags": ["[P06] 공통코드"],
+        "summary": "[P06-40] 🅿️ RPA 사용자 PC 작업 종류 목록 조회",
+        "description": "RpaUserTaskType enum의 모든 값을 조회합니다. 인증이 필요하지 않은 공개 API입니다.",
+        "operationId": "getRpaUserTaskTypes",
+        "responses": {
+          "200": {
+            "description": "RPA 사용자 PC 작업 종류 목록 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/codes/confirmation-document-types": {
+      "get": {
+        "tags": ["[P06] 공통코드"],
+        "summary": "[P06-41] 🅿️ 본인확인정보 구분 목록 조회",
+        "description": "ConfirmationDocumentType enum의 모든 값을 조회합니다. 인증이 필요하지 않은 공개 API입니다.",
+        "operationId": "getConfirmationDocumentTypes",
+        "responses": {
+          "200": {
+            "description": "본인확인정보 구분 목록 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/codes/file-branch-document-types": {
+      "get": {
+        "tags": ["[P06] 공통코드"],
+        "summary": "[P06-42] 🅿️ 지점 등록 문서 종류 코드 목록 조회",
+        "description": "FileBranchDocumentType enum의 모든 값을 조회합니다. 인증이 필요하지 않은 공개 API입니다.",
+        "operationId": "getFileBranchDocumentTypes",
+        "responses": {
+          "200": {
+            "description": "지점 등록 문서 종류 코드 목록 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/codes/success-codes": {
+      "get": {
+        "tags": ["[P06] 공통코드"],
+        "summary": "[P06-43] 🅿️ API 성공 코드 목록 조회",
+        "description": "SuccessCode enum의 모든 값을 조회합니다. 인증이 필요하지 않은 공개 API입니다.",
+        "operationId": "getSuccessCodes",
+        "responses": {
+          "200": {
+            "description": "API 성공 코드 목록 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiCodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/codes/error-codes": {
+      "get": {
+        "tags": ["[P06] 공통코드"],
+        "summary": "[P06-44] 🅿️ API 오류 코드 목록 조회",
+        "description": "ErrorCode enum의 모든 값을 조회합니다. 인증이 필요하지 않은 공개 API입니다.",
+        "operationId": "getErrorCodes",
+        "responses": {
+          "200": {
+            "description": "API 오류 코드 목록 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiCodeResponse"
                 }
               }
             }
@@ -3101,6 +3461,16 @@
             "name": "hasRegistryRightCertificate",
             "in": "query",
             "description": "등기권리증 정보 생성 여부(true일 경우 부동산 소유자 정보도 함께 생성됨)",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "example": false
+          },
+          {
+            "name": "hasPropertyRights",
+            "in": "query",
+            "description": "부동산 권리사항 생성 여부",
             "required": false,
             "schema": {
               "type": "boolean"
@@ -4374,7 +4744,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/RegistryProgressProcessResponse"
                 }
               }
             }
@@ -9484,39 +9854,38 @@
             }
           },
           "officeInfo": {
-            "$ref": "#/components/schemas/RegistryProgressOfficeUpdateRequest"
+            "$ref": "#/components/schemas/RegistryReceiptOfficeUpdateRequest"
           }
         },
         "description": "부동산 정보 전체 교체 요청"
       },
-      "RegistryProgressOfficeUpdateRequest": {
+      "RegistryReceiptOfficeUpdateRequest": {
         "type": "object",
         "properties": {
-          "transferRegistryMethod": {
+          "registryType": {
             "type": "string",
-            "description": "이전등기방식",
+            "description": "등기 유형",
+            "example": "MORTGAGE",
+            "enum": [
+              "OWNERSHIP_TRANSFER",
+              "MORTGAGE",
+              "SURFACE_RIGHT",
+              "CHANGE",
+              "CORRECTION",
+              "MORTGAGE_CANCELLATION",
+              "SURFACE_RIGHT_CANCELLATION"
+            ]
+          },
+          "registryMethod": {
+            "type": "string",
+            "description": "등기 방식",
             "example": "ELECTRONIC",
             "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
           },
-          "transferJurisdictionOffice": {
-            "maxLength": 500,
-            "minLength": 0,
+          "receiptRegistryOffice": {
             "type": "string",
-            "description": "이전관할등기소",
-            "example": "서울서부지방법원등기국"
-          },
-          "establishmentRegistryMethod": {
-            "type": "string",
-            "description": "설정등기방식",
-            "example": "ELECTRONIC",
-            "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
-          },
-          "establishmentJurisdictionOffice": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string",
-            "description": "설정관할등기소",
-            "example": "서울서부지방법원등기국, 광주지방법원 진도등기소"
+            "description": "접수 등기소",
+            "example": "서울서부지방법원 등기국, 서울동부지방법원 등기국"
           },
           "isSpecialLawApplied": {
             "type": "boolean",
@@ -9602,24 +9971,6 @@
             "type": "string",
             "description": "부동산표시",
             "example": "1.토지\n\n 고유번호[1234-5678-901234]\n\n 서울특별시 용산구 이태원동 225-39\n\n  대 204m2"
-          },
-          "establishmentRegistryMethod": {
-            "type": "string",
-            "description": "설정등기방식",
-            "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
-          },
-          "establishmentJurisdictionOffice": {
-            "type": "string",
-            "description": "설정관할등기소"
-          },
-          "transferRegistryMethod": {
-            "type": "string",
-            "description": "이전등기방식",
-            "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
-          },
-          "transferJurisdictionOffice": {
-            "type": "string",
-            "description": "이전관할등기소"
           }
         },
         "description": "부동산 리스트 상세 조회"
@@ -9641,39 +9992,43 @@
               "$ref": "#/components/schemas/BranchPrepaidCardResponse"
             }
           },
-          "progressOfficesOptions": {
-            "$ref": "#/components/schemas/RegistryProgressOfficeResponse"
+          "receiptOfficesOptions": {
+            "type": "array",
+            "description": "접수등기소 정보",
+            "items": {
+              "$ref": "#/components/schemas/RegistryReceiptOfficeOption"
+            }
           }
         },
         "description": "부동산 리스트 조회"
       },
-      "RegistryProgressOfficeResponse": {
+      "RegistryReceiptOfficeOption": {
         "type": "object",
         "properties": {
-          "registryManagementNumberBase": {
+          "registryType": {
             "type": "string",
-            "description": "등기관리번호(선행/후행 제외)",
-            "example": "RM2024112000001"
+            "description": "등기 유형",
+            "example": "MORTGAGE",
+            "enum": [
+              "OWNERSHIP_TRANSFER",
+              "MORTGAGE",
+              "SURFACE_RIGHT",
+              "CHANGE",
+              "CORRECTION",
+              "MORTGAGE_CANCELLATION",
+              "SURFACE_RIGHT_CANCELLATION"
+            ]
           },
-          "transferRegistryMethod": {
+          "registryMethod": {
             "type": "string",
-            "description": "이전등기방식",
-            "example": "전자등기"
+            "description": "등기 방식",
+            "example": "ELECTRONIC",
+            "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
           },
-          "transferJurisdictionOffice": {
+          "receiptRegistryOffice": {
             "type": "string",
-            "description": "이전관할등기소",
-            "example": "서울서부지방법원등기국"
-          },
-          "establishmentRegistryMethod": {
-            "type": "string",
-            "description": "설정등기방식",
-            "example": "전자등기"
-          },
-          "establishmentJurisdictionOffice": {
-            "type": "string",
-            "description": "설정관할등기소",
-            "example": "서울서부지방법원등기국"
+            "description": "접수 등기소",
+            "example": "서울서부지방법원 등기국, 서울동부지방법원 등기국"
           },
           "isSpecialLawApplied": {
             "type": "boolean",
@@ -9681,7 +10036,7 @@
             "example": false
           }
         },
-        "description": "등기 진행 접수등기소 정보 조회"
+        "description": "접수등기소 옵션"
       },
       "ApplicantCorrectionReqItem": {
         "required": ["id", "progressPartyId"],
@@ -11315,6 +11670,23 @@
             "type": "string",
             "description": "비밀번호",
             "example": "1234"
+          },
+          "confirmationDocumentType": {
+            "type": "string",
+            "description": "본인확인 구분(확인서면인경우)",
+            "example": "RESIDENT_REGISTRATION",
+            "enum": [
+              "RESIDENT_REGISTRATION",
+              "DRIVER_LICENSE",
+              "PASSPORT",
+              "FOREIGN_REGISTRATION",
+              "DOMESTIC_RESIDENCE_REPORT"
+            ]
+          },
+          "specialNote": {
+            "type": "string",
+            "description": "특이사항",
+            "example": "특이사항입니다"
           }
         },
         "description": "등기권리증 정보 항목"
@@ -11446,6 +11818,23 @@
             "type": "string",
             "description": "비밀번호",
             "example": "1234"
+          },
+          "confirmationDocumentType": {
+            "type": "string",
+            "description": "본인확인 구분(확인서면인경우)",
+            "example": "RESIDENT_REGISTRATION",
+            "enum": [
+              "RESIDENT_REGISTRATION",
+              "DRIVER_LICENSE",
+              "PASSPORT",
+              "FOREIGN_REGISTRATION",
+              "DOMESTIC_RESIDENCE_REPORT"
+            ]
+          },
+          "specialNote": {
+            "type": "string",
+            "description": "특이사항",
+            "example": "특이사항입니다"
           }
         },
         "description": "등기권리증 정보 조회"
@@ -11505,6 +11894,14 @@
             "items": {
               "type": "string",
               "description": "등기권리증 구분 옵션 (Enum)"
+            }
+          },
+          "identityDocumentOptions": {
+            "type": "array",
+            "description": "확인서면 구분 옵션 - 등기권리증이 확인서면일경우에만 노출 (Enum)",
+            "items": {
+              "type": "string",
+              "description": "확인서면 구분 옵션 - 등기권리증이 확인서면일경우에만 노출 (Enum)"
             }
           }
         },
@@ -14171,7 +14568,7 @@
             "description": "작성ID",
             "example": "banklaw123"
           },
-          "registryOffice": {
+          "registryReceiptOffice": {
             "type": "string",
             "description": "접수등기소",
             "example": "서울서부지방법원 등기국"
@@ -14263,7 +14660,7 @@
               "$ref": "#/components/schemas/PropertyInfo"
             }
           },
-          "registryOffice": {
+          "registryReceiptOffice": {
             "type": "string",
             "description": "접수등기소 정보",
             "example": "서울서부지방법원 등기국"
@@ -14473,7 +14870,7 @@
             "example": "ELECTRONIC",
             "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
           },
-          "establishmentJurisdictionOffice": {
+          "registryReceiptOffice": {
             "type": "string",
             "description": "접수등기소",
             "example": "서울서부지방법원 등기국"
@@ -15486,6 +15883,201 @@
         },
         "description": "의뢰 업무별 추가 정보"
       },
+      "ProcessActionResponse": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "description": "액션",
+            "enum": [
+              "COMPLETE_INSPECTION",
+              "REQUEST_RESUBMIT",
+              "COMPLETE_APPLICATION_INFO",
+              "COMPLETE_ADMIN_CONSENT",
+              "REQUEST_OBLIGOR_E_SIGNATURE",
+              "COMPLETE_OBLIGOR_E_SIGNATURE",
+              "COMPLETE_OBLIGEE_E_SIGNATURE",
+              "COMPLETE_TAX_DECLARATION",
+              "COMPLETE_HOUSING_BOND_PURCHASE",
+              "SUBMIT_LOAN_ACCOUNT",
+              "SUBMIT_LOAN_RECEIPT",
+              "COMPLETE_TRANSFER_CERTIFICATE",
+              "COMPLETE_APPLICATION_CREATE",
+              "REQUEST_INTERNET_E_SIGNATURE",
+              "COMPLETE_INTERNET_E_SIGNATURE",
+              "REQUEST_CASE_DELEGATION",
+              "COMPLETE_CASE_DELEGATION",
+              "SUBMIT_REGISTRY_RECEIVED",
+              "SUBMIT_COST_STATEMENT",
+              "SUBMIT_COMPLETION_DOCUMENTS",
+              "SUBMIT_COMPLETION_DOCUMENTS_VISIT"
+            ]
+          },
+          "actionDescription": {
+            "type": "string",
+            "description": "액션설명"
+          },
+          "nextStatus": {
+            "type": "string",
+            "description": "다음진행상태",
+            "enum": [
+              "ASSIGN_MANAGER",
+              "INSPECT_REGISTRY_INFO",
+              "REQUEST_RESUBMISSION",
+              "REGISTER_APPLICATION_INFO",
+              "REQUEST_ADMIN_INFO_CONSENT",
+              "OBLIGOR_E_SIGNATURE",
+              "OBLIGEE_E_SIGNATURE",
+              "TAX_DECLARATION_AGENCY",
+              "PURCHASE_HOUSING_BOND",
+              "REGISTER_LOAN_ACCOUNT",
+              "WAITING_LOAN_PAYMENT",
+              "LOAN_PAYMENT_COMPLETED",
+              "REGISTER_TRANSFER_CERTIFICATE",
+              "CREATE_APPLICATION",
+              "INTERNET_REGISTRY_E_SIGNATURE",
+              "REQUEST_CASE_DELEGATION",
+              "WAITING_CASE_DELEGATION",
+              "CASE_DELEGATION_COMPLETED",
+              "REGISTRY_RECEIVED",
+              "CREATE_COST_STATEMENT",
+              "REGISTER_COMPLETION_DOCUMENTS",
+              "SUBMIT_COMPLETION_DOCUMENTS",
+              "REGISTRY_COMPLETED",
+              "REGISTRY_CANCELLED"
+            ]
+          },
+          "nextStatusDescription": {
+            "type": "string",
+            "description": "다음진행상태설명"
+          }
+        },
+        "description": "프로세스 액션 응답 DTO"
+      },
+      "ProcessStepResponse": {
+        "type": "object",
+        "properties": {
+          "step": {
+            "type": "string",
+            "description": "단계",
+            "enum": [
+              "ASSIGN_MANAGER",
+              "INSPECT_REGISTRY_INFO",
+              "REQUEST_RESUBMISSION",
+              "REGISTER_APPLICATION_INFO",
+              "REQUEST_ADMIN_INFO_CONSENT",
+              "OBLIGOR_E_SIGNATURE",
+              "OBLIGEE_E_SIGNATURE",
+              "TAX_DECLARATION_AGENCY",
+              "PURCHASE_HOUSING_BOND",
+              "REGISTER_LOAN_ACCOUNT",
+              "WAITING_LOAN_PAYMENT",
+              "LOAN_PAYMENT_COMPLETED",
+              "REGISTER_TRANSFER_CERTIFICATE",
+              "CREATE_APPLICATION",
+              "INTERNET_REGISTRY_E_SIGNATURE",
+              "REQUEST_CASE_DELEGATION",
+              "WAITING_CASE_DELEGATION",
+              "CASE_DELEGATION_COMPLETED",
+              "REGISTRY_RECEIVED",
+              "CREATE_COST_STATEMENT",
+              "REGISTER_COMPLETION_DOCUMENTS",
+              "SUBMIT_COMPLETION_DOCUMENTS",
+              "REGISTRY_COMPLETED",
+              "REGISTRY_CANCELLED"
+            ]
+          },
+          "stepTitle": {
+            "type": "string",
+            "description": "단계제목"
+          },
+          "stepDescription": {
+            "type": "string",
+            "description": "단계설명"
+          },
+          "isCurrentStep": {
+            "type": "boolean",
+            "description": "현재단계여부"
+          },
+          "actions": {
+            "type": "array",
+            "description": "단계별가능액션목록",
+            "items": {
+              "$ref": "#/components/schemas/ProcessActionResponse"
+            }
+          }
+        },
+        "description": "프로세스 단계 응답 DTO"
+      },
+      "RegistryProgressProcessResponse": {
+        "type": "object",
+        "properties": {
+          "registryManagementNumber": {
+            "type": "string",
+            "description": "등기관리번호"
+          },
+          "progressType": {
+            "type": "string",
+            "description": "등기진행유형",
+            "enum": ["TYPE_01", "TYPE_02", "TYPE_04", "TYPE_05", "TYPE_07"]
+          },
+          "progressTypeDescription": {
+            "type": "string",
+            "description": "등기진행유형설명"
+          },
+          "registryMethod": {
+            "type": "string",
+            "description": "등기방식",
+            "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
+          },
+          "registryMethodDescription": {
+            "type": "string",
+            "description": "등기방식설명"
+          },
+          "currentStatus": {
+            "type": "string",
+            "description": "현재진행상태",
+            "enum": [
+              "ASSIGN_MANAGER",
+              "INSPECT_REGISTRY_INFO",
+              "REQUEST_RESUBMISSION",
+              "REGISTER_APPLICATION_INFO",
+              "REQUEST_ADMIN_INFO_CONSENT",
+              "OBLIGOR_E_SIGNATURE",
+              "OBLIGEE_E_SIGNATURE",
+              "TAX_DECLARATION_AGENCY",
+              "PURCHASE_HOUSING_BOND",
+              "REGISTER_LOAN_ACCOUNT",
+              "WAITING_LOAN_PAYMENT",
+              "LOAN_PAYMENT_COMPLETED",
+              "REGISTER_TRANSFER_CERTIFICATE",
+              "CREATE_APPLICATION",
+              "INTERNET_REGISTRY_E_SIGNATURE",
+              "REQUEST_CASE_DELEGATION",
+              "WAITING_CASE_DELEGATION",
+              "CASE_DELEGATION_COMPLETED",
+              "REGISTRY_RECEIVED",
+              "CREATE_COST_STATEMENT",
+              "REGISTER_COMPLETION_DOCUMENTS",
+              "SUBMIT_COMPLETION_DOCUMENTS",
+              "REGISTRY_COMPLETED",
+              "REGISTRY_CANCELLED"
+            ]
+          },
+          "currentStatusDescription": {
+            "type": "string",
+            "description": "현재진행상태설명"
+          },
+          "steps": {
+            "type": "array",
+            "description": "업무 프로세스 단계 목록",
+            "items": {
+              "$ref": "#/components/schemas/ProcessStepResponse"
+            }
+          }
+        },
+        "description": "등기 진행 업무 프로세스"
+      },
       "RegistryProgressOwnershipTransferResponse": {
         "type": "object",
         "properties": {
@@ -16223,7 +16815,7 @@
             "example": "ELECTRONIC",
             "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
           },
-          "establishmentJurisdictionOffice": {
+          "registryReceiptOffice": {
             "type": "string",
             "description": "접수등기소",
             "example": "서울서부지방법원 등기국"
@@ -16732,7 +17324,7 @@
             "example": "ELECTRONIC",
             "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
           },
-          "establishmentJurisdictionOffice": {
+          "registryReceiptOffice": {
             "type": "string",
             "description": "접수등기소",
             "example": "서울서부지방법원 등기국"
@@ -17093,6 +17685,33 @@
           }
         },
         "description": " 사용자 권한 레벨 응답"
+      },
+      "ApiCodeResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "코드 값 (Enum name)",
+            "example": "OK"
+          },
+          "status": {
+            "type": "integer",
+            "description": "상태 코드",
+            "format": "int32",
+            "example": 200
+          },
+          "title": {
+            "type": "string",
+            "description": "응답 제목",
+            "example": "요청 성공"
+          },
+          "message": {
+            "type": "string",
+            "description": "응답 메시지",
+            "example": "요청이 성공적으로 처리되었습니다."
+          }
+        },
+        "description": "API 코드 응답"
       },
       "BranchDetailResponse": {
         "type": "object",

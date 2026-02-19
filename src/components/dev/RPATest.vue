@@ -148,7 +148,7 @@ const testPost = async () => {
     try {
       parsedData = JSON.parse(postData.value)
     } catch (e) {
-      throw new Error(`JSON 형식이 올바르지 않습니다: ${(e as Error).message}`)
+      throw new Error(`JSON 형식이 올바르지 않습니다: ${(e as Error).message}`, { cause: e })
     }
 
     const response = await fetch(`${serverUrl.value}/`, {

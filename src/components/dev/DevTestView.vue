@@ -1,4 +1,15 @@
 <template>
+  <div style="width: 1000px; height: 1000px">
+    <PdfViewer
+      src="/pdf/test.pdf"
+      app-title="BankClear Web Viewer"
+      address-path="/viewer/pdf?id=123"
+      download-name="statement.pdf"
+    />
+  </div>
+
+  <PdfConverter />
+
   <div class="test-area" style="background-color: #fff">
     <!-- 공통코드 테스트 섹션 -->
     <div class="code-test-section">
@@ -757,6 +768,8 @@ import FloatingInput from '@/components/template/input/FloatingInput.vue'
 import Pagination from '@/components/template/PaginationItem.vue'
 import { useCodes } from '@/composables/api/useCodes'
 
+import PdfConverter from '../doc-templates/PdfConverter.vue'
+import PdfViewer from '../doc-templates/PdfViewer.vue'
 import AddrTest from './AddrTest.vue'
 import PdfTest from './PdfTest.vue'
 

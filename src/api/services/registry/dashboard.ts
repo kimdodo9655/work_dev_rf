@@ -37,6 +37,6 @@ export const registryDashboardAPI = {
     // --------------------------------------------------
     // [R02A-04][GET - /api/registry/progress/statistics] 진행 상태별 업무현황 조회
     // --------------------------------------------------
-    return apiHelpers.get(API.REGISTRY_DASHBOARD.STATISTICS, query)
+    return apiHelpers.get(API.REGISTRY_DASHBOARD.CASE_PROCESSING_STATUS, query)
   }
 }

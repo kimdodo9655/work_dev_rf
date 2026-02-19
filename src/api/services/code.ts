@@ -143,7 +143,7 @@ export const codeAPI = {
     // --------------------------------------------------
     // [P06-16][GET - /api/codes/adminInfo-linkTime] 행정정보 연계 시점 목록 조회
     // --------------------------------------------------
-    return apiHelpers.get<GetAdminInfoLinkTimeResponse>(API.CODE.ADMIN_INFO_LINK_TIME)
+    return apiHelpers.get<GetAdminInfoLinkTimeResponse>(API.CODE.ADMIN_INFO_LINK_TIMES)
   },
 
   async userStatuses() {
@@ -157,7 +157,7 @@ export const codeAPI = {
     // --------------------------------------------------
     // [P06-18][GET - /api/codes/assigned-works] 배정 업무 목록 조회
     // --------------------------------------------------
-    return apiHelpers.get<GetAssignedWorksResponse>(API.CODE.ASSIGNMENT_WORKS)
+    return apiHelpers.get<GetAssignedWorksResponse>(API.CODE.ASSIGNED_WORKS)
   },
 
   async progressStatuses() {

@@ -2,8 +2,8 @@
  * API 엔드포인트 상수
  * 모든 API 경로를 한 곳에서 관리
  *
- * @generated 2025-01-28
- * @total 202개 엔드포인트
+ * @generated 2025-02-19
+ * @total 220개 엔드포인트
  * @categories 43개
  */
 export const API = {
@@ -113,17 +113,17 @@ export const API = {
     USER_ROLE_LEVELS: '/api/codes/user-role-levels', // [P06-05][GET] 사용자 권한 레벨 목록 조회
     REGISTRY_TYPES: '/api/codes/registry-types', // [P06-06][GET] 등기 유형 목록 조회
     REGISTRY_CAUSES: '/api/codes/registry-causes', // [P06-07][GET] 등기 원인 목록 조회
-    PARTY_TYPES: '/api/codes/party-types', // [P06-08][GET] 당사자 구분 목록 조회
+    PARTY_TYPES: '/api/codes/party-types', // [P06-08][GET] 등록번호 구분 목록 조회
     PROPERTY_TYPES: '/api/codes/property-types', // [P06-09][GET] 부동산 구분 목록 조회
     SECTIONS: '/api/codes/sections', // [P06-10][GET] 구분 목록 조회
     REGISTRY_METHODS: '/api/codes/registry-methods', // [P06-11][GET] 등기 방식 목록 조회
     SECURED_DEBT_SCOPE_TYPES: '/api/codes/secured-debt-scope-types', // [P06-12][GET] 채권최고액 범위 구분 목록 조회
     CERTIFICATE_TYPES: '/api/codes/certificate-types', // [P06-13][GET] 증명서 구분 목록 조회
     WORK_TYPES: '/api/codes/work-types', // [P06-14][GET] 업무 구분 목록 조회
-    PAYMENT_STATUSES: '/api/codes/payment-statuses', // [P06-15][GET] 지급 상태 목록 조회
-    ADMIN_INFO_LINK_TIME: '/api/codes/adminInfo-linkTime', // [P06-16][GET] 행정정보 연계 시점 목록 조회
+    PAYMENT_STATUSES: '/api/codes/payment-statuses', // [P06-15][GET] 납부 여부 목록 조회
+    ADMIN_INFO_LINK_TIMES: '/api/codes/admin-info-link-times', // [P06-16][GET] 행정정보 연계 시점 목록 조회
     USER_STATUSES: '/api/codes/user-statuses', // [P06-17][GET] 사용자 상태 목록 조회
-    ASSIGNMENT_WORKS: '/api/codes/assigned-works', // [P06-18][GET] 배정 업무 목록 조회
+    ASSIGNED_WORKS: '/api/codes/assigned-works', // [P06-18][GET] 배정 업무 목록 조회
     PROGRESS_STATUSES: '/api/codes/progress-statuses', // [P06-19][GET] 진행 상태 목록 조회
     QUOTE_PROGRESS_STATUSES: '/api/codes/quote-progress-statuses', // [P06-20][GET] 등기 견적 진행 상태 목록 조회
     ESTIMATE_WRITING_STATUSES: '/api/codes/estimate-writing-statuses', // [P06-21][GET] 등기 견적 작성 여부 목록 조회
@@ -131,7 +131,25 @@ export const API = {
     PROGRESS_TYPES: '/api/codes/progress-types', // [P06-23][GET] 등기 진행 유형 목록 조회
     PARTY_ROLES: '/api/codes/party-roles', // [P06-24][GET] 당사자 구분 목록 조회
     PARTY_ROLES_FOR_REQUEST: '/api/codes/party-roles-for-request', // [P06-25][GET] 당사자 구분 (등기의뢰 계약당사자) 목록 조회
-    REGISTRY_TYPES_FOR_ASSIGN: '/api/codes/registry-types-for-assign' // [P06-26][GET] 금융기관 담당(배정) 등기유형 목록 조회
+    REGISTRY_TYPES_FOR_ASSIGN: '/api/codes/registry-types-for-assign', // [P06-26][GET] 금융기관 담당(배정) 등기유형 목록 조회
+    ACTION_TYPES: '/api/codes/action-types', // [P06-27][GET] action 구분 목록 조회
+    BOND_PURCHASE_TYPES: '/api/codes/bond-purchase-types', // [P06-28][GET] 국민주택채권 매입 구분 목록 조회
+    CORRECTION_TYPES: '/api/codes/correction-types', // [P06-29][GET] 경정사항 구분 목록 조회
+    DATA_SOURCES: '/api/codes/data-sources', // [P06-30][GET] 데이터 출처 목록 조회
+    E_SIGNATURE_METHODS: '/api/codes/e-signature-methods', // [P06-31][GET] 전자서명 방식 목록 조회
+    E_SIGNATURE_STATUSES: '/api/codes/e-signature-statuses', // [P06-32][GET] 전자서명 진행 상태 목록 조회
+    FILE_PROGRESS_DOCUMENT_TYPES: '/api/codes/file-progress-document-types', // [P06-33][GET] 등기 진행 문서 종류 코드 목록 조회
+    FILE_REGISTRY_TYPES: '/api/codes/file-registry-types', // [P06-34][GET] 파일 등기 유형 목록 조회
+    FILE_REQUEST_DOCUMENT_TYPES: '/api/codes/file-request-document-types', // [P06-35][GET] 등기 의뢰 문서 종류 코드 목록 조회
+    OWNERSHIP_TYPES: '/api/codes/ownership-types', // [P06-36][GET] 소유 형태 구분 목록 조회
+    PROCESS_ACTIONS: '/api/codes/process-actions', // [P06-37][GET] 등기 진행 단계별 가능한 액션(버튼) 목록 조회
+    PROPERTY_BUILD_TYPES: '/api/codes/property-build-types', // [P06-38][GET] 부동산 구분(세금신고) 목록 조회
+    RPA_USER_TASK_STATUSES: '/api/codes/rpa-user-task-statuses', // [P06-39][GET] RPA 사용자 PC 작업 상태 목록 조회
+    RPA_USER_TASK_TYPES: '/api/codes/rpa-user-task-types', // [P06-40][GET] RPA 사용자 PC 작업 종류 목록 조회
+    CONFIRMATION_DOCUMENT_TYPES: '/api/codes/confirmation-document-types', // [P06-41][GET] 본인확인정보 구분 목록 조회
+    FILE_BRANCH_DOCUMENT_TYPES: '/api/codes/file-branch-document-types', // [P06-42][GET] 지점 등록 문서 종류 코드 목록 조회
+    SUCCESS_CODES: '/api/codes/success-codes', // [P06-43][GET] API 성공 코드 목록 조회
+    ERROR_CODES: '/api/codes/error-codes' // [P06-44][GET] API 오류 코드 목록 조회
   },
 
   // [P07] 알림
@@ -185,7 +203,7 @@ export const API = {
     SUMMARY: '/api/registry/progress/summary', // [R02A-01][GET] 나의 진행현황 조회
     TODAY: '/api/registry/progress/today', // [R02A-02][GET] 오늘의 접수사건 조회
     SUMMARY_2: '/api/registry/progress/estimates/summary', // [R02A-03][GET] 견적현황 요약 조회
-    STATISTICS: '/api/registry/progress/statistics' // [R02A-04][GET] 진행 상태별 업무현황 조회
+    CASE_PROCESSING_STATUS: '/api/registry/progress/case-processing-status' // [R02A-04][GET] 사건처리현황 조회
   },
 
   // [R02B] 등기진행-기본

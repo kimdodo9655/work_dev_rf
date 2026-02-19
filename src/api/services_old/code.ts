@@ -144,7 +144,7 @@ export const codeAPI = {
    * @throws {ApiError} 조회 실패 시
    */
   async getAdminInfoLinkTime() {
-    return apiHelpers.get<ApiResponse<Code[]>>(API.CODE.ADMIN_INFO_LINK_TIME)
+    return apiHelpers.get<ApiResponse<Code[]>>(API.CODE.ADMIN_INFO_LINK_TIMES)
   },
 
   /**
@@ -198,7 +198,7 @@ export const codeAPI = {
    * @throws {ApiError} 조회 실패 시
    */
   async getAssignmentWorks() {
-    return apiHelpers.get<ApiResponse<Code[]>>(API.CODE.ASSIGNMENT_WORKS)
+    return apiHelpers.get<ApiResponse<Code[]>>(API.CODE.ASSIGNED_WORKS)
   },
 
   /**

@@ -65,6 +65,9 @@
               </button>
             </div>
           </div>
+
+          <!-- 신청서 양식 -->
+          <PdfConverter />
         </div>
       </div>
     </div>
@@ -87,6 +90,7 @@
 import { computed, ref, watch } from 'vue'
 
 import { registryTypeAPI } from '@/api/services/registry'
+import PdfConverter from '@/components/doc-templates/PdfConverter.vue'
 import CaseCertInfoRegModal from '@/components/registration/modals/CaseCertInfoRegModal.vue'
 import { useThrottle } from '@/composables/utils/useThrottle'
 
