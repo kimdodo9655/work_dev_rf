@@ -5,6 +5,8 @@
 import { apiHelpers } from '@/api/client'
 import { API } from '@/api/endpoints'
 import type {
+  LoginRequest,
+  LoginResponse,
   LogoutResponse,
   RefreshTokenRequest,
   RefreshTokenResponse,
@@ -24,11 +26,11 @@ export const authAPI = {
     return apiHelpers.post<SignUpResponse>(API.AUTH.SIGNUP, data)
   },
 
-  async login() {
+  async login(data: LoginRequest) {
     // --------------------------------------------------
     // [P04-02][POST - /api/auth/login] 로그인
     // --------------------------------------------------
-    return apiHelpers.post(API.AUTH.LOGIN)
+    return apiHelpers.post<LoginResponse>(API.AUTH.LOGIN, data)
   },
 
   async logout() {

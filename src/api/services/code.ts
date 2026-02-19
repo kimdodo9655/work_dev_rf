@@ -5,20 +5,35 @@
 import { apiHelpers } from '@/api/client'
 import { API } from '@/api/endpoints'
 import type {
+  GetActionTypesResponse,
   GetAdminInfoLinkTimeResponse,
   GetAssignedWorksResponse,
+  GetBondPurchaseTypesResponse,
   GetBranchStatusesResponse,
   GetCertificateTypesResponse,
+  GetConfirmationDocumentTypesResponse,
+  GetCorrectionTypesResponse,
+  GetDataSourcesResponse,
+  GetErrorCodesResponse,
+  GetESignatureMethodsResponse,
+  GetESignatureStatusesResponse,
   GetEstimateSelectionStatusesResponse,
   GetEstimateWritingStatusesResponse,
+  GetFileBranchDocumentTypesResponse,
+  GetFileProgressDocumentTypesResponse,
+  GetFileRegistryTypesResponse,
+  GetFileRequestDocumentTypesResponse,
   GetOrganizationStatusesResponse,
   GetOrganizationTypesResponse,
+  GetOwnershipTypesResponse,
   GetPartyRolesForRequestResponse,
   GetPartyRolesResponse,
   GetPartyTypesResponse,
   GetPaymentStatusesResponse,
+  GetProcessActionsResponse,
   GetProgressStatusesResponse,
   GetProgressTypesResponse,
+  GetPropertyBuildTypesResponse,
   GetPropertyTypesResponse,
   GetQualifiedTypesResponse,
   GetQuoteProgressStatusesResponse,
@@ -26,8 +41,11 @@ import type {
   GetRegistryMethodsResponse,
   GetRegistryTypesForAssignResponse,
   GetRegistryTypesResponse,
+  GetRpaUserTaskStatusesResponse,
+  GetRpaUserTaskTypesResponse,
   GetSectionsResponse,
   GetSecuredDebtScopeTypesResponse,
+  GetSuccessCodesResponse,
   GetUserRoleLevelsResponse,
   GetUserStatusesResponse,
   GetWorkTypesResponse
@@ -141,7 +159,7 @@ export const codeAPI = {
 
   async adminInfoLinkTime() {
     // --------------------------------------------------
-    // [P06-16][GET - /api/codes/adminInfo-linkTime] 행정정보 연계 시점 목록 조회
+    // [P06-16][GET - /api/codes/admin-info-link-times] 행정정보 연계 시점 목록 조회
     // --------------------------------------------------
     return apiHelpers.get<GetAdminInfoLinkTimeResponse>(API.CODE.ADMIN_INFO_LINK_TIMES)
   },
@@ -204,11 +222,141 @@ export const codeAPI = {
     return apiHelpers.get<GetPartyRolesResponse>(API.CODE.PARTY_ROLES)
   },
 
-  async partyRolesForRequest(_data: GetPartyRolesForRequestResponse) {
+  async partyRolesForRequest() {
     // --------------------------------------------------
     // [P06-25][GET - /api/codes/party-roles-for-request] 당사자 구분 (등기의뢰 계약당사자) 목록 조회
     // --------------------------------------------------
     return apiHelpers.get<GetPartyRolesForRequestResponse>(API.CODE.PARTY_ROLES_FOR_REQUEST)
+  },
+
+  async actionTypes() {
+    // --------------------------------------------------
+    // [P06-27][GET - /api/codes/action-types] action 구분 목록 조회
+    // --------------------------------------------------
+    return apiHelpers.get<GetActionTypesResponse>(API.CODE.ACTION_TYPES)
+  },
+
+  async bondPurchaseTypes() {
+    // --------------------------------------------------
+    // [P06-28][GET - /api/codes/bond-purchase-types] 국민주택채권 매입 구분 목록 조회
+    // --------------------------------------------------
+    return apiHelpers.get<GetBondPurchaseTypesResponse>(API.CODE.BOND_PURCHASE_TYPES)
+  },
+
+  async correctionTypes() {
+    // --------------------------------------------------
+    // [P06-29][GET - /api/codes/correction-types] 경정사항 구분 목록 조회
+    // --------------------------------------------------
+    return apiHelpers.get<GetCorrectionTypesResponse>(API.CODE.CORRECTION_TYPES)
+  },
+
+  async dataSources() {
+    // --------------------------------------------------
+    // [P06-30][GET - /api/codes/data-sources] 데이터 출처 목록 조회
+    // --------------------------------------------------
+    return apiHelpers.get<GetDataSourcesResponse>(API.CODE.DATA_SOURCES)
+  },
+
+  async eSignatureMethods() {
+    // --------------------------------------------------
+    // [P06-31][GET - /api/codes/e-signature-methods] 전자서명 방식 목록 조회
+    // --------------------------------------------------
+    return apiHelpers.get<GetESignatureMethodsResponse>(API.CODE.E_SIGNATURE_METHODS)
+  },
+
+  async eSignatureStatuses() {
+    // --------------------------------------------------
+    // [P06-32][GET - /api/codes/e-signature-statuses] 전자서명 진행 상태 목록 조회
+    // --------------------------------------------------
+    return apiHelpers.get<GetESignatureStatusesResponse>(API.CODE.E_SIGNATURE_STATUSES)
+  },
+
+  async fileProgressDocumentTypes() {
+    // --------------------------------------------------
+    // [P06-33][GET - /api/codes/file-progress-document-types] 등기 진행 문서 종류 코드 목록 조회
+    // --------------------------------------------------
+    return apiHelpers.get<GetFileProgressDocumentTypesResponse>(
+      API.CODE.FILE_PROGRESS_DOCUMENT_TYPES
+    )
+  },
+
+  async fileRegistryTypes() {
+    // --------------------------------------------------
+    // [P06-34][GET - /api/codes/file-registry-types] 파일 등기 유형 목록 조회
+    // --------------------------------------------------
+    return apiHelpers.get<GetFileRegistryTypesResponse>(API.CODE.FILE_REGISTRY_TYPES)
+  },
+
+  async fileRequestDocumentTypes() {
+    // --------------------------------------------------
+    // [P06-35][GET - /api/codes/file-request-document-types] 등기 의뢰 문서 종류 코드 목록 조회
+    // --------------------------------------------------
+    return apiHelpers.get<GetFileRequestDocumentTypesResponse>(API.CODE.FILE_REQUEST_DOCUMENT_TYPES)
+  },
+
+  async ownershipTypes() {
+    // --------------------------------------------------
+    // [P06-36][GET - /api/codes/ownership-types] 소유 형태 구분 목록 조회
+    // --------------------------------------------------
+    return apiHelpers.get<GetOwnershipTypesResponse>(API.CODE.OWNERSHIP_TYPES)
+  },
+
+  async processActions() {
+    // --------------------------------------------------
+    // [P06-37][GET - /api/codes/process-actions] 등기 진행 단계별 가능한 액션(버튼) 목록 조회
+    // --------------------------------------------------
+    return apiHelpers.get<GetProcessActionsResponse>(API.CODE.PROCESS_ACTIONS)
+  },
+
+  async propertyBuildTypes() {
+    // --------------------------------------------------
+    // [P06-38][GET - /api/codes/property-build-types] 부동산 구분(세금신고) 목록 조회
+    // --------------------------------------------------
+    return apiHelpers.get<GetPropertyBuildTypesResponse>(API.CODE.PROPERTY_BUILD_TYPES)
+  },
+
+  async rpaUserTaskStatuses() {
+    // --------------------------------------------------
+    // [P06-39][GET - /api/codes/rpa-user-task-statuses] RPA 사용자 PC 작업 상태 목록 조회
+    // --------------------------------------------------
+    return apiHelpers.get<GetRpaUserTaskStatusesResponse>(API.CODE.RPA_USER_TASK_STATUSES)
+  },
+
+  async rpaUserTaskTypes() {
+    // --------------------------------------------------
+    // [P06-40][GET - /api/codes/rpa-user-task-types] RPA 사용자 PC 작업 종류 목록 조회
+    // --------------------------------------------------
+    return apiHelpers.get<GetRpaUserTaskTypesResponse>(API.CODE.RPA_USER_TASK_TYPES)
+  },
+
+  async confirmationDocumentTypes() {
+    // --------------------------------------------------
+    // [P06-41][GET - /api/codes/confirmation-document-types] 본인확인정보 구분 목록 조회
+    // --------------------------------------------------
+    return apiHelpers.get<GetConfirmationDocumentTypesResponse>(
+      API.CODE.CONFIRMATION_DOCUMENT_TYPES
+    )
+  },
+
+  async fileBranchDocumentTypes() {
+    // --------------------------------------------------
+    // [P06-42][GET - /api/codes/file-branch-document-types] 지점 등록 문서 종류 코드 목록 조회
+    // --------------------------------------------------
+    return apiHelpers.get<GetFileBranchDocumentTypesResponse>(API.CODE.FILE_BRANCH_DOCUMENT_TYPES)
+  },
+
+  async successCodes() {
+    // --------------------------------------------------
+    // [P06-43][GET - /api/codes/success-codes] API 성공 코드 목록 조회
+    // --------------------------------------------------
+    return apiHelpers.get<GetSuccessCodesResponse>(API.CODE.SUCCESS_CODES)
+  },
+
+  async errorCodes() {
+    // --------------------------------------------------
+    // [P06-44][GET - /api/codes/error-codes] API 오류 코드 목록 조회
+    // --------------------------------------------------
+    return apiHelpers.get<GetErrorCodesResponse>(API.CODE.ERROR_CODES)
   },
 
   async registryTypesForAssign() {

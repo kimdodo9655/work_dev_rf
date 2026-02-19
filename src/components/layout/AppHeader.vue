@@ -91,7 +91,7 @@
 
             <!-- 세션 타이머 (auth, onboarding 상태) -->
             <li
-              v-if="authStore.authState === 'auth' || 'onboarding'"
+              v-if="authStore.authState === 'auth' || authStore.authState === 'onboarding'"
               class="session-timer"
               :class="{ expired: authStore.isExpired, expiring: authStore.isExpiringSoon }"
             >
@@ -130,24 +130,26 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import { authAPI } from '@/api/services_old/auth'
-// import { useMessage } from '@/composables/utils/useMessage'
+import { authAPI } from '@/api/services/auth'
 import locale from '@/locales/ko.json'
 import { useAuthStore } from '@/stores/auth'
 import { UserRoleLevel } from '@/types'
 import { storage } from '@/utils/storage'
 
+/** axios 응답({data}) / DTO 응답(그 자체) 둘 다 지원 */
+function unwrap<T>(res: any): T {
+  if (res && typeof res === 'object' && 'data' in res) return res.data as T
+  return res as T
+}
+
 const authStore = useAuthStore()
 const route = useRoute()
 const router = useRouter()
-// const { t } = useMessage()
 
-// Refs
 const breadcrumbsRef = ref<HTMLElement | null>(null)
 const headerRef = ref<HTMLElement | null>(null)
 const isMyMenuOpen = ref(false)
 
-// Constants
 const SCROLL_THRESHOLD = 1
 
 // ============================================================================
@@ -199,9 +201,7 @@ const breadcrumbs = computed(() => {
   const pathArray: string[] = []
   const path = route.path
 
-  if (path === '/dashboard' || path === '/') {
-    return pathArray
-  }
+  if (path === '/dashboard' || path === '/') return pathArray
 
   if (path.startsWith('/my/')) {
     pathArray.push(locale.common.my)
@@ -227,11 +227,8 @@ const breadcrumbs = computed(() => {
     )
   } else if (path.startsWith('/estimate')) {
     pathArray.push(locale.pageTitle.estimate.list)
-    if (path.includes('create')) {
-      pathArray.push(locale.pageTitle.estimate.createDetail)
-    } else if (path.includes('detail')) {
-      pathArray.push(locale.pageTitle.estimate.confirmDetail)
-    }
+    if (path.includes('create')) pathArray.push(locale.pageTitle.estimate.createDetail)
+    else if (path.includes('detail')) pathArray.push(locale.pageTitle.estimate.confirmDetail)
   } else if (path.startsWith('/registration')) {
     if (path.includes('schedule')) {
       pathArray.push(locale.pageTitle.registration.schedule)
@@ -242,18 +239,14 @@ const breadcrumbs = computed(() => {
       pathArray.push(locale.pageTitle.registration.caseStatus)
     }
   } else if (path.startsWith('/notice')) {
-    // TODO: 공지사항. 추후 조건 수정
     pathArray.push(locale.pageTitle.shared.notice)
-    if (path.includes('')) {
-      pathArray.push(locale.pageTitle.shared.noticeDetail)
-    }
+    pathArray.push(locale.pageTitle.shared.noticeDetail)
   }
 
   return pathArray
 })
 
 const pageTitle = computed(() => {
-  // Root 페이지는 authState에 따라 동적 타이틀
   if (route.path === '/') {
     switch (authStore.authState) {
       case 'pre-auth':
@@ -283,17 +276,9 @@ const pageTitle = computed(() => {
 const isActiveMenu = (menuPath: string) => {
   const currentPath = route.path
 
-  if (currentPath === menuPath) {
-    return true
-  }
-
-  if (menuPath === '/registration' && currentPath.startsWith('/registration/schedule')) {
-    return false
-  }
-
-  if (menuPath !== '/' && currentPath.startsWith(menuPath + '/')) {
-    return true
-  }
+  if (currentPath === menuPath) return true
+  if (menuPath === '/registration' && currentPath.startsWith('/registration/schedule')) return false
+  if (menuPath !== '/' && currentPath.startsWith(menuPath + '/')) return true
 
   return false
 }
@@ -311,9 +296,7 @@ const closeMyMenu = () => {
 // ============================================================================
 
 const handleLogout = async () => {
-  if (!confirm('로그아웃 하시겠습니까?')) {
-    return
-  }
+  if (!confirm('로그아웃 하시겠습니까?')) return
 
   try {
     await authAPI.logout()
@@ -330,19 +313,19 @@ const handleExtendSession = async () => {
     const { refreshToken } = storage.get()
     if (!refreshToken) throw new Error('No refresh token')
 
-    const response = await authAPI.refresh({ refreshToken })
-    authStore.updateTokens(response.data)
+    const res = await authAPI.refresh({ refreshToken })
+    const payload = unwrap<any>(res)
+
+    // 서버/생성기 차이 방어: payload.result / payload.data / payload 자체
+    const tokenData = payload?.result ?? payload?.data ?? payload
+
+    // updateTokens가 기대하는 형태에 맞게 그대로 전달
+    authStore.updateTokens(tokenData)
 
     alert('세션이 연장되었습니다.')
   } catch (error: any) {
     console.error('세션 연장 오류:', error)
-
-    // ✅ 검증 실패 에러는 이미 handleInvalidAuthState에서 알럿 표시했으므로 스킵
-    if (error.message === 'Invalid auth data') {
-      return // 중복 알럿 방지
-    }
-
-    // ✅ 그 외 에러만 알럿 표시
+    if (error?.message === 'Invalid auth data') return
     alert('세션 연장에 실패했습니다.')
   }
 }
@@ -352,17 +335,12 @@ const handleExtendSession = async () => {
 // ============================================================================
 
 function updateScrollState(isScrolled: boolean) {
-  if (breadcrumbsRef.value) {
-    breadcrumbsRef.value.classList.toggle('collapsed', isScrolled)
-  }
-  if (headerRef.value) {
-    headerRef.value.classList.toggle('collapsed', isScrolled)
-  }
+  if (breadcrumbsRef.value) breadcrumbsRef.value.classList.toggle('collapsed', isScrolled)
+  if (headerRef.value) headerRef.value.classList.toggle('collapsed', isScrolled)
 }
 
 function handleScroll() {
-  const isScrolled = window.scrollY > SCROLL_THRESHOLD
-  updateScrollState(isScrolled)
+  updateScrollState(window.scrollY > SCROLL_THRESHOLD)
 }
 
 // ============================================================================
@@ -373,12 +351,9 @@ onMounted(() => {
   handleScroll()
   window.addEventListener('scroll', handleScroll, { passive: true })
 
-  // 외부 클릭 시 마이 메뉴 닫기
   document.addEventListener('click', (e) => {
     const target = e.target as HTMLElement
-    if (!target.closest('.user') && !target.closest('.my-menu-area')) {
-      closeMyMenu()
-    }
+    if (!target.closest('.user') && !target.closest('.my-menu-area')) closeMyMenu()
   })
 })
 

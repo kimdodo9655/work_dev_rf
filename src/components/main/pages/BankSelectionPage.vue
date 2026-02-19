@@ -32,10 +32,16 @@ import { useQuery } from '@tanstack/vue-query'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { bankAPI } from '@/api/services_old/bank'
+import { bankAPI } from '@/api/services/bank'
 import { useAuthStore } from '@/stores/auth'
 import type { BankResponse } from '@/types'
 import { logger } from '@/utils/logger'
+
+/** axios 응답({data}) / DTO 응답(그 자체) 둘 다 지원 */
+function unwrap<T>(res: any): T {
+  if (res && typeof res === 'object' && 'data' in res) return res.data as T
+  return res as T
+}
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -46,21 +52,24 @@ const authStore = useAuthStore()
 const { data: bankResponse } = useQuery({
   queryKey: ['banks', 'list'],
   queryFn: () => bankAPI.getList()
+  // ✅ 신규 서비스 함수명: list() (프로젝트에 맞게 필요 시 조정)
 })
 
-// 금융기관 목록 (ApiResponse<GetBanksResponse> 구조)
+// 금융기관 목록
 const banks = computed<BankResponse[]>(() => {
-  if (!bankResponse.value?.data) return []
+  const payload = unwrap<any>(bankResponse.value)
 
-  // GetBanksResponse가 배열이면 직접 반환
-  if (Array.isArray(bankResponse.value.data)) {
-    return bankResponse.value.data
-  }
+  if (!payload) return []
 
-  // GetBanksResponse가 { banks: [] } 형태면 banks 속성 반환
-  if ('banks' in bankResponse.value.data && Array.isArray(bankResponse.value.data.banks)) {
-    return bankResponse.value.data.banks
-  }
+  // 케이스1) 바로 배열
+  if (Array.isArray(payload)) return payload as BankResponse[]
+
+  // 케이스2) { banks: [] }
+  if (Array.isArray(payload?.banks)) return payload.banks as BankResponse[]
+
+  // 케이스3) { result: { banks: [] } } 같은 래핑
+  if (Array.isArray(payload?.result?.banks)) return payload.result.banks as BankResponse[]
+  if (Array.isArray(payload?.result)) return payload.result as BankResponse[]
 
   return []
 })
@@ -70,9 +79,7 @@ const banks = computed<BankResponse[]>(() => {
 // ============================================================================
 const selectedBankCode = ref<string | null>(null)
 
-// 금융기관 클릭 (선택만 하고 이동은 안함)
 const handleClickBank = (bank: BankResponse) => {
-  // 비활성 금융기관은 선택 불가
   if (!bank.isActive) {
     logger.warn('[BANK_SELECT] Inactive bank clicked', { bank })
     alert('현재 사용할 수 없는 금융기관입니다.')
@@ -84,7 +91,6 @@ const handleClickBank = (bank: BankResponse) => {
     name: bank.name
   })
 
-  // 선택된 금융기관 코드 저장 (로컬 상태에만)
   selectedBankCode.value = bank.code || null
 }
 
@@ -99,7 +105,7 @@ const handleConfirmSelection = () => {
 
   const selectedBank = banks.value.find((bank) => bank.code === selectedBankCode.value)
 
-  if (!selectedBank) {
+  if (!selectedBank?.code) {
     alert('선택한 금융기관 정보를 찾을 수 없습니다.')
     return
   }
@@ -109,12 +115,7 @@ const handleConfirmSelection = () => {
     name: selectedBank.name
   })
 
-  // Store에 금융기관 코드 저장 (이제 실제로 저장)
-  if (selectedBank.code) {
-    authStore.setBankCode(selectedBank.code)
-  }
-
-  // 대시보드로 이동
+  authStore.setBankCode(selectedBank.code)
   router.push('/dashboard')
 }
 </script>

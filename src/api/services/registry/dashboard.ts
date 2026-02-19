@@ -35,7 +35,7 @@ export const registryDashboardAPI = {
 
   async statistics(query: SearchRegistryProgressStatisticsQuery) {
     // --------------------------------------------------
-    // [R02A-04][GET - /api/registry/progress/statistics] 진행 상태별 업무현황 조회
+    // [R02A-04][GET - /api/registry/progress/case-processing-status] 사건처리 현황 조회
     // --------------------------------------------------
     return apiHelpers.get(API.REGISTRY_DASHBOARD.CASE_PROCESSING_STATUS, query)
   }

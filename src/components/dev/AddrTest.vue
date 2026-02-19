@@ -232,10 +232,16 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 
-import { addressAPI } from '@/api/services_old/address'
+import { addressAPI } from '@/api/services/address'
 import { useAddress } from '@/composables/api/useAddress'
 import { useErrorHandler } from '@/composables/utils/useErrorHandler'
 import type { AddressItem, RegistryOfficeDetailResponse } from '@/types'
+
+/** axios 응답({data}) / DTO 응답(그 자체) 둘 다 지원 */
+function unwrap<T>(res: any): T {
+  if (res && typeof res === 'object' && 'data' in res) return res.data as T
+  return res as T
+}
 
 const {
   addresses,
@@ -265,7 +271,6 @@ let autocompleteTimer: ReturnType<typeof setTimeout> | null = null
 let registrySearchTimer: ReturnType<typeof setTimeout> | null = null
 
 const filteredRegistryOffices = computed(() => {
-  console.log('🔄 filteredRegistryOffices computed 실행:', registryOffices.value.length, '개')
   return registryOffices.value
 })
 
@@ -294,9 +299,7 @@ const handleSearch = async () => {
 }
 
 const handleAutocomplete = () => {
-  if (autocompleteTimer) {
-    clearTimeout(autocompleteTimer)
-  }
+  if (autocompleteTimer) clearTimeout(autocompleteTimer)
 
   autocompleteTimer = setTimeout(async () => {
     await getAddressSuggestions(autocompleteKeyword.value)
@@ -319,6 +322,10 @@ const selectRegistryOffice = (office: RegistryOfficeDetailResponse) => {
   selectedResult.value = `${office.name || ''} (${office.jurisdictionArea || ''})`
 }
 
+/**
+ * ✅ 등기소 조회
+ * - payload 형태가 달라도 registryOffices 배열을 최대한 안전하게 추출
+ */
 const loadRegistryOffices = async () => {
   isLoadingRegistry.value = true
   try {
@@ -326,21 +333,25 @@ const loadRegistryOffices = async () => {
 
     if (keyword.length < 2) {
       registryOffices.value = []
-      isLoadingRegistry.value = false
       return
     }
 
-    console.log('🔍 등기소 검색 시작:', keyword)
+    const res = await addressAPI.registryOffices({
+      keyword,
+      size: 0
+    }) // ✅ 신규 서비스 방식(권장)
+    const payload = unwrap<any>(res)
 
-    const response = await addressAPI.getRegistryOffices(keyword)
-    console.log('✅ 등기소 API 응답:', response)
-
-    // ✅ response.data.registryOffices로 접근
-    registryOffices.value = response.data?.registryOffices || []
-
-    console.log('📊 등기소 목록 업데이트:', registryOffices.value)
+    // 케이스 대응:
+    // 1) payload.registryOffices
+    // 2) payload.items
+    // 3) payload.result.registryOffices
+    // 4) payload.result.items
+    const root = payload?.result ?? payload
+    registryOffices.value = (root?.registryOffices ??
+      root?.items ??
+      []) as RegistryOfficeDetailResponse[]
   } catch (error) {
-    console.error('❌ 등기소 로드 실패:', error)
     handleError(error, 'LOAD_REGISTRY_OFFICES')
     registryOffices.value = []
   } finally {
@@ -355,7 +366,6 @@ const clearSelection = () => {
 const confirmSelection = () => {
   if (!selectedResult.value) return
   confirmedAddress.value = selectedResult.value
-  console.log('✅ 주소 선택:', selectedResult.value)
   closeModal()
 }
 
@@ -379,8 +389,6 @@ watch(isModalOpen, (newVal) => {
 watch(
   registryKeyword,
   (newValue) => {
-    console.log('👀 registryKeyword 변경:', newValue, 'length:', newValue.length)
-
     if (newValue.length < 2) {
       registryOffices.value = []
       if (registrySearchTimer) {
@@ -390,9 +398,7 @@ watch(
       return
     }
 
-    if (registrySearchTimer) {
-      clearTimeout(registrySearchTimer)
-    }
+    if (registrySearchTimer) clearTimeout(registrySearchTimer)
 
     registrySearchTimer = setTimeout(async () => {
       await loadRegistryOffices()

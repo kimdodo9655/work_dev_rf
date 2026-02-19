@@ -131,7 +131,7 @@ export type GetPaymentStatusesResponse = Code[]
 
 /**
  * P06-16
- * GET /api/codes/adminInfo-linkTime
+ * GET /api/codes/admin-info-link-times
  */
 export type GetAdminInfoLinkTimeResponse = Code[]
 
@@ -194,6 +194,113 @@ export type GetPartyRolesForRequestResponse = Code[]
  * GET /api/codes/registry-types-for-assign
  */
 export type GetRegistryTypesForAssignResponse = Code[]
+/**
+ * P06-27
+ * GET /api/codes/action-types
+ */
+export type GetActionTypesResponse = Code[]
+
+/**
+ * P06-28
+ * GET /api/codes/bond-purchase-types
+ */
+export type GetBondPurchaseTypesResponse = Code[]
+
+/**
+ * P06-29
+ * GET /api/codes/correction-types
+ */
+export type GetCorrectionTypesResponse = Code[]
+
+/**
+ * P06-30
+ * GET /api/codes/data-sources
+ */
+export type GetDataSourcesResponse = Code[]
+
+/**
+ * P06-31
+ * GET /api/codes/e-signature-methods
+ */
+export type GetESignatureMethodsResponse = Code[]
+
+/**
+ * P06-32
+ * GET /api/codes/e-signature-statuses
+ */
+export type GetESignatureStatusesResponse = Code[]
+
+/**
+ * P06-33
+ * GET /api/codes/file-progress-document-types
+ */
+export type GetFileProgressDocumentTypesResponse = Code[]
+
+/**
+ * P06-34
+ * GET /api/codes/file-registry-types
+ */
+export type GetFileRegistryTypesResponse = Code[]
+
+/**
+ * P06-35
+ * GET /api/codes/file-request-document-types
+ */
+export type GetFileRequestDocumentTypesResponse = Code[]
+
+/**
+ * P06-36
+ * GET /api/codes/ownership-types
+ */
+export type GetOwnershipTypesResponse = Code[]
+
+/**
+ * P06-37
+ * GET /api/codes/process-actions
+ */
+export type GetProcessActionsResponse = Code[]
+
+/**
+ * P06-38
+ * GET /api/codes/property-build-types
+ */
+export type GetPropertyBuildTypesResponse = Code[]
+
+/**
+ * P06-39
+ * GET /api/codes/rpa-user-task-statuses
+ */
+export type GetRpaUserTaskStatusesResponse = Code[]
+
+/**
+ * P06-40
+ * GET /api/codes/rpa-user-task-types
+ */
+export type GetRpaUserTaskTypesResponse = Code[]
+
+/**
+ * P06-41
+ * GET /api/codes/confirmation-document-types
+ */
+export type GetConfirmationDocumentTypesResponse = Code[]
+
+/**
+ * P06-42
+ * GET /api/codes/file-branch-document-types
+ */
+export type GetFileBranchDocumentTypesResponse = Code[]
+
+/**
+ * P06-43
+ * GET /api/codes/success-codes
+ */
+export type GetSuccessCodesResponse = Code[]
+
+/**
+ * P06-44
+ * GET /api/codes/error-codes
+ */
+export type GetErrorCodesResponse = Code[]
 
 // ============================================================================
 // 통합 응답 타입
@@ -258,6 +365,42 @@ export interface CodeResponse {
   partyRolesForRequest: Code[]
   /** [P06-26] 금융기관 담당(배정) 등기유형 목록 */
   registryTypesForAssign: Code[]
+  /** [P06-27] action 구분 목록 */
+  actionTypes: Code[]
+  /** [P06-28] 국민주택채권 매입 구분 목록 */
+  bondPurchaseTypes: Code[]
+  /** [P06-29] 경정사항 구분 목록 */
+  correctionTypes: Code[]
+  /** [P06-30] 데이터 출처 목록 */
+  dataSources: Code[]
+  /** [P06-31] 전자서명 방식 목록 */
+  eSignatureMethods: Code[]
+  /** [P06-32] 전자서명 진행 상태 목록 */
+  eSignatureStatuses: Code[]
+  /** [P06-33] 등기 진행 문서 종류 코드 목록 */
+  fileProgressDocumentTypes: Code[]
+  /** [P06-34] 파일 등기 유형 목록 */
+  fileRegistryTypes: Code[]
+  /** [P06-35] 등기 의뢰 문서 종류 코드 목록 */
+  fileRequestDocumentTypes: Code[]
+  /** [P06-36] 소유 형태 구분 */
+  ownershipTypes: Code[]
+  /** [P06-37] 등기 진행 단계별 가능한 액션(버튼) 목록 */
+  processActions: Code[]
+  /** [P06-38] 부동산 구분(세금신고) 목록 */
+  propertyBuildTypes: Code[]
+  /** [P06-39] RPA 사용자 PC 작업 상태 목록 */
+  rpaUserTaskStatuses: Code[]
+  /** [P06-40] RPA 사용자 PC 작업 종류 목록 */
+  rpaUserTaskTypes: Code[]
+  /** [P06-41] 본인확인정보 구분 목록 */
+  confirmationDocumentTypes: Code[]
+  /** [P06-42] 지점 등록 문서 종류 코드 목록 */
+  fileBranchDocumentTypes: Code[]
+  /** [P06-43] API 성공 코드 목록 */
+  successCodes: Code[]
+  /** [P06-44] API 오류 코드 목록 */
+  errorCodes: Code[]
 }
 
 /**

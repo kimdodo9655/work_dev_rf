@@ -30,7 +30,7 @@ export const notificationAPI = {
 
   async read(params: PatchNotificationsParams) {
     // --------------------------------------------------
-    // [P07-03][PATCH - /api/notifications/{notificationId}] 알림 읽음 처리
+    // [P07-03][PATCH - /api/notifications/{id}/read] 알림 읽음 처리
     // --------------------------------------------------
     return apiHelpers.patch<PatchNotificationsResponse>(API.NOTIFICATION.READ(params.id))
   },

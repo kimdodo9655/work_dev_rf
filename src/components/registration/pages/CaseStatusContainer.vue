@@ -245,9 +245,9 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
+import { codeAPI } from '@/api/services/code'
 import { registryProgressAPI } from '@/api/services/registry'
 import { userAPI } from '@/api/services/user'
-import { codeAPI } from '@/api/services_old/code'
 import { useAuthStore } from '@/stores/auth'
 import type { Code, GetAssignableUsersQuery, SearchRegistryProgresssListQuery } from '@/types'
 
@@ -260,10 +260,14 @@ const userId = computed(() => authStore.userId)
 const isUser30 = computed(() => roleLevelValue.value === 30)
 const isAboveUser30 = computed(() => roleLevelValue.value > 30)
 
-function unwrapData<T>(res: any): T {
-  if (res?.data && typeof res.data === 'object' && 'data' in res.data) return res.data.data as T
-  if (res && typeof res === 'object' && 'data' in res) return res.data as T
-  return undefined as unknown as T
+function unwrap<T>(res: any): T | undefined {
+  if (!res) return undefined
+  if (typeof res === 'object' && 'data' in res) {
+    const d = (res as any).data
+    if (d && typeof d === 'object' && 'data' in d) return (d as any).data as T
+    return d as T
+  }
+  return res as T
 }
 
 function toApiDate(ymd: string) {
@@ -292,6 +296,10 @@ function isUnassigned(name: string) {
   return name === '미배정' || !name
 }
 
+type AssignableUser = { userId: string | number; userName: string }
+
+const assignableUsers = ref<AssignableUser[]>([])
+
 function findUserIdByName(name: string): string {
   if (!name || name === '미배정') return ''
   const hit = assignableUsers.value.find((u) => u.userName === name)
@@ -310,20 +318,34 @@ const progressStatuses = ref<Code[]>([])
 const codesLoading = ref(false)
 const codesError = ref('')
 
+function pickCodes(payload: any): Code[] {
+  if (!payload) return []
+  if (Array.isArray(payload)) return payload
+  if (Array.isArray(payload?.codes)) return payload.codes
+  if (Array.isArray(payload?.items)) return payload.items
+  if (Array.isArray(payload?.content)) return payload.content
+  if (Array.isArray(payload?.result)) return payload.result
+  if (Array.isArray(payload?.result?.codes)) return payload.result.codes
+  if (Array.isArray(payload?.result?.items)) return payload.result.items
+  if (Array.isArray(payload?.result?.content)) return payload.result.content
+  return []
+}
+
 async function loadCodes() {
   codesLoading.value = true
   codesError.value = ''
   try {
-    const [wt, aw, rm, ps] = await Promise.all([
-      codeAPI.getWorkTypes(),
-      codeAPI.getAssignmentWorks(),
-      codeAPI.getRegistryMethods(),
-      codeAPI.getProgressStatuses()
+    const [wtRes, awRes, rmRes, psRes] = await Promise.all([
+      codeAPI.workTypes(),
+      codeAPI.assignmentWorks(),
+      codeAPI.registryMethods(),
+      codeAPI.progressStatuses()
     ])
-    workTypes.value = unwrapData<Code[]>(wt) ?? []
-    assignmentWorks.value = unwrapData<Code[]>(aw) ?? []
-    registryMethods.value = unwrapData<Code[]>(rm) ?? []
-    progressStatuses.value = unwrapData<Code[]>(ps) ?? []
+
+    workTypes.value = pickCodes(unwrap<any>(wtRes))
+    assignmentWorks.value = pickCodes(unwrap<any>(awRes))
+    registryMethods.value = pickCodes(unwrap<any>(rmRes))
+    progressStatuses.value = pickCodes(unwrap<any>(psRes))
   } catch (e: any) {
     codesError.value = e?.message ?? '코드 목록 로딩 실패'
     workTypes.value = []
@@ -338,8 +360,6 @@ async function loadCodes() {
 /** =======================
  * 담당자 옵션: /api/users/assignable
  * ======================= */
-type AssignableUser = { userId: string | number; userName: string }
-const assignableUsers = ref<AssignableUser[]>([])
 const assignableLoading = ref(false)
 const assignableError = ref('')
 
@@ -363,7 +383,6 @@ function ensureUserDefaultManager(users: AssignableUser[]) {
   const [firstUser] = users
   if (!firstUser) return
 
-  // ✅ TS 경고 피하려고 users[0] 직접 접근하지 말고 구조분해 + 가드 유지
   const firstId = String(firstUser.userId)
 
   if (!filters.managerUserId || filters.managerUserId === 'ALL' || filters.managerUserId === '-1') {
@@ -379,13 +398,16 @@ async function loadAssignableUsers() {
     if (filters.assignedWork !== 'ALL') query.assignedWork = filters.assignedWork
 
     const res: any = await userAPI.assignable(query)
-    const list = unwrapData<any>(res)
+    const payload = unwrap<any>(res)
+    const root = payload?.result ?? payload
 
-    const users: AssignableUser[] = Array.isArray(list)
-      ? list
-      : Array.isArray(list?.content)
-        ? list.content
-        : []
+    const users: AssignableUser[] = Array.isArray(root)
+      ? root
+      : Array.isArray(root?.content)
+        ? root.content
+        : Array.isArray(root?.items)
+          ? root.items
+          : []
 
     assignableUsers.value = users
     ensureUserDefaultManager(users)
@@ -478,11 +500,10 @@ function buildQuery(nextPage1Base: number): SearchRegistryProgresssListQuery {
   return query as SearchRegistryProgresssListQuery
 }
 
-/** ✅ 서버 totalPages 신뢰하지 않고 안전 계산(페이지 사이즈 변경 시 에러 방지 핵심) */
 function calcTotalPagesSafe(totalEl: number, pageSize: number) {
   const s = Math.max(1, Number(pageSize) || 1)
   const t = Math.max(0, Number(totalEl) || 0)
-  return Math.max(1, Math.ceil(t / s)) // UI 표기상 최소 1
+  return Math.max(1, Math.ceil(t / s))
 }
 
 async function fetchList(resetPage: boolean) {
@@ -494,19 +515,20 @@ async function fetchList(resetPage: boolean) {
     const query = buildQuery(page.value + 1)
     const res: any = await registryProgressAPI.getList(query)
 
-    const data = res?.data?.data ?? res?.data ?? res
+    const payload = unwrap<any>(res)
+    const data = payload?.result ?? payload
+
     rows.value = data?.content ?? []
     totalElements.value = Number(data?.totalElements ?? 0)
-
-    // ✅ totalPages는 안전 계산 값으로 덮어씀(백엔드가 이상하게 주거나, size 바뀌며 꼬이는 케이스 방지)
     totalPages.value = calcTotalPagesSafe(totalElements.value, size.value)
 
-    // ✅ 혹시 현재 page가 범위 밖이면 보정하고 한 번 더 조회 (이게 "size가 전체보다 크면 오류" 케이스 대부분 잡음)
     if (page.value > lastPageIndex.value) {
       page.value = lastPageIndex.value
       const query2 = buildQuery(page.value + 1)
       const res2: any = await registryProgressAPI.getList(query2)
-      const data2 = res2?.data?.data ?? res2?.data ?? res2
+      const payload2 = unwrap<any>(res2)
+      const data2 = payload2?.result ?? payload2
+
       rows.value = data2?.content ?? rows.value
       totalElements.value = Number(data2?.totalElements ?? totalElements.value)
       totalPages.value = calcTotalPagesSafe(totalElements.value, size.value)
@@ -557,14 +579,11 @@ function goDetail(registryManagementNumber: string) {
 }
 
 /** =======================
- * ✅ 페이지네이션 UI 추가: 페이지 버튼 + size 변경 안전 처리
+ * ✅ 페이지네이션 UI
  * ======================= */
-// 템플릿이 이 상수를 참조함
 const MAX_PAGE_SIZE = 50 as const
 
 function onChangePageSize() {
-  // ✅ size 바꿀 때 page가 유지되면 out-of-range로 백엔드가 터질 수 있음 → 무조건 0부터
-  // ✅ 혹시 이상 값 들어오면 보정
   const v = Number(size.value)
   if (!Number.isFinite(v) || v <= 0) size.value = 10
   if (size.value > MAX_PAGE_SIZE) size.value = MAX_PAGE_SIZE
@@ -582,7 +601,6 @@ const pageButtons = computed<PageButton[]>(() => {
   const tp = Math.max(1, totalPages.value || 1)
   const current = Math.min(Math.max(page.value, 0), tp - 1)
 
-  // 보여줄 버튼 개수(홀수 추천)
   const windowSize = 5
   const half = Math.floor(windowSize / 2)
 
@@ -592,15 +610,12 @@ const pageButtons = computed<PageButton[]>(() => {
 
   const items: PageButton[] = []
 
-  // 첫 페이지
   items.push({ key: 'p-0', label: '1', pageIndex: 0, disabled: current === 0 })
 
-  // 앞쪽 생략
   if (start > 1) {
     items.push({ key: 'ellipsis-left', label: '…', pageIndex: current, disabled: true })
   }
 
-  // 중간 구간
   for (let i = Math.max(1, start); i <= Math.min(end, tp - 2); i += 1) {
     items.push({
       key: `p-${i}`,
@@ -610,12 +625,10 @@ const pageButtons = computed<PageButton[]>(() => {
     })
   }
 
-  // 뒤쪽 생략
   if (end < tp - 2) {
     items.push({ key: 'ellipsis-right', label: '…', pageIndex: current, disabled: true })
   }
 
-  // 마지막 페이지 (tp가 1이면 이미 첫 페이지와 동일)
   if (tp > 1) {
     items.push({
       key: `p-${tp - 1}`,
@@ -646,9 +659,14 @@ async function callAssignManager(
       managerUserId: managerUserIdToAssign
     } as any)
 
-    const msg = res?.data?.message ?? res?.message ?? '업무담당자 배정이 완료되었습니다.'
-    window.alert(msg)
+    const payload = unwrap<any>(res)
+    const msg =
+      payload?.message ??
+      payload?.result?.message ??
+      (res as any)?.message ??
+      '업무담당자 배정이 완료되었습니다.'
 
+    window.alert(msg)
     await fetchList(false)
   } catch (e: any) {
     const msg = e?.message ?? '업무담당자 배정에 실패했습니다.'
