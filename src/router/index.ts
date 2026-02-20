@@ -326,10 +326,10 @@ const routes: RouteRecordRaw[] = [
 
   /**
    * 공지사항 상세 페이지
-   * TODO: 동적 라우트 파라미터로 변경 필요
+   * @param {string} noticeId - 공지사항 고유 식별자
    */
   {
-    path: '/notice/001',
+    path: '/notice/:noticeId',
     name: 'NoticeDetail',
     component: () => import('@/components/shared/pages/NoticeDetailPage.vue'),
     meta: {

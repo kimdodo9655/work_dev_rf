@@ -155,31 +155,31 @@
 
           <ul class="notice-list">
             <li>
-              <router-link to="/notice/001">
+              <router-link :to="{ name: 'NoticeDetail', params: { noticeId: '1' } }">
                 <p>여기는 공지사항 제목</p>
                 <p>2025.12.16</p>
               </router-link>
             </li>
             <li>
-              <router-link to="/notice/001">
+              <router-link :to="{ name: 'NoticeDetail', params: { noticeId: '2' } }">
                 <p>여기는 공지사항 제목 길어지면 이렇게 나옴</p>
                 <p>2025.12.16</p>
               </router-link>
             </li>
             <li>
-              <router-link to="/notice/001">
+              <router-link :to="{ name: 'NoticeDetail', params: { noticeId: '3' } }">
                 <p>여기는 공지사항 제목</p>
                 <p>2025.12.16</p>
               </router-link>
             </li>
             <li>
-              <router-link to="/notice/001">
+              <router-link :to="{ name: 'NoticeDetail', params: { noticeId: '4' } }">
                 <p>여기는 공지사항 제목</p>
                 <p>2025.12.16</p>
               </router-link>
             </li>
             <li>
-              <router-link to="/notice/001">
+              <router-link :to="{ name: 'NoticeDetail', params: { noticeId: '5' } }">
                 <p>여기는 공지사항 제목</p>
                 <p>2025.12.16</p>
               </router-link>

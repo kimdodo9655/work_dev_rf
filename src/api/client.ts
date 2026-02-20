@@ -2,6 +2,7 @@ import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axio
 import axiosRetry from 'axios-retry'
 
 import { API } from '@/api/endpoints'
+import { isPublicApiRequest } from '@/api/publicApiMap'
 import { useAuthStore } from '@/stores/auth'
 import { handleInvalidAuthState, isValidAuthData } from '@/utils/authValidator'
 import { ENV } from '@/utils/env'
@@ -61,41 +62,6 @@ authChannel?.addEventListener('message', (event) => {
     logger.warn('[AUTH][BC] Refresh failed in another tab')
   }
 })
-
-// ============================================================================
-// 공개 API 판별 함수 (하이브리드 방식)
-// ============================================================================
-function isPublicUrl(url: string | undefined): boolean {
-  if (!url) return false
-
-  // 1. 개별 지정 API (명확한 경로)
-  const explicitPublicUrls = [
-    API.AUTH.LOGIN, // 로그인
-    API.AUTH.LOGOUT // 로그아웃
-  ]
-
-  // 2. 패턴 매칭 API (/* 하위 경로 전체)
-  const publicPatterns = [
-    '/api/auth/', // /api/auth/* 전체
-    '/api/codes/' // /api/codes/* 전체 (공통코드)
-  ]
-
-  // 3. 개별 제외 API (패턴에 포함되지만 검증 필요한 경우)
-  const explicitPrivateUrls = [
-    API.AUTH.REFRESH // /api/auth/refresh는 검증 필요
-  ]
-
-  // 먼저 명시적 private 체크 (최우선)
-  if (explicitPrivateUrls.some((privateUrl) => url.includes(privateUrl))) {
-    return false // 검증 필요
-  }
-
-  // 개별 지정 또는 패턴 매칭 확인
-  return (
-    explicitPublicUrls.some((publicUrl) => url.includes(publicUrl)) ||
-    publicPatterns.some((pattern) => url.includes(pattern))
-  )
-}
 
 // ============================================================================
 // 세션 연장 제외 API 판별 함수
@@ -193,10 +159,11 @@ if (ENV.IS_DEV) {
 // 요청 인터셉터: 토큰 + 금융기관 코드 자동 추가 + 인증 데이터 검증 + 자동 세션 연장
 // ============================================================================
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  logger.debug('[REQ]', { url: config.url, isPublic: isPublicUrl(config.url) })
+  const isPublic = isPublicApiRequest(config.method, config.url)
+  logger.debug('[REQ]', { url: config.url, method: config.method, isPublic })
 
   // 공개 API는 검증 제외
-  if (isPublicUrl(config.url)) {
+  if (isPublic) {
     return config
   }
 

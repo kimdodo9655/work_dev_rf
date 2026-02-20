@@ -3,10 +3,13 @@
  * @description 인증 초기화 Composable (유틸리티)
  */
 
+import axios from 'axios'
 import { useRouter } from 'vue-router'
 
+import { API } from '@/api/endpoints'
 import { useAuthStore } from '@/stores/auth'
-import type { AuthState } from '@/types'
+import type { AuthState, TokenRefreshResponse } from '@/types'
+import { ENV } from '@/utils/env'
 import { logger } from '@/utils/logger'
 import { storage } from '@/utils/storage'
 
@@ -24,7 +27,7 @@ export function useAuthInitializer() {
   /**
    * 저장된 인증 정보의 유효성을 검사하고 로드
    */
-  function validateAndLoadAuth() {
+  async function validateAndLoadAuth() {
     const storedData = storage.get()
 
     // 토큰이 없으면 그냥 종료 (이미 비어있으므로 clear 불필요)
@@ -51,12 +54,47 @@ export function useAuthInitializer() {
 
     // accessToken만 만료되었으면 로컬스토리지 삭제하고 종료
     if (!isAccessTokenValid && isRefreshTokenValid) {
-      logger.warn('[AUTH INIT] Access token expired - Clear storage', {
+      logger.info('[AUTH INIT] Access token expired - Try refresh', {
         accessExpires: storedData.accessExpires,
         refreshExpires: storedData.refreshExpires,
         currentTime: now
       })
-      storage.clear()
+
+      if (!storedData.refreshToken) {
+        logger.warn('[AUTH INIT] Missing refresh token - Clear storage')
+        storage.clear()
+        return
+      }
+
+      try {
+        const { data } = await axios.post(`${ENV.API_BASE_URL}${API.AUTH.REFRESH}`, {
+          refreshToken: storedData.refreshToken
+        })
+
+        const payload = (data?.data ?? data) as TokenRefreshResponse
+
+        if (
+          !payload?.accessToken ||
+          !payload?.refreshToken ||
+          payload?.accessTokenExpiresIn == null ||
+          payload?.refreshTokenExpiresIn == null
+        ) {
+          throw new Error('Invalid refresh response')
+        }
+
+        storage.updateTokens({
+          accessToken: payload.accessToken,
+          refreshToken: payload.refreshToken,
+          accessTokenExpiresIn: payload.accessTokenExpiresIn,
+          refreshTokenExpiresIn: payload.refreshTokenExpiresIn
+        })
+
+        logger.info('[AUTH INIT] Token refresh success - Load auth')
+        authStore.loadAuth()
+      } catch (error) {
+        logger.warn('[AUTH INIT] Token refresh failed - Clear storage', { error })
+        storage.clear()
+      }
       return
     }
 
@@ -133,7 +171,7 @@ export function useAuthInitializer() {
     logger.info('[AUTH INIT] Starting initialization')
 
     // 1. 저장된 인증 정보 유효성 검사 및 로드
-    validateAndLoadAuth()
+    await validateAndLoadAuth()
 
     // 2. 현재 경로 및 인증 상태 확인
     const currentPath = router.currentRoute.value.path
