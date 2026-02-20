@@ -92,7 +92,7 @@ export interface ApplicationAdminInfoRequestListItem {
   /** 등기진행방식 */
   registryMethod?: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
   /** 접수등기소 */
-  establishmentJurisdictionOffice?: string
+  registryReceiptOffice?: string
   /** 작성년도 */
   creationYear?: string
   /** 작성번호 */
@@ -131,7 +131,7 @@ export interface BasicInfoItem {
   /** 작성ID */
   creationId?: string
   /** 접수등기소 */
-  registryOffice?: string
+  registryReceiptOffice?: string
   /** 작성년도 */
   creationYear?: string
   /** 작성번호 */
@@ -155,7 +155,7 @@ export interface InputInfoItem {
   /** 부동산 정보 */
   properties?: PropertyInfo[]
   /** 접수등기소 정보 */
-  registryOffice?: string
+  registryReceiptOffice?: string
   /** 등기의무자 정보 */
   obligors?: PartyInfo[]
   /** 등기권리자 정보 */

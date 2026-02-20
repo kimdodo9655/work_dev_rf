@@ -6,8 +6,12 @@ import { apiHelpers } from '@/api/client'
 import { API } from '@/api/endpoints'
 import type {
   GetTaxAgenciesParams,
+  GetTaxAgenciesResponse,
   GetTaxAgencyListParams,
-  ReplaceTaxAgenciesParams
+  GetTaxAgencyListResponse,
+  ReplaceTaxAgenciesParams,
+  ReplaceTaxAgenciesRequest,
+  ReplaceTaxAgenciesResponse
 } from '@/types'
 
 export const registryTaxReportAPI = {
@@ -15,20 +19,27 @@ export const registryTaxReportAPI = {
     // --------------------------------------------------
     // [R02P-01][GET - /api/registry/progress/{registryManagementNumber}/tax-agencies/detail] 세금신고 대행 상세 조회
     // --------------------------------------------------
-    return apiHelpers.get(API.REGISTRY_TAX_REPORT.DETAIL(params.registryManagementNumber))
+    return apiHelpers.get<GetTaxAgenciesResponse>(
+      API.REGISTRY_TAX_REPORT.DETAIL(params.registryManagementNumber)
+    )
   },
 
   async getList(params: GetTaxAgencyListParams) {
     // --------------------------------------------------
     // [R02P-02][GET - /api/registry/progress/{registryManagementNumber}/tax-agencies/list] 세금신고 대행 목록 조회
     // --------------------------------------------------
-    return apiHelpers.get(API.REGISTRY_TAX_REPORT.LIST(params.registryManagementNumber))
+    return apiHelpers.get<GetTaxAgencyListResponse>(
+      API.REGISTRY_TAX_REPORT.LIST(params.registryManagementNumber)
+    )
   },
 
-  async list2(params: ReplaceTaxAgenciesParams) {
+  async list2(params: ReplaceTaxAgenciesParams, data: ReplaceTaxAgenciesRequest) {
     // --------------------------------------------------
     // [R02P-03][PUT - /api/registry/progress/{registryManagementNumber}/tax-agencies] 세금신고 대행 목록 대체
     // --------------------------------------------------
-    return apiHelpers.put(API.REGISTRY_TAX_REPORT.LIST_2(params.registryManagementNumber))
+    return apiHelpers.put<ReplaceTaxAgenciesResponse>(
+      API.REGISTRY_TAX_REPORT.LIST_2(params.registryManagementNumber),
+      data
+    )
   }
 }

@@ -46,8 +46,8 @@ export interface PartyOption {
 export interface PropertyOwnerCertificateItem {
   /** 부동산고유번호 */
   propertyUniqueNumber: string
-  /** 소유자아이디(당사자ID) */
-  ownerId: number
+  /** 진행 당사자 ID */
+  progressPartyId: number
   /** 보유지분 분모 */
   holdingShareDenominator: number
   /** 보유지분 분자 */
@@ -76,6 +76,15 @@ export interface PropertyOwnerCertificateItem {
   certificatePasswordSequence?: string
   /** 비밀번호 */
   certificatePassword?: string
+  /** 본인확인정보 구분 */
+  confirmationDocumentType?:
+    | 'RESIDENT_REGISTRATION'
+    | 'DRIVER_LICENSE'
+    | 'PASSPORT'
+    | 'FOREIGN_REGISTRATION'
+    | 'DOMESTIC_RESIDENCE_REPORT'
+  /** 특이사항 */
+  specialNote?: string
 }
 
 /** 등기권리증 정보 조회 */
@@ -106,8 +115,19 @@ export interface PropertyOwnerCertificateItemResponse {
   certificateType?: string
   /** 일련번호 */
   certificateSerialNumber?: string
+  /** 비밀번호 순번 */
+  certificatePasswordSequence?: string
   /** 비밀번호 */
   certificatePassword?: string
+  /** 본인확인정보 구분 */
+  confirmationDocumentType?:
+    | 'RESIDENT_REGISTRATION'
+    | 'DRIVER_LICENSE'
+    | 'PASSPORT'
+    | 'FOREIGN_REGISTRATION'
+    | 'DOMESTIC_RESIDENCE_REPORT'
+  /** 특이사항 */
+  specialNote?: string
 }
 
 /** 부동산고유번호 옵션 */
@@ -136,4 +156,6 @@ export interface RegistryApplicationPropertyOwnerCertificateResponse {
   sectionOptions?: string[]
   /** 등기권리증 구분 옵션 (Enum) */
   certificateTypeOptions?: string[]
+  /** 본인확인정보 구분 옵션 (Enum) */
+  identityDocumentOptions?: string[]
 }

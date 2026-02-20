@@ -35,6 +35,23 @@ export interface RoleLevelCode extends Code {
   level: number
 }
 
+/**
+ * API 코드 응답 (성공/에러 코드 목록)
+ * Schema: ApiCodeResponse
+ * API: [P06-43] GET /api/codes/success-codes
+ * API: [P06-44] GET /api/codes/error-codes
+ */
+export interface ApiCodeResponse {
+  /** 코드 값 (Enum name) */
+  code?: string
+  /** 상태 코드 */
+  status?: number
+  /** 응답 제목 */
+  title?: string
+  /** 응답 메시지 */
+  message?: string
+}
+
 // ============================================================================
 // API 응답 타입
 // ============================================================================
@@ -294,13 +311,13 @@ export type GetFileBranchDocumentTypesResponse = Code[]
  * P06-43
  * GET /api/codes/success-codes
  */
-export type GetSuccessCodesResponse = Code[]
+export type GetSuccessCodesResponse = ApiCodeResponse[]
 
 /**
  * P06-44
  * GET /api/codes/error-codes
  */
-export type GetErrorCodesResponse = Code[]
+export type GetErrorCodesResponse = ApiCodeResponse[]
 
 // ============================================================================
 // 통합 응답 타입

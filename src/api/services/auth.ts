@@ -16,7 +16,7 @@ import type {
   ValidateEmailTokenResponse,
   VerifyEmail_1Request
 } from '@/types'
-import type { SetPasswordResponse, VerifyEmail_1Response } from '@/types/api'
+import type { SetPasswordRequest, SetPasswordResponse, VerifyEmail_1Response } from '@/types/api'
 
 export const authAPI = {
   async signup(data: SignUpRequest) {
@@ -61,10 +61,10 @@ export const authAPI = {
     return apiHelpers.post<VerifyEmail_1Response>(API.AUTH.EMAIL_VERIFY, data)
   },
 
-  async setPassword() {
+  async setPassword(data: SetPasswordRequest) {
     // --------------------------------------------------
     // [P04-07][POST - /api/auth/password] 비밀번호 설정
     // --------------------------------------------------
-    return apiHelpers.post<SetPasswordResponse>(API.AUTH.PASSWORD)
+    return apiHelpers.post<SetPasswordResponse>(API.AUTH.PASSWORD, data)
   }
 }

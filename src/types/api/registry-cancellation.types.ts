@@ -26,7 +26,8 @@ export interface SaveRegistryApplicationCancellationsParams {
   applicationId: number
 }
 
-export type SaveRegistryApplicationCancellationsRequest = RegistryApplicationCancellationSaveRequest
+export type SaveRegistryApplicationCancellationsRequest =
+  RegistryApplicationCancellationReplaceRequest
 
 export type SaveRegistryApplicationCancellationsResponse = RegistryApplicationCancellationResponse
 
@@ -34,22 +35,22 @@ export type SaveRegistryApplicationCancellationsResponse = RegistryApplicationCa
 
 /** 말소사항 정보 목록 */
 export interface CancellationItemRequest {
-  /** 말소사항 ID (수정 시 필수) */
-  cancellationId?: number
   /** 부동산 고유번호 */
   propertyUniqueNumber: string
   /** 선순위 설정 금융기관 */
   seniorMortgageBank: string
   /** 선순위 설정 취급지점 */
   seniorMortgageBranch: string
-  /** 해지 예정 일자 */
-  terminationScheduledDate: string
   /** 순위번호 */
   rankNumber: string
   /** 설정 접수 일자 */
   establishmentReceiptDate: string
   /** 설정 접수 번호 */
   establishmentReceiptNumber: string
+  /** 채권최고액 */
+  maximumCreditAmount: number
+  /** 상환/말소 주체 */
+  repaymentCancellationSubject?: string
 }
 
 /** 말소사항 정보 */
@@ -62,8 +63,6 @@ export interface RegistryApplicationCancellationItemResponse {
   seniorMortgageBank?: string
   /** 선순위 설정 취급지점 */
   seniorMortgageBranch?: string
-  /** 해지 예정 일자 */
-  terminationScheduledDate?: string
   /** 해당구 */
   section?: 'GAP' | 'EUL'
   /** 해당구 한글명 */
@@ -74,6 +73,10 @@ export interface RegistryApplicationCancellationItemResponse {
   establishmentReceiptDate?: string
   /** 설정 접수 번호 */
   establishmentReceiptNumber?: string
+  /** 채권최고액 */
+  maximumCreditAmount?: number
+  /** 상환/말소 주체 */
+  repaymentCancellationSubject?: string
 }
 
 /** 부동산 고유번호 옵션 */
@@ -86,26 +89,24 @@ export interface RegistryApplicationCancellationPropertyOption {
 
 /** 말소사항 정보 조회 응답 */
 export interface RegistryApplicationCancellationResponse {
-  /** 등기관리번호 */
-  registryManagementNumber?: string
   contractParties?: ContractPartyResponse
-  /** 말소사항 목록 */
-  cancellations?: RegistryApplicationCancellationItemResponse[]
+  /** 기본 항목 (동적 object) */
+  basicItems?: Record<string, unknown>
   /** 부동산 선택 옵션 */
   propertyOptions?: RegistryApplicationCancellationPropertyOption[]
   /** 선순위 대출 후보 목록 */
   seniorLoanCandidates?: RegistryApplicationCancellationSeniorLoanResponse[]
-  /** 상환/말소 주체 */
-  repaymentCancellationSubject?: string
+  /** 말소사항 목록 */
+  cancellations?: RegistryApplicationCancellationItemResponse[]
 }
 
-/** 말소사항 정보 저장 요청 */
-export interface RegistryApplicationCancellationSaveRequest {
+/** 말소사항 정보 대체 요청 */
+export interface RegistryApplicationCancellationReplaceRequest {
   partyRequest?: RegistryApplicationPartyReplaceRequest
+  /** 등기원인일자 */
+  registryCauseDate?: string
   /** 말소사항 정보 목록 */
   cancellationItems: CancellationItemRequest[]
-  /** 상환/말소 주체 (콤마 구분) */
-  repaymentCancellationSubject?: string
 }
 
 /** 선순위 대출 상환 정보 */

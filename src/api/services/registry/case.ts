@@ -6,8 +6,12 @@ import { apiHelpers } from '@/api/client'
 import { API } from '@/api/endpoints'
 import type {
   GetDetailedRegistryProgressCaseInquirysParams,
+  GetDetailedRegistryProgressCaseInquirysResponse,
   GetProgressCaseInquirysParams,
-  UpdateRegistryProgressCaseInquirysParams
+  GetProgressCaseInquirysResponse,
+  UpdateRegistryProgressCaseInquirysParams,
+  UpdateRegistryProgressCaseInquirysRequest,
+  UpdateRegistryProgressCaseInquirysResponse
 } from '@/types'
 
 export const registryCaseAPI = {
@@ -15,20 +19,30 @@ export const registryCaseAPI = {
     // --------------------------------------------------
     // [R02T-01][GET - /api/registry/progress/{registryManagementNumber}/case-inquiries/list] 신청사건 목록 조회
     // --------------------------------------------------
-    return apiHelpers.get(API.REGISTRY_CASE.LIST(params.registryManagementNumber))
+    return apiHelpers.get<GetProgressCaseInquirysResponse>(
+      API.REGISTRY_CASE.LIST(params.registryManagementNumber)
+    )
   },
 
-  async update(params: UpdateRegistryProgressCaseInquirysParams) {
+  async update(
+    params: UpdateRegistryProgressCaseInquirysParams,
+    data: UpdateRegistryProgressCaseInquirysRequest
+  ) {
     // --------------------------------------------------
     // [R02T-02][PATCH - /api/registry/progress/{registryManagementNumber}/case-inquiries] 신청사건 수정
     // --------------------------------------------------
-    return apiHelpers.patch(API.REGISTRY_CASE.UPDATE(params.registryManagementNumber))
+    return apiHelpers.patch<UpdateRegistryProgressCaseInquirysResponse>(
+      API.REGISTRY_CASE.UPDATE(params.registryManagementNumber),
+      data
+    )
   },
 
   async getDetail(params: GetDetailedRegistryProgressCaseInquirysParams) {
     // --------------------------------------------------
     // [R02T-03][GET - /api/registry/progress/{registryManagementNumber}/case-inquiries/detail] 신청사건 상세 조회
     // --------------------------------------------------
-    return apiHelpers.get(API.REGISTRY_CASE.DETAIL(params.registryManagementNumber))
+    return apiHelpers.get<GetDetailedRegistryProgressCaseInquirysResponse>(
+      API.REGISTRY_CASE.DETAIL(params.registryManagementNumber)
+    )
   }
 }

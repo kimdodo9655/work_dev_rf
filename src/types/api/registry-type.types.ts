@@ -105,6 +105,8 @@ export interface RegistryApplicationFormResponse {
   dataSource?: 'REQUEST' | 'MANUAL'
   registryType?: string
   registryTypeLabel?: string
+  /** 등기 역할 */
+  registryRole?: string
 }
 
 export interface RegistryApplicationUpdateRequest {

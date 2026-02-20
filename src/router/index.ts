@@ -2,6 +2,7 @@ import type { NavigationGuardNext, RouteLocationNormalized, RouteRecordRaw } fro
 import { createRouter, createWebHistory } from 'vue-router'
 
 import locale from '@/locales/ko.json'
+import { devRoutes } from '@/router/devRoutes'
 import { useAuthStore } from '@/stores/auth'
 import { UserRoleLevel } from '@/types'
 import { handleInvalidAuthState, isValidAuthData } from '@/utils/authValidator'
@@ -26,30 +27,7 @@ declare module 'vue-router' {
 }
 
 const routes: RouteRecordRaw[] = [
-  /**
-   * 개발 테스트 페이지
-   * 모든 인증 상태에서 접근 가능한 개발용 테스트 페이지
-   */
-  {
-    path: '/test',
-    name: 'Test',
-    component: () => import('@/components/dev/DevTestView.vue'),
-    meta: {
-      title: '테스트',
-      allowedAuthStates: ['pre-auth', 'onboarding', 'auth']
-    }
-  },
-  {
-    path: '/test-api',
-    name: 'APITest',
-    component: () => import('@/components/dev/ApiTester.vue'),
-    meta: {
-      title: 'API 테스트',
-      layout: 'test',
-      allowedAuthStates: ['pre-auth', 'onboarding', 'auth'],
-      footerOff: true
-    }
-  },
+  ...(import.meta.env.DEV ? devRoutes : []),
   /**
    * Root 페이지
    *

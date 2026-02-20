@@ -64,7 +64,7 @@ export const branchDocumentAPI = {
     // [P02F-04][DELETE - /api/organizations/{organizationId}/branches/{branchId}/documents] 문서 삭제
     // --------------------------------------------------
     return apiHelpers.delete<DeleteDocumentResponse>(
-      `${API.BRANCH_DOCUMENT.DELETE(params.organizationId, params.branchId)}?documentId=${query.documentId}`
+      `${API.BRANCH_DOCUMENT.DELETE(params.organizationId, params.branchId)}?fileName=${encodeURIComponent(query.fileName)}`
     )
   },
 

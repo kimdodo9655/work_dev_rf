@@ -6,8 +6,12 @@ import { apiHelpers } from '@/api/client'
 import { API } from '@/api/endpoints'
 import type {
   GetApplicationReceiptsParams,
+  GetApplicationReceiptsResponse,
   GetDetailedApplicationReceiptsParams,
-  UpdateApplicationReceiptsParams
+  GetDetailedApplicationReceiptsResponse,
+  UpdateApplicationReceiptsParams,
+  UpdateApplicationReceiptsRequest,
+  UpdateApplicationReceiptsResponse
 } from '@/types'
 
 export const registryReceiptAPI = {
@@ -15,20 +19,27 @@ export const registryReceiptAPI = {
     // --------------------------------------------------
     // [R02U-01][GET - /api/registry/applications/{registryManagementNumber}/receipts/list] 등기접수 목록 조회
     // --------------------------------------------------
-    return apiHelpers.get(API.REGISTRY_RECEIPT.LIST(params.registryManagementNumber))
+    return apiHelpers.get<GetApplicationReceiptsResponse>(
+      API.REGISTRY_RECEIPT.LIST(params.registryManagementNumber)
+    )
   },
 
-  async update(params: UpdateApplicationReceiptsParams) {
+  async update(params: UpdateApplicationReceiptsParams, data: UpdateApplicationReceiptsRequest) {
     // --------------------------------------------------
     // [R02U-02][PATCH - /api/registry/applications/{registryManagementNumber}/receipts] 등기접수 수정
     // --------------------------------------------------
-    return apiHelpers.patch(API.REGISTRY_RECEIPT.UPDATE(params.registryManagementNumber))
+    return apiHelpers.patch<UpdateApplicationReceiptsResponse>(
+      API.REGISTRY_RECEIPT.UPDATE(params.registryManagementNumber),
+      data
+    )
   },
 
   async getDetail(params: GetDetailedApplicationReceiptsParams) {
     // --------------------------------------------------
     // [R02U-03][GET - /api/registry/applications/{registryManagementNumber}/receipts/detail] 등기접수 상세 조회
     // --------------------------------------------------
-    return apiHelpers.get(API.REGISTRY_RECEIPT.DETAIL(params.registryManagementNumber))
+    return apiHelpers.get<GetDetailedApplicationReceiptsResponse>(
+      API.REGISTRY_RECEIPT.DETAIL(params.registryManagementNumber)
+    )
   }
 }

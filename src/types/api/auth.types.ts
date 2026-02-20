@@ -23,7 +23,10 @@ export type SignUpResponse = OrganizationCreateResponse
 /**
  * P04-02
  * POST /api/auth/login
+ * Request: LoginRequest (스키마와 동일명으로 직접 사용)
+ * Response: LoginResponse (스키마와 동일명으로 직접 사용)
  */
+
 /**
  * P04-03
  * POST /api/auth/logout
@@ -57,6 +60,7 @@ export type VerifyEmail_1Response = ApiResultVoid
 /**
  * P04-07
  * POST /api/auth/password
+ * Request: SetPasswordRequest (스키마와 동일명으로 직접 사용)
  */
 export type SetPasswordResponse = ApiResultVoid
 

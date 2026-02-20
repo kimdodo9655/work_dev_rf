@@ -761,17 +761,16 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 
-import RPATest from '@/components/dev/RPATest.vue'
+import PdfConverter from '@/components/doc-templates/PdfConverter.vue'
+import PdfViewer from '@/components/doc-templates/PdfViewer.vue'
 import FloatingCustomSelect from '@/components/template/input/FloatingCustomSelect.vue'
 import FloatingInnerSelect from '@/components/template/input/FloatingInnerSelect.vue'
 import FloatingInput from '@/components/template/input/FloatingInput.vue'
 import Pagination from '@/components/template/PaginationItem.vue'
 import { useCodes } from '@/composables/api/useCodes'
-
-import PdfConverter from '../doc-templates/PdfConverter.vue'
-import PdfViewer from '../doc-templates/PdfViewer.vue'
-import AddrTest from './AddrTest.vue'
-import PdfTest from './PdfTest.vue'
+import AddrTest from '@/features/dev/pages/AddrTestPanel.vue'
+import PdfTest from '@/features/dev/pages/PdfTestPanel.vue'
+import RPATest from '@/features/dev/pages/RPATestPanel.vue'
 
 // ✨ useCodes 사용
 const { codes, isLoading, loadError, fetchAllCodes, clearCache } = useCodes()

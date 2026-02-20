@@ -1989,7 +1989,7 @@ onMounted(() => {
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, reactive, ref } from 'vue'
 
-import PdfViewer from '../doc-templates/PdfViewer.vue'
+import PdfViewer from '@/components/doc-templates/PdfViewer.vue'
 
 type StatusType = 'info' | 'ok' | 'err'
 const status = reactive<{ type: StatusType; msg: string }>({ type: 'info', msg: '' })

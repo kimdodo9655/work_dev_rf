@@ -6,9 +6,13 @@ import { apiHelpers } from '@/api/client'
 import { API } from '@/api/endpoints'
 import type {
   DeleteDocument_1Params,
+  DeleteDocument_1Response,
   DownloadDocument_1Params,
+  DownloadDocument_1Response,
   DownloadDocumentAsBase64_1Params,
+  DownloadDocumentAsBase64_1Response,
   GetDocuments_1Params,
+  GetDocuments_1Response,
   UploadDocumentQuery
 } from '@/types'
 
@@ -18,7 +22,10 @@ export const registryRequestDocumentAPI = {
     // [R00D-01][GET - /api/registry/requests/{requestNumber}/documents] 문서 목록 조회
     // --------------------------------------------------
     const { requestNumber, ...query } = params as any
-    return apiHelpers.get(API.REGISTRY_REQUEST_DOCUMENT.LIST(requestNumber), query)
+    return apiHelpers.get<GetDocuments_1Response>(
+      API.REGISTRY_REQUEST_DOCUMENT.LIST(requestNumber),
+      query
+    )
   },
 
   async upload(query: UploadDocumentQuery) {
@@ -37,7 +44,7 @@ export const registryRequestDocumentAPI = {
     // --------------------------------------------------
     // [R00D-03][GET - /api/registry/requests/{requestNumber}/documents/{fileName}] 문서 다운로드
     // --------------------------------------------------
-    return apiHelpers.get(
+    return apiHelpers.get<DownloadDocument_1Response>(
       API.REGISTRY_REQUEST_DOCUMENT.DOWNLOAD(params.requestNumber, params.fileName)
     )
   },
@@ -46,7 +53,7 @@ export const registryRequestDocumentAPI = {
     // --------------------------------------------------
     // [R00D-04][DELETE - /api/registry/requests/{requestNumber}/documents/{fileName}] 문서 삭제
     // --------------------------------------------------
-    return apiHelpers.delete(
+    return apiHelpers.delete<DeleteDocument_1Response>(
       API.REGISTRY_REQUEST_DOCUMENT.DELETE(params.requestNumber, params.fileName)
     )
   },
@@ -55,7 +62,7 @@ export const registryRequestDocumentAPI = {
     // --------------------------------------------------
     // [R00D-05][GET - /api/registry/requests/{requestNumber}/documents/{fileName}/base64] 문서 Base64 다운로드
     // --------------------------------------------------
-    return apiHelpers.get(
+    return apiHelpers.get<DownloadDocumentAsBase64_1Response>(
       API.REGISTRY_REQUEST_DOCUMENT.DOWNLOAD_BASE64(params.requestNumber, params.fileName)
     )
   }

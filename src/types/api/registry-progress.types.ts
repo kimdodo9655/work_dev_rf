@@ -158,7 +158,7 @@ export interface GetRegistryProgressProcessParams {
   registryManagementNumber: string
 }
 
-export type GetRegistryProgressProcessResponse = string
+export type GetRegistryProgressProcessResponse = RegistryProgressProcessResponse
 
 /**
  * R02B-09
@@ -167,6 +167,35 @@ export type GetRegistryProgressProcessResponse = string
 export interface ChangeRegistryProgressProcessParams {
   /** 등기관리번호 */
   registryManagementNumber: string
+}
+
+export interface ChangeRegistryProgressProcessQuery {
+  /** 변경할 등기진행상태(nexstep) */
+  newStatus:
+    | 'ASSIGN_MANAGER'
+    | 'INSPECT_REGISTRY_INFO'
+    | 'REQUEST_RESUBMISSION'
+    | 'REGISTER_APPLICATION_INFO'
+    | 'REQUEST_ADMIN_INFO_CONSENT'
+    | 'OBLIGOR_E_SIGNATURE'
+    | 'OBLIGEE_E_SIGNATURE'
+    | 'TAX_DECLARATION_AGENCY'
+    | 'PURCHASE_HOUSING_BOND'
+    | 'REGISTER_LOAN_ACCOUNT'
+    | 'WAITING_LOAN_PAYMENT'
+    | 'LOAN_PAYMENT_COMPLETED'
+    | 'REGISTER_TRANSFER_CERTIFICATE'
+    | 'CREATE_APPLICATION'
+    | 'INTERNET_REGISTRY_E_SIGNATURE'
+    | 'REQUEST_CASE_DELEGATION'
+    | 'WAITING_CASE_DELEGATION'
+    | 'CASE_DELEGATION_COMPLETED'
+    | 'REGISTRY_RECEIVED'
+    | 'CREATE_COST_STATEMENT'
+    | 'REGISTER_COMPLETION_DOCUMENTS'
+    | 'SUBMIT_COMPLETION_DOCUMENTS'
+    | 'REGISTRY_COMPLETED'
+    | 'REGISTRY_CANCELLED'
 }
 
 export type ChangeRegistryProgressProcessResponse = void
@@ -181,6 +210,52 @@ export interface AssignManagerRequest {
 
 /** 등기진행유형 */
 export type ProgressType = 'TYPE_01' | 'TYPE_02' | 'TYPE_04' | 'TYPE_05' | 'TYPE_07'
+
+/** 등기진행 업무 프로세스 조회 응답 */
+export interface RegistryProgressProcessResponse {
+  /** 등기관리번호 */
+  registryManagementNumber?: string
+  /** 등기 진행 유형 */
+  progressType?: string
+  /** 등기 진행 유형 설명 */
+  progressTypeDescription?: string
+  /** 등기 방식 */
+  registryMethod?: string
+  /** 등기 방식 설명 */
+  registryMethodDescription?: string
+  /** 현재 진행 상태 */
+  currentStatus?: string
+  /** 현재 진행 상태 설명 */
+  currentStatusDescription?: string
+  /** 단계 목록 */
+  steps?: ProcessStepResponse[]
+}
+
+/** 프로세스 단계 정보 */
+export interface ProcessStepResponse {
+  /** 단계 코드 */
+  step?: string
+  /** 단계 제목 */
+  stepTitle?: string
+  /** 단계 설명 */
+  stepDescription?: string
+  /** 현재 단계 여부 */
+  isCurrentStep?: boolean
+  /** 해당 단계에서 가능한 액션 목록 */
+  actions?: ProcessActionResponse[]
+}
+
+/** 프로세스 액션 정보 */
+export interface ProcessActionResponse {
+  /** 액션 코드 */
+  action?: string
+  /** 액션 설명 */
+  actionDescription?: string
+  /** 다음 진행 상태 */
+  nextStatus?: string
+  /** 다음 진행 상태 설명 */
+  nextStatusDescription?: string
+}
 
 /** 업무 기본 정보 조회 조회 */
 export interface RegistryProgressBasicResponse {

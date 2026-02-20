@@ -234,8 +234,8 @@ const ROUTE_CATEGORIES = [
   {
     name: '테스트',
     routes: [
-      { path: '/test', title: '테스트' },
-      { path: '/test-api', title: 'API 테스트' }
+      { path: '/dev/test', title: '테스트' },
+      { path: '/dev/api', title: 'API 테스트' }
     ]
   },
   {

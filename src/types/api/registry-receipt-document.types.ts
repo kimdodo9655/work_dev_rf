@@ -242,12 +242,15 @@ export interface SummaryTotals {
 
 /** 공과금 정보 */
 export interface TaxSection {
-  acquisitionTax?: number
+  /** 납부여부 */
+  paymentStatus?: 'PAYMENT' | 'EXEMPTION'
+  /** 면제사유 */
+  exemptionReason?: string
   registrationLicenseTax?: number
   educationTax?: number
   ruralSpecialTax?: number
-  stampTax?: number
-  registryApplicationFee?: number
+  /** 합계 */
+  totalAmount?: number
 }
 
 /** 의뢰 업무별 추가 정보 */

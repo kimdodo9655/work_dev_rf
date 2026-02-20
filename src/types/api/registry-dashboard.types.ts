@@ -65,14 +65,16 @@ export type SearchRegistryProgressStatisticsResponse = RegistryProgressStatistic
 
 // ==================== Schemas ====================
 
-/** 진행 상태별 건수 */
-export interface ProgressStatusCount {
-  /** 상태 코드 */
-  statusCode?: string
-  /** 상태명 */
-  statusName?: string
-  /** 건수 */
-  count?: number
+/** 날짜별 등기 진행 건수 */
+export interface RegistryProgressDateCount {
+  /** 기준일자 */
+  basicDate?: string
+  /** 접수 건수 */
+  requestCount?: number
+  /** 완료 건수 */
+  completedCount?: number
+  /** 취소 건수 */
+  cancelledCount?: number
 }
 
 /** 견적 현황 요약 */
@@ -85,10 +87,10 @@ export interface RegistryEstimateSummaryResponse {
   awardedCount?: number
 }
 
-/** 나의 등기 진행 현황 */
+/** 사건처리 현황 조회 응답 */
 export interface RegistryProgressStatisticsResponse {
-  /** 진행 상태별 통계 목록 */
-  statusCounts?: ProgressStatusCount[]
+  /** 날짜별 접수/완료/취소 건수 목록 */
+  countList?: RegistryProgressDateCount[]
 }
 
 /** 나의 등기 진행 현황 */

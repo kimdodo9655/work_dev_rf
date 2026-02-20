@@ -8,9 +8,14 @@ import type {
   CreateRegistryApplicationRequest,
   CreateRegistryApplicationResponse,
   DeleteRegistryApplicationParams,
+  DeleteRegistryApplicationResponse,
   GetApplicationDocumentsParams,
+  GetApplicationDocumentsResponse,
   GetRegistryApplicationFormsQuery,
-  UpdateRegistryApplicationParams
+  GetRegistryApplicationFormsResponse,
+  UpdateRegistryApplicationParams,
+  UpdateRegistryApplicationRequest,
+  UpdateRegistryApplicationResponse
 } from '@/types'
 
 export const registryTypeAPI = {
@@ -25,27 +30,34 @@ export const registryTypeAPI = {
     // --------------------------------------------------
     // [R02D-03][DELETE - /api/registry/applications/{applicationId}] 등기유형(등기신청서) 삭제
     // --------------------------------------------------
-    return apiHelpers.delete(API.REGISTRY_TYPE.DELETE(params.applicationId))
+    return apiHelpers.delete<DeleteRegistryApplicationResponse>(
+      API.REGISTRY_TYPE.DELETE(params.applicationId)
+    )
   },
 
-  async update(params: UpdateRegistryApplicationParams) {
+  async update(params: UpdateRegistryApplicationParams, data: UpdateRegistryApplicationRequest) {
     // --------------------------------------------------
     // [R02D-04][PATCH - /api/registry/applications/{applicationId}] 등기유형(등기신청서) 수정
     // --------------------------------------------------
-    return apiHelpers.patch(API.REGISTRY_TYPE.UPDATE(params.applicationId))
+    return apiHelpers.patch<UpdateRegistryApplicationResponse>(
+      API.REGISTRY_TYPE.UPDATE(params.applicationId),
+      data
+    )
   },
 
   async getList(query: GetRegistryApplicationFormsQuery) {
     // --------------------------------------------------
     // [R02D-08][GET - /api/registry/applications/tabs] 등기신청서 양식 목록 조회
     // --------------------------------------------------
-    return apiHelpers.get(API.REGISTRY_TYPE.LIST, query)
+    return apiHelpers.get<GetRegistryApplicationFormsResponse>(API.REGISTRY_TYPE.LIST, query)
   },
 
   async documents(params: GetApplicationDocumentsParams) {
     // --------------------------------------------------
     // [R02D-09][GET - /api/registry/applications/{applicationId}/documents] 등기신청서 전자문서 조회
     // --------------------------------------------------
-    return apiHelpers.get(API.REGISTRY_TYPE.DOCUMENTS(params.applicationId))
+    return apiHelpers.get<GetApplicationDocumentsResponse>(
+      API.REGISTRY_TYPE.DOCUMENTS(params.applicationId)
+    )
   }
 }

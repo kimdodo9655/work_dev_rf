@@ -244,9 +244,12 @@ export interface LegalAgentInfo {
 export interface ObligeeInfo {
   /** 등기권리자 수 */
   obligeeCount?: number
-  /** 특이사항 */
-  specialNote?: string
-  esignatureStatus?: string
+  /** 전자서명 상태 */
+  eSignatureStatus?: string
+  /** 주택수 */
+  houseCount?: number
+  /** 세금 감면 유형 */
+  taxReliefType?: string
 }
 
 /** 견적서 공과금 상세 */
@@ -266,6 +269,8 @@ export interface RegistryInfo {
   workTypeDescription?: string
   /** 매매금액 */
   tradeAmount?: number
-  /** 접수일자 */
-  receiptDate?: string
+  /** 잔금일자 */
+  balanceDueDate?: string
+  /** 등기방식 설명 */
+  registryMethodDescription?: string
 }

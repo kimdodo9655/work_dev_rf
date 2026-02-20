@@ -3,14 +3,11 @@
  * @generated 2025-01-27
  */
 
-import type { ApplicantItem, PartyItem, PropertyOwnerItem } from './common.types'
-
 /**
  * R02L-01
  * GET /api/registry/applications/{applicationId}/correction
  */
 export interface GetDetailedApplicationCorrectionsParams {
-  /** 신청서ID */
   applicationId: number
 }
 
@@ -21,7 +18,6 @@ export type GetDetailedApplicationCorrectionsResponse = RegistryApplicationCorre
  * PUT /api/registry/applications/{applicationId}/correction
  */
 export interface ReplaceApplicationCorrectionsParams {
-  /** 신청서ID */
   applicationId: number
 }
 
@@ -31,94 +27,116 @@ export type ReplaceApplicationCorrectionsResponse = RegistryApplicationCorrectio
 
 // ==================== Schemas ====================
 
-/** 등기신청인 정보 */
+/** 계약당사자 옵션 항목 (경정) */
+export interface RegistryApplicationCorrectionPartyItem {
+  id?: number
+  progressPartyId?: number
+  partyRole?: string
+  partyType?: 'DOMESTIC' | 'OVERSEAS_KOREAN' | 'FOREIGNER' | 'CORPORATION'
+  name?: string
+  registrationNumber?: string
+  contact?: string
+  handlingBranch?: string
+  nationality?: string
+  representativeType?: 'DOMESTIC' | 'OVERSEAS_KOREAN' | 'FOREIGNER' | 'CORPORATION'
+  representativePosition?: string
+  representativeName?: string
+  representativeNationality?: string
+  address?: string
+  addressDetail?: string
+}
+
+/** 등기신청인 항목 (경정 조회용) */
+export interface CorrectionApplicantItem {
+  applicantId?: number
+  progressPartyId?: number
+  partyRole?: string
+  partyType?: 'DOMESTIC' | 'OVERSEAS_KOREAN' | 'FOREIGNER' | 'CORPORATION'
+  name?: string
+  registrationNumber?: string
+  contact?: string
+  handlingBranch?: string
+  nationality?: string
+  representativeType?: 'DOMESTIC' | 'OVERSEAS_KOREAN' | 'FOREIGNER' | 'CORPORATION'
+  representativePosition?: string
+  representativeName?: string
+  representativeNationality?: string
+  address?: string
+  addressDetail?: string
+}
+
+/** 부동산 소유자 항목 (경정) */
+export interface CorrectionPropertyOwnerItem {
+  propertyUniqueNumber?: string
+  progressPartyId?: number
+  section?: 'GAP' | 'EUL'
+  rankNumber?: string
+  receiptNumber?: string
+  ownerAddress?: string
+  correctionCount?: number
+}
+
+/** 경정사항 항목 (조회) */
+export interface CorrectionItem {
+  changeId?: number
+  propertyUniqueNumber?: string
+  correctionType?: string
+  correctionItem?: string
+  section?: 'GAP' | 'EUL'
+  rankNumber?: string
+  receiptNumber?: string
+  registryAddress?: string
+  name?: string
+  registrationNumber?: string
+  handlingBranch?: string
+  nationality?: string
+  registryName?: string
+  registryRegistrationNumber?: string
+}
+
+/** 등기신청인 정보 (저장용) */
 export interface ApplicantCorrectionReqItem {
-  /** 신청인 ID */
   id: number
-  /** 진행 당사자 ID (FK) */
   progressPartyId: number
 }
 
-/** 경정사항 정보 */
-export interface CorrectionItem {
-  /** 경정사항 ID */
-  changeId?: number
-  /** 부동산 고유번호 */
-  propertyUniqueNumber?: string
-  /** 등기원인일자 */
-  registryCauseDate?: string
-  /** 경정구분 */
-  correctionType?: string
-  /** 경정항목 */
-  correctionItem?: 'NAME' | 'REGISTRATION_NUMBER' | 'HANDLING_BRANCH' | 'NATIONALITY' | 'ADDRESS'
-  /** 해당구 */
-  section?: 'GAP' | 'EUL'
-  /** 순위번호 */
-  rankNumber?: string
-  /** 접수일자 */
-  receiptDate?: string
-  /** 접수번호 */
-  receiptNumber?: string
-  /** 등기상주소 */
-  registryAddress?: string
-  /** 성명 */
-  name?: string
-  /** (주민)등록번호 */
-  registrationNumber?: string
-  /** 취급지점 */
-  handlingBranch?: string
-  /** 국적 */
-  nationality?: string
-}
-
-/** 경정사항 정보 */
+/** 경정사항 항목 (저장용) */
 export interface CorrectionReqItem {
-  /** 부동산 고유번호 */
   propertyUniqueNumber?: string
-  /** 등기원인일자 */
   registryCauseDate?: string
-  /** 경정구분 */
   correctionType?: string
-  /** 경정항목 */
-  correctionItem?: 'NAME' | 'REGISTRATION_NUMBER' | 'HANDLING_BRANCH' | 'NATIONALITY' | 'ADDRESS'
-  /** 해당구 */
+  correctionItem?: string
   section?: 'GAP' | 'EUL'
-  /** 순위번호 */
   rankNumber?: string
-  /** 접수일자 */
-  receiptDate?: string
-  /** 접수번호 */
   receiptNumber?: string
-  /** 성명(상호) */
   name?: string
-  /** (주민)등록번호 */
   registrationNumber?: string
-  /** 취급지점 */
   handlingBranch?: string
-  /** 국적 */
-  nationality?: string
-  /** 등기상주소 */
+  /** 등기상 국적 */
+  registryNationality?: string
   registryAddress?: string
+  registryPartyType?: 'DOMESTIC' | 'OVERSEAS_KOREAN' | 'FOREIGNER' | 'CORPORATION'
+  registryName?: string
+  registryRegistrationNumber?: string
 }
 
-/** 등기명의인표시경정 정보 전체 교체 요청 */
+/** 등기명의인표시경정 전체 교체 요청 */
 export interface RegistryApplicationCorrectionReplaceRequest {
-  /** 등기신청인 정보 목록 */
   applicantItems: ApplicantCorrectionReqItem[]
-  /** 변경사항 정보 목록 */
+  /** 등기원인일자 */
+  registryCauseDate: string
   correctionItems: CorrectionReqItem[]
 }
 
-/** 등기명의인표시경정 */
+/** 등기명의인표시경정 조회 응답 */
 export interface RegistryApplicationCorrectionResponse {
-  /** 경정항목 목록 */
-  correctionOption?: string[]
-  /** 계약당사자 목록 */
-  parties?: PartyItem[]
-  /** 등기신청인 목록 */
-  applicantItems?: ApplicantItem[]
-  /** 부동산 소유자 상세정보 */
-  propertyOwners?: PropertyOwnerItem[]
-  /** 경정사항 목록 */
+  /** 계약당사자 목록 (드롭다운 옵션) */
+  partiesOptions?: RegistryApplicationCorrectionPartyItem[]
+  applicantItems?: CorrectionApplicantItem[]
+  /** 기본 항목 (동적 object) */
+  basicItems?: Record<string, unknown>
+  propertyOwnerOptions?: CorrectionPropertyOwnerItem[]
+  /** 경정항목 옵션 */
+  correctionOptions?: string[]
   correctionsItems?: CorrectionItem[]
 }

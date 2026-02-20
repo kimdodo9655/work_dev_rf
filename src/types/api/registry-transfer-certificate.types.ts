@@ -55,8 +55,8 @@ export interface CancellationCertificateItem {
     | 'CORRECTION'
     | 'MORTGAGE_CANCELLATION'
     | 'SURFACE_RIGHT_CANCELLATION'
-  /** 진행부동산소유자아이디 */
-  progressPropertyOwnerId: number
+  /** 부동산소유자아이디 */
+  ownerId: number
   /** 등기원인 */
   registryCause: string
   /** 부동산고유번호 */
@@ -135,16 +135,26 @@ export interface RegistryProgressCancellationCertificateResponse {
 
 /** 이전/말소 등기권리증 정보 응답 */
 export interface TransferCancellationCertificateResponse {
+  /** 소유자명 */
+  name?: string
   /** 등기유형 */
   registryType?: string
-  /** 부동산소유자아이디 */
-  progressPropertyOwnerId?: number
   /** 등기원인 */
   registryCause?: string
   /** 부동산 고유번호 */
   propertyUniqueNumber?: string
-  /** 소유자명 */
-  name?: string
+  /** 부동산소유자아이디 */
+  ownerId?: number
+  /** 등기권리증 구분 */
+  certificateType?:
+    | 'REGISTRY_CERT_INFO'
+    | 'REGISTRY_CERTIFICATE'
+    | 'CONFIRMATION_DOCUMENT'
+    | 'PRIOR_REGISTRY_LINK'
+  /** 비밀번호 순서 */
+  certificatePasswordSequence?: string
+  /** 비밀번호 */
+  certificatePassword?: string
   /** 해당 구 (갑구/을구) */
   section?: 'GAP' | 'EUL'
   /** 순위번호 */
@@ -153,18 +163,11 @@ export interface TransferCancellationCertificateResponse {
   receiptDate?: string
   /** 접수번호 */
   receiptNumber?: string
-  /** 등기권리증 구분 */
-  certificateType?:
-    | 'REGISTRY_CERT_INFO'
-    | 'REGISTRY_CERTIFICATE'
-    | 'CONFIRMATION_DOCUMENT'
-    | 'PRIOR_REGISTRY_LINK'
   /** 일련번호 */
   certificateSerialNumber?: string
-  /** 비밀번호 순서 */
-  certificatePasswordSequence?: string
-  /** 비밀번호 */
-  certificatePassword?: string
   /** 비밀번호사용여부 */
   isUseCertificatePassword?: boolean
 }
+
+/** @alias TransferCancellationCertificateResponse (openapi: TransferCancellationCertificateProjection) */
+export type TransferCancellationCertificateProjection = TransferCancellationCertificateResponse

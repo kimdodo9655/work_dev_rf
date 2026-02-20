@@ -40,6 +40,7 @@ export { getRoleLevelValue, hasPermission, UserRoleLevel } from '@/types/store'
 // ============================================================================
 export type {
   ApiAction,
+  ApiCodeResponse,
   Code,
   CodeKey,
   CodeMap,

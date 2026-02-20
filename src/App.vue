@@ -29,15 +29,14 @@
       <AppFooter v-if="shouldShowFooter" />
     </div>
 
-    <DevNav />
+    <component :is="DevNav" v-if="isDev && DevNav" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted } from 'vue'
+import { computed, defineAsyncComponent, onBeforeUnmount, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 
-import DevNav from '@/components/dev/DevNav.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import { useAuthInitializer } from '@/composables/utils/useAuthInitializer'
@@ -48,6 +47,10 @@ import { logger } from '@/utils/logger'
 const route = useRoute()
 const authStore = useAuthStore()
 const { initialize } = useAuthInitializer()
+const isDev = import.meta.env.DEV
+const DevNav = isDev
+  ? defineAsyncComponent(() => import('@/features/dev/components/DevNav.vue'))
+  : null
 // const { checkAndRedirect } = useDeviceDetection()
 
 // ============================================================================

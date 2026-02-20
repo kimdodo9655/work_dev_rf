@@ -6,8 +6,10 @@ import { apiHelpers } from '@/api/client'
 import { API } from '@/api/endpoints'
 import type {
   GetDetailedPropertyOwnerCertificateParams,
+  GetDetailedPropertyOwnerCertificateResponse,
   ReplaceApplicationPropertyOwnerCertificateParams,
-  ReplaceApplicationPropertyOwnerCertificateRequest
+  ReplaceApplicationPropertyOwnerCertificateRequest,
+  ReplaceApplicationPropertyOwnerCertificateResponse
 } from '@/types'
 
 export const registryCertificateAPI = {
@@ -15,7 +17,9 @@ export const registryCertificateAPI = {
     // --------------------------------------------------
     // [R02G-01][GET - /api/registry/applications/{applicationId}/certificates] 등기권리증 상세 조회
     // --------------------------------------------------
-    return apiHelpers.get(API.REGISTRY_CERTIFICATE.DETAIL(params.applicationId))
+    return apiHelpers.get<GetDetailedPropertyOwnerCertificateResponse>(
+      API.REGISTRY_CERTIFICATE.DETAIL(params.applicationId)
+    )
   },
 
   async replace(
@@ -25,6 +29,9 @@ export const registryCertificateAPI = {
     // --------------------------------------------------
     // [R02G-02][PUT - /api/registry/applications/{applicationId}/certificates] 등기권리증 대체
     // --------------------------------------------------
-    return apiHelpers.put(API.REGISTRY_CERTIFICATE.REPLACE(params.applicationId), data)
+    return apiHelpers.put<ReplaceApplicationPropertyOwnerCertificateResponse>(
+      API.REGISTRY_CERTIFICATE.REPLACE(params.applicationId),
+      data
+    )
   }
 }

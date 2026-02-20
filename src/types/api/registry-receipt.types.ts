@@ -66,7 +66,7 @@ export interface ApplicationReceiptItem {
   /** 등기진행방식 */
   registryMethod?: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
   /** 접수등기소 */
-  establishmentJurisdictionOffice?: string
+  registryReceiptOffice?: string
   /** 작성년도 */
   creationYear?: string
   /** 작성번호 */
@@ -91,7 +91,7 @@ export interface ApplicationReceiptListItem {
   /** 등기진행방식 */
   registryMethod?: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
   /** 접수등기소 */
-  establishmentJurisdictionOffice?: string
+  registryReceiptOffice?: string
   /** 작성번호 */
   creationNumber?: string
   /** 접수일자 */

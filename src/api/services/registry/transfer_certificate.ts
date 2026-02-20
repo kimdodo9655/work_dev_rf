@@ -6,8 +6,11 @@ import { apiHelpers } from '@/api/client'
 import { API } from '@/api/endpoints'
 import type {
   GetDetailedProgressCancellationCertificatesParams,
+  GetDetailedProgressCancellationCertificatesResponse,
   GetProgressCancellationCertificatesParams,
-  ReplaceProgressCancellationCertificatesParams
+  GetProgressCancellationCertificatesResponse,
+  ReplaceProgressCancellationCertificatesParams,
+  ReplaceProgressCancellationCertificatesResponse
 } from '@/types'
 
 export const registryTransferCertificateAPI = {
@@ -15,14 +18,16 @@ export const registryTransferCertificateAPI = {
     // --------------------------------------------------
     // [R02S-01][GET - /api/registry/progress/{registryManagementNumber}/transfer-cancellation-certificates] 이전/말소등기권리증 목록 조회
     // --------------------------------------------------
-    return apiHelpers.get(API.REGISTRY_TRANSFER_CERTIFICATE.LIST(params.registryManagementNumber))
+    return apiHelpers.get<GetProgressCancellationCertificatesResponse>(
+      API.REGISTRY_TRANSFER_CERTIFICATE.LIST(params.registryManagementNumber)
+    )
   },
 
   async replace(params: ReplaceProgressCancellationCertificatesParams) {
     // --------------------------------------------------
     // [R02S-02][PUT - /api/registry/progress/{registryManagementNumber}/transfer-cancellation-certificates] 이전/말소등기권리증 대체
     // --------------------------------------------------
-    return apiHelpers.put(
+    return apiHelpers.put<ReplaceProgressCancellationCertificatesResponse>(
       API.REGISTRY_TRANSFER_CERTIFICATE.REPLACE(params.registryManagementNumber)
     )
   },
@@ -31,6 +36,8 @@ export const registryTransferCertificateAPI = {
     // --------------------------------------------------
     // [R02S-03][GET - /api/registry/progress/{registryManagementNumber}/transfer-cancellation-certificates/detail] 이전/말소등기권리증 상세 조회
     // --------------------------------------------------
-    return apiHelpers.get(API.REGISTRY_TRANSFER_CERTIFICATE.DETAIL(params.registryManagementNumber))
+    return apiHelpers.get<GetDetailedProgressCancellationCertificatesResponse>(
+      API.REGISTRY_TRANSFER_CERTIFICATE.DETAIL(params.registryManagementNumber)
+    )
   }
 }

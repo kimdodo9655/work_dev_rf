@@ -77,40 +77,43 @@ export interface RegistryApplicationPropertyItemResponse {
 export interface RegistryApplicationPropertyReplaceRequest {
   /** 부동산 정보 목록 */
   propertyItems: PropertyItem[]
-  officeInfo?: RegistryProgressOfficeUpdateRequest
+  officeInfo?: RegistryReceiptOfficeUpdateRequest
 }
 
 /** 부동산 리스트 조회 */
 export interface RegistryApplicationPropertyResponse {
-  /** 부동산 목록 */
   items?: RegistryApplicationPropertyItemResponse[]
-  /** 선불지급수단 목록 */
   prepaidCardOptions?: BranchPrepaidCardResponse[]
-  progressOfficesOptions?: RegistryProgressOfficeResponse
+  /** 접수 등기소 옵션 목록 */
+  receiptOfficesOptions?: RegistryReceiptOfficeOption[]
 }
 
-/** 등기 진행 접수등기소 정보 조회 */
-export interface RegistryProgressOfficeResponse {
-  /** 등기관리번호(선행/후행 제외) */
-  registryManagementNumberBase?: string
-  /** 이전등기방식 */
-  transferRegistryMethod?: string
-  /** 이전관할등기소 */
-  transferJurisdictionOffice?: string
-  /** 설정등기방식 */
-  establishmentRegistryMethod?: string
-  /** 설정관할등기소 */
-  establishmentJurisdictionOffice?: string
+/** 접수 등기소 옵션 */
+export interface RegistryReceiptOfficeOption {
+  registryType?:
+    | 'OWNERSHIP_TRANSFER'
+    | 'MORTGAGE'
+    | 'SURFACE_RIGHT'
+    | 'CHANGE'
+    | 'CORRECTION'
+    | 'MORTGAGE_CANCELLATION'
+    | 'SURFACE_RIGHT_CANCELLATION'
+  registryMethod?: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
+  receiptRegistryOffice?: string
+  isSpecialLawApplied?: boolean
 }
 
 /** 등기 진행 접수등기소 정보 수정 요청 */
-export interface RegistryProgressOfficeUpdateRequest {
-  /** 이전등기방식 */
-  transferRegistryMethod?: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
-  /** 이전관할등기소 */
-  transferJurisdictionOffice?: string
-  /** 설정등기방식 */
-  establishmentRegistryMethod?: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
-  /** 설정관할등기소 */
-  establishmentJurisdictionOffice?: string
+export interface RegistryReceiptOfficeUpdateRequest {
+  registryType?:
+    | 'OWNERSHIP_TRANSFER'
+    | 'MORTGAGE'
+    | 'SURFACE_RIGHT'
+    | 'CHANGE'
+    | 'CORRECTION'
+    | 'MORTGAGE_CANCELLATION'
+    | 'SURFACE_RIGHT_CANCELLATION'
+  registryMethod?: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
+  receiptRegistryOffice?: string
+  isSpecialLawApplied?: boolean
 }

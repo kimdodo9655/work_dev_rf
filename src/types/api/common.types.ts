@@ -63,16 +63,27 @@ export type RegistryMethod = 'ONLINE' | 'OFFLINE'
 
 /** 지점 항목 */
 export interface BranchItem {
-  branchId?: number
-  branchName?: string
-  businessRegistrationNumber?: string
+  branchName: string
+  businessRegistrationNumber: string
+  phone: string
+  extension?: string
+  address: string
+  qualifiedType: 'LEGAL_SCRIVENER' | 'LAWYER'
+  qualifiedName: string
+  businessLicenseFileName: string
+  insuranceCertificateFileName?: string
 }
 
 /** 사용자 항목 */
 export interface UserItem {
-  userId?: number
-  userName?: string
-  loginId?: string
+  name: string
+  position: string
+  roleLevel: number
+  phone: string
+  extension?: string
+  email: string
+  loginId: string
+  password: string
 }
 
 /** 배정 금융기관 항목 */
@@ -97,15 +108,19 @@ export interface PartyItem {
 
 /** 부동산 정보 */
 export interface PropertyInfo {
-  propertyId?: number
-  address?: string
-  propertyType?: string
+  propertyClassification?: string
+  propertyCount?: number
+  propertyAddress?: string
+  propertyArea?: number
+  seniorRepaymentCount?: number
 }
 
 /** 채무자 정보 */
 export interface ObligorInfo {
-  obligorId?: number
-  obligorName?: string
+  obligorCount?: number
+  eSignatureStatus?: string
+  certificateStatus?: string
+  addressChangeCount?: number
 }
 
 /** 신청인 항목 */
@@ -124,61 +139,103 @@ export interface PropertyOwnerItem {
 // 문서 관련 공통 타입
 // ============================================================================
 
-/** 문서 목록 응답 */
+/** 문서 목록 응답 (단건) */
 export interface DocumentListResponse {
-  documents?: DocumentItem[]
-}
-
-/** 문서 항목 */
-export interface DocumentItem {
-  documentId?: number
+  /** 문서 종류 코드 */
+  documentType?: string
+  /** 문서 종류명 */
+  documentTypeName?: string
+  /** 파일명 */
   fileName?: string
+  /** 파일 경로 */
+  filePath?: string
+  /** 파일 크기 (bytes) */
   fileSize?: number
+  /** 업로드 일시 */
   uploadedAt?: string
 }
 
-/** 문서 업로드 응답 */
+/** 문서 임시 업로드 응답 */
 export interface DocumentUploadResponse {
-  documentId?: number
-  fileName?: string
-  fileUrl?: string
+  /** 임시 파일명 (저장 시 사용) */
+  tempFileName?: string
+  /** 파일 경로 */
+  filePath?: string
+  /** 파일 크기 (bytes) */
+  fileSize?: number
+  /** 업로드 일시 */
+  uploadedAt?: string
 }
 
 /** 문서 저장 요청 */
 export interface DocumentSaveRequest {
-  documentIds?: number[]
-  category?: string
+  /** 임시 업로드 파일명 */
+  tempFileName: string
+  /** 기존 파일 백업 여부 */
+  backup: boolean
 }
 
 /** 문서 저장 응답 */
 export interface DocumentSaveResponse {
-  savedDocuments?: number[]
-  message?: string
+  /** 문서 종류 코드 */
+  documentType?: string
+  /** 파일명 */
+  fileName?: string
+  /** 파일 경로 */
+  filePath?: string
+  /** 파일 크기 (bytes) */
+  fileSize?: number
+  /** 저장 일시 */
+  savedAt?: string
 }
 
 /** 문서 Base64 다운로드 응답 */
 export interface DocumentDownloadBase64Response {
+  /** 파일명 */
   fileName?: string
-  base64Data?: string
+  /** 파일 크기 (bytes) */
+  fileSize?: number
+  /** MIME 타입 */
   mimeType?: string
+  /** Base64 인코딩 데이터 */
+  base64Data?: string
 }
 
 // ============================================================================
 // 기타 공통 응답
 // ============================================================================
 
-/** 등기소 인증 정보 */
+/** 인터넷등기소 아이디 응답 */
 export interface BranchRegistryCredentialResponse {
+  /** 인증정보 고유번호 */
   credentialId?: number
-  registryOfficeId?: number
-  username?: string
+  /** 지점 ID */
+  branchId?: number
+  qualifiedType?: QualifiedType
+  /** 자격자 구분 설명 */
+  qualifiedTypeDescription?: string
+  /** 자격자명 */
+  qualifiedName?: string
+  /** 인터넷등기소 로그인 아이디 */
+  registryLoginId?: string
+  /** 인터넷등기소 비밀번호 */
+  registryPassword?: string
 }
 
-/** 선불카드 응답 */
+/** 선불지급수단 응답 */
 export interface BranchPrepaidCardResponse {
-  cardId?: number
+  /** 선불지급수단 고유번호 */
+  id?: number
+  /** 지점 ID */
+  branchId?: number
+  /** 카드번호 */
   cardNumber?: string
-  balance?: number
+  /** 카드 비밀번호 */
+  cardPassword?: string
+  /** 사용처 */
+  usageAgency?: string
+  /** 사용목적 */
+  usagePurpose?: string
 }
 
 /** 계약 당사자 상세 */
@@ -195,6 +252,10 @@ export interface ContractPartyDetail {
   partyType?: 'DOMESTIC' | 'OVERSEAS_KOREAN' | 'FOREIGNER' | 'CORPORATION'
   /** 당사자 구분명 */
   partyTypeName?: string
+  /** 소유형태 */
+  ownershipType?: 'SOLE' | 'CO_OWNERSHIP' | 'JOINT_OWNERSHIP'
+  /** 소유형태명 */
+  ownershipTypeName?: string
   /** 성명/법인명 */
   name?: string
   /** 주민등록번호/사업자등록번호 */
@@ -273,34 +334,35 @@ export interface ProgressPartyOption {
   handlingBranch?: string
 }
 
+/** 당사자 항목 요청 (계약 당사자 교체용) */
+export interface RegistryApplicationPartyItem {
+  action: ActionType
+  partyId?: number
+  progressPartyId?: number
+  partyRole?: string
+  partyType?: 'DOMESTIC' | 'OVERSEAS_KOREAN' | 'FOREIGNER' | 'CORPORATION'
+  name?: string
+  registrationNumber?: string
+  contact?: string
+  nationality?: string
+  email?: string
+  address?: string
+  addressDetail?: string
+  representativeType?: 'DOMESTIC' | 'OVERSEAS_KOREAN' | 'FOREIGNER' | 'CORPORATION'
+  representativePosition?: string
+  representativeName?: string
+  representativeNationality?: string
+  isSameAsDebtor?: boolean
+  ownershipType?: 'SOLE' | 'CO_OWNERSHIP' | 'JOINT_OWNERSHIP'
+  transferShareDenominator?: number
+  transferShareNumerator?: number
+  handlingBranch?: string
+}
+
 /** 당사자 교체 요청 */
 export interface RegistryApplicationPartyReplaceRequest {
   /** 계약당사자 정보 목록 */
-  partyItems: PartyItemRequest[]
-}
-
-/** 당사자 항목 요청 */
-export interface PartyItemRequest {
-  /** 신청서 당사자 ID */
-  id?: number
-  /** 진행 당사자 ID */
-  progressPartyId?: number
-  /** 신청인구분 */
-  partyRole?: string
-  /** 등록번호구분 */
-  partyType?: 'DOMESTIC' | 'OVERSEAS_KOREAN' | 'FOREIGNER' | 'CORPORATION'
-  /** 신청인명 */
-  name?: string
-  /** 주민등록번호 */
-  registrationNumber?: string
-  /** 연락처 */
-  contact?: string
-  /** 국적 */
-  nationality?: string
-  /** 기본주소 */
-  address?: string
-  /** 상세주소 */
-  addressDetail?: string
+  partyItems: RegistryApplicationPartyItem[]
 }
 
 // ============================================================================
@@ -309,57 +371,133 @@ export interface PartyItemRequest {
 
 /** 등록면허세 요청 */
 export interface FilingFeeRequest {
-  feeAmount?: number
-  feeType?: string
+  /** 납부여부 */
+  paymentStatus: 'PAYMENT' | 'EXEMPTION'
+  /** 면제사유 */
+  exemptionReason?: string
+  /** 등기방식 */
+  registryMethod: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
+  /** 등기건수 */
+  registryCount?: number
+  /** 수수료 */
+  applicationFee?: number
 }
 
 /** 등록면허세 응답 */
 export interface FilingFeeResponse {
-  calculatedFee?: number
-  feeType?: string
+  applicationId?: number
+  paymentStatus?: 'PAYMENT' | 'EXEMPTION'
+  exemptionReason?: string
+  registryMethod?: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
+  registryCount?: number
+  applicationFee?: number
 }
 
 /** 세금 정보 요청 */
 export interface TaxInfoRequest {
-  taxType?: string
-  taxAmount?: number
+  paymentStatus: 'PAYMENT' | 'EXEMPTION'
+  exemptionReason?: string
+  acquisitionTax?: number
+  registrationLicenseTax?: number
+  educationTax?: number
+  ruralSpecialTax?: number
+  paymentAgency?: string
+  paymentAmount?: number
+  taxNumber?: string
+  electronicPaymentNumber?: string
 }
 
 /** 세금 정보 응답 */
 export interface TaxInfoResponse {
-  taxType?: string
-  calculatedTax?: number
+  applicationId?: number
+  paymentStatus?: 'PAYMENT' | 'EXEMPTION'
+  exemptionReason?: string
+  acquisitionTax?: number
+  registrationLicenseTax?: number
+  educationTax?: number
+  ruralSpecialTax?: number
+  paymentAgency?: string
+  paymentAmount?: number
+  taxNumber?: string
+  electronicPaymentNumber?: string
+  totalAmount?: number
+  registryType?:
+    | 'OWNERSHIP_TRANSFER'
+    | 'MORTGAGE'
+    | 'SURFACE_RIGHT'
+    | 'CHANGE'
+    | 'CORRECTION'
+    | 'MORTGAGE_CANCELLATION'
+    | 'SURFACE_RIGHT_CANCELLATION'
 }
 
-/** 채권 부동산 항목 */
+/** 채권 부동산 항목 (저장 요청용) */
 export interface BondPropertyItem {
-  propertyId?: number
-  propertyAddress?: string
+  /** 부동산 고유번호 */
+  propertyId: string
+  request: BondPropertyUpdateRequest
 }
 
-/** 채권 부동산 항목 응답 */
+/** 채권 부동산 항목 (조회 응답) */
 export interface BondPropertyItemResponse {
-  properties?: BondPropertyItem[]
+  propertyId?: string
+  propertyType?: 'LAND' | 'BUILDING' | 'COLLECTIVE_BUILDING'
+  propertyAddress?: string
+  officialLandPrice?: number
+  area?: number
+  standardMarketPrice?: number
+  bondPurchaseType?: 'PURCHASE' | 'DISCOUNT' | 'EXEMPTION'
+  bondExemptionReason?: string
+  bondPurchaseAmount?: number
 }
 
 /** 채권 부동산 수정 요청 */
 export interface BondPropertyUpdateRequest {
-  propertyIds?: number[]
-}
-
-/** 채권 구분 요청 */
-export interface BondSectionRequest {
-  sectionType?: string
+  /** 국민주택채권 매입 구분 */
+  bondPurchaseType: 'PURCHASE' | 'DISCOUNT' | 'EXEMPTION'
+  /** 감면 사유 */
+  bondExemptionReason?: string
+  /** 채권 매입 금액 */
+  bondPurchaseAmount?: number
+  /** 공시지가 */
+  officialLandPrice?: number
+  /** 면적 */
+  area?: number
+  /** 시가표준액 */
+  standardMarketPrice?: number
 }
 
 /** 주택채권 요청 */
 export interface HousingBondRequest {
-  bondAmount?: number
-  bondType?: string
+  /** 국민주택채권 매입 구분 */
+  purchaseType: 'PURCHASE' | 'DISCOUNT' | 'EXEMPTION'
+  /** 감면 사유 */
+  exemptionReason?: string
+  /** 할인율 */
+  discountRate?: number
+  /** 채권할인금액 */
+  bondDiscountAmount?: number
+  /** 채권매입금액 */
+  bondPurchaseAmount?: number
+  /** 주택채권번호 */
+  housingBondNumber?: string
 }
 
-/** 주택채권 응답 */
+/** 주택채권 조회 응답 */
 export interface HousingBondResponse {
-  calculatedBond?: number
-  bondType?: string
+  applicationId?: number
+  registryManagementNumber?: string
+  purchaseType?: 'PURCHASE' | 'DISCOUNT' | 'EXEMPTION'
+  exemptionReason?: string
+  discountRate?: number
+  bondDiscountAmount?: number
+  bondPurchaseAmount?: number
+  housingBondNumber?: string
+  maximumCreditAmount?: number
+}
+
+/** 채권 구분 저장 요청 */
+export interface BondSectionRequest {
+  application: HousingBondRequest
+  properties: BondPropertyItem[]
 }

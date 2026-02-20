@@ -74,6 +74,10 @@ export interface CreateRegistryTypeComboTestDataQuery {
   hasScopeOfSecuredDebt?: boolean
   /** 등기권리증 정보 생성 여부 */
   hasRegistryRightCertificate?: boolean
+  /** 소유자 정보 포함 여부 */
+  hasPropertyOwnerInfo?: boolean
+  /** 부동산 권리 포함 여부 */
+  hasPropertyRights?: boolean
 }
 
 export type CreateRegistryTypeComboTestDataResponse = RegistryProgressTestDataResponse
