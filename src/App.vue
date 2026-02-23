@@ -42,12 +42,13 @@ import AppHeader from '@/components/layout/AppHeader.vue'
 import { useAuthInitializer } from '@/composables/utils/useAuthInitializer'
 // import { useDeviceDetection } from '@/composables/utils/useDeviceDetection'
 import { useAuthStore } from '@/stores/auth'
+import { ENV } from '@/utils/env'
 import { logger } from '@/utils/logger'
 
 const route = useRoute()
 const authStore = useAuthStore()
 const { initialize } = useAuthInitializer()
-const isDev = import.meta.env.DEV
+const isDev = ENV.IS_DEV
 const DevNav = isDev
   ? defineAsyncComponent(() => import('@/features/dev/components/DevNav.vue'))
   : null

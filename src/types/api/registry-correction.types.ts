@@ -111,7 +111,7 @@ export interface CorrectionReqItem {
   receiptNumber?: string
   name?: string
   registrationNumber?: string
-  handlingBranch?: string
+  registryHandlingBranch?: string
   /** 등기상 국적 */
   registryNationality?: string
   registryAddress?: string

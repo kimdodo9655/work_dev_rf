@@ -105,15 +105,6 @@ export interface RegistryReceiptOfficeOption {
 
 /** 등기 진행 접수등기소 정보 수정 요청 */
 export interface RegistryReceiptOfficeUpdateRequest {
-  registryType?:
-    | 'OWNERSHIP_TRANSFER'
-    | 'MORTGAGE'
-    | 'SURFACE_RIGHT'
-    | 'CHANGE'
-    | 'CORRECTION'
-    | 'MORTGAGE_CANCELLATION'
-    | 'SURFACE_RIGHT_CANCELLATION'
-  registryMethod?: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
   receiptRegistryOffice?: string
   isSpecialLawApplied?: boolean
 }

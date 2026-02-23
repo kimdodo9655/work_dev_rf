@@ -4,6 +4,14 @@
  */
 
 import type { ApiResultVoid, RegistryMethod } from './common.types'
+import type {
+  ContractPartyReplaceResponse,
+  MortgageContractSaveResponse,
+  OwnershipContractSaveResponse,
+  SurfaceRightContractSaveResponse
+} from './registry-contract.types'
+import type { MortgageFinancialResponse } from './registry-debt-tax.types'
+import type { RegistryProgressTaxAgencyListResponse } from './registry-tax-report.types'
 
 /**
  * R02D-02
@@ -59,6 +67,17 @@ export interface GetApplicationDocumentsParams {
 
 export type GetApplicationDocumentsResponse = RegistryApplicationDocumentResponse
 
+/**
+ * R02D-10
+ * GET /api/registry/applications/{applicationId}/forms/unified
+ */
+export interface GetUnifiedApplicationFormParams {
+  /** 신청서 ID */
+  applicationId: number
+}
+
+export type GetUnifiedApplicationFormResponse = UnifiedApplicationFormResponse
+
 // ==================== Schemas ====================
 
 /** 행정정보 연계 시점 */
@@ -112,6 +131,66 @@ export interface RegistryApplicationFormResponse {
 export interface RegistryApplicationUpdateRequest {
   registryMethod: RegistryMethod
   adminInfoLinkTime: AdminInfoLinkTime
+}
+
+/** 등기신청서 - 말소사항정보 */
+export interface ApplicationCancellationFormResponse {
+  /** 말소사항 */
+  cancellationContent?: string
+}
+
+/** 등기신청서 - 등기필정보 */
+export interface ApplicationCertificateFormResponse {
+  /** 부동산 고유번호 */
+  propertyUniqueNumber?: string
+  /** 성명(명칭) */
+  ownerName?: string
+  /** 일련번호 */
+  certificateSerialNumber?: string
+  /** 비밀번호 (순번 2자리 + 비밀번호조합) */
+  certificatePassword?: string
+}
+
+/** 등기신청서 - 등기명의인표시변경 */
+export interface ApplicationChangeFormResponse {
+  /** 변경사항 */
+  changeContent?: string
+}
+
+/** 등기신청서 - 등기명의인표시경정 */
+export interface ApplicationCorrectionFormResponse {
+  /** 경정사항 */
+  correctionContent?: string
+}
+
+/** 등기신청서 - 부동산정보 */
+export interface ApplicationPropertyFormResponse {
+  /** 부동산의표시 목록 */
+  propertyDescription?: string[]
+}
+
+/** 등기신청서 - 첨부문서정보 */
+export interface AttachedDocumentResponse {
+  /** 문서명 */
+  attachmentName?: string
+  /** 통수 */
+  quantity?: number
+}
+
+/** 등기신청서 통합 응답 */
+export interface UnifiedApplicationFormResponse {
+  contractParties?: ContractPartyReplaceResponse
+  ownershipContract?: OwnershipContractSaveResponse
+  mortgageContract?: MortgageContractSaveResponse
+  surfaceRightContract?: SurfaceRightContractSaveResponse
+  mortgageFinancial?: MortgageFinancialResponse
+  taxAgency?: RegistryProgressTaxAgencyListResponse
+  cancellation?: ApplicationCancellationFormResponse
+  attachments?: AttachedDocumentResponse[]
+  properties?: ApplicationPropertyFormResponse[]
+  correction?: ApplicationCorrectionFormResponse
+  change?: ApplicationChangeFormResponse
+  certificates?: ApplicationCertificateFormResponse[]
 }
 
 /** 등기 원인 */

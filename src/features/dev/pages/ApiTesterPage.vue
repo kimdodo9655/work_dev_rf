@@ -1636,6 +1636,24 @@ const generateExampleFromSchema = (schema: any): string => {
   return '{\n  \n}'
 }
 
+function normalizeAttachmentPayload(raw: any) {
+  if (!raw || typeof raw !== 'object' || !Array.isArray(raw.attachmentItems)) return raw
+
+  return {
+    ...raw,
+    attachmentItems: raw.attachmentItems.map((item: any) => {
+      if (!item || typeof item !== 'object') return item
+      const mapped = { ...item }
+      if (mapped.fileName == null && typeof mapped.tempFileName === 'string') {
+        mapped.fileName = mapped.tempFileName
+      }
+      delete mapped.tempFileName
+      delete mapped.htmlForm
+      return mapped
+    })
+  }
+}
+
 const executeRequest = async () => {
   if (!selectedEndpoint.value) return
 
@@ -1673,18 +1691,18 @@ const executeRequest = async () => {
 
     let result: any
     const client = apiClient.value // 동적 클라이언트 사용
+    const requestData = requestBody.value.trim()
+      ? normalizeAttachmentPayload(JSON.parse(requestBody.value))
+      : undefined
 
     if (method === 'get') {
       result = await client.get(url, config)
     } else if (method === 'post') {
-      const data = requestBody.value.trim() ? JSON.parse(requestBody.value) : undefined
-      result = await client.post(url, data, config)
+      result = await client.post(url, requestData, config)
     } else if (method === 'put') {
-      const data = requestBody.value.trim() ? JSON.parse(requestBody.value) : undefined
-      result = await client.put(url, data, config)
+      result = await client.put(url, requestData, config)
     } else if (method === 'patch') {
-      const data = requestBody.value.trim() ? JSON.parse(requestBody.value) : undefined
-      result = await client.patch(url, data, config)
+      result = await client.patch(url, requestData, config)
     } else if (method === 'delete') {
       result = await client.delete(url, config)
     }

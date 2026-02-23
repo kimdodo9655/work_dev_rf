@@ -72,6 +72,7 @@ import { computed, onMounted, ref } from 'vue'
 
 import { useAuth } from '@/composables/api/useAuth'
 import { useErrorHandler } from '@/composables/utils/useErrorHandler'
+import { ENV } from '@/utils/env'
 import { logger } from '@/utils/logger'
 
 // ============================================================================
@@ -86,8 +87,8 @@ const { getErrorMessage } = useErrorHandler()
 const STORAGE_KEY = 'REMEMBER_LOGIN_ID' as const
 
 const DEV_DEFAULT_CREDENTIALS = {
-  loginId: import.meta.env.DEV ? 'admin' : '',
-  password: import.meta.env.DEV ? 'P@ssw0rd1!' : ''
+  loginId: ENV.IS_DEV ? 'admin' : '',
+  password: ENV.IS_DEV ? 'P@ssw0rd1!' : ''
 } as const
 
 // ============================================================================

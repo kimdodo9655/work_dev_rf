@@ -26,8 +26,13 @@ declare module 'vue-router' {
   }
 }
 
+const shouldEnableDevRoutes =
+  import.meta.env.DEV ||
+  import.meta.env.MODE === 'development' ||
+  import.meta.env.VITE_IS_DEV === 'true'
+
 const routes: RouteRecordRaw[] = [
-  ...(import.meta.env.DEV ? devRoutes : []),
+  ...(shouldEnableDevRoutes ? devRoutes : []),
   /**
    * Root 페이지
    *

@@ -189,6 +189,13 @@
               placeholder="http://localhost:29541"
             />
           </div>
+          <div class="input-block">
+            <label class="check-label">
+              <input v-model="useRpaHttpMock" type="checkbox" />
+              iOS/로컬 미실행 환경용 Mock 모드
+            </label>
+            <small v-if="useRpaHttpMock"> 로컬 EXE 없이 샘플 응답으로 테스트합니다. </small>
+          </div>
         </div>
 
         <div class="input-grid">
@@ -714,6 +721,12 @@ const rpaHttpLoading = reactive({
 })
 let rpaHttpPollingInterval: ReturnType<typeof setInterval> | null = null
 let rpaHttpPollingCount = 0
+const isLikelyIosClient =
+  typeof navigator !== 'undefined' &&
+  (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))
+const useRpaHttpMock = ref(isLikelyIosClient)
+let rpaHttpMockStatusCount = 0
 
 const rpaAutoStatus = ref<Record<string, any> | null>(null)
 let rpaAutoPollingInterval: ReturnType<typeof setInterval> | null = null
@@ -1030,10 +1043,36 @@ function setRpaHttpResult(key: string, data: any, isError = false) {
   }
 }
 
+function wait(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+function getRpaHttpBaseUrl() {
+  const raw = rpaHttpServerUrl.value.trim()
+  if (!raw) return 'http://localhost:29541'
+  if (raw.startsWith(':')) return `http://localhost${raw}`
+  if (/^https?:\/\//i.test(raw)) return raw.replace(/\/+$/, '')
+  return `http://${raw}`.replace(/\/+$/, '')
+}
+
 async function rpaHttpTestGet() {
   rpaHttpLoading.get = true
   try {
-    const response = await fetch(`${rpaHttpServerUrl.value}/`, { method: 'GET' })
+    if (useRpaHttpMock.value) {
+      await wait(120)
+      setRpaHttpResult('get', {
+        status: 200,
+        statusText: 'OK',
+        response: {
+          status: 'success',
+          message: 'Mock RPA HTTP 서버 연결 성공',
+          mock: true
+        }
+      })
+      return
+    }
+
+    const response = await fetch(`${getRpaHttpBaseUrl()}/`, { method: 'GET' })
     const data = await response.json()
     setRpaHttpResult('get', {
       status: response.status,
@@ -1055,7 +1094,23 @@ async function rpaHttpTestPost() {
   rpaHttpLoading.post = true
   try {
     const parsed = JSON.parse(rpaHttpPostData.value)
-    const response = await fetch(`${rpaHttpServerUrl.value}/`, {
+    if (useRpaHttpMock.value) {
+      await wait(120)
+      setRpaHttpResult('post', {
+        status: 200,
+        statusText: 'OK',
+        sent: parsed,
+        response: {
+          status: 'success',
+          message: 'Mock 데이터 저장 완료',
+          mock: true,
+          savedAt: new Date().toISOString()
+        }
+      })
+      return
+    }
+
+    const response = await fetch(`${getRpaHttpBaseUrl()}/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(parsed)
@@ -1081,7 +1136,21 @@ async function rpaHttpTestPost() {
 async function rpaHttpGetMacAddress() {
   rpaHttpLoading.mac = true
   try {
-    const response = await fetch(`${rpaHttpServerUrl.value}/macaddress`)
+    if (useRpaHttpMock.value) {
+      await wait(120)
+      setRpaHttpResult('mac', {
+        status: 200,
+        statusText: 'OK',
+        response: {
+          status: 'success',
+          macAddress: 'AA:BB:CC:DD:EE:FF',
+          mock: true
+        }
+      })
+      return
+    }
+
+    const response = await fetch(`${getRpaHttpBaseUrl()}/macaddress`)
     const data = await response.json()
     setRpaHttpResult('mac', {
       status: response.status,
@@ -1102,7 +1171,24 @@ async function rpaHttpGetMacAddress() {
 async function rpaHttpGetData() {
   rpaHttpLoading.data = true
   try {
-    const response = await fetch(`${rpaHttpServerUrl.value}/data`)
+    if (useRpaHttpMock.value) {
+      await wait(120)
+      setRpaHttpResult('data', {
+        status: 200,
+        statusText: 'OK',
+        response: {
+          status: 'success',
+          items: [
+            { id: 1, name: 'mock-item-1' },
+            { id: 2, name: 'mock-item-2' }
+          ],
+          mock: true
+        }
+      })
+      return
+    }
+
+    const response = await fetch(`${getRpaHttpBaseUrl()}/data`)
     const data = await response.json()
     setRpaHttpResult('data', {
       status: response.status,
@@ -1123,7 +1209,29 @@ async function rpaHttpGetData() {
 async function rpaHttpExecute() {
   rpaHttpLoading.execute = true
   try {
-    const response = await fetch(`${rpaHttpServerUrl.value}/execute`)
+    if (useRpaHttpMock.value) {
+      await wait(150)
+      rpaHttpMockStatusCount = 0
+      const data: RpaHttpResponse = {
+        status: 'success',
+        result: 'N',
+        message: 'Mock RPA 실행 시작',
+        mock: true
+      }
+      setRpaHttpResult(
+        'execute',
+        {
+          status: 200,
+          statusText: 'OK',
+          response: data
+        },
+        false
+      )
+      rpaHttpStartPolling()
+      return
+    }
+
+    const response = await fetch(`${getRpaHttpBaseUrl()}/execute`)
     const data: RpaHttpResponse = await response.json()
     setRpaHttpResult(
       'execute',
@@ -1170,7 +1278,25 @@ async function rpaHttpCheckStatus() {
   rpaHttpLoading.status = true
   rpaHttpPollingCount += 1
   try {
-    const response = await fetch(`${rpaHttpServerUrl.value}/status`)
+    if (useRpaHttpMock.value) {
+      await wait(120)
+      rpaHttpMockStatusCount += 1
+      const result = rpaHttpMockStatusCount >= 3 ? 'Y' : 'N'
+      setRpaHttpResult('status', {
+        확인횟수: rpaHttpPollingCount,
+        상태: result === 'Y' ? 'success' : 'processing',
+        결과값: result,
+        메시지: result === 'Y' ? 'Mock 작업 완료' : 'Mock 작업 진행 중',
+        statusCode: 200,
+        mock: true
+      })
+      if (result === 'Y') {
+        rpaHttpStopPolling()
+      }
+      return
+    }
+
+    const response = await fetch(`${getRpaHttpBaseUrl()}/status`)
     const data: RpaHttpResponse = await response.json()
     setRpaHttpResult('status', {
       확인횟수: rpaHttpPollingCount,
@@ -1198,7 +1324,7 @@ function copyRpaHttpAllResult() {
     '═══════════════════════════════════════',
     '📡 RPA HTTP 서버 테스트 결과',
     '═══════════════════════════════════════',
-    `서버 URL: ${rpaHttpServerUrl.value}`,
+    `서버 URL: ${getRpaHttpBaseUrl()}`,
     '',
     stringify(rpaHttpResult.value)
   ].join('\n')
@@ -1238,7 +1364,28 @@ function startRpaAutoCountdown() {
 async function checkRpaAutoStatus() {
   rpaAutoPollingCount += 1
   try {
-    const response = await fetch(`${rpaHttpServerUrl.value}/status`)
+    if (useRpaHttpMock.value) {
+      await wait(120)
+      const result = rpaAutoPollingCount >= 3 ? 'Y' : 'N'
+      rpaAutoStatus.value = {
+        ...(rpaAutoStatus.value ?? {}),
+        statusCheck: {
+          count: rpaAutoPollingCount,
+          statusCode: 200,
+          status: result === 'Y' ? 'success' : 'processing',
+          result,
+          message: result === 'Y' ? 'Mock 자동 실행 완료' : 'Mock 자동 실행 진행 중',
+          mock: true
+        }
+      }
+      rpaAutoLastUpdatedAt.value = new Date().toLocaleTimeString()
+      if (result === 'Y') {
+        stopRpaAutoPolling()
+      }
+      return
+    }
+
+    const response = await fetch(`${getRpaHttpBaseUrl()}/status`)
     const data: RpaHttpResponse = await response.json()
     rpaAutoStatus.value = {
       ...(rpaAutoStatus.value ?? {}),
@@ -1276,7 +1423,8 @@ async function executeRpaAuto(taskToken: string, endpointId: string) {
     taskToken,
     taskType: RPAC_TASK_TYPE_MAP[endpointId] ?? endpointId
   }
-  const executeUrl = `${rpaHttpServerUrl.value}/execute/${encodeURIComponent(
+  const baseUrl = getRpaHttpBaseUrl()
+  const executeUrl = `${baseUrl}/execute/${encodeURIComponent(
     context.bankCode
   )}/${encodeURIComponent(context.apiBaseUrl ?? '')}/${encodeURIComponent(
     context.taskToken
@@ -1292,8 +1440,37 @@ async function executeRpaAuto(taskToken: string, endpointId: string) {
   }
 
   try {
-    // execute 뒤 파라미터를 붙여 호출
-    const response = await fetch(executeUrl)
+    if (useRpaHttpMock.value) {
+      await wait(150)
+      rpaAutoStatus.value = {
+        ...(rpaAutoStatus.value ?? {}),
+        executeResponse: {
+          statusCode: 200,
+          status: 'success',
+          result: 'N',
+          message: 'Mock 자동 execute 시작',
+          raw: {
+            status: 'success',
+            result: 'N',
+            mock: true
+          }
+        }
+      }
+      rpaAutoLastUpdatedAt.value = new Date().toLocaleTimeString()
+
+      rpaAutoPollingInterval = setInterval(() => {
+        void checkRpaAutoStatus()
+      }, RPA_AUTO_POLL_INTERVAL_SEC * 1000)
+      startRpaAutoCountdown()
+      await checkRpaAutoStatus()
+      return
+    }
+
+    // execute 뒤 파라미터를 붙여 호출. 구버전 서버는 /execute만 지원하므로 fallback 시도.
+    let response = await fetch(executeUrl)
+    if (!response.ok && (response.status === 404 || response.status === 405)) {
+      response = await fetch(`${baseUrl}/execute`)
+    }
     const data: RpaHttpResponse = await response.json()
     rpaAutoStatus.value = {
       ...(rpaAutoStatus.value ?? {}),
@@ -1599,6 +1776,24 @@ async function applyAutoFill(endpointId: string) {
   }
 }
 
+function normalizeAttachmentPayload(raw: any) {
+  if (!raw || typeof raw !== 'object' || !Array.isArray(raw.attachmentItems)) return raw
+
+  return {
+    ...raw,
+    attachmentItems: raw.attachmentItems.map((item: any) => {
+      if (!item || typeof item !== 'object') return item
+      const mapped = { ...item }
+      if (mapped.fileName == null && typeof mapped.tempFileName === 'string') {
+        mapped.fileName = mapped.tempFileName
+      }
+      delete mapped.tempFileName
+      delete mapped.htmlForm
+      return mapped
+    })
+  }
+}
+
 async function callEndpoint(endpointId: string) {
   const ep = endpointConfigs.find((item) => item.id === endpointId)
   if (!ep) return
@@ -1614,7 +1809,22 @@ async function callEndpoint(endpointId: string) {
       url = url.replace(`{${pathParam}}`, encodeURIComponent(value))
     }
 
-    const data = ep.hasBody ? JSON.parse(bodyByEndpoint[endpointId] || '{}') : undefined
+    const data = ep.hasBody
+      ? normalizeAttachmentPayload(JSON.parse(bodyByEndpoint[endpointId] || '{}'))
+      : undefined
+
+    if ((endpointId === 'RPAC-01' || endpointId === 'RPAC-13') && data) {
+      const cardNumber = String(data.cardNumber ?? '').trim()
+      if (!cardNumber) {
+        throw new Error('cardNumber가 비어있습니다.')
+      }
+      if (/[^0-9A-Za-z\s-]/.test(cardNumber)) {
+        throw new Error(
+          'cardNumber 형식이 올바르지 않습니다. 영문/숫자/공백/- 만 입력하세요. (예: P6735534 7877)'
+        )
+      }
+      data.cardNumber = cardNumber
+    }
 
     const accessToken = storage.getAccessToken()
     const headers: Record<string, string> = {

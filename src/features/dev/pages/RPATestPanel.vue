@@ -8,6 +8,10 @@
         <h2>서버 설정</h2>
         <label>서버 URL:</label>
         <input v-model="serverUrl" type="text" placeholder="http://localhost:29541" />
+        <label class="mock-toggle">
+          <input v-model="useMock" type="checkbox" />
+          iOS/로컬 미실행 환경용 Mock 모드
+        </label>
       </section>
 
       <!-- GET 요청 테스트 -->
@@ -100,6 +104,12 @@ const postData = ref(`{
   "userId": 1,
   "value": "테스트 데이터"
 }`)
+const isLikelyIosClient =
+  typeof navigator !== 'undefined' &&
+  (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))
+const useMock = ref(isLikelyIosClient)
+let mockStatusCount = 0
 
 // 폴링 관련
 let pollingInterval: number | null = null
@@ -109,11 +119,24 @@ let pollingCount = 0
 const formatResult = (data: any): string => {
   return JSON.stringify(data, null, 2)
 }
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 // API 호출 함수들
 const testGet = async () => {
   try {
     getResult.value = { data: '요청 중...', isError: false }
+    if (useMock.value) {
+      await wait(120)
+      getResult.value = {
+        data: {
+          status: 200,
+          statusText: 'OK',
+          response: { status: 'success', message: 'Mock RPA HTTP 서버 연결 성공', mock: true }
+        },
+        isError: false
+      }
+      return
+    }
 
     const response = await fetch(`${serverUrl.value}/`, {
       method: 'GET'
@@ -150,6 +173,24 @@ const testPost = async () => {
     } catch (e) {
       throw new Error(`JSON 형식이 올바르지 않습니다: ${(e as Error).message}`, { cause: e })
     }
+    if (useMock.value) {
+      await wait(120)
+      postResult.value = {
+        data: {
+          status: 200,
+          statusText: 'OK',
+          sent: parsedData,
+          response: {
+            status: 'success',
+            message: 'Mock 데이터 저장 완료',
+            mock: true,
+            savedAt: new Date().toISOString()
+          }
+        },
+        isError: false
+      }
+      return
+    }
 
     const response = await fetch(`${serverUrl.value}/`, {
       method: 'POST',
@@ -184,6 +225,18 @@ const testPost = async () => {
 const getMacAddress = async () => {
   try {
     macResult.value = { data: '요청 중...', isError: false }
+    if (useMock.value) {
+      await wait(120)
+      macResult.value = {
+        data: {
+          status: 200,
+          statusText: 'OK',
+          response: { status: 'success', macAddress: 'AA:BB:CC:DD:EE:FF', mock: true }
+        },
+        isError: false
+      }
+      return
+    }
 
     const response = await fetch(`${serverUrl.value}/macaddress`)
     const data = await response.json()
@@ -210,6 +263,25 @@ const getMacAddress = async () => {
 const getData = async () => {
   try {
     dataResult.value = { data: '요청 중...', isError: false }
+    if (useMock.value) {
+      await wait(120)
+      dataResult.value = {
+        data: {
+          status: 200,
+          statusText: 'OK',
+          response: {
+            status: 'success',
+            items: [
+              { id: 1, name: 'mock-item-1' },
+              { id: 2, name: 'mock-item-2' }
+            ],
+            mock: true
+          }
+        },
+        isError: false
+      }
+      return
+    }
 
     const response = await fetch(`${serverUrl.value}/data`)
     const data = await response.json()
@@ -236,6 +308,26 @@ const getData = async () => {
 const executeRPA = async () => {
   try {
     rpaResult.value = { data: 'RPA 실행 중...', isError: false }
+    if (useMock.value) {
+      await wait(150)
+      mockStatusCount = 0
+      const data: RPAResponse = {
+        status: 'success',
+        result: 'N',
+        message: 'Mock RPA 실행 시작',
+        mock: true
+      }
+      rpaResult.value = {
+        data: {
+          status: 200,
+          statusText: 'OK',
+          response: data
+        },
+        isError: false
+      }
+      startPolling()
+      return
+    }
 
     const response = await fetch(`${serverUrl.value}/execute`)
     const data: RPAResponse = await response.json()
@@ -304,6 +396,25 @@ const checkStatus = async () => {
     statusResult.value = {
       data: `상태 확인 중... (${pollingCount}회차)`,
       isError: false
+    }
+    if (useMock.value) {
+      await wait(120)
+      mockStatusCount += 1
+      const result = mockStatusCount >= 3 ? 'Y' : 'N'
+      statusResult.value = {
+        data: {
+          확인횟수: pollingCount,
+          상태: result === 'Y' ? '완료' : 'processing',
+          결과값: result,
+          메시지: result === 'Y' ? '완료' : '진행중',
+          mock: true
+        },
+        isError: false
+      }
+      if (result === 'Y') {
+        stopPolling()
+      }
+      return
     }
 
     const response = await fetch(`${serverUrl.value}/status`)

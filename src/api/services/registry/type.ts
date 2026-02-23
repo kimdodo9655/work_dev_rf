@@ -13,6 +13,8 @@ import type {
   GetApplicationDocumentsResponse,
   GetRegistryApplicationFormsQuery,
   GetRegistryApplicationFormsResponse,
+  GetUnifiedApplicationFormParams,
+  GetUnifiedApplicationFormResponse,
   UpdateRegistryApplicationParams,
   UpdateRegistryApplicationRequest,
   UpdateRegistryApplicationResponse
@@ -58,6 +60,15 @@ export const registryTypeAPI = {
     // --------------------------------------------------
     return apiHelpers.get<GetApplicationDocumentsResponse>(
       API.REGISTRY_TYPE.DOCUMENTS(params.applicationId)
+    )
+  },
+
+  async unifiedForm(params: GetUnifiedApplicationFormParams) {
+    // --------------------------------------------------
+    // [R02D-10][GET - /api/registry/applications/{applicationId}/forms/unified] 등기신청서 통합 조회
+    // --------------------------------------------------
+    return apiHelpers.get<GetUnifiedApplicationFormResponse>(
+      API.REGISTRY_TYPE.UNIFIED_FORM(params.applicationId)
     )
   }
 }

@@ -50,7 +50,7 @@ export type SearchEstimateSummaryResponse = RegistryEstimateSummaryResponse
 
 /**
  * R02A-04
- * GET /api/registry/progress/statistics
+ * GET /api/registry/progress/case-processing-status
  */
 export interface SearchRegistryProgressStatisticsQuery {
   /** 조회 대상 담당자 ID (전체 조회시 생략 또는 'ALL') */

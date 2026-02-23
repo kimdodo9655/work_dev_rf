@@ -240,7 +240,9 @@ export const API = {
     UPDATE: (applicationId: string | number) => `/api/registry/applications/${applicationId}`, // [R02D-04][PATCH] 등기유형(등기신청서) 수정
     LIST: '/api/registry/applications/tabs', // [R02D-08][GET] 등기신청서 양식 목록 조회
     DOCUMENTS: (applicationId: string | number) =>
-      `/api/registry/applications/${applicationId}/documents` // [R02D-09][GET] 등기신청서 전자문서 조회
+      `/api/registry/applications/${applicationId}/documents`, // [R02D-09][GET] 등기신청서 전자문서 조회
+    UNIFIED_FORM: (applicationId: string | number) =>
+      `/api/registry/applications/${applicationId}/forms/unified` // [R02D-10][GET] 등기신청서 통합 조회
   },
 
   // [R02E] 등기진행-계약정보
@@ -504,5 +506,12 @@ export const API = {
     RESULT: (taskToken: string | number) => `/api/registry/rpa/user-tasks/${taskToken}/result`, // [RPAC-12][PATCH] RPA 작업 결과 전달
     CREATE_FULL_CERTIFICATE_ISSUE: (registryManagementNumber: string | number) =>
       `/api/registry/rpa/user-tasks/${registryManagementNumber}/full-certificate-issue` // [RPAC-13][POST] 등기사항전부증명서 발급 작업 등록
+  },
+
+  // [Z01] 암호화/복호화
+  CRYPTO: {
+    ENCRYPT: '/api/admin/crypto/encrypt', // [Z01-01][POST] 평문 암호화
+    DECRYPT: '/api/admin/crypto/decrypt', // [Z01-02][POST] 암호문 복호화
+    HASH: '/api/admin/crypto/hash' // [Z01-03][POST] SHA-256 해시 생성
   }
 } as const

@@ -1,3 +1,4 @@
+import { ENV } from '@/utils/env'
 import { logger } from '@/utils/logger'
 import { storage } from '@/utils/storage'
 
@@ -169,7 +170,7 @@ export function handleInvalidAuthState() {
  * @param data - 검증할 인증 데이터
  */
 export function logAuthDataValidation(data: Partial<AuthData>) {
-  if (import.meta.env.DEV) {
+  if (ENV.IS_DEV) {
     console.group('[AUTH_VALIDATOR] Detailed Validation')
     console.log('accessToken:', !!data.accessToken, typeof data.accessToken)
     console.log('refreshToken:', !!data.refreshToken, typeof data.refreshToken)

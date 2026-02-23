@@ -146,7 +146,7 @@
 
 <script lang="ts" setup>
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs'
-import pdfWorker from 'pdfjs-dist/legacy/build/pdf.worker.mjs?url'
+import PdfJsWorker from 'pdfjs-dist/legacy/build/pdf.worker.mjs?worker'
 import {
   computed,
   markRaw,
@@ -158,7 +158,9 @@ import {
   shallowRef,
   watch
 } from 'vue'
-;(pdfjsLib as any).GlobalWorkerOptions.workerSrc = pdfWorker
+
+const pdfWorker = new PdfJsWorker()
+;(pdfjsLib as any).GlobalWorkerOptions.workerPort = pdfWorker
 
 type ZoomMode = 'custom' | 'fitWidth' | 'fitPage'
 
@@ -326,9 +328,18 @@ async function loadPdf() {
     cancelAllRenderTasks()
     pageRenderKeyMap.clear()
 
+    const hasUrl = typeof props.src === 'string' && props.src.trim().length > 0
+    const hasData = props.src instanceof ArrayBuffer && props.src.byteLength > 0
+
+    if (!hasUrl && !hasData) {
+      pdfDoc.value = null
+      numPages.value = 0
+      return
+    }
+
     const task = (pdfjsLib as any).getDocument({
-      url: typeof props.src === 'string' ? props.src : undefined,
-      data: typeof props.src !== 'string' ? props.src : undefined,
+      url: hasUrl ? props.src : undefined,
+      data: hasData ? props.src : undefined,
       disableAutoFetch: true,
       disableStream: true
     })
@@ -832,6 +843,7 @@ onBeforeUnmount(() => {
   resizeObserver = null
 
   cancelAllRenderTasks()
+  pdfWorker.terminate()
 })
 </script>
 

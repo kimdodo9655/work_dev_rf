@@ -197,6 +197,10 @@
     {
       "name": "[RPAC] RPA 사용자 PC 작업",
       "description": "RPA 사용자 PC 작업 관리 API"
+    },
+    {
+      "name": "[Z01] 암호화/복호화",
+      "description": "암호화/복호화 관리 API"
     }
   ],
   "paths": {
@@ -5012,6 +5016,39 @@
         }
       }
     },
+    "/api/registry/applications/{applicationId}/forms/unified": {
+      "get": {
+        "tags": ["[R02D] 등기진행-등기유형"],
+        "summary": "[R02D-10] 등기신청서 통합 조회",
+        "description": "신청서 ID에 따라 등기유형별 응답을 통합 포맷으로 반환합니다. 유형에 해당하지 않는 필드는 null 혹은 빈 배열로 내려갑니다.",
+        "operationId": "getUnifiedApplicationForm",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "description": "신청서 ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "통합 신청서 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnifiedApplicationFormResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/registry/applications/{applicationId}/contracts/parties": {
       "get": {
         "tags": ["[R02E] 등기진행-계약정보"],
@@ -5076,7 +5113,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResultContractPartyResponse"
+                  "$ref": "#/components/schemas/ApiResultContractPartyReplaceResponse"
                 }
               }
             }
@@ -5148,7 +5185,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResultOwnershipContractResponse"
+                  "$ref": "#/components/schemas/ApiResultOwnershipContractSaveResponse"
                 }
               }
             }
@@ -5220,7 +5257,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResultMortgageContractResponse"
+                  "$ref": "#/components/schemas/ApiResultMortgageContractSaveResponse"
                 }
               }
             }
@@ -5292,7 +5329,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResultSurfaceRightContractResponse"
+                  "$ref": "#/components/schemas/ApiResultSurfaceRightContractSaveResponse"
                 }
               }
             }
@@ -5621,7 +5658,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/RegistryApplicationAttachmentResponse"
+                  "$ref": "#/components/schemas/RegistryApplicationAttachmentDetailResponse"
                 }
               }
             }
@@ -5662,7 +5699,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/RegistryApplicationAttachmentResponse"
+                  "$ref": "#/components/schemas/RegistryApplicationAttachmentDetailResponse"
                 }
               }
             }
@@ -8582,6 +8619,96 @@
           }
         }
       }
+    },
+    "/api/admin/crypto/encrypt": {
+      "post": {
+        "tags": ["[Z01] 암호화/복호화"],
+        "summary": "[Z01-01] 🅿️ 평문 암호화",
+        "description": "입력한 평문을 AES-GCM으로 암호화합니다",
+        "operationId": "encrypt",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CryptoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultCryptoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/crypto/decrypt": {
+      "post": {
+        "tags": ["[Z01] 암호화/복호화"],
+        "summary": "[Z01-02] 🅿️ 암호문 복호화",
+        "description": "입력한 암호문을 AES-GCM으로 복호화합니다",
+        "operationId": "decrypt",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CryptoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultCryptoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/crypto/hash": {
+      "post": {
+        "tags": ["[Z01] 암호화/복호화"],
+        "summary": "[Z01-03] 🅿️ SHA-256 해시 생성",
+        "description": "입력한 평문을 SHA-256으로 해시합니다",
+        "operationId": "hash",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CryptoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultCryptoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -8758,6 +8885,13 @@
           "registryCause": {
             "type": "string"
           },
+          "rankNumber": {
+            "type": "string"
+          },
+          "section": {
+            "type": "string",
+            "enum": ["GAP", "EUL"]
+          },
           "propertyUniqueNumber": {
             "type": "string"
           },
@@ -8778,13 +8912,6 @@
             "type": "string"
           },
           "certificatePassword": {
-            "type": "string"
-          },
-          "section": {
-            "type": "string",
-            "enum": ["GAP", "EUL"]
-          },
-          "rankNumber": {
             "type": "string"
           },
           "receiptDate": {
@@ -9862,30 +9989,10 @@
       "RegistryReceiptOfficeUpdateRequest": {
         "type": "object",
         "properties": {
-          "registryType": {
-            "type": "string",
-            "description": "등기 유형",
-            "example": "MORTGAGE",
-            "enum": [
-              "OWNERSHIP_TRANSFER",
-              "MORTGAGE",
-              "SURFACE_RIGHT",
-              "CHANGE",
-              "CORRECTION",
-              "MORTGAGE_CANCELLATION",
-              "SURFACE_RIGHT_CANCELLATION"
-            ]
-          },
-          "registryMethod": {
-            "type": "string",
-            "description": "등기 방식",
-            "example": "ELECTRONIC",
-            "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
-          },
           "receiptRegistryOffice": {
             "type": "string",
             "description": "접수 등기소",
-            "example": "서울서부지방법원 등기국, 서울동부지방법원 등기국"
+            "example": "서울서부지방법원 등기국"
           },
           "isSpecialLawApplied": {
             "type": "boolean",
@@ -10106,7 +10213,7 @@
             "description": "(주민)등록번호",
             "example": "801010-1234567"
           },
-          "handlingBranch": {
+          "registryHandlingBranch": {
             "type": "string",
             "description": "취급지점",
             "example": "서울중구"
@@ -10490,7 +10597,7 @@
           }
         }
       },
-      "ApiResultSurfaceRightContractResponse": {
+      "ApiResultSurfaceRightContractSaveResponse": {
         "type": "object",
         "properties": {
           "status": {
@@ -10507,11 +10614,11 @@
             "type": "string"
           },
           "data": {
-            "$ref": "#/components/schemas/SurfaceRightContractResponse"
+            "$ref": "#/components/schemas/SurfaceRightContractSaveResponse"
           }
         }
       },
-      "SurfaceRightContractResponse": {
+      "SurfaceRightContractSaveResponse": {
         "type": "object",
         "properties": {
           "durationPeriod": {
@@ -10521,11 +10628,6 @@
           "contractDate": {
             "type": "string",
             "description": "계약 일자",
-            "format": "date"
-          },
-          "registryReceiptDate": {
-            "type": "string",
-            "description": "등기 접수 일자",
             "format": "date"
           },
           "establishmentScope": {
@@ -10681,7 +10783,7 @@
           }
         }
       },
-      "ApiResultContractPartyResponse": {
+      "ApiResultContractPartyReplaceResponse": {
         "type": "object",
         "properties": {
           "status": {
@@ -10698,182 +10800,53 @@
             "type": "string"
           },
           "data": {
-            "$ref": "#/components/schemas/ContractPartyResponse"
+            "$ref": "#/components/schemas/ContractPartyReplaceResponse"
           }
         }
       },
-      "ContractPartyDetail": {
+      "CommonParty": {
         "type": "object",
         "properties": {
-          "partyId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "progressPartyId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "partyRole": {
-            "type": "string",
-            "enum": ["REGISTRY_OBLIGOR", "REGISTRY_OBLIGEE", "DEBTOR"]
-          },
-          "partyRoleName": {
-            "type": "string"
-          },
-          "partyType": {
-            "type": "string",
-            "enum": ["DOMESTIC", "OVERSEAS_KOREAN", "FOREIGNER", "CORPORATION"]
-          },
-          "partyTypeName": {
-            "type": "string"
-          },
-          "ownershipType": {
-            "type": "string",
-            "description": "소유형태: 소유/공유/합유",
-            "enum": ["SOLE", "CO_OWNERSHIP", "JOINT_OWNERSHIP"]
-          },
-          "ownershipTypeName": {
-            "type": "string"
-          },
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "성명"
           },
           "registrationNumber": {
-            "type": "string"
-          },
-          "contact": {
-            "type": "string"
-          },
-          "nationality": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
+            "type": "string",
+            "description": "등록번호"
           },
           "address": {
-            "type": "string"
-          },
-          "addressDetail": {
-            "type": "string"
-          },
-          "representativeType": {
             "type": "string",
-            "enum": ["DOMESTIC", "OVERSEAS_KOREAN", "FOREIGNER", "CORPORATION"]
-          },
-          "representativePosition": {
-            "type": "string"
-          },
-          "representativeName": {
-            "type": "string"
-          },
-          "representativeNationality": {
-            "type": "string"
-          },
-          "isSameAsDebtor": {
-            "type": "boolean"
-          },
-          "transferShareDenominator": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "transferShareNumerator": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "handlingBranch": {
-            "type": "string"
+            "description": "주소"
           }
         },
         "description": "채무자 목록"
       },
-      "ContractPartyResponse": {
+      "ContractPartyReplaceResponse": {
         "type": "object",
         "properties": {
           "obligors": {
             "type": "array",
             "description": "등기의무자 목록",
             "items": {
-              "$ref": "#/components/schemas/ContractPartyDetail"
+              "$ref": "#/components/schemas/CommonParty"
             }
           },
           "obligees": {
             "type": "array",
             "description": "등기권리자 목록",
             "items": {
-              "$ref": "#/components/schemas/ContractPartyDetail"
+              "$ref": "#/components/schemas/CommonParty"
             }
           },
           "debtors": {
             "type": "array",
             "description": "채무자 목록",
             "items": {
-              "$ref": "#/components/schemas/ContractPartyDetail"
-            }
-          },
-          "progressPartyOptions": {
-            "type": "array",
-            "description": "진행당사자 선택 옵션",
-            "items": {
-              "$ref": "#/components/schemas/ProgressPartyOption"
+              "$ref": "#/components/schemas/CommonParty"
             }
           }
-        },
-        "description": "계약당사자 정보"
-      },
-      "ProgressPartyOption": {
-        "type": "object",
-        "properties": {
-          "progressPartyId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "dataSource": {
-            "type": "string",
-            "enum": ["REQUEST", "MANUAL"]
-          },
-          "partyType": {
-            "type": "string",
-            "enum": ["DOMESTIC", "OVERSEAS_KOREAN", "FOREIGNER", "CORPORATION"]
-          },
-          "name": {
-            "type": "string"
-          },
-          "registrationNumber": {
-            "type": "string"
-          },
-          "contact": {
-            "type": "string"
-          },
-          "nationality": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          },
-          "address": {
-            "type": "string"
-          },
-          "addressDetail": {
-            "type": "string"
-          },
-          "representativeType": {
-            "type": "string",
-            "enum": ["DOMESTIC", "OVERSEAS_KOREAN", "FOREIGNER", "CORPORATION"]
-          },
-          "representativePosition": {
-            "type": "string"
-          },
-          "representativeName": {
-            "type": "string"
-          },
-          "representativeNationality": {
-            "type": "string"
-          },
-          "handlingBranch": {
-            "type": "string"
-          }
-        },
-        "description": "진행당사자 선택 옵션"
+        }
       },
       "InterimPayment": {
         "type": "object",
@@ -10930,7 +10903,7 @@
           }
         }
       },
-      "ApiResultOwnershipContractResponse": {
+      "ApiResultOwnershipContractSaveResponse": {
         "type": "object",
         "properties": {
           "status": {
@@ -10947,30 +10920,13 @@
             "type": "string"
           },
           "data": {
-            "$ref": "#/components/schemas/OwnershipContractResponse"
+            "$ref": "#/components/schemas/OwnershipContractSaveResponse"
           }
         }
       },
-      "InterimPaymentResponse": {
+      "OwnershipContractSaveResponse": {
         "type": "object",
         "properties": {
-          "amount": {
-            "type": "number"
-          },
-          "date": {
-            "type": "string",
-            "format": "date"
-          }
-        },
-        "description": "2차 중도금 정보"
-      },
-      "OwnershipContractResponse": {
-        "type": "object",
-        "properties": {
-          "contractAmount": {
-            "type": "number",
-            "description": "계약 금액"
-          },
           "contractDate": {
             "type": "string",
             "description": "계약 일자",
@@ -10984,16 +10940,6 @@
           "tradeReportManagementNumber": {
             "type": "string",
             "description": "실거래신고 관리번호"
-          },
-          "tradeReportReceiptNumber": {
-            "type": "string",
-            "description": "실거래신고 접수번호"
-          },
-          "firstInterim": {
-            "$ref": "#/components/schemas/InterimPaymentResponse"
-          },
-          "secondInterim": {
-            "$ref": "#/components/schemas/InterimPaymentResponse"
           }
         }
       },
@@ -11090,7 +11036,7 @@
         },
         "description": "피담보채무 범위 목록 (최대 2건)"
       },
-      "ApiResultMortgageContractResponse": {
+      "ApiResultMortgageContractSaveResponse": {
         "type": "object",
         "properties": {
           "status": {
@@ -11107,11 +11053,11 @@
             "type": "string"
           },
           "data": {
-            "$ref": "#/components/schemas/MortgageContractResponse"
+            "$ref": "#/components/schemas/MortgageContractSaveResponse"
           }
         }
       },
-      "MortgageContractResponse": {
+      "MortgageContractSaveResponse": {
         "type": "object",
         "properties": {
           "maximumCreditAmount": {
@@ -11127,67 +11073,8 @@
             "type": "string",
             "description": "등기 접수 일자",
             "format": "date"
-          },
-          "loanExecutionDate": {
-            "type": "string",
-            "description": "대출 실행 일자",
-            "format": "date"
-          },
-          "securedDebtScopeType": {
-            "type": "string",
-            "description": "피담보채무 범위 구분",
-            "enum": ["LIMITED", "SPECIFIC"]
-          },
-          "securedDebtScopes": {
-            "type": "array",
-            "description": "피담보채무 범위 상세",
-            "items": {
-              "$ref": "#/components/schemas/SecuredDebtScopeResponse"
-            }
-          },
-          "settlementPeriodType": {
-            "type": "string",
-            "description": "결산기 유형"
-          },
-          "settlementDate": {
-            "type": "string",
-            "description": "결산 일자",
-            "format": "date"
-          },
-          "isWithdrawalRightWaived": {
-            "type": "boolean",
-            "description": "철회권 포기 여부"
-          },
-          "withdrawalRightWaiveDate": {
-            "type": "string",
-            "description": "철회권 포기 일자",
-            "format": "date"
           }
         }
-      },
-      "SecuredDebtScopeResponse": {
-        "type": "object",
-        "properties": {
-          "securedDebtScopeId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "securedDebtScopeType": {
-            "type": "string",
-            "enum": ["LIMITED", "SPECIFIC"]
-          },
-          "transactionType": {
-            "type": "string"
-          },
-          "transactionDate": {
-            "type": "string",
-            "format": "date"
-          },
-          "agreementName": {
-            "type": "string"
-          }
-        },
-        "description": "피담보채무 범위 상세"
       },
       "ApplicantChangeReqItem": {
         "required": ["partyId", "progressPartyId"],
@@ -11221,12 +11108,6 @@
         ],
         "type": "object",
         "properties": {
-          "changeId": {
-            "type": "integer",
-            "description": "변경사항 ID (수정 시 필수)",
-            "format": "int64",
-            "example": 1
-          },
           "propertyUniqueNumber": {
             "minLength": 1,
             "type": "string",
@@ -11775,7 +11656,8 @@
           "section": {
             "type": "string",
             "description": "구분",
-            "example": "GAP"
+            "example": "GAP",
+            "enum": ["GAP", "EUL"]
           },
           "rankNumber": {
             "type": "string",
@@ -11991,6 +11873,179 @@
         },
         "description": "말소사항 정보 대체 요청"
       },
+      "ContractPartyDetail": {
+        "type": "object",
+        "properties": {
+          "partyId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "progressPartyId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "partyRole": {
+            "type": "string",
+            "enum": ["REGISTRY_OBLIGOR", "REGISTRY_OBLIGEE", "DEBTOR"]
+          },
+          "partyRoleName": {
+            "type": "string"
+          },
+          "partyType": {
+            "type": "string",
+            "enum": ["DOMESTIC", "OVERSEAS_KOREAN", "FOREIGNER", "CORPORATION"]
+          },
+          "partyTypeName": {
+            "type": "string"
+          },
+          "ownershipType": {
+            "type": "string",
+            "description": "소유형태: 소유/공유/합유",
+            "enum": ["SOLE", "CO_OWNERSHIP", "JOINT_OWNERSHIP"]
+          },
+          "ownershipTypeName": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "registrationNumber": {
+            "type": "string"
+          },
+          "contact": {
+            "type": "string"
+          },
+          "nationality": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "addressDetail": {
+            "type": "string"
+          },
+          "representativeType": {
+            "type": "string",
+            "enum": ["DOMESTIC", "OVERSEAS_KOREAN", "FOREIGNER", "CORPORATION"]
+          },
+          "representativePosition": {
+            "type": "string"
+          },
+          "representativeName": {
+            "type": "string"
+          },
+          "representativeNationality": {
+            "type": "string"
+          },
+          "isSameAsDebtor": {
+            "type": "boolean"
+          },
+          "transferShareDenominator": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "transferShareNumerator": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "handlingBranch": {
+            "type": "string"
+          }
+        },
+        "description": "채무자 목록"
+      },
+      "ContractPartyResponse": {
+        "type": "object",
+        "properties": {
+          "obligors": {
+            "type": "array",
+            "description": "등기의무자 목록",
+            "items": {
+              "$ref": "#/components/schemas/ContractPartyDetail"
+            }
+          },
+          "obligees": {
+            "type": "array",
+            "description": "등기권리자 목록",
+            "items": {
+              "$ref": "#/components/schemas/ContractPartyDetail"
+            }
+          },
+          "debtors": {
+            "type": "array",
+            "description": "채무자 목록",
+            "items": {
+              "$ref": "#/components/schemas/ContractPartyDetail"
+            }
+          },
+          "progressPartyOptions": {
+            "type": "array",
+            "description": "진행당사자 선택 옵션",
+            "items": {
+              "$ref": "#/components/schemas/ProgressPartyOption"
+            }
+          }
+        },
+        "description": "계약당사자 정보"
+      },
+      "ProgressPartyOption": {
+        "type": "object",
+        "properties": {
+          "progressPartyId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dataSource": {
+            "type": "string",
+            "enum": ["REQUEST", "MANUAL"]
+          },
+          "partyType": {
+            "type": "string",
+            "enum": ["DOMESTIC", "OVERSEAS_KOREAN", "FOREIGNER", "CORPORATION"]
+          },
+          "name": {
+            "type": "string"
+          },
+          "registrationNumber": {
+            "type": "string"
+          },
+          "contact": {
+            "type": "string"
+          },
+          "nationality": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "addressDetail": {
+            "type": "string"
+          },
+          "representativeType": {
+            "type": "string",
+            "enum": ["DOMESTIC", "OVERSEAS_KOREAN", "FOREIGNER", "CORPORATION"]
+          },
+          "representativePosition": {
+            "type": "string"
+          },
+          "representativeName": {
+            "type": "string"
+          },
+          "representativeNationality": {
+            "type": "string"
+          },
+          "handlingBranch": {
+            "type": "string"
+          }
+        },
+        "description": "진행당사자 선택 옵션"
+      },
       "RegistryApplicationCancellationItemResponse": {
         "type": "object",
         "properties": {
@@ -12169,8 +12224,35 @@
           "attachmentName": {
             "type": "string",
             "description": "첨부서면명칭",
-            "example": "RRC",
-            "enum": ["CNT", "RGC", "RRC"]
+            "example": "LPA",
+            "enum": [
+              "LST",
+              "POA",
+              "SGN",
+              "CRT",
+              "CNT",
+              "RFC",
+              "RPC",
+              "RRC",
+              "TAX",
+              "SMP",
+              "SVC",
+              "ESC",
+              "RRI",
+              "LRI",
+              "LRC",
+              "CNF",
+              "RPS",
+              "LTP",
+              "LBK",
+              "GBK",
+              "CBK",
+              "LPA",
+              "RPA",
+              "CRP",
+              "CSM",
+              "ECS"
+            ]
           },
           "submissionMethod": {
             "type": "string",
@@ -12189,12 +12271,7 @@
             "format": "int32",
             "example": 1
           },
-          "htmlForm": {
-            "type": "string",
-            "description": "HTML양식 (제출방식에 따라 필수)",
-            "example": "<html></html>"
-          },
-          "tempFileName": {
+          "fileName": {
             "type": "string",
             "description": "임시파일명 (제출방식에 따라 필수)",
             "example": "BRN_000_000_BLF.temp-20241205143022-a1b2c3d4.pdf"
@@ -12204,6 +12281,21 @@
             "description": "원용정보 (제출방식에 따라 필수)",
             "example": "NOT_APPLICABLE",
             "enum": ["NOT_APPLICABLE", "OFFICE_USE", "SIMULTANEOUS_SUBMIT", "PREVIOUS_ATTACHMENT"]
+          },
+          "name": {
+            "type": "string",
+            "description": "동의인",
+            "example": "홍길동"
+          },
+          "jurisdictionRegistryOffice": {
+            "type": "string",
+            "description": "관할등기소",
+            "example": "서울서부지방법원 등기국"
+          },
+          "rentalBusinessRegistrationNumber": {
+            "type": "string",
+            "description": "임대사업자등록번호",
+            "example": "2024서울강남구임대사업자00001"
           }
         },
         "description": "첨부서면 정보 목록"
@@ -12221,73 +12313,102 @@
           }
         }
       },
-      "RegistryApplicationAttachmentItemResponse": {
+      "AttachmentItemProjection": {
         "type": "object",
         "properties": {
-          "attachmentId": {
-            "type": "integer",
-            "description": "첨부서면ID",
-            "format": "int64",
-            "example": 1
+          "name": {
+            "type": "string"
+          },
+          "fileName": {
+            "type": "string"
           },
           "attachmentName": {
             "type": "string",
-            "description": "첨부서면명칭",
-            "example": "1",
-            "enum": ["CNT", "RGC", "RRC"]
+            "enum": [
+              "LST",
+              "POA",
+              "SGN",
+              "CRT",
+              "CNT",
+              "RFC",
+              "RPC",
+              "RRC",
+              "TAX",
+              "SMP",
+              "SVC",
+              "ESC",
+              "RRI",
+              "LRI",
+              "LRC",
+              "CNF",
+              "RPS",
+              "LTP",
+              "LBK",
+              "GBK",
+              "CBK",
+              "LPA",
+              "RPA",
+              "CRP",
+              "CSM",
+              "ECS"
+            ]
           },
-          "submissionMethod": {
+          "registryMethod": {
             "type": "string",
-            "description": "제출방식",
-            "example": "ELECTRONIC_CREATE",
-            "enum": ["ELECTRONIC_CREATE", "ELECTRONIC_UPLOAD", "VISIT_SUBMIT", "ADMIN_INFO_LINK"]
+            "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
           },
-          "additionalInfo": {
+          "registryType": {
             "type": "string",
-            "description": "부가정보",
-            "example": "원본과상위없음"
+            "enum": [
+              "OWNERSHIP_TRANSFER",
+              "MORTGAGE",
+              "SURFACE_RIGHT",
+              "CHANGE",
+              "CORRECTION",
+              "MORTGAGE_CANCELLATION",
+              "SURFACE_RIGHT_CANCELLATION"
+            ]
           },
           "quantity": {
             "type": "integer",
-            "description": "통수",
-            "format": "int32",
-            "example": 1
+            "format": "int32"
           },
-          "htmlForm": {
-            "type": "string",
-            "description": "HTML양식",
-            "example": "<html></html>"
+          "jurisdictionRegistryOffice": {
+            "type": "string"
           },
-          "filePath": {
+          "submissionMethod": {
             "type": "string",
-            "description": "파일경로",
-            "example": "/path/to/file"
+            "enum": ["ELECTRONIC_CREATE", "ELECTRONIC_UPLOAD", "VISIT_SUBMIT", "ADMIN_INFO_LINK"]
           },
           "referenceMethod": {
             "type": "string",
-            "description": "원용정보",
-            "example": "NOT_APPLICABLE",
             "enum": ["NOT_APPLICABLE", "OFFICE_USE", "SIMULTANEOUS_SUBMIT", "PREVIOUS_ATTACHMENT"]
+          },
+          "additionalInfo": {
+            "type": "string"
+          },
+          "rentalBusinessRegistrationNumber": {
+            "type": "string"
           }
         },
-        "description": "첨부서면 상세 정보 조회"
+        "description": "첨부서면 목록"
       },
-      "RegistryApplicationAttachmentResponse": {
+      "RegistryApplicationAttachmentDetailResponse": {
         "type": "object",
         "properties": {
           "items": {
             "type": "array",
             "description": "첨부서면 목록",
             "items": {
-              "$ref": "#/components/schemas/RegistryApplicationAttachmentItemResponse"
+              "$ref": "#/components/schemas/AttachmentItemProjection"
             }
           },
-          "fileRequestDocumentTypeOptions": {
+          "fileProgressDocumentTypeOptions": {
             "type": "array",
-            "description": "첨부서면 옵션 목록",
+            "description": "첨부서면 명칭 옵션 목록",
             "items": {
               "type": "string",
-              "description": "첨부서면 옵션 목록"
+              "description": "첨부서면 명칭 옵션 목록"
             }
           },
           "submissionMethodOptions": {
@@ -12304,6 +12425,22 @@
             "items": {
               "type": "string",
               "description": "원용정보 옵션 목록"
+            }
+          },
+          "partyNamesOptions": {
+            "type": "array",
+            "description": "동의인 옵션 목록",
+            "items": {
+              "type": "string",
+              "description": "동의인 옵션 목록"
+            }
+          },
+          "jurisdictionRegistryOfficeOptions": {
+            "type": "array",
+            "description": "관할등기소 옵션 목록",
+            "items": {
+              "type": "string",
+              "description": "관할등기소 옵션 목록"
             }
           }
         },
@@ -14140,6 +14277,61 @@
           }
         },
         "description": "이메일 인증 응답"
+      },
+      "CryptoRequest": {
+        "type": "object",
+        "properties": {
+          "plainText": {
+            "type": "string",
+            "description": "암호화할 평문",
+            "example": "test@example.com"
+          },
+          "cipherText": {
+            "type": "string",
+            "description": "복호화할 암호문 (Base64 인코딩)",
+            "example": "abc123..."
+          }
+        }
+      },
+      "ApiResultCryptoResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "code": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/CryptoResponse"
+          }
+        }
+      },
+      "CryptoResponse": {
+        "type": "object",
+        "properties": {
+          "plainText": {
+            "type": "string",
+            "description": "평문",
+            "example": "test@example.com"
+          },
+          "cipherText": {
+            "type": "string",
+            "description": "암호문 (Base64 인코딩)"
+          },
+          "algorithm": {
+            "type": "string",
+            "description": "사용된 암호화 알고리즘",
+            "example": "AES-GCM"
+          }
+        }
       },
       "UserStatus": {
         "type": "string",
@@ -17360,6 +17552,140 @@
         },
         "description": "등기 접수 정보 목록 조회 응답"
       },
+      "ApplicationCancellationFormResponse": {
+        "type": "object",
+        "properties": {
+          "cancellationContent": {
+            "type": "string",
+            "description": "말소사항"
+          }
+        },
+        "description": "말소사항정보"
+      },
+      "ApplicationCertificateFormResponse": {
+        "type": "object",
+        "properties": {
+          "propertyUniqueNumber": {
+            "type": "string",
+            "description": "부동산 고유번호"
+          },
+          "ownerName": {
+            "type": "string",
+            "description": "성명(명칭)"
+          },
+          "certificateSerialNumber": {
+            "type": "string",
+            "description": "일련번호"
+          },
+          "certificatePassword": {
+            "type": "string",
+            "description": "비밀번호 (순번 2자리 + 비밀번호조합)"
+          }
+        },
+        "description": "등기필정보"
+      },
+      "ApplicationChangeFormResponse": {
+        "type": "object",
+        "properties": {
+          "changeContent": {
+            "type": "string",
+            "description": "변경사항"
+          }
+        },
+        "description": "등기명의인표시변경 변경사항정보"
+      },
+      "ApplicationCorrectionFormResponse": {
+        "type": "object",
+        "properties": {
+          "correctionContent": {
+            "type": "string",
+            "description": "경정사항"
+          }
+        },
+        "description": "등기명의인표시변경 경정사항정보"
+      },
+      "ApplicationPropertyFormResponse": {
+        "type": "object",
+        "properties": {
+          "propertyDescription": {
+            "type": "array",
+            "description": "부동산의표시 목록",
+            "items": {
+              "type": "string",
+              "description": "부동산의표시 목록"
+            }
+          }
+        },
+        "description": "부동산정보 정보"
+      },
+      "AttachedDocumentResponse": {
+        "type": "object",
+        "properties": {
+          "attachmentName": {
+            "type": "string",
+            "description": "문서명",
+            "example": "OWNERSHIP_TRANSFER"
+          },
+          "quantity": {
+            "type": "integer",
+            "description": "통수",
+            "format": "int64",
+            "example": 1
+          }
+        },
+        "description": "등기신청서 - 첨부문서정보"
+      },
+      "UnifiedApplicationFormResponse": {
+        "type": "object",
+        "properties": {
+          "contractParties": {
+            "$ref": "#/components/schemas/ContractPartyReplaceResponse"
+          },
+          "ownershipContract": {
+            "$ref": "#/components/schemas/OwnershipContractSaveResponse"
+          },
+          "mortgageContract": {
+            "$ref": "#/components/schemas/MortgageContractSaveResponse"
+          },
+          "surfaceRightContract": {
+            "$ref": "#/components/schemas/SurfaceRightContractSaveResponse"
+          },
+          "mortgageFinancial": {
+            "$ref": "#/components/schemas/MortgageFinancialResponse"
+          },
+          "taxAgency": {
+            "$ref": "#/components/schemas/RegistryProgressTaxAgencyListResponse"
+          },
+          "cancellation": {
+            "$ref": "#/components/schemas/ApplicationCancellationFormResponse"
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttachedDocumentResponse"
+            }
+          },
+          "properties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApplicationPropertyFormResponse"
+            }
+          },
+          "correction": {
+            "$ref": "#/components/schemas/ApplicationCorrectionFormResponse"
+          },
+          "change": {
+            "$ref": "#/components/schemas/ApplicationChangeFormResponse"
+          },
+          "certificates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApplicationCertificateFormResponse"
+            }
+          }
+        },
+        "description": "등기신청서 통합 응답"
+      },
       "RegistryApplicationDocumentResponse": {
         "type": "object",
         "properties": {
@@ -17419,6 +17745,157 @@
           }
         },
         "description": "등기신청서 전자문서 섹션 정보"
+      },
+      "SurfaceRightContractResponse": {
+        "type": "object",
+        "properties": {
+          "durationPeriod": {
+            "type": "string",
+            "description": "존속 기간"
+          },
+          "contractDate": {
+            "type": "string",
+            "description": "계약 일자",
+            "format": "date"
+          },
+          "registryReceiptDate": {
+            "type": "string",
+            "description": "등기 접수 일자",
+            "format": "date"
+          },
+          "establishmentScope": {
+            "type": "string",
+            "description": "설정 범위"
+          },
+          "establishmentPurpose": {
+            "type": "string",
+            "description": "설정 목적"
+          }
+        }
+      },
+      "InterimPaymentResponse": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "description": "2차 중도금 정보"
+      },
+      "OwnershipContractResponse": {
+        "type": "object",
+        "properties": {
+          "contractAmount": {
+            "type": "number",
+            "description": "계약 금액"
+          },
+          "contractDate": {
+            "type": "string",
+            "description": "계약 일자",
+            "format": "date"
+          },
+          "registryReceiptDate": {
+            "type": "string",
+            "description": "등기 접수 일자",
+            "format": "date"
+          },
+          "tradeReportManagementNumber": {
+            "type": "string",
+            "description": "실거래신고 관리번호"
+          },
+          "tradeReportReceiptNumber": {
+            "type": "string",
+            "description": "실거래신고 접수번호"
+          },
+          "firstInterim": {
+            "$ref": "#/components/schemas/InterimPaymentResponse"
+          },
+          "secondInterim": {
+            "$ref": "#/components/schemas/InterimPaymentResponse"
+          }
+        }
+      },
+      "MortgageContractResponse": {
+        "type": "object",
+        "properties": {
+          "maximumCreditAmount": {
+            "type": "number",
+            "description": "채권 최고액"
+          },
+          "contractDate": {
+            "type": "string",
+            "description": "계약 일자",
+            "format": "date"
+          },
+          "registryReceiptDate": {
+            "type": "string",
+            "description": "등기 접수 일자",
+            "format": "date"
+          },
+          "loanExecutionDate": {
+            "type": "string",
+            "description": "대출 실행 일자",
+            "format": "date"
+          },
+          "securedDebtScopeType": {
+            "type": "string",
+            "description": "피담보채무 범위 구분",
+            "enum": ["LIMITED", "SPECIFIC"]
+          },
+          "securedDebtScopes": {
+            "type": "array",
+            "description": "피담보채무 범위 상세",
+            "items": {
+              "$ref": "#/components/schemas/SecuredDebtScopeResponse"
+            }
+          },
+          "settlementPeriodType": {
+            "type": "string",
+            "description": "결산기 유형"
+          },
+          "settlementDate": {
+            "type": "string",
+            "description": "결산 일자",
+            "format": "date"
+          },
+          "isWithdrawalRightWaived": {
+            "type": "boolean",
+            "description": "철회권 포기 여부"
+          },
+          "withdrawalRightWaiveDate": {
+            "type": "string",
+            "description": "철회권 포기 일자",
+            "format": "date"
+          }
+        }
+      },
+      "SecuredDebtScopeResponse": {
+        "type": "object",
+        "properties": {
+          "securedDebtScopeId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "securedDebtScopeType": {
+            "type": "string",
+            "enum": ["LIMITED", "SPECIFIC"]
+          },
+          "transactionType": {
+            "type": "string"
+          },
+          "transactionDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "agreementName": {
+            "type": "string"
+          }
+        },
+        "description": "피담보채무 범위 상세"
       },
       "RegistryApplicationFormResponse": {
         "type": "object",

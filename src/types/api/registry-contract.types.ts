@@ -27,7 +27,7 @@ export interface ReplaceContractPartiesParams {
 
 export type ReplaceContractPartiesRequest = RegistryApplicationPartyReplaceRequest
 
-export type ReplaceContractPartiesResponse = ApiResultContractPartyResponse
+export type ReplaceContractPartiesResponse = ApiResultContractPartyReplaceResponse
 
 /**
  * R02E-03
@@ -51,7 +51,7 @@ export interface SaveOwnershipContractParams {
 
 export type SaveOwnershipContractRequest = OwnershipContractRequest
 
-export type SaveOwnershipContractResponse = ApiResultOwnershipContractResponse
+export type SaveOwnershipContractResponse = ApiResultOwnershipContractSaveResponse
 
 /**
  * R02E-05
@@ -75,7 +75,7 @@ export interface SaveMortgageContractParams {
 
 export type SaveMortgageContractRequest = MortgageContractRequest
 
-export type SaveMortgageContractResponse = ApiResultMortgageContractResponse
+export type SaveMortgageContractResponse = ApiResultMortgageContractSaveResponse
 
 /**
  * R02E-07
@@ -99,40 +99,58 @@ export interface SaveSurfaceRightContractParams {
 
 export type SaveSurfaceRightContractRequest = SurfaceRightContractRequest
 
-export type SaveSurfaceRightContractResponse = ApiResultSurfaceRightContractResponse
+export type SaveSurfaceRightContractResponse = ApiResultSurfaceRightContractSaveResponse
 
 // ==================== Schemas ====================
 
-export interface ApiResultContractPartyResponse {
+export interface ApiResultContractPartyReplaceResponse {
   status?: number
   code?: string
   title?: string
   message?: string
-  data?: ContractPartyResponse
+  data?: ContractPartyReplaceResponse
 }
 
-export interface ApiResultMortgageContractResponse {
+export interface ApiResultMortgageContractSaveResponse {
   status?: number
   code?: string
   title?: string
   message?: string
-  data?: MortgageContractResponse
+  data?: MortgageContractSaveResponse
 }
 
-export interface ApiResultOwnershipContractResponse {
+export interface ApiResultOwnershipContractSaveResponse {
   status?: number
   code?: string
   title?: string
   message?: string
-  data?: OwnershipContractResponse
+  data?: OwnershipContractSaveResponse
 }
 
-export interface ApiResultSurfaceRightContractResponse {
+export interface ApiResultSurfaceRightContractSaveResponse {
   status?: number
   code?: string
   title?: string
   message?: string
-  data?: SurfaceRightContractResponse
+  data?: SurfaceRightContractSaveResponse
+}
+
+export interface CommonParty {
+  /** 성명 */
+  name?: string
+  /** 등록번호 */
+  registrationNumber?: string
+  /** 주소 */
+  address?: string
+}
+
+export interface ContractPartyReplaceResponse {
+  /** 등기의무자 목록 */
+  obligors?: CommonParty[]
+  /** 등기권리자 목록 */
+  obligees?: CommonParty[]
+  /** 채무자 목록 */
+  debtors?: CommonParty[]
 }
 
 /** 2차 중도금 정보 */
@@ -195,6 +213,15 @@ export interface MortgageContractResponse {
   withdrawalRightWaiveDate?: string
 }
 
+export interface MortgageContractSaveResponse {
+  /** 채권 최고액 */
+  maximumCreditAmount?: number
+  /** 계약 일자 */
+  contractDate?: string
+  /** 등기 접수 일자 */
+  registryReceiptDate?: string
+}
+
 export interface OwnershipContractRequest {
   /** 계약 금액 */
   contractAmount?: number
@@ -223,6 +250,15 @@ export interface OwnershipContractResponse {
   tradeReportReceiptNumber?: string
   firstInterim?: InterimPaymentResponse
   secondInterim?: InterimPaymentResponse
+}
+
+export interface OwnershipContractSaveResponse {
+  /** 계약 일자 */
+  contractDate?: string
+  /** 등기 접수 일자 */
+  registryReceiptDate?: string
+  /** 실거래신고 관리번호 */
+  tradeReportManagementNumber?: string
 }
 
 /** 피담보채무 범위 목록 (최대 2건) */
@@ -266,6 +302,17 @@ export interface SurfaceRightContractResponse {
   contractDate?: string
   /** 등기 접수 일자 */
   registryReceiptDate?: string
+  /** 설정 범위 */
+  establishmentScope?: string
+  /** 설정 목적 */
+  establishmentPurpose?: string
+}
+
+export interface SurfaceRightContractSaveResponse {
+  /** 존속 기간 */
+  durationPeriod?: string
+  /** 계약 일자 */
+  contractDate?: string
   /** 설정 범위 */
   establishmentScope?: string
   /** 설정 목적 */

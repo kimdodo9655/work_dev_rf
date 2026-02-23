@@ -14,7 +14,7 @@ export interface GetDetailedApplicationAttachmentParams {
   applicationId: number
 }
 
-export type GetDetailedApplicationAttachmentResponse = RegistryApplicationAttachmentResponse
+export type GetDetailedApplicationAttachmentResponse = RegistryApplicationAttachmentDetailResponse
 
 /**
  * R02J-02
@@ -27,7 +27,7 @@ export interface ReplaceApplicationAttachmentsParams {
 
 export type ReplaceApplicationAttachmentsRequest = RegistryApplicationAttachmentReplaceRequest
 
-export type ReplaceApplicationAttachmentsResponse = RegistryApplicationAttachmentResponse
+export type ReplaceApplicationAttachmentsResponse = RegistryApplicationAttachmentDetailResponse
 
 /**
  * R02J-03
@@ -66,39 +66,49 @@ export type ViewRegistryApplicationAttachmentResponse = DocumentDownloadBase64Re
 /** 첨부서면 정보 목록 */
 export interface AttachmentReplaceItem {
   /** 첨부서면명칭 */
-  attachmentName: 'CNT' | 'RGC' | 'RRC'
+  attachmentName:
+    | 'LST'
+    | 'POA'
+    | 'SGN'
+    | 'CRT'
+    | 'CNT'
+    | 'RFC'
+    | 'RPC'
+    | 'RRC'
+    | 'TAX'
+    | 'SMP'
+    | 'SVC'
+    | 'ESC'
+    | 'RRI'
+    | 'LRI'
+    | 'LRC'
+    | 'CNF'
+    | 'RPS'
+    | 'LTP'
+    | 'LBK'
+    | 'GBK'
+    | 'CBK'
+    | 'LPA'
+    | 'RPA'
+    | 'CRP'
+    | 'CSM'
+    | 'ECS'
   /** 제출방식 */
   submissionMethod: 'ELECTRONIC_CREATE' | 'ELECTRONIC_UPLOAD' | 'VISIT_SUBMIT' | 'ADMIN_INFO_LINK'
   /** 부가정보 (제출방식에 따라 필수) */
   additionalInfo?: string
   /** 통수 (제출방식에 따라 필수) */
   quantity?: number
-  /** HTML양식 (제출방식에 따라 필수) */
-  htmlForm?: string
   /** 임시파일명 (제출방식에 따라 필수) */
-  tempFileName?: string
+  fileName?: string
   /** 원용정보 (제출방식에 따라 필수) */
   referenceMethod?: 'NOT_APPLICABLE' | 'OFFICE_USE' | 'SIMULTANEOUS_SUBMIT' | 'PREVIOUS_ATTACHMENT'
-}
-
-/** 첨부서면 상세 정보 조회 */
-export interface RegistryApplicationAttachmentItemResponse {
-  /** 첨부서면ID */
-  attachmentId?: number
-  /** 첨부서면명칭 */
-  attachmentName?: 'CNT' | 'RGC' | 'RRC'
-  /** 제출방식 */
-  submissionMethod?: 'ELECTRONIC_CREATE' | 'ELECTRONIC_UPLOAD' | 'VISIT_SUBMIT' | 'ADMIN_INFO_LINK'
-  /** 부가정보 */
-  additionalInfo?: string
-  /** 통수 */
-  quantity?: number
-  /** HTML양식 */
-  htmlForm?: string
-  /** 파일경로 */
-  filePath?: string
-  /** 원용정보 */
-  referenceMethod?: 'NOT_APPLICABLE' | 'OFFICE_USE' | 'SIMULTANEOUS_SUBMIT' | 'PREVIOUS_ATTACHMENT'
+  /** 동의인 */
+  name?: string
+  /** 관할등기소 */
+  jurisdictionRegistryOffice?: string
+  /** 임대사업자등록번호 */
+  rentalBusinessRegistrationNumber?: string
 }
 
 export interface RegistryApplicationAttachmentReplaceRequest {
@@ -106,14 +116,66 @@ export interface RegistryApplicationAttachmentReplaceRequest {
   attachmentItems: AttachmentReplaceItem[]
 }
 
+/** 첨부서면 목록 */
+export interface AttachmentItemProjection {
+  name?: string
+  fileName?: string
+  attachmentName?:
+    | 'LST'
+    | 'POA'
+    | 'SGN'
+    | 'CRT'
+    | 'CNT'
+    | 'RFC'
+    | 'RPC'
+    | 'RRC'
+    | 'TAX'
+    | 'SMP'
+    | 'SVC'
+    | 'ESC'
+    | 'RRI'
+    | 'LRI'
+    | 'LRC'
+    | 'CNF'
+    | 'RPS'
+    | 'LTP'
+    | 'LBK'
+    | 'GBK'
+    | 'CBK'
+    | 'LPA'
+    | 'RPA'
+    | 'CRP'
+    | 'CSM'
+    | 'ECS'
+  registryMethod?: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
+  registryType?:
+    | 'OWNERSHIP_TRANSFER'
+    | 'MORTGAGE'
+    | 'SURFACE_RIGHT'
+    | 'CHANGE'
+    | 'CORRECTION'
+    | 'MORTGAGE_CANCELLATION'
+    | 'SURFACE_RIGHT_CANCELLATION'
+  quantity?: number
+  jurisdictionRegistryOffice?: string
+  submissionMethod?: 'ELECTRONIC_CREATE' | 'ELECTRONIC_UPLOAD' | 'VISIT_SUBMIT' | 'ADMIN_INFO_LINK'
+  referenceMethod?: 'NOT_APPLICABLE' | 'OFFICE_USE' | 'SIMULTANEOUS_SUBMIT' | 'PREVIOUS_ATTACHMENT'
+  additionalInfo?: string
+  rentalBusinessRegistrationNumber?: string
+}
+
 /** 첨부서면 정보 조회 */
-export interface RegistryApplicationAttachmentResponse {
+export interface RegistryApplicationAttachmentDetailResponse {
   /** 첨부서면 목록 */
-  items?: RegistryApplicationAttachmentItemResponse[]
-  /** 첨부서면 옵션 목록 */
-  fileRequestDocumentTypeOptions?: string[]
+  items?: AttachmentItemProjection[]
+  /** 첨부서면 명칭 옵션 목록 */
+  fileProgressDocumentTypeOptions?: string[]
   /** 제출방식 옵션 목록 */
   submissionMethodOptions?: string[]
   /** 원용정보 옵션 목록 */
   referenceMethodOptions?: string[]
+  /** 동의인 옵션 목록 */
+  partyNamesOptions?: string[]
+  /** 관할등기소 옵션 목록 */
+  jurisdictionRegistryOfficeOptions?: string[]
 }
