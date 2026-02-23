@@ -4,6 +4,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import { api } from '@/api/client'
 import defaultOpenApiSpec from '@/api/openapi.json'
+import RpacApiTestPage from '@/features/dev/pages/RpacApiTestPage.vue'
 import { useAuthStore } from '@/stores/auth'
 import { storage } from '@/utils/storage'
 
@@ -119,9 +120,15 @@ const showToast = ref<boolean>(false)
 // ============================================================================
 // ✅ 새로운 상태: 탭 및 Schemas
 // ============================================================================
-const activeTab = ref<'apis' | 'schemas'>('apis')
+const activeTab = ref<'apis' | 'schemas' | 'rpac'>('apis')
 const schemas = ref<SchemaInfo[]>([])
 const selectedSchema = ref<SchemaInfo | null>(null)
+const ACTIVE_TAB_STORAGE_KEY = 'api-tester-active-tab'
+
+const savedActiveTab = localStorage.getItem(ACTIVE_TAB_STORAGE_KEY)
+if (savedActiveTab === 'apis' || savedActiveTab === 'schemas' || savedActiveTab === 'rpac') {
+  activeTab.value = savedActiveTab
+}
 
 // ============================================================================
 // 로그인 사용자 목록
@@ -881,7 +888,8 @@ watch(selectedLoginUser, (user) => {
 })
 
 // ✅ 탭 변경 시 검색어 초기화
-watch(activeTab, () => {
+watch(activeTab, (tab) => {
+  localStorage.setItem(ACTIVE_TAB_STORAGE_KEY, tab)
   searchQuery.value = ''
 })
 
@@ -1132,10 +1140,16 @@ const executeLogin = async () => {
     // 1. 스토어에 인증 정보 저장
     authStore.setAuth(loginData)
 
-    // 2. UI 초기화
-    refreshStorageData()
+    // 2. 로그인 직후 bank_code 기본값 즉시 세팅 (헤더 공백 구간 방지)
+    selectedBankCode.value = 'bankclear'
+    authStore.setBankCode('bankclear')
+    localStorage.setItem('bank_code', 'bankclear')
 
-    // ✅ 은행 목록은 watch에서 자동으로 가져옴
+    // 3. 은행 목록 즉시 조회 (watch에도 있지만, 초기 헤더 보장을 위해 선실행)
+    await fetchAssignedBanks()
+
+    // 4. UI 초기화
+    refreshStorageData()
 
     // ✅ 디버깅: 저장 후 스토리지 확인
     console.log('After setAuth, storage:', storage.get())
@@ -1942,6 +1956,14 @@ watch(
             >
               📦 Schemas
             </button>
+            <button
+              class="view-toggle-btn"
+              :class="{ active: activeTab === 'rpac' }"
+              @click="activeTab = 'rpac'"
+              title="RPAC API 테스트"
+            >
+              🤖 RPAC
+            </button>
           </div>
 
           <!-- BASE URL 전환 버튼 -->
@@ -2577,6 +2599,12 @@ watch(
                 </div>
               </div>
             </div>
+          </main>
+        </template>
+
+        <template v-else-if="activeTab === 'rpac'">
+          <main class="main rpac-tab-main">
+            <RpacApiTestPage embedded :external-bank-code="selectedBankCode" />
           </main>
         </template>
       </template>
@@ -3556,6 +3584,10 @@ watch(
   flex: 1;
   overflow-y: auto;
   background: var(--bg-primary);
+}
+
+.rpac-tab-main {
+  padding: 0;
 }
 
 .main::-webkit-scrollbar {

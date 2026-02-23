@@ -17,9 +17,9 @@
     <div v-show="isOpen" class="calendar-dropdown">
       <div class="calendar">
         <div class="calendar-header">
-          <button @click="prevMonth" :disabled="!canGoPrev">◀</button>
+          <button type="button" @click="prevMonth" :disabled="!canGoPrev">◀</button>
           <span>{{ currentYear }}년 {{ currentMonth }}월</span>
-          <button @click="nextMonth" :disabled="!canGoNext">▶</button>
+          <button type="button" @click="nextMonth" :disabled="!canGoNext">▶</button>
         </div>
 
         <div class="calendar-body">
@@ -53,6 +53,7 @@
 
         <div class="calendar-footer">
           <button
+            type="button"
             class="confirm-btn"
             :disabled="!tempStartDate || !tempEndDate"
             @click="confirmSelection"

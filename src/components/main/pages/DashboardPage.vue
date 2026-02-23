@@ -6,8 +6,10 @@
         v-model="selectedCity"
         :options="cityOptions"
         placeholder="담당자"
+        :disabled="assignableLoading"
         @change="handleCityChange"
       />
+      <small v-if="assignableError" class="assignable-error">{{ assignableError }}</small>
 
       <ul class="date-tab">
         <li v-for="tab in tabs" :key="tab.value">
@@ -29,7 +31,7 @@
               <router-link to="/estimate">
                 <p>견적 요청 건수 :</p>
                 <p>
-                  <span class="num">00</span>
+                  <span class="num">{{ estimateSummary.requestCount }}</span>
                   건
                 </p>
                 <i class="fi fi-rr-angle-circle-right"></i>
@@ -40,7 +42,7 @@
               <router-link to="/estimate">
                 <p>견적 작성 건수 :</p>
                 <p>
-                  <span class="num">00</span>
+                  <span class="num">{{ estimateSummary.writtenCount }}</span>
                   건
                 </p>
                 <i class="fi fi-rr-angle-circle-right"></i>
@@ -51,7 +53,7 @@
               <router-link to="/estimate">
                 <p>견적 수임 건수 :</p>
                 <p>
-                  <span class="num">00</span>
+                  <span class="num">{{ estimateSummary.awardedCount }}</span>
                   건
                 </p>
                 <i class="fi fi-rr-angle-circle-right"></i>
@@ -69,7 +71,7 @@
               <router-link to="/estimate">
                 <p>업무 배정 건수 :</p>
                 <p>
-                  <span class="num">00</span>
+                  <span class="num">{{ progressSummary.assignedCount }}</span>
                   건
                 </p>
                 <i class="fi fi-rr-angle-circle-right"></i>
@@ -79,14 +81,14 @@
             <li>
               <p>업무 진행 건수 :</p>
               <p>
-                <span class="num">00</span>
+                <span class="num">{{ progressSummary.inProgressCount }}</span>
                 <span>건</span>
               </p>
             </li>
             <li>
               <p>완료·취소 건수 :</p>
               <p>
-                <span class="num">00</span>
+                <span class="num">{{ progressSummary.completedCount }}</span>
                 <span>건</span>
               </p>
             </li>
@@ -102,26 +104,25 @@
             >
           </h4>
           <ul class="dashboard-btn-list">
-            <li>
+            <!-- [R02A-02] 오늘의 접수사건 API 결과 렌더링 -->
+            <li
+              v-for="(item, index) in todayCases"
+              :key="`${item.registryManagementNumber}-${index}`"
+            >
               <router-link to="/estimate">
-                <p>[2025-05-25] BC2025062500001 - 홍길동</p>
+                <p>
+                  [{{ item.registryReceiptDate || '-' }}]
+                  {{ item.registryManagementNumber || '-' }} - {{ item.userName || '-' }}
+                </p>
                 <i class="fi fi-rr-angle-circle-right"></i>
                 <i class="fi fi-sr-angle-circle-right"></i>
               </router-link>
             </li>
-            <li>
-              <router-link to="/estimate">
-                <p>[2025-05-25] BC2025062500001 - 홍길동</p>
-                <i class="fi fi-rr-angle-circle-right"></i>
-                <i class="fi fi-sr-angle-circle-right"></i>
-              </router-link>
+            <li v-if="loadError">
+              <p>{{ loadError }}</p>
             </li>
-            <li>
-              <router-link to="/estimate">
-                <p>[2025-05-25] BC2025062500001 - 홍길동</p>
-                <i class="fi fi-rr-angle-circle-right"></i>
-                <i class="fi fi-sr-angle-circle-right"></i>
-              </router-link>
+            <li v-if="!isLoading && todayCases.length === 0">
+              <p>오늘 접수된 사건이 없습니다.</p>
             </li>
           </ul>
         </div>
@@ -249,51 +250,268 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, reactive, ref, watch } from 'vue'
 
+import { registryDashboardAPI } from '@/api/services/registry/dashboard'
+import { userAPI } from '@/api/services/user'
 import FormSelect, { type SelectOption } from '@/components/template/input/UserSelect.vue'
 import { useExternalLinks } from '@/composables/utils/useExternalLinks'
+import type {
+  RegistryEstimateSummaryResponse,
+  RegistryProgressSummaryResponse,
+  RegistryProgressTodayResponse,
+  SearchEstimateSummaryQuery,
+  SearchRegistryProgressSummaryQuery,
+  SearchRegistryProgressTodayQuery,
+  UserAssignableResponse
+} from '@/types'
 
 import DashboardChart from './DashboardChart.vue'
 
 const { links } = useExternalLinks()
 
-// 옵션
-const cityOptions: SelectOption[] = [
-  { label: '김누구', value: 'kim' },
-  { label: '이누구', value: 'lee' },
-  { label: '박누구', value: 'park' }
-]
+// ============================================================================
+// 대시보드 필터 상태
+// ============================================================================
 
-// 선택된 값들
-const selectedCity = ref<string | number | null>('kim')
+// 담당자 필터 옵션 (/api/users/assignable 기반)
+const cityOptions = ref<SelectOption[]>([{ label: '전체', value: 'ALL' }])
 
-// 이벤트 핸들러
+// 선택된 담당자 (기본: 전체)
+const selectedCity = ref<string | number | null>('ALL')
+const assignableLoading = ref(false)
+const assignableError = ref('')
+
+// 담당자 변경 이벤트 (v-model 동기화 이후 watch에서 API 재조회)
 const handleCityChange = (value: string | number) => {
-  console.log('도시가 변경되었습니다:', value)
+  selectedCity.value = value
 }
 
-// 탭 데이터 타입
+// 조회 기간 탭 타입
 type DateTab = {
   label: string
   value: string
 }
 
-// 탭 목록
+// 조회 기간 탭 목록
 const tabs = ref<DateTab[]>([
   { label: '1일', value: '1d' },
   { label: '1주', value: '1w' },
   { label: '1개월', value: '1m' }
 ])
 
-// 현재 활성 탭
+// 현재 활성 조회 기간
 const activeValue = ref<string>('1d')
 
-// 클릭 핸들러
+// 조회 기간 탭 클릭 핸들러
 const handleClick = (tab: DateTab) => {
   activeValue.value = tab.value
-  console.log(tab.value)
 }
+
+// ============================================================================
+// 대시보드 API 상태
+// ============================================================================
+
+// [R02A-03] 견적현황 요약 조회 결과
+const estimateSummary = reactive<Required<RegistryEstimateSummaryResponse>>({
+  requestCount: 0,
+  writtenCount: 0,
+  awardedCount: 0
+})
+
+// [R02A-01] 나의 진행현황 조회 결과
+const progressSummary = reactive<Required<RegistryProgressSummaryResponse>>({
+  assignedCount: 0,
+  inProgressCount: 0,
+  completedCount: 0
+})
+
+// [R02A-02] 오늘의 접수사건 조회 결과
+const todayCases = ref<RegistryProgressTodayResponse[]>([])
+
+// 로딩/에러 상태
+const isLoading = ref(false)
+const loadError = ref<string | null>(null)
+
+// ============================================================================
+// 내부 유틸
+// ============================================================================
+
+// API 응답이 { data: ... } 구조/바로 데이터 구조 모두 대응
+function unwrapResponse<T>(payload: unknown): T {
+  if (payload && typeof payload === 'object' && 'data' in (payload as Record<string, unknown>)) {
+    return (payload as { data: T }).data
+  }
+  return payload as T
+}
+
+// Date -> YYYYMMDD (R02A 대시보드 API 스펙 요구 포맷)
+function formatApiDate(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}${month}${day}`
+}
+
+// 탭 값에 맞는 기간(시작일/종료일) 계산
+function getDateRange(tabValue: string): { startDate: string; endDate: string } {
+  const end = new Date()
+  const start = new Date(end)
+
+  if (tabValue === '1w') start.setDate(start.getDate() - 6)
+  if (tabValue === '1m') start.setMonth(start.getMonth() - 1)
+
+  return {
+    startDate: formatApiDate(start),
+    endDate: formatApiDate(end)
+  }
+}
+
+// 공통 쿼리 생성
+function buildBaseQuery():
+  | SearchEstimateSummaryQuery
+  | SearchRegistryProgressSummaryQuery
+  | SearchRegistryProgressTodayQuery {
+  const { startDate, endDate } = getDateRange(activeValue.value)
+  const targetUserId = selectedCity.value ? String(selectedCity.value) : 'ALL'
+  const query: SearchEstimateSummaryQuery = { startDate, endDate }
+
+  // 백엔드 스펙 기준: 전체 조회는 targetUserId 생략 또는 ALL 허용
+  // 호환성을 위해 'ALL'일 때는 필드를 생략한다.
+  if (targetUserId !== 'ALL') {
+    query.targetUserId = targetUserId
+  }
+
+  return query
+}
+
+// 업무 담당자 목록 조회 (등기 진행 현황과 동일 API 사용)
+async function loadAssignableUsers() {
+  assignableLoading.value = true
+  assignableError.value = ''
+
+  try {
+    const response = await userAPI.assignable({})
+    const payload = unwrapResponse<unknown>(response)
+    const root =
+      payload && typeof payload === 'object' && 'result' in (payload as Record<string, unknown>)
+        ? (payload as { result: unknown }).result
+        : payload
+
+    const users: UserAssignableResponse[] = Array.isArray(root)
+      ? root
+      : root && typeof root === 'object' && Array.isArray((root as { content?: unknown[] }).content)
+        ? ((root as { content: UserAssignableResponse[] }).content ?? [])
+        : root && typeof root === 'object' && Array.isArray((root as { items?: unknown[] }).items)
+          ? ((root as { items: UserAssignableResponse[] }).items ?? [])
+          : []
+
+    cityOptions.value = [
+      { label: '전체', value: 'ALL' },
+      ...users
+        .filter((user) => user.userId != null)
+        .map((user) => ({
+          label: user.userName || `담당자-${user.userId}`,
+          value: String(user.userId)
+        }))
+    ]
+  } catch (error) {
+    assignableError.value = '업무 담당자 목록을 불러오지 못했습니다.'
+    cityOptions.value = [{ label: '전체', value: 'ALL' }]
+    console.error('[DASHBOARD] Failed to load assignable users', error)
+  } finally {
+    assignableLoading.value = false
+  }
+}
+
+// ============================================================================
+// API 조회
+// ============================================================================
+
+// 대시보드 3개 카드 API를 병렬 호출해 화면을 동기화
+async function fetchDashboardData() {
+  isLoading.value = true
+  loadError.value = null
+
+  try {
+    const query = buildBaseQuery()
+
+    const [estimateRes, progressRes, todayRes] = await Promise.all([
+      registryDashboardAPI.summary2(query),
+      registryDashboardAPI.summary(query),
+      registryDashboardAPI.today(query)
+    ])
+
+    const estimatePayload = unwrapResponse<unknown>(estimateRes)
+    const progressPayload = unwrapResponse<unknown>(progressRes)
+    const todayPayload = unwrapResponse<unknown>(todayRes)
+
+    const estimateRoot =
+      estimatePayload && typeof estimatePayload === 'object' && 'result' in estimatePayload
+        ? (estimatePayload as { result: unknown }).result
+        : estimatePayload
+
+    const progressRoot =
+      progressPayload && typeof progressPayload === 'object' && 'result' in progressPayload
+        ? (progressPayload as { result: unknown }).result
+        : progressPayload
+
+    const todayRoot =
+      todayPayload && typeof todayPayload === 'object' && 'result' in todayPayload
+        ? (todayPayload as { result: unknown }).result
+        : todayPayload
+
+    const estimateData = estimateRoot as RegistryEstimateSummaryResponse
+    const progressData = progressRoot as RegistryProgressSummaryResponse
+
+    estimateSummary.requestCount = estimateData?.requestCount ?? 0
+    estimateSummary.writtenCount = estimateData?.writtenCount ?? 0
+    estimateSummary.awardedCount = estimateData?.awardedCount ?? 0
+
+    progressSummary.assignedCount = progressData?.assignedCount ?? 0
+    progressSummary.inProgressCount = progressData?.inProgressCount ?? 0
+    progressSummary.completedCount = progressData?.completedCount ?? 0
+
+    // today API는 환경별로 단건/배열/content/items 포맷이 달라질 수 있어 모두 수용
+    todayCases.value = Array.isArray(todayRoot)
+      ? (todayRoot as RegistryProgressTodayResponse[])
+      : todayRoot && typeof todayRoot === 'object' && Array.isArray((todayRoot as any).content)
+        ? (((todayRoot as any).content ?? []) as RegistryProgressTodayResponse[])
+        : todayRoot && typeof todayRoot === 'object' && Array.isArray((todayRoot as any).items)
+          ? (((todayRoot as any).items ?? []) as RegistryProgressTodayResponse[])
+          : todayRoot
+            ? [todayRoot as RegistryProgressTodayResponse]
+            : []
+  } catch (error) {
+    loadError.value = '대시보드 데이터를 불러오지 못했습니다.'
+    // 실패 시에도 기존 화면 구조가 깨지지 않도록 0/빈배열로 유지
+    estimateSummary.requestCount = 0
+    estimateSummary.writtenCount = 0
+    estimateSummary.awardedCount = 0
+    progressSummary.assignedCount = 0
+    progressSummary.inProgressCount = 0
+    progressSummary.completedCount = 0
+    todayCases.value = []
+    console.error('[DASHBOARD] Failed to fetch dashboard data', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// ============================================================================
+// Lifecycle / Watch
+// ============================================================================
+
+// 최초 진입 시 1회 조회
+onMounted(async () => {
+  await loadAssignableUsers()
+  await fetchDashboardData()
+})
+
+// 담당자/조회 기간 변경 시 자동 재조회
+watch([selectedCity, activeValue], () => {
+  fetchDashboardData()
+})
 </script>
 
 <style lang="scss" scoped>
@@ -313,6 +531,15 @@ const handleClick = (tab: DateTab) => {
 
     .dashboard-select {
       width: 130px;
+    }
+
+    .assignable-error {
+      display: flex;
+      align-items: center;
+      margin-left: 8px;
+      color: #d64545;
+      font-size: 12px;
+      white-space: nowrap;
     }
 
     .date-tab {

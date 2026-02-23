@@ -1,102 +1,59 @@
 <template>
   <section class="registry-progress">
-    <!-- 검색 패널 -->
-    <form class="search-panel" @submit.prevent="handleSearch(true)">
-      <div class="grid">
-        <label class="field">
-          <span class="label">업무구분</span>
-          <select v-model="filters.workType" :disabled="codesLoading">
-            <option value="ALL">전체</option>
-            <option v-for="c in workTypes" :key="c.code" :value="c.code">
-              {{ c.description }}
-            </option>
-          </select>
-        </label>
-
-        <label class="field">
-          <span class="label">배정업무</span>
-          <select v-model="filters.assignedWork" :disabled="codesLoading">
-            <option value="ALL">전체</option>
-            <option v-for="c in assignmentWorks" :key="c.code" :value="c.description">
-              {{ c.description }}
-            </option>
-          </select>
-        </label>
-
-        <label class="field">
-          <span class="label">등기방식</span>
-          <select v-model="filters.registryMethod" :disabled="codesLoading">
-            <option value="ALL">전체</option>
-            <option v-for="c in registryMethods" :key="c.code" :value="c.code">
-              {{ c.description }}
-            </option>
-          </select>
-        </label>
-
-        <!-- ✅ 담당자: assignable API 결과로 구성 -->
-        <label class="field">
-          <span class="label">업무담당자</span>
-          <select v-model="filters.managerUserId" :disabled="assignableLoading">
-            <option v-if="roleLevelValue !== 30" value="ALL">전체</option>
-            <option value="-1">미배정</option>
-            <option v-for="u in assignableUsers" :key="u.userId" :value="String(u.userId)">
-              {{ u.userName }}
-            </option>
-          </select>
-          <small v-if="assignableError" class="hint error-text">{{ assignableError }}</small>
-        </label>
-
-        <div class="field">
-          <span class="label">등기의뢰일자</span>
-          <div class="range">
-            <input type="date" v-model="filters.registryRequestStartDate" />
-            <span>~</span>
-            <input type="date" v-model="filters.registryRequestEndDate" />
-          </div>
-        </div>
-
-        <div class="field">
-          <span class="label">등기접수일자</span>
-          <div class="range">
-            <input type="date" v-model="filters.registryReceiptStartDate" />
-            <span>~</span>
-            <input type="date" v-model="filters.registryReceiptEndDate" />
-          </div>
-        </div>
-
-        <label class="field">
-          <span class="label">진행상태</span>
-          <select v-model="filters.progressStatus" :disabled="codesLoading">
-            <option value="ALL">전체</option>
-            <option v-for="c in progressStatuses" :key="c.code" :value="c.code">
-              {{ c.description }}
-            </option>
-          </select>
-        </label>
-
-        <label class="field">
-          <span class="label">통합검색</span>
-          <input
-            v-model.trim="filters.keyword"
-            placeholder="부동산 주소 또는 신청번호"
-            @keydown.enter.prevent="handleSearch(true)"
+    <div class="Search-panel">
+      <form @submit.prevent="handleSearch(true)">
+        <div class="input-area">
+          <SearchSelect
+            v-model="filters.workType"
+            label="업무구분"
+            :options="workTypeOptions"
+            :disabled="codesLoading"
           />
-        </label>
+          <SearchSelect
+            v-model="filters.assignedWork"
+            label="배정업무"
+            :options="assignedWorkOptions"
+            :disabled="codesLoading"
+          />
+          <SearchSelect
+            v-model="filters.registryMethod"
+            label="등기방식"
+            :options="registryMethodOptions"
+            :disabled="codesLoading"
+          />
+          <SearchSelect
+            v-model="filters.managerUserId"
+            label="업무담당자"
+            :options="managerOptions"
+            :disabled="assignableLoading"
+          />
+          <SearchDateRangePicker v-model="requestDateRange" label="등기의뢰일자 선택" />
+          <SearchDateRangePicker v-model="receiptDateRange" label="등기접수일자 선택" />
+          <SearchSelect
+            v-model="filters.progressStatus"
+            label="진행상태"
+            :options="progressStatusOptions"
+            :disabled="codesLoading"
+          />
+          <SearchInput
+            v-model="filters.keyword"
+            label="통합검색"
+            placeholder="부동산 주소 또는 신청번호"
+            :disabled="loading"
+            @search="() => handleSearch(true)"
+          />
+        </div>
+        <input type="submit" value="검색" :disabled="loading" />
+      </form>
+      <div v-if="codesError || assignableError" class="inline-error">
+        {{ codesError || assignableError }}
       </div>
+    </div>
 
-      <div class="actions">
-        <button type="submit" :disabled="loading">검색</button>
-        <button type="button" class="ghost" @click="handleReset" :disabled="loading">초기화</button>
-      </div>
+    <div v-if="errorMessage" class="inline-error">{{ errorMessage }}</div>
 
-      <div v-if="codesError" class="inline-error">{{ codesError }}</div>
-    </form>
-
-    <!-- 테이블 -->
     <div class="table-wrap">
-      <div v-if="errorMessage" class="inline-error">{{ errorMessage }}</div>
-
-      <table class="table">
+      <table class="data-table">
         <thead>
           <tr>
             <th style="width: 80px">번호</th>
@@ -111,19 +68,16 @@
             <th style="width: 140px">진행상태</th>
           </tr>
         </thead>
-
         <tbody>
-          <tr v-if="loading">
-            <td colspan="10" class="muted">불러오는 중…</td>
+          <tr v-if="loading" class="info-text">
+            <td colspan="10">불러오는 중...</td>
           </tr>
-
-          <tr v-else-if="rows.length === 0">
-            <td colspan="10" class="muted">조회 결과가 없습니다.</td>
+          <tr v-else-if="rows.length === 0" class="info-text">
+            <td colspan="10">조회 결과가 없습니다.</td>
           </tr>
-
           <tr
-            v-else
             v-for="r in rows"
+            v-else
             :key="r.registryManagementNumber"
             class="row"
             @click="goDetail(r.registryManagementNumber)"
@@ -133,13 +87,10 @@
             <td>{{ r.workType }}</td>
             <td>{{ r.assignedWork }}</td>
             <td>{{ r.registryMethod }}</td>
-            <td class="ellipsis">{{ r.propertyAddress ?? '-' }}</td>
+            <td class="address-cell">{{ r.propertyAddress ?? '-' }}</td>
             <td>{{ r.registryRequestDate }}</td>
             <td>{{ r.registryReceiptDate }}</td>
-
-            <!-- ✅ 담당자 컬럼: 권한에 따라 렌더링 -->
             <td>
-              <!-- USER(30): 미배정이면 배정받기 버튼 -->
               <template v-if="isUser30 && isUnassigned(r.managerUserName)">
                 <button
                   type="button"
@@ -147,11 +98,9 @@
                   :disabled="assigningSet.has(r.registryManagementNumber) || !userId"
                   @click.stop="handleAssignMyself(r.registryManagementNumber)"
                 >
-                  {{ assigningSet.has(r.registryManagementNumber) ? '처리중…' : '배정받기' }}
+                  {{ assigningSet.has(r.registryManagementNumber) ? '처리중...' : '배정받기' }}
                 </button>
               </template>
-
-              <!-- 관리자(30 초과): 담당자 선택 셀렉트 -->
               <template v-else-if="isAboveUser30">
                 <select
                   class="inline-select"
@@ -161,83 +110,37 @@
                   @change.stop="(e) => onAdminSelectChange(r.registryManagementNumber, e)"
                 >
                   <option value="" disabled>담당자 선택</option>
-                  <!-- ❌ 미배정 옵션 제거 -->
                   <option v-for="u in assignableUsers" :key="u.userId" :value="String(u.userId)">
                     {{ u.userName }}
                   </option>
                 </select>
               </template>
-
-              <!-- 그 외: 텍스트 -->
               <template v-else>
                 {{ r.managerUserName }}
               </template>
             </td>
-
             <td>{{ r.progressStatus }}</td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- 페이지네이션 -->
-    <div class="pagination">
-      <div class="left">
-        총 <b>{{ totalElements }}</b
-        >건 · {{ page + 1 }} / {{ totalPages || 1 }}
-      </div>
-      <div class="right">
-        <button type="button" @click="movePage(0)" :disabled="loading || page === 0">처음</button>
-        <button type="button" @click="movePage(page - 1)" :disabled="loading || page === 0">
-          이전
-        </button>
-
-        <!-- ✅ 페이지 번호 버튼들 -->
-        <div class="page-buttons">
-          <button
-            v-for="p in pageButtons"
-            :key="p.key"
-            type="button"
-            class="page-btn"
-            :class="{ active: p.pageIndex === page }"
-            :disabled="loading || p.disabled"
-            @click="!p.disabled && movePage(p.pageIndex)"
-          >
-            {{ p.label }}
-          </button>
-        </div>
-
-        <label class="page-size">
-          <select v-model.number="size" @change="onChangePageSize" :disabled="loading">
-            <option :value="10">10</option>
-            <option v-if="MAX_PAGE_SIZE >= 20" :value="20">20</option>
-            <option v-if="MAX_PAGE_SIZE >= 50" :value="50">50</option>
-          </select>
-        </label>
-
-        <button
-          type="button"
-          @click="movePage(page + 1)"
-          :disabled="loading || page >= lastPageIndex"
-        >
-          다음
-        </button>
-        <button
-          type="button"
-          @click="movePage(lastPageIndex)"
-          :disabled="loading || totalPages === 0"
-        >
-          마지막
-        </button>
-      </div>
+    <div class="pagination-meta">
+      <p>총 {{ totalElements }}건</p>
+      <label class="page-size">
+        <span>페이지당</span>
+        <select v-model.number="size" @change="onChangePageSize" :disabled="loading">
+          <option :value="10">10</option>
+          <option v-if="MAX_PAGE_SIZE >= 20" :value="20">20</option>
+          <option v-if="MAX_PAGE_SIZE >= 50" :value="50">50</option>
+        </select>
+      </label>
     </div>
-
-    <!-- 🔧 개발용 -->
-    <div class="debug-role">
-      <strong>roleLevel:</strong>
-      <span>{{ roleLevel }}</span>
-      <span class="muted"> (roleLevelValue: {{ roleLevelValue }}, userId: {{ userId }})</span>
-    </div>
+    <Pagination
+      v-model:current-page="currentPage"
+      :total-items="totalElements"
+      :items-per-page="size"
+    />
   </section>
 </template>
 
@@ -248,6 +151,10 @@ import { useRouter } from 'vue-router'
 import { codeAPI } from '@/api/services/code'
 import { registryProgressAPI } from '@/api/services/registry'
 import { userAPI } from '@/api/services/user'
+import SearchDateRangePicker from '@/components/template/input/SearchDateRangePicker.vue'
+import SearchInput from '@/components/template/input/SearchInput.vue'
+import SearchSelect from '@/components/template/input/SearchSelect.vue'
+import Pagination from '@/components/template/PaginationItem.vue'
 import { useAuthStore } from '@/stores/auth'
 import type { Code, GetAssignableUsersQuery, SearchRegistryProgresssListQuery } from '@/types'
 
@@ -376,6 +283,40 @@ const filters = reactive({
   keyword: ''
 })
 
+type SearchOption = {
+  label: string
+  value: string | number
+}
+
+const workTypeOptions = computed<SearchOption[]>(() => [
+  { label: '전체', value: 'ALL' },
+  ...workTypes.value.map((code) => ({ label: code.description, value: code.code }))
+])
+
+const assignedWorkOptions = computed<SearchOption[]>(() => [
+  { label: '전체', value: 'ALL' },
+  ...assignmentWorks.value.map((code) => ({ label: code.description, value: code.description }))
+])
+
+const registryMethodOptions = computed<SearchOption[]>(() => [
+  { label: '전체', value: 'ALL' },
+  ...registryMethods.value.map((code) => ({ label: code.description, value: code.code }))
+])
+
+const progressStatusOptions = computed<SearchOption[]>(() => [
+  { label: '전체', value: 'ALL' },
+  ...progressStatuses.value.map((code) => ({ label: code.description, value: code.code }))
+])
+
+const managerOptions = computed<SearchOption[]>(() => {
+  const base = isUser30.value ? [] : ([{ label: '전체', value: 'ALL' }] as SearchOption[])
+  return [
+    ...base,
+    { label: '미배정', value: '-1' },
+    ...assignableUsers.value.map((user) => ({ label: user.userName, value: String(user.userId) }))
+  ]
+})
+
 function ensureUserDefaultManager(users: AssignableUser[]) {
   if (!isUser30.value) return
   if (!Array.isArray(users)) return
@@ -432,6 +373,28 @@ filters.registryRequestStartDate = defaultRequestStart
 filters.registryRequestEndDate = defaultRequestEnd
 filters.registryReceiptStartDate = defaultReceiptStart
 filters.registryReceiptEndDate = defaultReceiptEnd
+
+const requestDateRange = computed({
+  get: () => ({
+    startDate: filters.registryRequestStartDate || null,
+    endDate: filters.registryRequestEndDate || null
+  }),
+  set: (value: { startDate: string | null; endDate: string | null }) => {
+    filters.registryRequestStartDate = value.startDate ?? defaultRequestStart
+    filters.registryRequestEndDate = value.endDate ?? defaultRequestEnd
+  }
+})
+
+const receiptDateRange = computed({
+  get: () => ({
+    startDate: filters.registryReceiptStartDate || null,
+    endDate: filters.registryReceiptEndDate || null
+  }),
+  set: (value: { startDate: string | null; endDate: string | null }) => {
+    filters.registryReceiptStartDate = value.startDate ?? defaultReceiptStart
+    filters.registryReceiptEndDate = value.endDate ?? defaultReceiptEnd
+  }
+})
 
 function resolveManagerUserIdForApi(v: string): string | null {
   if (!v) return null
@@ -495,7 +458,8 @@ function buildQuery(nextPage1Base: number): SearchRegistryProgresssListQuery {
   }
 
   if (managerUserId !== null) query.managerUserId = managerUserId
-  if (filters.keyword) query.keyword = filters.keyword
+  const keyword = filters.keyword.trim()
+  if (keyword) query.keyword = keyword
 
   return query as SearchRegistryProgresssListQuery
 }
@@ -549,24 +513,6 @@ function handleSearch(reset: boolean) {
   fetchList(reset)
 }
 
-async function handleReset() {
-  filters.workType = 'ALL'
-  filters.assignedWork = 'ALL'
-  filters.registryMethod = 'ALL'
-  filters.progressStatus = 'ALL'
-  filters.keyword = ''
-
-  filters.registryRequestStartDate = defaultRequestStart
-  filters.registryRequestEndDate = defaultRequestEnd
-  filters.registryReceiptStartDate = defaultReceiptStart
-  filters.registryReceiptEndDate = defaultReceiptEnd
-
-  filters.managerUserId = isUser30.value ? '' : 'ALL'
-
-  await loadAssignableUsers()
-  fetchList(true)
-}
-
 function movePage(next: number) {
   const clamped = Math.min(Math.max(next, 0), lastPageIndex.value)
   if (clamped === page.value) return
@@ -582,6 +528,10 @@ function goDetail(registryManagementNumber: string) {
  * ✅ 페이지네이션 UI
  * ======================= */
 const MAX_PAGE_SIZE = 50 as const
+const currentPage = computed({
+  get: () => page.value + 1,
+  set: (next: number) => movePage(next - 1)
+})
 
 function onChangePageSize() {
   const v = Number(size.value)
@@ -589,57 +539,6 @@ function onChangePageSize() {
   if (size.value > MAX_PAGE_SIZE) size.value = MAX_PAGE_SIZE
   handleSearch(true)
 }
-
-type PageButton = {
-  key: string
-  label: string
-  pageIndex: number
-  disabled: boolean
-}
-
-const pageButtons = computed<PageButton[]>(() => {
-  const tp = Math.max(1, totalPages.value || 1)
-  const current = Math.min(Math.max(page.value, 0), tp - 1)
-
-  const windowSize = 5
-  const half = Math.floor(windowSize / 2)
-
-  let start = Math.max(0, current - half)
-  let end = Math.min(tp - 1, start + windowSize - 1)
-  start = Math.max(0, end - (windowSize - 1))
-
-  const items: PageButton[] = []
-
-  items.push({ key: 'p-0', label: '1', pageIndex: 0, disabled: current === 0 })
-
-  if (start > 1) {
-    items.push({ key: 'ellipsis-left', label: '…', pageIndex: current, disabled: true })
-  }
-
-  for (let i = Math.max(1, start); i <= Math.min(end, tp - 2); i += 1) {
-    items.push({
-      key: `p-${i}`,
-      label: String(i + 1),
-      pageIndex: i,
-      disabled: i === current
-    })
-  }
-
-  if (end < tp - 2) {
-    items.push({ key: 'ellipsis-right', label: '…', pageIndex: current, disabled: true })
-  }
-
-  if (tp > 1) {
-    items.push({
-      key: `p-${tp - 1}`,
-      label: String(tp),
-      pageIndex: tp - 1,
-      disabled: current === tp - 1
-    })
-  }
-
-  return items
-})
 
 /** =======================
  * ✅ R02B-03 배정 API 공통 호출
@@ -764,170 +663,65 @@ onMounted(async () => {
 .registry-progress {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-}
-
-.search-panel {
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 12px;
-  background: #fff;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.label {
-  font-size: 12px;
-  color: #374151;
-}
-
-.hint {
-  font-size: 11px;
-  color: #6b7280;
-  line-height: 1.3;
-}
-
-.error-text {
-  color: #b91c1c;
-}
-
-.range {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-input,
-select {
-  font-size: 14px;
-  height: 34px;
-  padding: 0 10px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  outline: none;
-}
-
-.actions {
-  margin-top: 10px;
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-}
-
-button {
-  height: 34px;
-  padding: 0 12px;
-  border-radius: 8px;
-  border: 1px solid #d1d5db;
-  background: #111827;
-  color: #fff;
-  cursor: pointer;
-}
-
-button.ghost {
-  background: #fff;
-  color: #111827;
-}
-
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+  gap: 16px;
 }
 
 .table-wrap {
-  border: 1px solid #e5e7eb;
   border-radius: 10px;
   overflow: hidden;
   background: #fff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
-.table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th,
-td {
-  padding: 10px;
-  border-bottom: 1px solid #f3f4f6;
-  text-align: left;
-  font-size: 13px;
-}
-
-thead th {
-  background: #f9fafb;
-  font-weight: 600;
+.Search-panel form {
+  align-items: flex-start;
+  gap: 10px;
 }
 
 .row {
   cursor: pointer;
 }
 
-.row:hover td {
-  background: #f9fafb;
-}
-
-.muted {
-  text-align: center;
-  color: #6b7280;
-}
-
-.ellipsis {
-  max-width: 360px;
+.address-cell {
+  max-width: 320px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.pagination {
+.pagination-meta {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 10px;
-  padding: 10px 2px;
+  gap: 12px;
+  margin-top: -4px;
+  color: #4f5f6f;
+  font-size: 14px;
 }
 
-.pagination .right {
+.page-size {
   display: flex;
-  gap: 8px;
   align-items: center;
+  gap: 8px;
 }
 
 .page-size select {
-  height: 34px;
+  height: 32px;
+  min-width: 64px;
+  border-radius: 6px;
+  border: 1px solid #ccd6dd;
+  padding: 0 8px;
+  background: #fff;
 }
 
 .inline-error {
-  margin-top: 10px;
-  padding: 10px;
+  margin-top: 12px;
+  padding: 10px 12px;
   border-radius: 8px;
   background: #fef2f2;
   border: 1px solid #fee2e2;
   color: #b91c1c;
   font-size: 12px;
-}
-
-// @media (max-width: 1100px) {
-//   .grid {
-//     grid-template-columns: repeat(2, minmax(0, 1fr));
-//   }
-// }
-
-.debug-role {
-  margin-top: 6px;
-  font-size: 14px;
-  color: #6b7280;
-  text-align: right;
 }
 
 .assign-btn {
