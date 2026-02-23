@@ -7,7 +7,7 @@
       <section class="test-section">
         <h2>서버 설정</h2>
         <label>서버 URL:</label>
-        <input v-model="serverUrl" type="text" placeholder="http://localhost:29541" />
+        <input v-model="serverUrl" type="text" placeholder="http://127.0.0.1:29541" />
         <label class="mock-toggle">
           <input v-model="useMock" type="checkbox" />
           iOS/로컬 미실행 환경용 Mock 모드
@@ -91,7 +91,7 @@ interface PostData {
 }
 
 // 상태 관리
-const serverUrl = ref('http://localhost:29541')
+const serverUrl = ref('http://127.0.0.1:29541')
 const getResult = ref<TestResult | null>(null)
 const postResult = ref<TestResult | null>(null)
 const macResult = ref<TestResult | null>(null)

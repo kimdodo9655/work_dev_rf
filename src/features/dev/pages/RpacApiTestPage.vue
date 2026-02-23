@@ -186,7 +186,7 @@
             <input
               v-model.trim="rpaHttpServerUrl"
               type="text"
-              placeholder="http://localhost:29541"
+              placeholder="http://127.0.0.1:29541"
             />
           </div>
           <div class="input-block">
@@ -704,7 +704,7 @@ const referenceLoading = reactive({
 })
 const isReferenceCollapsed = ref(true)
 
-const rpaHttpServerUrl = ref('http://localhost:29541')
+const rpaHttpServerUrl = ref('http://127.0.0.1:29541')
 const rpaHttpPostData = ref(`{
   "action": "saveData",
   "userId": 1,
@@ -1049,8 +1049,8 @@ function wait(ms: number) {
 
 function getRpaHttpBaseUrl() {
   const raw = rpaHttpServerUrl.value.trim()
-  if (!raw) return 'http://localhost:29541'
-  if (raw.startsWith(':')) return `http://localhost${raw}`
+  if (!raw) return 'http://127.0.0.1:29541'
+  if (raw.startsWith(':')) return `http://127.0.0.1${raw}`
   if (/^https?:\/\//i.test(raw)) return raw.replace(/\/+$/, '')
   return `http://${raw}`.replace(/\/+$/, '')
 }
