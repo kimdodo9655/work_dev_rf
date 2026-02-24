@@ -459,7 +459,7 @@ function buildQuery(nextPage1Base: number): SearchRegistryProgresssListQuery {
 
   if (managerUserId !== null) query.managerUserId = managerUserId
   const keyword = filters.keyword.trim()
-  if (keyword) query.keyword = keyword
+  if (keyword) query.searchKeyword = keyword
 
   return query as SearchRegistryProgresssListQuery
 }

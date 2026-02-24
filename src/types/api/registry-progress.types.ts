@@ -21,9 +21,9 @@ export interface SearchRegistryProgresssListQuery {
     | '이전,설정'
     | '말소,이전,설정'
   /** 등기방식 */
-  registryMethod: 'ALL' | '전자' | 'E-from' | '서면' | '혼합'
+  registryMethod: string
   /** 업무담당자 ID */
-  managerUserId: 'ALL'
+  managerUserId?: 'ALL' | '-1' | number | `${number}`
   /** 등기의뢰일자 시작 */
   registryRequestStartDate: string
   /** 등기의뢰일자 종료 */

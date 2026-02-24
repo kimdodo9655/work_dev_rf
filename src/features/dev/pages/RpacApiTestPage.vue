@@ -739,22 +739,6 @@ const rpaAutoNextPollIn = ref<number | null>(null)
 const rpaAutoLastUpdatedAt = ref('')
 const rpaAutoPollingActive = ref(false)
 
-const RPAC_TASK_TYPE_MAP: Record<string, string> = {
-  'RPAC-01': 'FULL_CERTIFICATE_VIEW',
-  'RPAC-02': 'PROPERTY_DESCRIPTION',
-  'RPAC-03': 'QUERY_REGISTRATION_PASSWORD',
-  'RPAC-04': 'ETAX_ACQUISITION',
-  'RPAC-05': 'ETAX_REGISTRATION',
-  'RPAC-06': 'WETAX_ACQUISITION',
-  'RPAC-07': 'WETAX_REGISTRATION',
-  'RPAC-08': 'QUERY_REGISTRATION_CASE',
-  'RPAC-09': 'ADMIN_CONSENT',
-  'RPAC-10': 'REGISTRATION_APPLICATION',
-  'RPAC-11': 'QUERY_TASK_STATUS',
-  'RPAC-12': 'SUBMIT_TASK_RESULT',
-  'RPAC-13': 'FULL_CERTIFICATE_ISSUE'
-}
-
 const groupedLoginUsers = computed(() => {
   const groups = new Map<string, Array<(typeof LOGIN_USERS)[number]>>()
   LOGIN_USERS.forEach((user) => {
@@ -1435,7 +1419,7 @@ async function checkRpaAutoStatus() {
   }
 }
 
-async function executeRpaAuto(taskToken: string, endpointId: string) {
+async function executeRpaAuto(taskToken: string, taskType: string) {
   stopRpaAutoPolling()
   rpaAutoPollingCount = 0
 
@@ -1443,7 +1427,7 @@ async function executeRpaAuto(taskToken: string, endpointId: string) {
     bankCode: effectiveBankCode.value,
     apiBaseUrl: api.defaults.baseURL,
     taskToken,
-    taskType: RPAC_TASK_TYPE_MAP[endpointId] ?? endpointId
+    taskType
   }
   const baseUrl = getRpaHttpBaseUrl()
   const executePathToken = `${context.bankCode}|${context.apiBaseUrl ?? ''}|${context.taskToken}|${context.taskType}`
@@ -1930,6 +1914,10 @@ async function callEndpoint(endpointId: string) {
     }
 
     const token = res?.data?.data?.taskToken ?? res?.data?.taskToken
+    const responseTaskType = res?.data?.data?.taskType ?? res?.data?.taskType
+    const bodyTaskType =
+      typeof data?.taskType === 'string' && data.taskType.trim() ? data.taskType.trim() : null
+    const taskTypeForAuto = responseTaskType || bodyTaskType
     if (token && !taskTokens.value.includes(token)) {
       taskTokens.value.unshift(token)
       taskTokens.value = taskTokens.value.slice(0, 20)
@@ -1938,13 +1926,15 @@ async function callEndpoint(endpointId: string) {
     // RPAC 호출 직후 자동으로 로컬 RPA execute + status 폴링
     const fallbackTaskToken = pathInputByEndpoint[endpointId]?.taskToken
     const taskTokenForAuto = token || fallbackTaskToken
-    if (String(endpointId).startsWith('RPAC-') && taskTokenForAuto) {
-      void executeRpaAuto(String(taskTokenForAuto), endpointId)
+    if (String(endpointId).startsWith('RPAC-') && taskTokenForAuto && taskTypeForAuto) {
+      void executeRpaAuto(String(taskTokenForAuto), String(taskTypeForAuto))
     } else if (String(endpointId).startsWith('RPAC-')) {
       rpaAutoStatus.value = {
         executeRequest: null,
         executeResponse: {
-          error: 'taskToken을 찾지 못해 자동 execute를 건너뛰었습니다.'
+          error: !taskTokenForAuto
+            ? 'taskToken을 찾지 못해 자동 execute를 건너뛰었습니다.'
+            : 'taskType을 찾지 못해 자동 execute를 건너뛰었습니다.'
         },
         statusCheck: null
       }
