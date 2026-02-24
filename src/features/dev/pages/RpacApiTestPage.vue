@@ -721,6 +721,7 @@ const rpaHttpLoading = reactive({
 })
 let rpaHttpPollingInterval: ReturnType<typeof setInterval> | null = null
 let rpaHttpPollingCount = 0
+let rpaHttpSocket: WebSocket | null = null
 const isLikelyIosClient =
   typeof navigator !== 'undefined' &&
   (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
@@ -732,6 +733,7 @@ const rpaAutoStatus = ref<Record<string, any> | null>(null)
 let rpaAutoPollingInterval: ReturnType<typeof setInterval> | null = null
 let rpaAutoPollingCount = 0
 let rpaAutoCountdownInterval: ReturnType<typeof setInterval> | null = null
+let rpaAutoSocket: WebSocket | null = null
 const RPA_AUTO_POLL_INTERVAL_SEC = 5
 const rpaAutoNextPollIn = ref<number | null>(null)
 const rpaAutoLastUpdatedAt = ref('')
@@ -1207,49 +1209,65 @@ async function rpaHttpGetData() {
 }
 
 async function rpaHttpExecute() {
+  const baseUrl = getRpaHttpBaseUrl()
+  const wsBaseUrl = baseUrl.replace(/^http:\/\//, 'ws://').replace(/^https:\/\//, 'wss://')
+
   rpaHttpLoading.execute = true
   try {
-    if (useRpaHttpMock.value) {
-      await wait(150)
-      rpaHttpMockStatusCount = 0
-      const data: RpaHttpResponse = {
-        status: 'success',
-        result: 'N',
-        message: 'Mock RPA 실행 시작',
-        mock: true
+    setRpaHttpResult('execute', { message: 'RPA 서버 연결 중...' }, false)
+
+    if (rpaHttpSocket && rpaHttpSocket.readyState === WebSocket.OPEN) {
+      rpaHttpSocket.close()
+    }
+
+    rpaHttpSocket = new WebSocket(wsBaseUrl)
+
+    rpaHttpSocket.onopen = () => {
+      setRpaHttpResult('execute', { message: '연결 성공! RPA 실행 명령 전송 중...' }, false)
+      rpaHttpSocket?.send(JSON.stringify({ command: 'execute' }))
+    }
+
+    rpaHttpSocket.onmessage = (event) => {
+      try {
+        const data: RpaHttpResponse = JSON.parse(event.data)
+        setRpaHttpResult(
+          'execute',
+          {
+            status: 'received',
+            response: data
+          },
+          data.status === 'error'
+        )
+
+        if (data.status === 'success') {
+          if (useRpaHttpMock.value) {
+            rpaHttpMockStatusCount = 0
+          }
+          rpaHttpStartPolling()
+        }
+      } catch (e) {
+        console.error('데이터 파싱 에러:', e)
       }
+    }
+
+    rpaHttpSocket.onerror = () => {
       setRpaHttpResult(
         'execute',
         {
-          status: 200,
-          statusText: 'OK',
-          response: data
+          error: 'WebSocket 에러 발생',
+          tip: 'RPA 프로그램이 실행 중인지, 포트가 열려 있는지 확인하세요.'
         },
-        false
+        true
       )
-      rpaHttpStartPolling()
-      return
     }
 
-    const response = await fetch(`${getRpaHttpBaseUrl()}/execute`)
-    const data: RpaHttpResponse = await response.json()
-    setRpaHttpResult(
-      'execute',
-      {
-        status: response.status,
-        statusText: response.statusText,
-        response: data
-      },
-      data.status === 'error'
-    )
-
-    if (data.status === 'success') {
-      rpaHttpStartPolling()
+    rpaHttpSocket.onclose = () => {
+      console.log('웹소켓 연결이 종료되었습니다.')
     }
   } catch (error: any) {
     setRpaHttpResult(
       'execute',
-      { error: error?.message ?? '요청 실패', tip: 'RPA 프로그램이 실행 중인지 확인하세요.' },
+      { error: error?.message ?? '요청 실패', tip: '연결 시도 중 오류가 발생했습니다.' },
       true
     )
   } finally {
@@ -1340,6 +1358,10 @@ function stopRpaAutoPolling() {
     clearInterval(rpaAutoCountdownInterval)
     rpaAutoCountdownInterval = null
   }
+  if (rpaAutoSocket) {
+    rpaAutoSocket.close()
+    rpaAutoSocket = null
+  }
   rpaAutoNextPollIn.value = null
   rpaAutoPollingActive.value = false
 }
@@ -1424,20 +1446,81 @@ async function executeRpaAuto(taskToken: string, endpointId: string) {
     taskType: RPAC_TASK_TYPE_MAP[endpointId] ?? endpointId
   }
   const baseUrl = getRpaHttpBaseUrl()
-  const executeUrl = `${baseUrl}/execute/${encodeURIComponent(
-    context.bankCode
-  )}/${encodeURIComponent(context.apiBaseUrl ?? '')}/${encodeURIComponent(
-    context.taskToken
-  )}/${encodeURIComponent(context.taskType)}`
+  const executePathToken = `${context.bankCode}|${context.apiBaseUrl ?? ''}|${context.taskToken}|${context.taskType}`
+  const executeUrl = `${baseUrl}/execute/${encodeURIComponent(executePathToken)}`
+  const wsBaseUrl = baseUrl.replace(/^http:\/\//, 'ws://').replace(/^https:\/\//, 'wss://')
+  const wsExecuteUrl = `${wsBaseUrl}/execute/${encodeURIComponent(executePathToken)}`
 
   rpaAutoStatus.value = {
     executeRequest: {
       ...context,
-      executeUrl
+      executePathToken,
+      executeUrl,
+      wsExecuteUrl
     },
     executeResponse: null,
     statusCheck: null
   }
+
+  const executeViaWebSocket = (url: string) =>
+    new Promise<RpaHttpResponse>((resolve, reject) => {
+      if (rpaAutoSocket && rpaAutoSocket.readyState === WebSocket.OPEN) {
+        rpaAutoSocket.close()
+      }
+
+      let settled = false
+      const socket = new WebSocket(url)
+      rpaAutoSocket = socket
+      const timeout = setTimeout(() => {
+        if (settled) return
+        settled = true
+        socket.close()
+        reject(new Error('WebSocket 응답 시간 초과'))
+      }, 10000)
+
+      socket.onopen = () => {
+        socket.send(
+          JSON.stringify({
+            command: 'execute',
+            ...context
+          })
+        )
+      }
+
+      socket.onmessage = (event) => {
+        if (settled) return
+        settled = true
+        clearTimeout(timeout)
+        try {
+          const data: RpaHttpResponse = JSON.parse(event.data)
+          resolve(data)
+        } catch (e) {
+          reject(new Error(`데이터 파싱 에러: ${(e as Error).message}`))
+        } finally {
+          socket.close()
+          if (rpaAutoSocket === socket) {
+            rpaAutoSocket = null
+          }
+        }
+      }
+
+      socket.onerror = () => {
+        if (settled) return
+        settled = true
+        clearTimeout(timeout)
+        reject(new Error('WebSocket 에러 발생'))
+      }
+
+      socket.onclose = () => {
+        if (rpaAutoSocket === socket) {
+          rpaAutoSocket = null
+        }
+        if (settled) return
+        settled = true
+        clearTimeout(timeout)
+        reject(new Error('웹소켓 연결이 종료되었습니다.'))
+      }
+    })
 
   try {
     if (useRpaHttpMock.value) {
@@ -1466,19 +1549,16 @@ async function executeRpaAuto(taskToken: string, endpointId: string) {
       return
     }
 
-    // execute 뒤 파라미터를 붙여 호출. 구버전 서버는 /execute만 지원하므로 fallback 시도.
-    let response = await fetch(executeUrl)
-    if (!response.ok && (response.status === 404 || response.status === 405)) {
-      response = await fetch(`${baseUrl}/execute`)
-    }
-    const data: RpaHttpResponse = await response.json()
+    const data: RpaHttpResponse = await executeViaWebSocket(wsExecuteUrl)
+
     rpaAutoStatus.value = {
       ...(rpaAutoStatus.value ?? {}),
       executeResponse: {
-        statusCode: response.status,
+        statusCode: 'WS',
         status: data.status ?? '',
         result: data.result ?? 'N',
         message: data.message ?? '',
+        usedWsUrl: wsExecuteUrl,
         raw: data
       }
     }
@@ -1959,6 +2039,14 @@ onBeforeUnmount(() => {
   stopRpaAutoPolling()
   rpaAutoLastUpdatedAt.value = ''
   rpaHttpStopPolling()
+  if (rpaAutoSocket) {
+    rpaAutoSocket.close()
+    rpaAutoSocket = null
+  }
+  if (rpaHttpSocket) {
+    rpaHttpSocket.close()
+    rpaHttpSocket = null
+  }
   if (storagePollingTimer) {
     clearInterval(storagePollingTimer)
     storagePollingTimer = null

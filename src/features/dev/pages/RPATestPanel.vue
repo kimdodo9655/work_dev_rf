@@ -114,6 +114,7 @@ let mockStatusCount = 0
 // 폴링 관련
 let pollingInterval: number | null = null
 let pollingCount = 0
+let socket: WebSocket | null = null
 
 // 유틸리티 함수
 const formatResult = (data: any): string => {
@@ -306,50 +307,62 @@ const getData = async () => {
 }
 
 const executeRPA = async () => {
+  const rawUrl = serverUrl.value.trim()
+  const wsBaseUrl = rawUrl.replace(/^http:\/\//, 'ws://').replace(/^https:\/\//, 'wss://')
+  const wsUrl = `${wsBaseUrl}/execute`
+
   try {
-    rpaResult.value = { data: 'RPA 실행 중...', isError: false }
-    if (useMock.value) {
-      await wait(150)
-      mockStatusCount = 0
-      const data: RPAResponse = {
-        status: 'success',
-        result: 'N',
-        message: 'Mock RPA 실행 시작',
-        mock: true
+    rpaResult.value = { data: 'RPA 서버 연결 중...', isError: false }
+
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.close()
+    }
+
+    socket = new WebSocket(wsUrl)
+
+    socket.onopen = () => {
+      rpaResult.value = { data: '연결 성공! RPA 실행 명령 전송 중...', isError: false }
+      socket?.send(JSON.stringify({ command: 'execute' }))
+    }
+
+    socket.onmessage = (event) => {
+      try {
+        const data: RPAResponse = JSON.parse(event.data)
+
+        rpaResult.value = {
+          data: {
+            status: 'received',
+            response: data
+          },
+          isError: data.status === 'error'
+        }
+
+        if (data.status === 'success') {
+          startPolling()
+        }
+      } catch (e) {
+        console.error('데이터 파싱 에러:', e)
       }
+    }
+
+    socket.onerror = () => {
       rpaResult.value = {
         data: {
-          status: 200,
-          statusText: 'OK',
-          response: data
+          error: 'WebSocket 에러 발생',
+          tip: 'RPA 프로그램이 실행 중인지, 포트가 열려 있는지 확인하세요.'
         },
-        isError: false
+        isError: true
       }
-      startPolling()
-      return
     }
 
-    const response = await fetch(`${serverUrl.value}/execute`)
-    const data: RPAResponse = await response.json()
-
-    rpaResult.value = {
-      data: {
-        status: response.status,
-        statusText: response.statusText,
-        response: data
-      },
-      isError: data.status === 'error'
-    }
-
-    // 실행 성공하면 상태 확인 시작
-    if (data.status === 'success') {
-      startPolling()
+    socket.onclose = () => {
+      console.log('웹소켓 연결이 종료되었습니다.')
     }
   } catch (error) {
     rpaResult.value = {
       data: {
         error: (error as Error).message,
-        tip: 'RPA 프로그램이 실행 중인지 확인하세요.'
+        tip: '연결 시도 중 오류가 발생했습니다.'
       },
       isError: true
     }
@@ -458,6 +471,10 @@ const checkStatus = async () => {
 // 컴포넌트 언마운트 시 폴링 정리
 onUnmounted(() => {
   stopPolling()
+  if (socket) {
+    socket.close()
+    socket = null
+  }
 })
 </script>
 
