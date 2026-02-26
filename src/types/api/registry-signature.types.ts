@@ -17,6 +17,9 @@ export interface GetDetailedESignaturesParams {
   registryManagementNumber: string
 }
 
+export type GetDetailedESignaturesRequest = GetDetailedESignaturesParams &
+  GetDetailedESignaturesQuery
+
 export type GetDetailedESignaturesResponse = RegistryProgressESignatureResponse
 
 /**
@@ -73,6 +76,8 @@ export interface GetESignaturesParams {
   /** 등기관리번호 (15자리) */
   registryManagementNumber: string
 }
+
+export type GetESignaturesRequest = GetESignaturesParams & GetESignaturesQuery
 
 export type GetESignaturesResponse = RegistryProgressESignatureResponse
 

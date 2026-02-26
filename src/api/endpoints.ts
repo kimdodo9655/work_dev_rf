@@ -3,7 +3,7 @@
  * 모든 API 경로를 한 곳에서 관리
  *
  * @generated 2025-02-19
- * @total 220개 엔드포인트
+ * @total 221개 엔드포인트
  * @categories 43개
  */
 export const API = {
@@ -372,7 +372,9 @@ export const API = {
     DETAIL: (registryManagementNumber: string | number) =>
       `/api/registry/progress/${registryManagementNumber}/housing-bonds/detail`, // [R02Q-01][GET] 국민주택채권 상세 조회
     DETAIL_2: (registryManagementNumber: string | number, registryType: string | number) =>
-      `/api/registry/progress/${registryManagementNumber}/housing-bonds/${registryType}` // [R02Q-02][PUT] 국민주택채권 상세 저장
+      `/api/registry/progress/${registryManagementNumber}/housing-bonds/${registryType}`, // [R02Q-02][PUT] 국민주택채권 상세 저장
+    LIST: (registryManagementNumber: string | number) =>
+      `/api/registry/progress/${registryManagementNumber}/housing-bonds/list` // [R02Q-03][GET] 국민주택채권 목록 조회
   },
 
   // [R02R] 등기진행-대출금지급계좌

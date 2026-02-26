@@ -279,17 +279,8 @@ const fetchUsers = async () => {
     }
 
     // 값이 있는 필터만 추가 (빈 문자열 제외)
-    if (searchParams.organizationType) {
-      params.organizationType = searchParams.organizationType
-    }
-    if (searchParams.organizationName) {
-      params.organizationName = searchParams.organizationName
-    }
-    if (searchParams.branchName) {
-      params.branchName = searchParams.branchName
-    }
     if (searchParams.roleLevel) {
-      params.roleLevel = searchParams.roleLevel
+      params.roleLevel = Number(searchParams.roleLevel)
     }
     if (searchParams.userStatus) {
       params.userStatus = searchParams.userStatus

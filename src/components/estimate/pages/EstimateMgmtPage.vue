@@ -38,7 +38,6 @@
             v-model="filters.keyword"
             label="통합검색"
             placeholder="부동산 주소 또는 등기신청번호"
-            @search="handleSearch"
           />
         </div>
         <input type="submit" value="검색" />
@@ -337,14 +336,16 @@ async function fetchList() {
   }
 }
 
-function handleSearch() {
-  currentPage.value = 1
+function triggerSearch() {
+  if (currentPage.value !== 1) {
+    currentPage.value = 1
+    return
+  }
   fetchList()
 }
 
 function handleSubmit() {
-  currentPage.value = 1
-  fetchList()
+  triggerSearch()
 }
 
 watch(currentPage, () => {

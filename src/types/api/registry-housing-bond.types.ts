@@ -22,6 +22,17 @@ export interface GetHousingBondDetailsParams {
 export type GetHousingBondDetailsResponse = ProgressHousingBondResponse
 
 /**
+ * R02Q-03
+ * GET /api/registry/progress/{registryManagementNumber}/housing-bonds/list
+ */
+export interface GetHousingBondListParams {
+  /** 등기관리번호 */
+  registryManagementNumber: string
+}
+
+export type GetHousingBondListResponse = RegistryProgressHousingBondListResponse
+
+/**
  * R02Q-02
  * PUT /api/registry/progress/{registryManagementNumber}/housing-bonds/{registryType}
  */
@@ -85,4 +96,30 @@ export interface ProgressHousingBondResponse {
   autoGenerationAvailable?: boolean
   /** 등기유형별 국민주택채권 목록 */
   cases?: HousingBondCase[]
+}
+
+/** 국민주택채권 목록 응답 */
+export interface RegistryProgressHousingBondListResponse {
+  /** 등기관리번호 */
+  registryManagementNumber?: string
+  /** 국민주택채권 목록 행 */
+  rows?: HousingBondListRow[]
+}
+
+/** 국민주택채권 목록 행 정보 */
+export interface HousingBondListRow {
+  /** 신청서 ID */
+  applicationId?: number
+  /** 등기유형(설명) */
+  registryType?: string
+  /** 매입 구분 (채권할인/채권면제) */
+  purchaseType?: string
+  /** 매입대상금액 */
+  purchaseTargetAmount?: number
+  /** 채권매입금액 */
+  bondPurchaseAmount?: number
+  /** 채권할인금액 (채권면제 시 '-') */
+  bondDiscountAmount?: string
+  /** 국민주택채권번호 (채권면제 시 '-') */
+  housingBondNumber?: string
 }

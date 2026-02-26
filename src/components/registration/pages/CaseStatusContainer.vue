@@ -40,7 +40,6 @@
             label="통합검색"
             placeholder="부동산 주소 또는 신청번호"
             :disabled="loading"
-            @search="() => handleSearch(true)"
           />
         </div>
         <input type="submit" value="검색" :disabled="loading" />

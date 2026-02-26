@@ -184,7 +184,7 @@ async function fetchMortgageSignatures() {
       const res: any = await registrySignatureAPI.getDetail({
         registryManagementNumber: props.registryManagementNumber,
         registryType: 'MORTGAGE_REGISTRATION'
-      } as any)
+      })
       const data = unwrapData<ESignatureItem[]>(res)
 
       mortgageList.value = Array.isArray(data) ? data : []
@@ -214,7 +214,7 @@ async function fetchTransferSignatures() {
       const res: any = await registrySignatureAPI.getDetail({
         registryManagementNumber: props.registryManagementNumber,
         registryType: 'OWNERSHIP_TRANSFER'
-      } as any)
+      })
       const data = unwrapData<ESignatureItem[]>(res)
 
       transferList.value = Array.isArray(data) ? data : []

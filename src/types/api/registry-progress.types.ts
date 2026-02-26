@@ -147,6 +147,9 @@ export interface GetRegistryProgressLegalAgentParams {
   registryManagementNumber: string
 }
 
+export type GetRegistryProgressLegalAgentRequest = GetRegistryProgressLegalAgentParams &
+  GetRegistryProgressLegalAgentQuery
+
 export type GetRegistryProgressLegalAgentResponse = RegistryProgressLegalAgentResponse
 
 /**

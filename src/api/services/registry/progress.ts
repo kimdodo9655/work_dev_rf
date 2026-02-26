@@ -10,7 +10,7 @@ import type {
   ChangeRegistryProgressProcessResponse,
   GetRegistryProgressBasicInfoParams,
   GetRegistryProgressBasicInfoResponse,
-  GetRegistryProgressLegalAgentQuery,
+  GetRegistryProgressLegalAgentRequest,
   GetRegistryProgressLegalAgentResponse,
   GetRegistryProgressLoanInfoParams,
   GetRegistryProgressLoanInfoResponse,
@@ -89,7 +89,7 @@ export const registryProgressAPI = {
     )
   },
 
-  async legalAgent(query: GetRegistryProgressLegalAgentQuery) {
+  async legalAgent(query: GetRegistryProgressLegalAgentRequest) {
     // --------------------------------------------------
     // [R02B-07][GET - /api/registry/progress/{registryManagementNumber}/legal-agent] 법무대리인 정보 조회
     // --------------------------------------------------

@@ -345,6 +345,50 @@ function unwrapResponse<T>(payload: unknown): T {
   return payload as T
 }
 
+function extractApiRoot<T>(payload: unknown): T {
+  let current: unknown = payload
+
+  if (current && typeof current === 'object' && 'data' in (current as Record<string, unknown>)) {
+    current = (current as { data: unknown }).data
+  }
+  if (current && typeof current === 'object' && 'result' in (current as Record<string, unknown>)) {
+    current = (current as { result: unknown }).result
+  }
+  if (current && typeof current === 'object' && 'data' in (current as Record<string, unknown>)) {
+    current = (current as { data: unknown }).data
+  }
+
+  return (current ?? {}) as T
+}
+
+function toNumberOrZero(value: unknown): number {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : 0
+  if (typeof value === 'string') {
+    const parsed = Number(value)
+    return Number.isFinite(parsed) ? parsed : 0
+  }
+  return 0
+}
+
+function normalizeEstimateSummary(source: unknown): Required<RegistryEstimateSummaryResponse> {
+  const obj = (source && typeof source === 'object' ? source : {}) as Record<string, unknown>
+  return {
+    requestCount: toNumberOrZero(
+      obj.requestCount ?? obj.requestCnt ?? obj.estimateRequestCount ?? obj.estimateRequestCnt
+    ),
+    writtenCount: toNumberOrZero(
+      obj.writtenCount ?? obj.writtenCnt ?? obj.estimateWrittenCount ?? obj.estimateWrittenCnt
+    ),
+    awardedCount: toNumberOrZero(
+      obj.awardedCount ??
+        obj.awardedCnt ??
+        obj.acceptedCount ??
+        obj.acceptedCnt ??
+        obj.estimateAwardedCount
+    )
+  }
+}
+
 // Date -> YYYYMMDD (R02A 대시보드 API 스펙 요구 포맷)
 function formatApiDate(date: Date): string {
   const year = date.getFullYear()
@@ -358,7 +402,8 @@ function getDateRange(tabValue: string): { startDate: string; endDate: string } 
   const end = new Date()
   const start = new Date(end)
 
-  if (tabValue === '1w') start.setDate(start.getDate() - 6)
+  if (tabValue === '1d') start.setDate(start.getDate() - 1)
+  if (tabValue === '1w') start.setDate(start.getDate() - 7)
   if (tabValue === '1m') start.setMonth(start.getMonth() - 1)
 
   return {
@@ -374,13 +419,7 @@ function buildBaseQuery():
   | SearchRegistryProgressTodayQuery {
   const { startDate, endDate } = getDateRange(activeValue.value)
   const targetUserId = selectedCity.value ? String(selectedCity.value) : 'ALL'
-  const query: SearchEstimateSummaryQuery = { startDate, endDate }
-
-  // 백엔드 스펙 기준: 전체 조회는 targetUserId 생략 또는 ALL 허용
-  // 호환성을 위해 'ALL'일 때는 필드를 생략한다.
-  if (targetUserId !== 'ALL') {
-    query.targetUserId = targetUserId
-  }
+  const query: SearchEstimateSummaryQuery = { startDate, endDate, targetUserId }
 
   return query
 }
@@ -436,37 +475,31 @@ async function fetchDashboardData() {
   try {
     const query = buildBaseQuery()
 
-    const [estimateRes, progressRes, todayRes] = await Promise.all([
+    const [estimateRes, progressRes, todayRes] = await Promise.allSettled([
       registryDashboardAPI.summary2(query),
       registryDashboardAPI.summary(query),
       registryDashboardAPI.today(query)
     ])
 
-    const estimatePayload = unwrapResponse<unknown>(estimateRes)
-    const progressPayload = unwrapResponse<unknown>(progressRes)
-    const todayPayload = unwrapResponse<unknown>(todayRes)
+    const estimateData =
+      estimateRes.status === 'fulfilled'
+        ? extractApiRoot<RegistryEstimateSummaryResponse>(unwrapResponse(estimateRes.value))
+        : ({} as RegistryEstimateSummaryResponse)
 
-    const estimateRoot =
-      estimatePayload && typeof estimatePayload === 'object' && 'result' in estimatePayload
-        ? (estimatePayload as { result: unknown }).result
-        : estimatePayload
-
-    const progressRoot =
-      progressPayload && typeof progressPayload === 'object' && 'result' in progressPayload
-        ? (progressPayload as { result: unknown }).result
-        : progressPayload
+    const progressData =
+      progressRes.status === 'fulfilled'
+        ? extractApiRoot<RegistryProgressSummaryResponse>(unwrapResponse(progressRes.value))
+        : ({} as RegistryProgressSummaryResponse)
 
     const todayRoot =
-      todayPayload && typeof todayPayload === 'object' && 'result' in todayPayload
-        ? (todayPayload as { result: unknown }).result
-        : todayPayload
+      todayRes.status === 'fulfilled'
+        ? extractApiRoot<unknown>(unwrapResponse(todayRes.value))
+        : null
 
-    const estimateData = estimateRoot as RegistryEstimateSummaryResponse
-    const progressData = progressRoot as RegistryProgressSummaryResponse
-
-    estimateSummary.requestCount = estimateData?.requestCount ?? 0
-    estimateSummary.writtenCount = estimateData?.writtenCount ?? 0
-    estimateSummary.awardedCount = estimateData?.awardedCount ?? 0
+    const normalizedEstimate = normalizeEstimateSummary(estimateData)
+    estimateSummary.requestCount = normalizedEstimate.requestCount
+    estimateSummary.writtenCount = normalizedEstimate.writtenCount
+    estimateSummary.awardedCount = normalizedEstimate.awardedCount
 
     progressSummary.assignedCount = progressData?.assignedCount ?? 0
     progressSummary.inProgressCount = progressData?.inProgressCount ?? 0
@@ -482,6 +515,14 @@ async function fetchDashboardData() {
           : todayRoot
             ? [todayRoot as RegistryProgressTodayResponse]
             : []
+
+    if (
+      estimateRes.status === 'rejected' ||
+      progressRes.status === 'rejected' ||
+      todayRes.status === 'rejected'
+    ) {
+      loadError.value = '일부 대시보드 데이터를 불러오지 못했습니다.'
+    }
   } catch (error) {
     loadError.value = '대시보드 데이터를 불러오지 못했습니다.'
     // 실패 시에도 기존 화면 구조가 깨지지 않도록 0/빈배열로 유지

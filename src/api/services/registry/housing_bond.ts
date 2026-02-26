@@ -7,6 +7,8 @@ import { API } from '@/api/endpoints'
 import type {
   GetHousingBondDetailsParams,
   GetHousingBondDetailsResponse,
+  GetHousingBondListParams,
+  GetHousingBondListResponse,
   SaveHousingBondParams,
   SaveHousingBondRequest,
   SaveHousingBondResponse
@@ -19,6 +21,15 @@ export const registryHousingBondAPI = {
     // --------------------------------------------------
     return apiHelpers.get<GetHousingBondDetailsResponse>(
       API.REGISTRY_HOUSING_BOND.DETAIL(params.registryManagementNumber)
+    )
+  },
+
+  async getList(params: GetHousingBondListParams) {
+    // --------------------------------------------------
+    // [R02Q-03][GET - /api/registry/progress/{registryManagementNumber}/housing-bonds/list] 국민주택채권 목록 조회
+    // --------------------------------------------------
+    return apiHelpers.get<GetHousingBondListResponse>(
+      API.REGISTRY_HOUSING_BOND.LIST(params.registryManagementNumber)
     )
   },
 

@@ -7,9 +7,9 @@ import { API } from '@/api/endpoints'
 import type {
   CompleteESignatureParams,
   CompleteESignatureResponse,
-  GetDetailedESignaturesQuery,
+  GetDetailedESignaturesRequest,
   GetDetailedESignaturesResponse,
-  GetESignaturesQuery,
+  GetESignaturesRequest,
   GetESignaturesResponse,
   RequestESignatureParams,
   RequestESignatureResponse,
@@ -18,7 +18,7 @@ import type {
 } from '@/types'
 
 export const registrySignatureAPI = {
-  async getDetail(query: GetDetailedESignaturesQuery) {
+  async getDetail(query: GetDetailedESignaturesRequest) {
     // --------------------------------------------------
     // [R02O-01][GET - /api/registry/progress/{registryManagementNumber}/e-signatures/detail] 전자서명 진행 정보 조회
     // --------------------------------------------------
@@ -62,7 +62,7 @@ export const registrySignatureAPI = {
     )
   },
 
-  async getList(query: GetESignaturesQuery) {
+  async getList(query: GetESignaturesRequest) {
     // --------------------------------------------------
     // [R02O-05][GET - /api/registry/progress/{registryManagementNumber}/e-signatures/list] 전자서명 진행 정보 목록 조회
     // --------------------------------------------------

@@ -440,7 +440,7 @@ async function fetchMortgageLegalInfo() {
       const res: any = await registryProgressAPI.legalAgent({
         registryManagementNumber: props.registryManagementNumber,
         registryType: 'MORTGAGE'
-      } as any)
+      })
       const data = unwrapData<RegistryProgressLegalAgentResponse>(res)
 
       mortgageLegalInfo.value = data ?? null
@@ -471,7 +471,7 @@ async function fetchTransferLegalInfo() {
       const res: any = await registryProgressAPI.legalAgent({
         registryManagementNumber: props.registryManagementNumber,
         registryType: 'OWNERSHIP_TRANSFER'
-      } as any)
+      })
       const data = unwrapData<RegistryProgressLegalAgentResponse>(res)
 
       transferLegalInfo.value = data ?? null
