@@ -8,9 +8,10 @@ import type {
   ContractPartyReplaceResponse,
   MortgageContractSaveResponse,
   OwnershipContractSaveResponse,
+  RegistryCertificateFormResponse,
   SurfaceRightContractSaveResponse
 } from './registry-contract.types'
-import type { MortgageFinancialResponse } from './registry-debt-tax.types'
+import type { TaxSection } from './registry-receipt-document.types'
 import type { RegistryProgressTaxAgencyListResponse } from './registry-tax-report.types'
 
 /**
@@ -149,24 +150,31 @@ export interface ApplicationCertificateFormResponse {
   certificateSerialNumber?: string
   /** 비밀번호 (순번 2자리 + 비밀번호조합) */
   certificatePassword?: string
+  /** 등기권리증 지분정보 목록 */
+  shares?: CertificateShareResponse[]
+  /** 등기필정보목록 */
+  registryCertificate?: RegistryCertificateFormResponse[]
 }
 
 /** 등기신청서 - 등기명의인표시변경 */
 export interface ApplicationChangeFormResponse {
   /** 변경사항 */
   changeContent?: string
+  applicant?: ChangeApplicantInfoResponse
 }
 
 /** 등기신청서 - 등기명의인표시경정 */
 export interface ApplicationCorrectionFormResponse {
   /** 경정사항 */
   correctionContent?: string
+  applicant?: CorrectionApplicantInfoResponse
 }
 
 /** 등기신청서 - 부동산정보 */
 export interface ApplicationPropertyFormResponse {
   /** 부동산의표시 목록 */
   propertyDescription?: string[]
+  registryOffice?: RegistryOfficeFormResponse
 }
 
 /** 등기신청서 - 첨부문서정보 */
@@ -179,11 +187,18 @@ export interface AttachedDocumentResponse {
 
 /** 등기신청서 통합 응답 */
 export interface UnifiedApplicationFormResponse {
+  registryType?: string
+  specialLawAppliedNote?: string
+  transferShareDescription?: string
+  shareDescription?: string
+  registrationPurpose?: string
+  agentInfo?: AgentInfoResponse
   contractParties?: ContractPartyReplaceResponse
   ownershipContract?: OwnershipContractSaveResponse
   mortgageContract?: MortgageContractSaveResponse
   surfaceRightContract?: SurfaceRightContractSaveResponse
-  mortgageFinancial?: MortgageFinancialResponse
+  mortgageFinancial?: MortgageFinancialSaveResponse
+  taxPopup?: TaxPopupSaveResponse
   taxAgency?: RegistryProgressTaxAgencyListResponse
   cancellation?: ApplicationCancellationFormResponse
   attachments?: AttachedDocumentResponse[]
@@ -211,3 +226,58 @@ export type RegistryType =
   | 'CORRECTION'
   | 'MORTGAGE_CANCELLATION'
   | 'SURFACE_RIGHT_CANCELLATION'
+
+export interface AgentInfoResponse {
+  lawFirmName?: string
+  qualificationType?: string
+  qualifiedPersonName?: string
+  phoneNumber?: string
+  extensionNumber?: string
+  address?: string
+}
+
+export interface ApplicationFeeSection {
+  applicationFee?: number
+  registryCount?: number
+  batchPaymentAmount?: number
+  exemptionReason?: string
+}
+
+export interface CertificateShareResponse {
+  progressPartyId?: number
+  name?: string
+  holdingShareNumerator?: number
+  holdingShareDenominator?: number
+  transferShareNumerator?: number
+  transferShareDenominator?: number
+  section?: 'GAP' | 'EUL'
+  rankNumber?: string
+}
+
+export interface ChangeApplicantInfoResponse {
+  name?: string
+  registrationNumber?: string
+  address?: string
+}
+
+export interface CorrectionApplicantInfoResponse {
+  name?: string
+  registrationNumber?: string
+  address?: string
+}
+
+export interface MortgageFinancialSaveResponse {
+  bondPurchaseAmount?: number
+  bondExemptionReason?: string
+  housingBondNumber?: string
+}
+
+export interface RegistryOfficeFormResponse {
+  acceptanceOfficeName?: string
+  jurisdictionOfficeName?: string
+}
+
+export interface TaxPopupSaveResponse {
+  tax?: TaxSection
+  applicationFee?: ApplicationFeeSection
+}

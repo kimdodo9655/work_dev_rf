@@ -35,6 +35,12 @@ export interface RoleLevelCode extends Code {
   level: number
 }
 
+export interface UserRoleLevelResponse {
+  code?: 'SUPER_ADMIN' | 'ADMIN' | 'ORGANIZATION_ADMIN' | 'BRANCH_ADMIN' | 'USER'
+  level?: number
+  description?: string
+}
+
 /**
  * API 코드 응답 (성공/에러 코드 목록)
  * Schema: ApiCodeResponse
@@ -84,7 +90,7 @@ export type GetBranchStatusesResponse = Code[]
  * P06-05
  * GET /api/codes/user-role-levels
  */
-export type GetUserRoleLevelsResponse = RoleLevelCode[]
+export type GetUserRoleLevelsResponse = UserRoleLevelResponse[]
 
 /**
  * P06-06

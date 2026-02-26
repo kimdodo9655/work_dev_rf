@@ -8914,14 +8914,14 @@
           "registryType": {
             "type": "string"
           },
-          "registryCause": {
-            "type": "string"
-          },
           "section": {
             "type": "string",
             "enum": ["GAP", "EUL"]
           },
           "rankNumber": {
+            "type": "string"
+          },
+          "registryCause": {
             "type": "string"
           },
           "propertyUniqueNumber": {
@@ -8931,13 +8931,13 @@
             "type": "integer",
             "format": "int64"
           },
-          "certificateSerialNumber": {
-            "type": "string"
-          },
           "certificatePasswordSequence": {
             "type": "string"
           },
           "certificatePassword": {
+            "type": "string"
+          },
+          "certificateSerialNumber": {
             "type": "string"
           },
           "certificateType": {
@@ -10860,29 +10860,105 @@
       "ContractPartyReplaceResponse": {
         "type": "object",
         "properties": {
-          "obligors": {
-            "type": "array",
-            "description": "등기의무자 목록",
-            "items": {
-              "$ref": "#/components/schemas/CommonParty"
-            }
-          },
-          "obligees": {
-            "type": "array",
-            "description": "등기권리자 목록",
-            "items": {
-              "$ref": "#/components/schemas/CommonParty"
-            }
-          },
           "debtors": {
             "type": "array",
             "description": "채무자 목록",
             "items": {
               "$ref": "#/components/schemas/CommonParty"
             }
+          },
+          "shareDescription": {
+            "type": "string",
+            "description": "지분 설명"
+          },
+          "obligorsWithShare": {
+            "type": "array",
+            "description": "지분/순위정보가 포함된 등기의무자 목록",
+            "items": {
+              "$ref": "#/components/schemas/PartyShareResponse"
+            }
+          },
+          "obligeesWithShare": {
+            "type": "array",
+            "description": "지분/순위정보가 포함된 등기권리자 목록",
+            "items": {
+              "$ref": "#/components/schemas/PartyShareResponse"
+            }
+          },
+          "registryCertificates": {
+            "type": "array",
+            "description": "등기의무자의 등기필정보 목록",
+            "items": {
+              "$ref": "#/components/schemas/RegistryCertificateFormResponse"
+            }
           }
         },
         "description": "계약당사자 일괄 저장/조회 응답"
+      },
+      "PartyShareResponse": {
+        "type": "object",
+        "properties": {
+          "progressPartyId": {
+            "type": "integer",
+            "description": "진행당사자ID",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string",
+            "description": "성명"
+          },
+          "registrationNumber": {
+            "type": "string",
+            "description": "등록번호"
+          },
+          "address": {
+            "type": "string",
+            "description": "주소"
+          },
+          "share": {
+            "type": "string",
+            "description": "이전/설정 지분(분자/분모)"
+          },
+          "holdingShare": {
+            "type": "string",
+            "description": "보유 지분(분자/분모)"
+          },
+          "transferShare": {
+            "type": "string",
+            "description": "이전/설정 지분(분자/분모)"
+          },
+          "section": {
+            "type": "string",
+            "description": "구(갑구/을구)"
+          },
+          "rankNumber": {
+            "type": "string",
+            "description": "순위번호"
+          }
+        },
+        "description": "지분/순위정보가 포함된 등기권리자 목록"
+      },
+      "RegistryCertificateFormResponse": {
+        "type": "object",
+        "properties": {
+          "propertyUniqueNumber": {
+            "type": "string",
+            "description": "부동산 고유번호"
+          },
+          "ownerName": {
+            "type": "string",
+            "description": "성명(명칭)"
+          },
+          "certificateSerialNumber": {
+            "type": "string",
+            "description": "일련번호"
+          },
+          "certificatePassword": {
+            "type": "string",
+            "description": "비밀번호 (순번 2자리 + 비밀번호조합)"
+          }
+        },
+        "description": "등기필정보"
       },
       "InterimPayment": {
         "type": "object",
@@ -10980,6 +11056,10 @@
           "tradeReportManagementNumber": {
             "type": "string",
             "description": "실거래신고 관리번호"
+          },
+          "registrationPurpose": {
+            "type": "string",
+            "description": "등기의 목적"
           }
         },
         "description": "소유권이전 계약정보 응답"
@@ -10991,6 +11071,16 @@
             "type": "number",
             "description": "채권 최고액",
             "example": 200000000
+          },
+          "loanAmount": {
+            "type": "number",
+            "description": "대출 금액",
+            "example": 150000000
+          },
+          "isFaceToFace": {
+            "type": "boolean",
+            "description": "대면 여부",
+            "example": true
           },
           "contractDate": {
             "type": "string",
@@ -12395,10 +12485,6 @@
               "ECS"
             ]
           },
-          "registryMethod": {
-            "type": "string",
-            "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
-          },
           "registryType": {
             "type": "string",
             "enum": [
@@ -12410,6 +12496,10 @@
               "MORTGAGE_CANCELLATION",
               "SURFACE_RIGHT_CANCELLATION"
             ]
+          },
+          "registryMethod": {
+            "type": "string",
+            "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
           },
           "quantity": {
             "type": "integer",
@@ -15831,19 +15921,46 @@
       "RegistryProgressSeniorLoanRepaymentItemResponse": {
         "type": "object",
         "properties": {
-          "rightHolderName": {
+          "propertyUniqueNumber": {
             "type": "string",
-            "description": "선순위 설정 금융기관명",
-            "example": "뱅크클리어은행"
+            "description": "부동산 고유번호",
+            "example": "1234-1234-123456"
+          },
+          "section": {
+            "type": "string",
+            "description": "해당 구",
+            "example": "EUL",
+            "enum": ["GAP", "EUL"]
           },
           "rankNumber": {
             "type": "string",
             "description": "순위번호",
             "example": "1"
           },
+          "receiptDate": {
+            "type": "string",
+            "description": "설정 접수 일자",
+            "format": "date",
+            "example": "2023-05-18"
+          },
+          "receiptNumber": {
+            "type": "string",
+            "description": "설정 접수 번호",
+            "example": "123456"
+          },
+          "rightHolderName": {
+            "type": "string",
+            "description": "선순위 설정 금융기관명",
+            "example": "주식회사뱅클은행"
+          },
+          "rightHolderBranch": {
+            "type": "string",
+            "description": "선순위 설정 취급지점",
+            "example": "본점"
+          },
           "maximumCreditAmount": {
             "type": "number",
-            "description": "채권최고액",
+            "description": "선순위 설정 채권최고액",
             "example": 150000000
           },
           "repaymentCancellationSubject": {
@@ -17626,24 +17743,6 @@
         },
         "description": "대리인 정보"
       },
-      "ApplicantInfoResponse": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "성명"
-          },
-          "registrationNumber": {
-            "type": "string",
-            "description": "등록번호"
-          },
-          "address": {
-            "type": "string",
-            "description": "주소"
-          }
-        },
-        "description": "등기신청인 정보"
-      },
       "ApplicationCancellationFormResponse": {
         "type": "object",
         "properties": {
@@ -17779,12 +17878,12 @@
             "description": "보유지분 분모",
             "format": "int32"
           },
-          "transferShareDenominator": {
+          "transferShareNumerator": {
             "type": "integer",
-            "description": "이전지분 분모",
+            "description": "이전지분 분자",
             "format": "int32"
           },
-          "transferShareNumerator": {
+          "transferShareDenominator": {
             "type": "integer",
             "description": "이전지분 분모",
             "format": "int32"
@@ -17855,28 +17954,6 @@
         },
         "description": "채권·세금·수수료 통합 응답"
       },
-      "RegistryCertificateFormResponse": {
-        "type": "object",
-        "properties": {
-          "propertyUniqueNumber": {
-            "type": "string",
-            "description": "부동산 고유번호"
-          },
-          "ownerName": {
-            "type": "string",
-            "description": "성명(명칭)"
-          },
-          "certificateSerialNumber": {
-            "type": "string",
-            "description": "일련번호"
-          },
-          "certificatePassword": {
-            "type": "string",
-            "description": "비밀번호 (순번 2자리 + 비밀번호조합)"
-          }
-        },
-        "description": "등기필정보"
-      },
       "RegistryOfficeFormResponse": {
         "type": "object",
         "properties": {
@@ -17928,12 +18005,6 @@
           },
           "agentInfo": {
             "$ref": "#/components/schemas/AgentInfoResponse"
-          },
-          "applicant": {
-            "$ref": "#/components/schemas/ApplicantInfoResponse"
-          },
-          "registryOffice": {
-            "$ref": "#/components/schemas/RegistryOfficeFormResponse"
           },
           "contractParties": {
             "$ref": "#/components/schemas/ContractPartyReplaceResponse"
@@ -18125,6 +18196,14 @@
           "maximumCreditAmount": {
             "type": "number",
             "description": "채권 최고액"
+          },
+          "loanAmount": {
+            "type": "number",
+            "description": "대출 금액"
+          },
+          "isFaceToFace": {
+            "type": "boolean",
+            "description": "대면 여부"
           },
           "contractDate": {
             "type": "string",

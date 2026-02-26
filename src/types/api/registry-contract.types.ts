@@ -144,6 +144,25 @@ export interface CommonParty {
   address?: string
 }
 
+export interface PartyShareResponse {
+  progressPartyId?: number
+  name?: string
+  registrationNumber?: string
+  address?: string
+  share?: string
+  holdingShare?: string
+  transferShare?: string
+  section?: string
+  rankNumber?: string
+}
+
+export interface RegistryCertificateFormResponse {
+  propertyUniqueNumber?: string
+  ownerName?: string
+  certificateSerialNumber?: string
+  certificatePassword?: string
+}
+
 export interface ContractPartyReplaceResponse {
   /** 등기의무자 목록 */
   obligors?: CommonParty[]
@@ -151,6 +170,10 @@ export interface ContractPartyReplaceResponse {
   obligees?: CommonParty[]
   /** 채무자 목록 */
   debtors?: CommonParty[]
+  shareDescription?: string
+  obligorsWithShare?: PartyShareResponse[]
+  obligeesWithShare?: PartyShareResponse[]
+  registryCertificates?: RegistryCertificateFormResponse[]
 }
 
 /** 2차 중도금 정보 */

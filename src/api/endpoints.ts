@@ -3,7 +3,7 @@
  * 모든 API 경로를 한 곳에서 관리
  *
  * @generated 2025-02-19
- * @total 221개 엔드포인트
+ * @total 225개 엔드포인트
  * @categories 43개
  */
 export const API = {

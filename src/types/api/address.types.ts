@@ -65,6 +65,8 @@ export interface AddressAutocompleteResponseSwagger {
   data?: AddressAutocompleteResponse
 }
 
+export type ApiResultAddressAutocompleteResponse = AddressAutocompleteResponseSwagger
+
 /** 주소 항목 */
 export interface AddressItem {
   roadAddress?: string
@@ -89,6 +91,8 @@ export interface AddressSearchResponseSwagger {
   message?: string
   data?: AddressSearchResponse
 }
+
+export type ApiResultAddressSearchResponse = AddressSearchResponseSwagger
 
 /** 페이징 정보 */
 export interface PageInfo {

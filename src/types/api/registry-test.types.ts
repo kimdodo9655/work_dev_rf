@@ -142,6 +142,14 @@ export interface RegistryProgressTestDataResponse {
   createdAt?: string
 }
 
+export interface ApiResultRegistryProgressTestDataResponse {
+  status?: number
+  code?: string
+  title?: string
+  message?: string
+  data?: RegistryProgressTestDataResponse
+}
+
 /** 등기의뢰 테스트 데이터 응답 */
 export interface RegistryRequestTestDataResponse {
   /** 등기신청번호 */
@@ -170,4 +178,12 @@ export interface RegistryRequestTestDataResponse {
   organizationName?: string
   /** 생성일시 */
   createdAt?: string
+}
+
+export interface ApiResultRegistryRequestTestDataResponse {
+  status?: number
+  code?: string
+  title?: string
+  message?: string
+  data?: RegistryRequestTestDataResponse
 }

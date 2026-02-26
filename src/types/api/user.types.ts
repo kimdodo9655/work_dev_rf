@@ -244,6 +244,14 @@ export interface UserDetailResponse {
   assignedBanks?: AssignedBankInfo[]
 }
 
+export interface ApiResultUserDetailResponse {
+  status?: number
+  code?: string
+  title?: string
+  message?: string
+  data?: UserDetailResponse
+}
+
 /** 사용자 응답 */
 export interface UserResponse {
   /** 순번 */

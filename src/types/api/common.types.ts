@@ -51,6 +51,15 @@ export type RegistryTypeForAssign = 'OWNERSHIP_TRANSFER' | 'MORTGAGE_REGISTRATIO
 /** 권한 코드 */
 export type RoleLevel = 'SUPER_ADMIN' | 'ADMIN' | 'ORGANIZATION_ADMIN' | 'BRANCH_ADMIN' | 'USER'
 
+/** 당사자 역할 */
+export type PartyRole = 'REGISTRY_OBLIGOR' | 'REGISTRY_OBLIGEE' | 'DEBTOR'
+
+/** 당사자 구분 */
+export type PartyType = 'DOMESTIC' | 'OVERSEAS_KOREAN' | 'FOREIGNER' | 'CORPORATION'
+
+/** 소유 형태 */
+export type OwnershipType = 'SOLE' | 'CO_OWNERSHIP' | 'JOINT_OWNERSHIP'
+
 /** Action 타입 */
 export type ActionType = 'ADD' | 'MODIFY' | 'DELETE'
 
