@@ -8131,7 +8131,7 @@
             "schema": {
               "type": "string"
             },
-            "example": "RG20250101-0001"
+            "example": "RM2026022402712"
           }
         ],
         "requestBody": {
@@ -8173,7 +8173,7 @@
             "schema": {
               "type": "string"
             },
-            "example": "RG20250101-0001"
+            "example": "RM2026022402712"
           }
         ],
         "requestBody": {
@@ -8215,7 +8215,7 @@
             "schema": {
               "type": "string"
             },
-            "example": "RG20250101-0001"
+            "example": "RM2026022402712"
           }
         ],
         "requestBody": {
@@ -8257,7 +8257,7 @@
             "schema": {
               "type": "string"
             },
-            "example": "RG20250101-0001"
+            "example": "RM2026022402712"
           }
         ],
         "requestBody": {
@@ -8299,7 +8299,7 @@
             "schema": {
               "type": "string"
             },
-            "example": "RG20250101-0001"
+            "example": "RM2026022402712"
           }
         ],
         "requestBody": {
@@ -8341,7 +8341,7 @@
             "schema": {
               "type": "string"
             },
-            "example": "RG20250101-0001"
+            "example": "RM2026022402712"
           }
         ],
         "requestBody": {
@@ -8383,7 +8383,7 @@
             "schema": {
               "type": "string"
             },
-            "example": "RG20250101-0001"
+            "example": "RM2026022402712"
           }
         ],
         "requestBody": {
@@ -8425,7 +8425,7 @@
             "schema": {
               "type": "string"
             },
-            "example": "RG20250101-0001"
+            "example": "RM2026022402712"
           }
         ],
         "requestBody": {
@@ -8467,7 +8467,7 @@
             "schema": {
               "type": "string"
             },
-            "example": "RG20250101-0001"
+            "example": "RM2026022402712"
           }
         ],
         "requestBody": {
@@ -8509,7 +8509,7 @@
             "schema": {
               "type": "string"
             },
-            "example": "RG20250101-0001"
+            "example": "RM2026022402712"
           }
         ],
         "requestBody": {
@@ -8625,7 +8625,7 @@
             "schema": {
               "type": "string"
             },
-            "example": "RG20250101-0001"
+            "example": "RM2026022402712"
           }
         ],
         "requestBody": {
@@ -8931,13 +8931,13 @@
             "type": "integer",
             "format": "int64"
           },
+          "certificateSerialNumber": {
+            "type": "string"
+          },
           "certificatePasswordSequence": {
             "type": "string"
           },
           "certificatePassword": {
-            "type": "string"
-          },
-          "certificateSerialNumber": {
             "type": "string"
           },
           "certificateType": {
@@ -9477,28 +9477,6 @@
         },
         "description": "대출금융기관 행"
       },
-      "LoanPaymentAccountBranchAccountOption": {
-        "type": "object",
-        "properties": {
-          "branchPaymentAccountId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "bankName": {
-            "type": "string"
-          },
-          "accountNumber": {
-            "type": "string"
-          },
-          "accountHolder": {
-            "type": "string"
-          },
-          "accountType": {
-            "type": "string"
-          }
-        },
-        "description": "법무대리인 지급계좌 옵션"
-      },
       "LoanPaymentAccountCostSummary": {
         "type": "object",
         "properties": {
@@ -9549,64 +9527,9 @@
           },
           "costSummary": {
             "$ref": "#/components/schemas/LoanPaymentAccountCostSummary"
-          },
-          "priorLoanOptions": {
-            "type": "array",
-            "description": "선순위 대출 옵션",
-            "items": {
-              "$ref": "#/components/schemas/LoanPaymentAccountPriorLoanOption"
-            }
-          },
-          "paymentTypeOptions": {
-            "type": "array",
-            "description": "허용 지급구분 목록",
-            "example": ["LOAN_REPAYMENT", "SALE_BALANCE", "LOAN_BALANCE"],
-            "items": {
-              "type": "string",
-              "description": "허용 지급구분 목록",
-              "example": "[\"LOAN_REPAYMENT\",\"SALE_BALANCE\",\"LOAN_BALANCE\"]"
-            }
-          },
-          "paymentSubjectOptions": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "array",
-              "description": "지급구분별 허용 지급주체",
-              "items": {
-                "type": "string",
-                "description": "지급구분별 허용 지급주체"
-              }
-            },
-            "description": "지급구분별 허용 지급주체"
-          },
-          "branchPaymentAccountOptions": {
-            "type": "array",
-            "description": "법무대리인 지급계좌 옵션",
-            "items": {
-              "$ref": "#/components/schemas/LoanPaymentAccountBranchAccountOption"
-            }
           }
         },
         "description": "대출금 지급계좌 상세 응답"
-      },
-      "LoanPaymentAccountPriorLoanOption": {
-        "type": "object",
-        "properties": {
-          "seniorLoanId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "rightHolderName": {
-            "type": "string"
-          },
-          "maximumCreditAmount": {
-            "type": "number"
-          },
-          "rightHolderBranch": {
-            "type": "string"
-          }
-        },
-        "description": "선순위 대출 옵션"
       },
       "Seller": {
         "type": "object",
@@ -9911,15 +9834,11 @@
             "format": "int32",
             "example": 1
           },
-          "eSignatureStatus": {
-            "type": "string",
-            "description": "전자서명 가능 여부",
-            "example": "가능(공동인증서 보유)"
+          "obligorEcertificateType": {
+            "$ref": "#/components/schemas/EcertificateType"
           },
-          "certificateStatus": {
-            "type": "string",
-            "description": "등기권리증 보유 현황",
-            "example": "보유(등기필정보)"
+          "obligorCertificateType": {
+            "$ref": "#/components/schemas/CertificateType"
           },
           "addressChangeCount": {
             "type": "integer",
@@ -10598,10 +10517,15 @@
       "SurfaceRightContractRequest": {
         "type": "object",
         "properties": {
-          "durationPeriod": {
+          "registryType": {
             "type": "string",
-            "description": "존속 기간",
-            "example": "30년"
+            "description": "등기 유형",
+            "example": "SURFACE_RIGHT"
+          },
+          "registryCause": {
+            "type": "string",
+            "description": "등기 원인",
+            "example": "ESTABLISHMENT_CONTRACT"
           },
           "contractDate": {
             "type": "string",
@@ -10614,6 +10538,11 @@
             "description": "등기 접수 일자",
             "format": "date",
             "example": "2025-06-25"
+          },
+          "durationPeriod": {
+            "type": "string",
+            "description": "존속 기간",
+            "example": "30년"
           },
           "establishmentScope": {
             "type": "string",
@@ -10685,14 +10614,14 @@
       },
       "PartyRole": {
         "type": "string",
-        "description": "당사자 구분 (add, modify 시 필수)",
+        "description": "당사자 역할",
         "example": "REGISTRY_OBLIGOR",
         "enum": ["REGISTRY_OBLIGOR", "REGISTRY_OBLIGEE", "DEBTOR"]
       },
       "PartyType": {
         "type": "string",
-        "description": "대표자 구분",
-        "example": "DOMESTIC",
+        "description": "대표자 유형",
+        "example": "PERSON",
         "enum": ["DOMESTIC", "OVERSEAS_KOREAN", "FOREIGNER", "CORPORATION"]
       },
       "RegistryApplicationPartyItem": {
@@ -10980,6 +10909,27 @@
       "OwnershipContractRequest": {
         "type": "object",
         "properties": {
+          "registryType": {
+            "type": "string",
+            "description": "등기 유형",
+            "example": "OWNERSHIP_TRANSFER"
+          },
+          "registryCause": {
+            "type": "string",
+            "description": "등기 원인",
+            "example": "TRADE"
+          },
+          "tradeAmount": {
+            "type": "number",
+            "description": "매매 금액",
+            "example": 450000000
+          },
+          "balancePaymentDate": {
+            "type": "string",
+            "description": "잔금 일자",
+            "format": "date",
+            "example": "2025-06-30"
+          },
           "contractAmount": {
             "type": "number",
             "description": "계약 금액",
@@ -11067,10 +11017,15 @@
       "MortgageContractRequest": {
         "type": "object",
         "properties": {
-          "maximumCreditAmount": {
-            "type": "number",
-            "description": "채권 최고액",
-            "example": 200000000
+          "registryType": {
+            "type": "string",
+            "description": "등기 유형",
+            "example": "MORTGAGE"
+          },
+          "registryCause": {
+            "type": "string",
+            "description": "등기 원인",
+            "example": "ESTABLISHMENT_CONTRACT"
           },
           "loanAmount": {
             "type": "number",
@@ -11082,17 +11037,22 @@
             "description": "대면 여부",
             "example": true
           },
-          "contractDate": {
-            "type": "string",
-            "description": "계약 일자",
-            "format": "date",
-            "example": "2025-05-21"
+          "maximumCreditAmount": {
+            "type": "number",
+            "description": "채권 최고액",
+            "example": 200000000
           },
           "registryReceiptDate": {
             "type": "string",
             "description": "등기 접수 일자",
             "format": "date",
             "example": "2025-06-25"
+          },
+          "contractDate": {
+            "type": "string",
+            "description": "계약 일자",
+            "format": "date",
+            "example": "2025-05-21"
           },
           "loanExecutionDate": {
             "type": "string",
@@ -11118,7 +11078,7 @@
           "settlementPeriodType": {
             "type": "string",
             "description": "결산기 유형",
-            "example": "FIXED"
+            "example": "장래지정형"
           },
           "settlementDate": {
             "type": "string",
@@ -12017,26 +11977,13 @@
             "format": "int64"
           },
           "partyRole": {
-            "type": "string",
-            "enum": ["REGISTRY_OBLIGOR", "REGISTRY_OBLIGEE", "DEBTOR"]
-          },
-          "partyRoleName": {
-            "type": "string"
+            "$ref": "#/components/schemas/PartyRole"
           },
           "partyType": {
-            "type": "string",
-            "enum": ["DOMESTIC", "OVERSEAS_KOREAN", "FOREIGNER", "CORPORATION"]
-          },
-          "partyTypeName": {
-            "type": "string"
+            "$ref": "#/components/schemas/PartyType"
           },
           "ownershipType": {
-            "type": "string",
-            "description": "소유형태: 소유/공유/합유",
-            "enum": ["SOLE", "CO_OWNERSHIP", "JOINT_OWNERSHIP"]
-          },
-          "ownershipTypeName": {
-            "type": "string"
+            "$ref": "#/components/schemas/OwnershipType"
           },
           "name": {
             "type": "string"
@@ -12060,8 +12007,7 @@
             "type": "string"
           },
           "representativeType": {
-            "type": "string",
-            "enum": ["DOMESTIC", "OVERSEAS_KOREAN", "FOREIGNER", "CORPORATION"]
+            "$ref": "#/components/schemas/PartyType"
           },
           "representativePosition": {
             "type": "string"
@@ -12485,6 +12431,10 @@
               "ECS"
             ]
           },
+          "registryMethod": {
+            "type": "string",
+            "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
+          },
           "registryType": {
             "type": "string",
             "enum": [
@@ -12496,10 +12446,6 @@
               "MORTGAGE_CANCELLATION",
               "SURFACE_RIGHT_CANCELLATION"
             ]
-          },
-          "registryMethod": {
-            "type": "string",
-            "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
           },
           "quantity": {
             "type": "integer",
@@ -12995,7 +12941,7 @@
           "registryManagementNumber": {
             "type": "string",
             "description": "등기관리번호",
-            "example": "RG20250101-0001"
+            "example": "RM2026022402712"
           },
           "createdAt": {
             "type": "string",
@@ -13076,13 +13022,19 @@
         "description": "등기신청서 작성 작업 요청"
       },
       "PropertyDescriptionTaskRequest": {
-        "required": ["propertyUniqueNumber"],
+        "required": ["propertyType", "propertyUniqueNumber"],
         "type": "object",
         "properties": {
           "propertyUniqueNumber": {
             "type": "string",
             "description": "부동산 고유번호",
             "example": "12345678901234"
+          },
+          "propertyType": {
+            "type": "string",
+            "description": "부동산 구분",
+            "example": "LAND",
+            "enum": ["LAND", "BUILDING", "COLLECTIVE_BUILDING"]
           }
         },
         "description": "부동산의표시 생성 작업 요청"
@@ -13101,7 +13053,7 @@
             "minLength": 1,
             "type": "string",
             "description": "카드 번호",
-            "example": "P6735534 7877"
+            "example": "P67355347877"
           }
         },
         "description": "등기사항전부증명서 열람/발급 작업 요청"
@@ -13357,7 +13309,7 @@
       },
       "RegistryMethod": {
         "type": "string",
-        "description": "등기 진행 방식",
+        "description": "등기방식",
         "example": "ELECTRONIC",
         "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
       },
@@ -13448,8 +13400,8 @@
       },
       "RegistryCause": {
         "type": "string",
-        "description": "등기 원인",
-        "example": "ADDRESS_CHANGE",
+        "description": "등기원인",
+        "example": "SALE",
         "enum": [
           "TRADE",
           "ESTABLISHMENT_CONTRACT",
@@ -13463,8 +13415,8 @@
       },
       "RegistryType": {
         "type": "string",
-        "description": "등기 유형",
-        "example": "CHANGE",
+        "description": "등기유형",
+        "example": "MORTGAGE",
         "enum": [
           "OWNERSHIP_TRANSFER",
           "MORTGAGE",
@@ -15041,10 +14993,8 @@
       "PropertyInfo": {
         "type": "object",
         "properties": {
-          "propertyClassification": {
-            "type": "string",
-            "description": "부동산 구분",
-            "example": "집합건물"
+          "propertyType": {
+            "$ref": "#/components/schemas/PropertyType"
           },
           "propertyCount": {
             "type": "integer",
@@ -15341,9 +15291,11 @@
             "example": "lawyer123"
           },
           "registryPassword": {
+            "maxLength": 11,
+            "minLength": 0,
             "type": "string",
             "description": "인터넷등기소 비밀번호",
-            "example": "password123!"
+            "example": "password1!"
           }
         },
         "description": "지점 인터넷등기소 아이디 항목"
@@ -15368,6 +15320,8 @@
             "example": "P67355347877"
           },
           "cardPassword": {
+            "maxLength": 9,
+            "minLength": 0,
             "type": "string",
             "description": "카드 비밀번호",
             "example": "p@ssw0rd!"
@@ -15727,7 +15681,7 @@
           "registryManagementNumber": {
             "type": "string",
             "description": "등기관리번호",
-            "example": "RG20250101-0001"
+            "example": "RM2026022402712"
           },
           "taskData": {
             "type": "object",
@@ -15891,13 +15845,10 @@
             "example": 1
           },
           "registryType": {
-            "type": "string",
-            "description": "등기유형(설명)",
-            "example": "소유권이전"
+            "$ref": "#/components/schemas/RegistryType"
           },
           "purchaseType": {
-            "type": "string",
-            "description": "매입 구분 (채권할인/채권면제)"
+            "$ref": "#/components/schemas/PurchaseType"
           },
           "purchaseTargetAmount": {
             "type": "number",
@@ -16008,9 +15959,10 @@
             "description": "영수증ID",
             "format": "int64"
           },
-          "registryTypeName": {
+          "registryType": {
             "type": "string",
-            "description": "등기유형명"
+            "description": "등기유형 (enum name). 통합 영수증은 INTEGRATED_RECEIPT로 반환",
+            "example": "OWNERSHIP_TRANSFER"
           },
           "feeSubtotal": {
             "type": "number",
@@ -16061,9 +16013,8 @@
             "description": "영수증ID",
             "format": "int64"
           },
-          "registryTypeName": {
-            "type": "string",
-            "description": "등기유형명"
+          "registryType": {
+            "$ref": "#/components/schemas/RegistryType"
           },
           "feeSubtotal": {
             "type": "number",
@@ -16147,9 +16098,8 @@
             "description": "신청서ID",
             "format": "int64"
           },
-          "registryTypeName": {
-            "type": "string",
-            "description": "등기유형명"
+          "registryType": {
+            "$ref": "#/components/schemas/RegistryType"
           },
           "registryObligeeName": {
             "type": "string",
@@ -16356,18 +16306,10 @@
             "description": "등기진행유형",
             "enum": ["TYPE_01", "TYPE_02", "TYPE_04", "TYPE_05", "TYPE_07"]
           },
-          "progressTypeDescription": {
-            "type": "string",
-            "description": "등기진행유형설명"
-          },
           "registryMethod": {
             "type": "string",
             "description": "등기방식",
             "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
-          },
-          "registryMethodDescription": {
-            "type": "string",
-            "description": "등기방식설명"
           },
           "currentStatus": {
             "type": "string",
@@ -16399,10 +16341,6 @@
               "REGISTRY_CANCELLED"
             ]
           },
-          "currentStatusDescription": {
-            "type": "string",
-            "description": "현재진행상태설명"
-          },
           "steps": {
             "type": "array",
             "description": "업무 프로세스 단계 목록",
@@ -16417,14 +16355,10 @@
         "type": "object",
         "properties": {
           "registryType": {
-            "type": "string",
-            "description": "등기유형",
-            "example": "소유권이전"
+            "$ref": "#/components/schemas/RegistryType"
           },
           "registryCause": {
-            "type": "string",
-            "description": "등기원인",
-            "example": "매매"
+            "$ref": "#/components/schemas/RegistryCause"
           },
           "tradeAmount": {
             "type": "number",
@@ -16432,9 +16366,7 @@
             "example": 620000000
           },
           "registryMethod": {
-            "type": "string",
-            "description": "등기방식",
-            "example": "전자등기"
+            "$ref": "#/components/schemas/RegistryMethod"
           },
           "estimateWriter": {
             "type": "string",
@@ -16452,21 +16384,18 @@
       "RegistryProgressMortgageResponse": {
         "type": "object",
         "properties": {
-          "registryTypeName": {
-            "type": "string",
-            "description": "등기 유형"
+          "registryType": {
+            "$ref": "#/components/schemas/RegistryType"
           },
-          "registryCauseName": {
-            "type": "string",
-            "description": "등기 원인"
+          "registryCause": {
+            "$ref": "#/components/schemas/RegistryCause"
           },
           "maximumCreditAmount": {
             "type": "number",
             "description": "채권최고액"
           },
-          "registryMethodName": {
-            "type": "string",
-            "description": "등기 방식"
+          "registryMethod": {
+            "$ref": "#/components/schemas/RegistryMethod"
           },
           "surfaceRightYn": {
             "type": "string",
@@ -16598,6 +16527,12 @@
           }
         },
         "description": "법무대리인 정보"
+      },
+      "PurchaseType": {
+        "type": "string",
+        "description": "매입 구분",
+        "example": "DISCOUNT",
+        "enum": ["PURCHASE", "DISCOUNT", "EXEMPTION"]
       },
       "RegistryProgressHousingBondListResponse": {
         "type": "object",
@@ -17375,9 +17310,7 @@
             "example": "BC2025062500001"
           },
           "registryType": {
-            "type": "string",
-            "description": "등기유형",
-            "example": "소유권이전"
+            "$ref": "#/components/schemas/RegistryType"
           },
           "tradeAmount": {
             "type": "number",
@@ -17408,19 +17341,13 @@
             "example": "2025-06-15"
           },
           "progressStatus": {
-            "type": "string",
-            "description": "진행상태",
-            "example": "견적 진행"
+            "$ref": "#/components/schemas/QuoteProgressStatus"
           },
           "writingStatus": {
-            "type": "string",
-            "description": "작성여부",
-            "example": "작성 대기"
+            "$ref": "#/components/schemas/EstimateWritingStatus"
           },
           "selectionStatus": {
-            "type": "string",
-            "description": "선정여부",
-            "example": "선정 대기"
+            "$ref": "#/components/schemas/SelectionStatus"
           },
           "estimateId": {
             "type": "integer",
@@ -17435,6 +17362,30 @@
           }
         },
         "description": "등기 견적 관리 목록 아이템"
+      },
+      "EstimateWritingStatus": {
+        "type": "string",
+        "description": "작성여부",
+        "example": "WAITING",
+        "enum": ["WAITING", "COMPLETED", "WITHDRAWN"]
+      },
+      "QuoteProgressStatus": {
+        "type": "string",
+        "description": "진행상태",
+        "example": "QUOTE_IN_PROGRESS",
+        "enum": [
+          "QUOTE_IN_PROGRESS",
+          "QUOTE_CLOSED",
+          "ESTIMATE_SELECTED",
+          "SELECTION_COMPLETED",
+          "REQUEST_CANCELLED"
+        ]
+      },
+      "SelectionStatus": {
+        "type": "string",
+        "description": "선정여부",
+        "example": "WAITING",
+        "enum": ["WAITING", "SELECTED", "NOT_SELECTED"]
       },
       "EstimateDetailResponse": {
         "type": "object",
@@ -17463,9 +17414,7 @@
             "example": 2001
           },
           "registryMethod": {
-            "type": "string",
-            "description": "등기 진행 방식",
-            "example": "전자등기"
+            "$ref": "#/components/schemas/RegistryMethod"
           },
           "feeDetails": {
             "$ref": "#/components/schemas/FeeDetails"
@@ -17581,6 +17530,23 @@
         },
         "description": "견적서 공과금 상세"
       },
+      "CertificateType": {
+        "type": "string",
+        "description": "등기권리증 구분",
+        "example": "TITLE_DEED",
+        "enum": [
+          "REGISTRY_CERT_INFO",
+          "REGISTRY_CERTIFICATE",
+          "CONFIRMATION_DOCUMENT",
+          "PRIOR_REGISTRY_LINK"
+        ]
+      },
+      "EcertificateType": {
+        "type": "string",
+        "description": "전자서명 구분",
+        "example": "DELEGATED",
+        "enum": ["OWNED", "DELEGATED", "NONE"]
+      },
       "EstimateInfoResponse": {
         "type": "object",
         "properties": {
@@ -17608,10 +17574,8 @@
             "format": "int32",
             "example": 1
           },
-          "eSignatureStatus": {
-            "type": "string",
-            "description": "전자서명 가능 여부",
-            "example": "가능(공동인증서 위임)"
+          "obligeeEcertificateType": {
+            "$ref": "#/components/schemas/EcertificateType"
           },
           "houseCount": {
             "type": "integer",
@@ -17627,13 +17591,23 @@
         },
         "description": "등기권리자 정보"
       },
+      "PropertyType": {
+        "type": "string",
+        "description": "부동산 구분",
+        "example": "COLLECTIVE_BUILDING",
+        "enum": ["LAND", "BUILDING", "COLLECTIVE_BUILDING"]
+      },
       "RegistryInfo": {
         "type": "object",
         "properties": {
-          "workTypeDescription": {
-            "type": "string",
-            "description": "등기유형",
-            "example": "소유권이전(매매)"
+          "registryType": {
+            "$ref": "#/components/schemas/RegistryType"
+          },
+          "registryCause": {
+            "$ref": "#/components/schemas/RegistryCause"
+          },
+          "registryMethod": {
+            "$ref": "#/components/schemas/RegistryMethod"
           },
           "tradeAmount": {
             "type": "number",
@@ -17645,11 +17619,6 @@
             "description": "잔금일자",
             "format": "date",
             "example": "2025-06-25"
-          },
-          "registryMethodDescription": {
-            "type": "string",
-            "description": "설정 진행 방식",
-            "example": "전자등기"
           }
         },
         "description": "등기 기본 정보"
@@ -17669,6 +17638,21 @@
               "CORRECTION",
               "MORTGAGE_CANCELLATION",
               "SURFACE_RIGHT_CANCELLATION"
+            ]
+          },
+          "registryCause": {
+            "type": "string",
+            "description": "등기원인",
+            "example": "ESTABLISHMENT_CONTRACT",
+            "enum": [
+              "TRADE",
+              "ESTABLISHMENT_CONTRACT",
+              "ADDRESS_CHANGE",
+              "ROAD_NAME_ADDRESS",
+              "APPLICATION_ERROR",
+              "TERMINATION",
+              "NAME_CHANGE",
+              "REGISTRATION_NUMBER"
             ]
           },
           "registryMethod": {
@@ -17985,7 +17969,17 @@
         "properties": {
           "registryType": {
             "type": "string",
-            "description": "신청서 등기유형(한글)"
+            "description": "신청서 등기유형",
+            "example": "OWNERSHIP_TRANSFER",
+            "enum": [
+              "OWNERSHIP_TRANSFER",
+              "MORTGAGE",
+              "SURFACE_RIGHT",
+              "CHANGE",
+              "CORRECTION",
+              "MORTGAGE_CANCELLATION",
+              "SURFACE_RIGHT_CANCELLATION"
+            ]
           },
           "specialLawAppliedNote": {
             "type": "string",
@@ -18072,24 +18066,16 @@
             "example": "RM20231001"
           },
           "registryType": {
-            "type": "string",
-            "description": "등기유형",
-            "example": "소유권이전"
+            "$ref": "#/components/schemas/RegistryType"
           },
           "registryCause": {
-            "type": "string",
-            "description": "등기원인",
-            "example": "매매"
+            "$ref": "#/components/schemas/RegistryCause"
           },
           "registryMethod": {
-            "type": "string",
-            "description": "등기방식",
-            "example": "전자등기"
+            "$ref": "#/components/schemas/RegistryMethod"
           },
           "adminInfoLinkTime": {
-            "type": "string",
-            "description": "행정정보 연계 시점",
-            "example": "제출전"
+            "$ref": "#/components/schemas/AdminInfoLinkTime"
           },
           "sections": {
             "type": "array",
@@ -18120,9 +18106,32 @@
       "SurfaceRightContractResponse": {
         "type": "object",
         "properties": {
-          "durationPeriod": {
+          "registryType": {
             "type": "string",
-            "description": "존속 기간"
+            "description": "등기 유형",
+            "enum": [
+              "OWNERSHIP_TRANSFER",
+              "MORTGAGE",
+              "SURFACE_RIGHT",
+              "CHANGE",
+              "CORRECTION",
+              "MORTGAGE_CANCELLATION",
+              "SURFACE_RIGHT_CANCELLATION"
+            ]
+          },
+          "registryCause": {
+            "type": "string",
+            "description": "등기 원인",
+            "enum": [
+              "TRADE",
+              "ESTABLISHMENT_CONTRACT",
+              "ADDRESS_CHANGE",
+              "ROAD_NAME_ADDRESS",
+              "APPLICATION_ERROR",
+              "TERMINATION",
+              "NAME_CHANGE",
+              "REGISTRATION_NUMBER"
+            ]
           },
           "contractDate": {
             "type": "string",
@@ -18133,6 +18142,10 @@
             "type": "string",
             "description": "등기 접수 일자",
             "format": "date"
+          },
+          "durationPeriod": {
+            "type": "string",
+            "description": "존속 기간"
           },
           "establishmentScope": {
             "type": "string",
@@ -18148,10 +18161,12 @@
         "type": "object",
         "properties": {
           "amount": {
-            "type": "number"
+            "type": "number",
+            "description": "중도금액"
           },
           "date": {
             "type": "string",
+            "description": "중도금 일자",
             "format": "date"
           }
         },
@@ -18160,6 +18175,42 @@
       "OwnershipContractResponse": {
         "type": "object",
         "properties": {
+          "registryType": {
+            "type": "string",
+            "description": "등기 유형",
+            "enum": [
+              "OWNERSHIP_TRANSFER",
+              "MORTGAGE",
+              "SURFACE_RIGHT",
+              "CHANGE",
+              "CORRECTION",
+              "MORTGAGE_CANCELLATION",
+              "SURFACE_RIGHT_CANCELLATION"
+            ]
+          },
+          "registryCause": {
+            "type": "string",
+            "description": "등기 원인",
+            "enum": [
+              "TRADE",
+              "ESTABLISHMENT_CONTRACT",
+              "ADDRESS_CHANGE",
+              "ROAD_NAME_ADDRESS",
+              "APPLICATION_ERROR",
+              "TERMINATION",
+              "NAME_CHANGE",
+              "REGISTRATION_NUMBER"
+            ]
+          },
+          "tradeAmount": {
+            "type": "number",
+            "description": "매매 금액"
+          },
+          "balancePaymentDate": {
+            "type": "string",
+            "description": "잔금 일자",
+            "format": "date"
+          },
           "contractAmount": {
             "type": "number",
             "description": "계약 금액"
@@ -18193,9 +18244,32 @@
       "MortgageContractResponse": {
         "type": "object",
         "properties": {
-          "maximumCreditAmount": {
-            "type": "number",
-            "description": "채권 최고액"
+          "registryType": {
+            "type": "string",
+            "description": "등기 유형",
+            "enum": [
+              "OWNERSHIP_TRANSFER",
+              "MORTGAGE",
+              "SURFACE_RIGHT",
+              "CHANGE",
+              "CORRECTION",
+              "MORTGAGE_CANCELLATION",
+              "SURFACE_RIGHT_CANCELLATION"
+            ]
+          },
+          "registryCause": {
+            "type": "string",
+            "description": "등기 원인",
+            "enum": [
+              "TRADE",
+              "ESTABLISHMENT_CONTRACT",
+              "ADDRESS_CHANGE",
+              "ROAD_NAME_ADDRESS",
+              "APPLICATION_ERROR",
+              "TERMINATION",
+              "NAME_CHANGE",
+              "REGISTRATION_NUMBER"
+            ]
           },
           "loanAmount": {
             "type": "number",
@@ -18205,14 +18279,18 @@
             "type": "boolean",
             "description": "대면 여부"
           },
-          "contractDate": {
-            "type": "string",
-            "description": "계약 일자",
-            "format": "date"
+          "maximumCreditAmount": {
+            "type": "number",
+            "description": "채권 최고액"
           },
           "registryReceiptDate": {
             "type": "string",
             "description": "등기 접수 일자",
+            "format": "date"
+          },
+          "contractDate": {
+            "type": "string",
+            "description": "계약 일자",
             "format": "date"
           },
           "loanExecutionDate": {
@@ -18297,21 +18375,18 @@
             "enum": ["REQUEST", "MANUAL"]
           },
           "registryType": {
-            "type": "string",
-            "description": "등기유형 Enum 값",
-            "example": "MORTGAGE"
-          },
-          "registryTypeLabel": {
-            "type": "string",
-            "description": "등기유형 라벨(한글)",
-            "example": "근저당권설정"
+            "$ref": "#/components/schemas/RegistryType"
           },
           "registryRole": {
-            "type": "string",
-            "description": "등기 역할 (MAIN/LINKED)",
-            "example": "MAIN"
+            "$ref": "#/components/schemas/RegistryApplicationRole"
           }
         }
+      },
+      "RegistryApplicationRole": {
+        "type": "string",
+        "description": "등기신청서 역할",
+        "example": "MAIN",
+        "enum": ["MAIN", "LINKED"]
       },
       "PageInfo": {
         "type": "object",

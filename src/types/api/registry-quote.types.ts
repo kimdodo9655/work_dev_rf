@@ -3,7 +3,15 @@
  * @generated 2025-01-27
  */
 
-import type { ApiResultVoid, ObligorInfo, PropertyInfo, RegistryMethod } from './common.types'
+import type {
+  ApiResultVoid,
+  EstimateWritingStatus,
+  ObligorInfo,
+  PropertyInfo,
+  QuoteProgressStatus,
+  RegistryMethod,
+  SelectionStatus
+} from './common.types'
 
 /**
  * R01-01
@@ -30,16 +38,11 @@ export interface GetEstimateListQuery {
   /** 등기접수일자 종료일 */
   receiptDateTo?: string
   /** 진행상태 */
-  progressStatus?:
-    | 'QUOTE_IN_PROGRESS'
-    | 'QUOTE_CLOSED'
-    | 'ESTIMATE_SELECTED'
-    | 'SELECTION_COMPLETED'
-    | 'REQUEST_CANCELLED'
+  progressStatus?: QuoteProgressStatus
   /** 작성여부 */
-  writingStatus?: 'WAITING' | 'COMPLETED' | 'WITHDRAWN'
+  writingStatus?: EstimateWritingStatus
   /** 선정여부 */
-  selectionStatus?: 'WAITING' | 'SELECTED' | 'NOT_SELECTED'
+  selectionStatus?: SelectionStatus
   /** 통합검색 (부동산 주소 또는 등기신청번호) */
   keyword?: string
   /** 페이지 번호 (1부터 시작) */

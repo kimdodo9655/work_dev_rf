@@ -48,6 +48,36 @@ export type QualifiedType = 'LEGAL_SCRIVENER' | 'LAWYER'
 /** 등기 유형 */
 export type RegistryTypeForAssign = 'OWNERSHIP_TRANSFER' | 'MORTGAGE_REGISTRATION'
 
+/** 부동산 구분 */
+export type PropertyType = 'LAND' | 'BUILDING' | 'COLLECTIVE_BUILDING'
+
+/** 등기권리증 구분 */
+export type CertificateType =
+  | 'REGISTRY_CERT_INFO'
+  | 'REGISTRY_CERTIFICATE'
+  | 'CONFIRMATION_DOCUMENT'
+  | 'PRIOR_REGISTRY_LINK'
+
+/** 전자서명 구분 */
+export type EcertificateType = 'OWNED' | 'DELEGATED' | 'NONE'
+
+/** 매입 구분 */
+export type PurchaseType = 'PURCHASE' | 'DISCOUNT' | 'EXEMPTION'
+
+/** 견적 진행 상태 */
+export type QuoteProgressStatus =
+  | 'QUOTE_IN_PROGRESS'
+  | 'QUOTE_CLOSED'
+  | 'ESTIMATE_SELECTED'
+  | 'SELECTION_COMPLETED'
+  | 'REQUEST_CANCELLED'
+
+/** 견적 작성 여부 */
+export type EstimateWritingStatus = 'WAITING' | 'COMPLETED' | 'WITHDRAWN'
+
+/** 견적 선정 여부 */
+export type SelectionStatus = 'WAITING' | 'SELECTED' | 'NOT_SELECTED'
+
 /** 권한 코드 */
 export type RoleLevel = 'SUPER_ADMIN' | 'ADMIN' | 'ORGANIZATION_ADMIN' | 'BRANCH_ADMIN' | 'USER'
 
@@ -59,6 +89,9 @@ export type PartyType = 'DOMESTIC' | 'OVERSEAS_KOREAN' | 'FOREIGNER' | 'CORPORAT
 
 /** 소유 형태 */
 export type OwnershipType = 'SOLE' | 'CO_OWNERSHIP' | 'JOINT_OWNERSHIP'
+
+/** 등기신청서 역할 */
+export type RegistryApplicationRole = 'MAIN' | 'LINKED'
 
 /** Action 타입 */
 export type ActionType = 'ADD' | 'MODIFY' | 'DELETE'
@@ -450,12 +483,12 @@ export interface BondPropertyItem {
 /** 채권 부동산 항목 (조회 응답) */
 export interface BondPropertyItemResponse {
   propertyId?: string
-  propertyType?: 'LAND' | 'BUILDING' | 'COLLECTIVE_BUILDING'
+  propertyType?: PropertyType
   propertyAddress?: string
   officialLandPrice?: number
   area?: number
   standardMarketPrice?: number
-  bondPurchaseType?: 'PURCHASE' | 'DISCOUNT' | 'EXEMPTION'
+  bondPurchaseType?: PurchaseType
   bondExemptionReason?: string
   bondPurchaseAmount?: number
 }
@@ -463,7 +496,7 @@ export interface BondPropertyItemResponse {
 /** 채권 부동산 수정 요청 */
 export interface BondPropertyUpdateRequest {
   /** 국민주택채권 매입 구분 */
-  bondPurchaseType: 'PURCHASE' | 'DISCOUNT' | 'EXEMPTION'
+  bondPurchaseType: PurchaseType
   /** 감면 사유 */
   bondExemptionReason?: string
   /** 채권 매입 금액 */
@@ -479,7 +512,7 @@ export interface BondPropertyUpdateRequest {
 /** 주택채권 요청 */
 export interface HousingBondRequest {
   /** 국민주택채권 매입 구분 */
-  purchaseType: 'PURCHASE' | 'DISCOUNT' | 'EXEMPTION'
+  purchaseType: PurchaseType
   /** 감면 사유 */
   exemptionReason?: string
   /** 할인율 */
@@ -496,7 +529,7 @@ export interface HousingBondRequest {
 export interface HousingBondResponse {
   applicationId?: number
   registryManagementNumber?: string
-  purchaseType?: 'PURCHASE' | 'DISCOUNT' | 'EXEMPTION'
+  purchaseType?: PurchaseType
   exemptionReason?: string
   discountRate?: number
   bondDiscountAmount?: number

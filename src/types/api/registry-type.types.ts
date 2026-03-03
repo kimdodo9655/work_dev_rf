@@ -3,7 +3,7 @@
  * @generated 2025-01-27
  */
 
-import type { ApiResultVoid, RegistryMethod } from './common.types'
+import type { ApiResultVoid, RegistryApplicationRole, RegistryMethod } from './common.types'
 import type {
   ContractPartyReplaceResponse,
   MortgageContractSaveResponse,
@@ -126,7 +126,7 @@ export interface RegistryApplicationFormResponse {
   registryType?: string
   registryTypeLabel?: string
   /** 등기 역할 */
-  registryRole?: string
+  registryRole?: RegistryApplicationRole
 }
 
 export interface RegistryApplicationUpdateRequest {
