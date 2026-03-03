@@ -770,7 +770,6 @@
 <script setup lang="ts">
 import { defineAsyncComponent, reactive, ref } from 'vue'
 
-import PdfConverter from '@/components/doc-templates/PdfConverter.vue'
 import FloatingCustomSelect from '@/components/template/input/FloatingCustomSelect.vue'
 import FloatingInnerSelect from '@/components/template/input/FloatingInnerSelect.vue'
 import FloatingInput from '@/components/template/input/FloatingInput.vue'
@@ -780,8 +779,9 @@ import { useDialog } from '@/composables/utils/useDialog'
 import AddrTest from '@/features/dev/pages/AddrTestPanel.vue'
 import PdfTest from '@/features/dev/pages/PdfTestPanel.vue'
 import RPATest from '@/features/dev/pages/RPATestPanel.vue'
+import PdfConverter from '@/features/doc-templates/PdfConverter.vue'
 
-const PdfViewer = defineAsyncComponent(() => import('@/components/doc-templates/PdfViewer.vue'))
+const PdfViewer = defineAsyncComponent(() => import('@/features/doc-templates/PdfViewer.vue'))
 
 // ✨ useCodes 사용
 const { codes, isLoading, loadError, fetchAllCodes, clearCache } = useCodes()

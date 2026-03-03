@@ -8,7 +8,7 @@ export const authRoutes: RouteRecordRaw[] = [
   {
     path: '/auth/login',
     name: 'Login',
-    component: () => import('@/components/auth/pages/LoginPage.vue'),
+    component: () => import('@/features/auth/pages/LoginPage.vue'),
     meta: {
       title: locale.pageTitle.auth.login,
       allowedAuthStates: ['pre-auth']
@@ -17,7 +17,7 @@ export const authRoutes: RouteRecordRaw[] = [
   {
     path: '/auth/signup',
     name: 'SignUp',
-    component: () => import('@/components/auth/pages/SignupPage.vue'),
+    component: () => import('@/features/auth/pages/SignupPage.vue'),
     meta: {
       title: locale.pageTitle.auth.signup,
       allowedAuthStates: ['pre-auth']
@@ -26,7 +26,7 @@ export const authRoutes: RouteRecordRaw[] = [
   {
     path: '/auth/install',
     name: 'ProgramInstall',
-    component: () => import('@/components/auth/pages/ProgramInstallPage.vue'),
+    component: () => import('@/features/auth/pages/ProgramInstallPage.vue'),
     meta: {
       title: locale.pageTitle.auth.install,
       allowedAuthStates: ['pre-auth']
@@ -35,7 +35,7 @@ export const authRoutes: RouteRecordRaw[] = [
   {
     path: '/auth/auto-logout',
     name: 'AutoLogout',
-    component: () => import('@/components/auth/pages/AutoLogoutPage.vue'),
+    component: () => import('@/features/auth/pages/AutoLogoutPage.vue'),
     beforeEnter: () => {
       const authStore = useAuthStore()
 
@@ -55,7 +55,7 @@ export const authRoutes: RouteRecordRaw[] = [
   {
     path: '/auth/password-setup',
     name: 'PasswordSetup',
-    component: () => import('@/components/auth/pages/PasswordSetupPage.vue'),
+    component: () => import('@/features/auth/pages/PasswordSetupPage.vue'),
     meta: {
       title: locale.pageTitle.auth.passwordSetup,
       allowedAuthStates: ['pre-auth']
@@ -64,7 +64,7 @@ export const authRoutes: RouteRecordRaw[] = [
   {
     path: '/auth/blocked/mac',
     name: 'AccessBlockMac',
-    component: () => import('@/components/auth/pages/AccessBlockMacPage.vue'),
+    component: () => import('@/features/auth/pages/AccessBlockMacPage.vue'),
     meta: {
       title: locale.pageTitle.auth.blocked.mac,
       allowedAuthStates: ['pre-auth']
@@ -73,7 +73,7 @@ export const authRoutes: RouteRecordRaw[] = [
   {
     path: '/auth/blocked/email',
     name: 'AccessBlockEmail',
-    component: () => import('@/components/auth/pages/AccessBlockEmailPage.vue'),
+    component: () => import('@/features/auth/pages/AccessBlockEmailPage.vue'),
     meta: {
       title: locale.pageTitle.auth.blocked.email,
       allowedAuthStates: ['pre-auth']
@@ -82,7 +82,7 @@ export const authRoutes: RouteRecordRaw[] = [
   {
     path: '/auth/blocked/user',
     name: 'AccessBlockUser',
-    component: () => import('@/components/auth/pages/AccessBlockUserPage.vue'),
+    component: () => import('@/features/auth/pages/AccessBlockUserPage.vue'),
     meta: {
       title: locale.pageTitle.auth.blocked.user,
       allowedAuthStates: ['pre-auth']

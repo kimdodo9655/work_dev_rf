@@ -1,4 +1,4 @@
-<!-- src/components/doc-templates/applications/SuperficiesRegistration.vue -->
+<!-- src/features/doc-templates/applications/SuperficiesRegistration.vue -->
 <!-- 지상권설정등기신청 문서 양식 -->
 
 <template>

@@ -1989,7 +1989,7 @@ onMounted(() => {
 <script lang="ts" setup>
 import { computed, defineAsyncComponent, onBeforeUnmount, reactive, ref } from 'vue'
 
-const PdfViewer = defineAsyncComponent(() => import('@/components/doc-templates/PdfViewer.vue'))
+const PdfViewer = defineAsyncComponent(() => import('@/features/doc-templates/PdfViewer.vue'))
 
 type StatusType = 'info' | 'ok' | 'err'
 const status = reactive<{ type: StatusType; msg: string }>({ type: 'info', msg: '' })

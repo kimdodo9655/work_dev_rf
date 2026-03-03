@@ -1,4 +1,4 @@
-<!-- src/components/doc-templates/applications/OwnershipTransfer.vue -->
+<!-- src/features/doc-templates/applications/OwnershipTransfer.vue -->
 <!-- 소유권이전등기신청 문서 양식 -->
 
 <template>

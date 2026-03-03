@@ -25,7 +25,7 @@ export const devRoutes: RouteRecordRaw[] = [
   {
     path: '/dev/viewer',
     name: 'DevWebViewer',
-    component: () => import('@/components/shared/pages/WebViewerPage.vue'),
+    component: () => import('@/features/shared/pages/WebViewerPage.vue'),
     meta: {
       title: '개발 PDF 뷰어',
       layout: 'test',

@@ -6,7 +6,7 @@ export const protectedRoutes: RouteRecordRaw[] = [
   {
     path: '/dashboard',
     name: 'Dashboard',
-    component: () => import('@/components/main/pages/DashboardPage.vue'),
+    component: () => import('@/features/main/pages/DashboardPage.vue'),
     meta: {
       title: locale.pageTitle.main.dashboard,
       requiresAuth: true,
@@ -17,7 +17,7 @@ export const protectedRoutes: RouteRecordRaw[] = [
   {
     path: '/viewer',
     name: 'WebViewer',
-    component: () => import('@/components/shared/pages/WebViewerPage.vue'),
+    component: () => import('@/features/shared/pages/WebViewerPage.vue'),
     meta: {
       title: locale.pageTitle.shared.viewer,
       requiresAuth: true,
@@ -28,7 +28,7 @@ export const protectedRoutes: RouteRecordRaw[] = [
   {
     path: '/notice',
     name: 'Notice',
-    component: () => import('@/components/shared/pages/NoticePage.vue'),
+    component: () => import('@/features/shared/pages/NoticePage.vue'),
     meta: {
       title: locale.pageTitle.shared.notice,
       requiresAuth: true,
@@ -39,7 +39,7 @@ export const protectedRoutes: RouteRecordRaw[] = [
   {
     path: '/notice/:noticeId',
     name: 'NoticeDetail',
-    component: () => import('@/components/shared/pages/NoticeDetailPage.vue'),
+    component: () => import('@/features/shared/pages/NoticeDetailPage.vue'),
     meta: {
       title: locale.pageTitle.shared.noticeDetail,
       requiresAuth: true,
@@ -50,7 +50,7 @@ export const protectedRoutes: RouteRecordRaw[] = [
   {
     path: '/estimate',
     name: 'EstimateMgmt',
-    component: () => import('@/components/estimate/pages/EstimateMgmtPage.vue'),
+    component: () => import('@/features/estimate/pages/EstimateMgmtPage.vue'),
     meta: {
       title: locale.pageTitle.estimate.list,
       requiresAuth: true,
@@ -62,7 +62,7 @@ export const protectedRoutes: RouteRecordRaw[] = [
   {
     path: '/estimate/create/:registrationNo',
     name: 'EstimateCreate',
-    component: () => import('@/components/estimate/pages/EstimateDetailPage.vue'),
+    component: () => import('@/features/estimate/pages/EstimateDetailPage.vue'),
     meta: {
       title: locale.pageTitle.estimate.createDetail,
       requiresAuth: true,
@@ -74,7 +74,7 @@ export const protectedRoutes: RouteRecordRaw[] = [
   {
     path: '/estimate/detail/:registrationNo',
     name: 'EstimateDetail',
-    component: () => import('@/components/estimate/pages/EstimateDetailPage.vue'),
+    component: () => import('@/features/estimate/pages/EstimateDetailPage.vue'),
     meta: {
       title: locale.pageTitle.estimate.confirmDetail,
       requiresAuth: true,
@@ -86,7 +86,7 @@ export const protectedRoutes: RouteRecordRaw[] = [
   {
     path: '/registration',
     name: 'RegistrationStatus',
-    component: () => import('@/components/registration/pages/CaseStatusContainer.vue'),
+    component: () => import('@/features/registration/pages/CaseStatusContainer.vue'),
     meta: {
       title: locale.pageTitle.registration.caseStatus,
       requiresAuth: true,
@@ -97,7 +97,7 @@ export const protectedRoutes: RouteRecordRaw[] = [
   {
     path: '/registration/:caseId',
     name: 'RegistrationDetail',
-    component: () => import('@/components/registration/pages/CaseDetailPage.vue'),
+    component: () => import('@/features/registration/pages/CaseDetailPage.vue'),
     meta: {
       title: locale.pageTitle.registration.caseDetail,
       requiresAuth: true,
@@ -108,7 +108,7 @@ export const protectedRoutes: RouteRecordRaw[] = [
   {
     path: '/registration/schedule',
     name: 'RegistrationSchedule',
-    component: () => import('@/components/registration/pages/CaseScheduleMgmtPage.vue'),
+    component: () => import('@/features/registration/pages/CaseScheduleMgmtPage.vue'),
     meta: {
       title: locale.pageTitle.registration.schedule,
       requiresAuth: true,

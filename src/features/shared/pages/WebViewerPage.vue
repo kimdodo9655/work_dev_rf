@@ -16,7 +16,7 @@
 import { computed, defineAsyncComponent } from 'vue'
 import { useRoute } from 'vue-router'
 
-const PdfViewer = defineAsyncComponent(() => import('@/components/doc-templates/PdfViewer.vue'))
+const PdfViewer = defineAsyncComponent(() => import('@/features/doc-templates/PdfViewer.vue'))
 const route = useRoute()
 
 const pdfSrc = computed(() => {

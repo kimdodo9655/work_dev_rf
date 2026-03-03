@@ -1,4 +1,4 @@
-<!-- src/components/doc-templates/applications/MortgageRegistration.vue -->
+<!-- src/features/doc-templates/applications/MortgageRegistration.vue -->
 <!-- 근저당권설정등기신청 문서 양식 -->
 
 <template>

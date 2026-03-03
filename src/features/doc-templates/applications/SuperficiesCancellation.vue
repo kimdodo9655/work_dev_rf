@@ -1,4 +1,4 @@
-<!-- src/components/doc-templates/applications/SuperficiesCancellation.vue -->
+<!-- src/features/doc-templates/applications/SuperficiesCancellation.vue -->
 <!-- 지상권말소등기신청 문서 양식 -->
 
 <template>

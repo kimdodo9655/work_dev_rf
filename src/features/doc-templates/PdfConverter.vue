@@ -7,7 +7,7 @@
 <script setup lang="ts">
 import { defineAsyncComponent } from 'vue'
 
-const PdfTester = defineAsyncComponent(() => import('@/components/doc-templates/PdfTester.vue'))
+const PdfTester = defineAsyncComponent(() => import('@/features/doc-templates/PdfTester.vue'))
 </script>
 
 <style lang="scss" scoped>

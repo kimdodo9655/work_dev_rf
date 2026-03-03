@@ -4,7 +4,7 @@ export const rootRoutes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'Root',
-    component: () => import('@/components/shared/pages/RootPage.vue'),
+    component: () => import('@/features/app/pages/RootPage.vue'),
     meta: {
       title: '전자등기',
       allowedAuthStates: ['pre-auth', 'onboarding', 'auth']

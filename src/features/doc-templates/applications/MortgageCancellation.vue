@@ -1,4 +1,4 @@
-<!-- src/components/doc-templates/applications/MortgageCancellation.vue -->
+<!-- src/features/doc-templates/applications/MortgageCancellation.vue -->
 <!-- 근저당권말소등기신청 문서 양식 -->
 
 <template>

@@ -5,9 +5,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import LoginPage from '@/components/auth/pages/LoginPage.vue'
-import BankSelectionPage from '@/components/main/pages/BankSelectionPage.vue'
-import DashboardPage from '@/components/main/pages/DashboardPage.vue'
+import LoginPage from '@/features/auth/pages/LoginPage.vue'
+import BankSelectionPage from '@/features/main/pages/BankSelectionPage.vue'
+import DashboardPage from '@/features/main/pages/DashboardPage.vue'
 import { useAuthStore } from '@/stores/auth'
 import { logger } from '@/utils/logger'
 
