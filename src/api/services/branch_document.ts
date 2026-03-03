@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/api/services/branch_document.ts`
- * 문서 제목: branch document 구현 파일
+ * 문서 제목: API 서비스: branch-document
  */
 
 // --------------------------------------------------

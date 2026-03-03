@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/features/my/modals/UserFormModal.vue`
-문서 제목: User Form Modal 구현 파일 -->
+문서 제목: 기능 페이지/컴포넌트: user-form-modal -->
 
 <template>
   <div>

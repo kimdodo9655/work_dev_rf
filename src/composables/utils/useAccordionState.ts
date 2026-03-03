@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/composables/utils/useAccordionState.ts`
- * 문서 제목: use Accordion State 구현 파일
+ * 문서 제목: 컴포저블 유틸: use-accordion-state
  */
 
 import { computed, ref } from 'vue'

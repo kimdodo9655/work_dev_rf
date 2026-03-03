@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/features/registration/composables/useApplicationSectionTabs.ts`
- * 문서 제목: use Application Section Tabs 구현 파일
+ * 문서 제목: 기능 모듈: use-application-section-tabs
  */
 
 import { computed, type Ref, ref, watch } from 'vue'

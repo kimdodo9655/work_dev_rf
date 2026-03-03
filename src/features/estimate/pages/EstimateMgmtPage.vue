@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/features/estimate/pages/EstimateMgmtPage.vue`
-문서 제목: Estimate Mgmt Page 구현 파일 -->
+문서 제목: 기능 페이지/컴포넌트: estimate-mgmt-page -->
 
 <template>
   <div class="estimate-mgmt-page">

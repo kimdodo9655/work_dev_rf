@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/composables/utils/useDeviceDetection.ts`
- * 문서 제목: use Device Detection 구현 파일
+ * 문서 제목: 컴포저블 유틸: use-device-detection
  */
 
 /**

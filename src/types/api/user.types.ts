@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/types/api/user.types.ts`
- * 문서 제목: user.types 구현 파일
+ * 문서 제목: 타입 정의: user-types
  */
 
 /**

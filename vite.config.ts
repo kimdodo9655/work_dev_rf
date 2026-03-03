@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/vite.config.ts`
- * 문서 제목: vite.config 구현 파일
+ * 문서 제목: TypeScript 모듈: vite-config
  */
 
 import vue from '@vitejs/plugin-vue'

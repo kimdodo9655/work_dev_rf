@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/router/routes/protected.ts`
- * 문서 제목: protected 구현 파일
+ * 문서 제목: 라우트 정의: protected
  */
 
 import type { RouteRecordRaw } from 'vue-router'

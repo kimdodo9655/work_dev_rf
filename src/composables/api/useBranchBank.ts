@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/composables/api/useBranchBank.ts`
- * 문서 제목: use Branch Bank 구현 파일
+ * 문서 제목: 컴포저블 API: use-branch-bank
  */
 
 /**

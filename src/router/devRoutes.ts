@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/router/devRoutes.ts`
- * 문서 제목: dev Routes 구현 파일
+ * 문서 제목: 라우터 모듈: dev-routes
  */
 
 import type { RouteRecordRaw } from 'vue-router'

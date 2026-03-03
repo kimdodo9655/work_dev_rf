@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/types/api/branch-payment.types.ts`
- * 문서 제목: branch payment.types 구현 파일
+ * 문서 제목: 타입 정의: branch-payment-types
  */
 
 /**

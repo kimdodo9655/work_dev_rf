@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/features/auth/pages/AccessBlockEmailPage.vue`
-문서 제목: Access Block Email Page 구현 파일 -->
+문서 제목: 기능 페이지/컴포넌트: access-block-email-page -->
 
 <template>
   <div>

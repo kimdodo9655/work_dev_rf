@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/utils/authValidator.ts`
- * 문서 제목: auth Validator 구현 파일
+ * 문서 제목: 유틸리티 모듈: auth-validator
  */
 
 import { useApiAlert } from '@/composables/utils/useApiAlert'

@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/features/dev/components/DevNav.vue`
-문서 제목: Dev Nav 구현 파일 -->
+문서 제목: 기능 페이지/컴포넌트: dev-nav -->
 
 <template>
   <div class="floating-navigation">

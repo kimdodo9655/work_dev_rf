@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/components/layout/AppHeader.vue`
-문서 제목: App Header 구현 파일 -->
+문서 제목: 재사용 레이아웃 컴포넌트: app-header -->
 
 <template>
   <div class="fixed-area">

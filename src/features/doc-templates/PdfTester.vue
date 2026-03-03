@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/features/doc-templates/PdfTester.vue`
-문서 제목: Pdf Tester 구현 파일 -->
+문서 제목: 기능 페이지/컴포넌트: pdf-tester -->
 
 <template>
   <div class="pdf-wrapper" ref="wrapperRef" :style="{ height: `${wrapperHeight}px` }">

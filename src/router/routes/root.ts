@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/router/routes/root.ts`
- * 문서 제목: root 구현 파일
+ * 문서 제목: 라우트 정의: root
  */
 
 import type { RouteRecordRaw } from 'vue-router'

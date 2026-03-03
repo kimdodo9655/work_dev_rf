@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/tests/structure.test.ts`
- * 문서 제목: structure.test 구현 파일
+ * 문서 제목: 테스트: structure-test
  */
 
 import assert from 'node:assert/strict'

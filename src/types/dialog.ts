@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/types/dialog.ts`
- * 문서 제목: dialog 구현 파일
+ * 문서 제목: 타입 정의: dialog
  */
 
 // types/dialog.ts

@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/components/layout/AppFooter.vue`
-문서 제목: App Footer 구현 파일 -->
+문서 제목: 재사용 레이아웃 컴포넌트: app-footer -->
 
 <template>
   <footer class="main-footer" :class="authStore.authState === 'pre-auth' ? 'pre-auth-footer' : ''">

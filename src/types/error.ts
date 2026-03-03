@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/types/error.ts`
- * 문서 제목: error 구현 파일
+ * 문서 제목: 타입 정의: error
  */
 
 /**

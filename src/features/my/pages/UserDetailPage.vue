@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/features/my/pages/UserDetailPage.vue`
-문서 제목: User Detail Page 구현 파일 -->
+문서 제목: 기능 페이지/컴포넌트: user-detail-page -->
 
 <template>
   <div>

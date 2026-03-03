@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/api/services/registry/debt_tax.ts`
- * 문서 제목: debt tax 구현 파일
+ * 문서 제목: API 서비스: debt-tax
  */
 
 // --------------------------------------------------

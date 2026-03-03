@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/features/shared/modals/AutoLogoutNoticeModal.vue`
-문서 제목: Auto Logout Notice Modal 구현 파일 -->
+문서 제목: 기능 페이지/컴포넌트: auto-logout-notice-modal -->
 
 <template>
   <div>

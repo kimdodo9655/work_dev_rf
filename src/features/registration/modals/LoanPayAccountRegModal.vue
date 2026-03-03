@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/features/registration/modals/LoanPayAccountRegModal.vue`
-문서 제목: Loan Pay Account Reg Modal 구현 파일 -->
+문서 제목: 기능 페이지/컴포넌트: loan-pay-account-reg-modal -->
 
 <template>
   <div>

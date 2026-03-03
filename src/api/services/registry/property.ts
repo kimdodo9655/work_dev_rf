@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/api/services/registry/property.ts`
- * 문서 제목: property 구현 파일
+ * 문서 제목: API 서비스: property
  */
 
 // --------------------------------------------------

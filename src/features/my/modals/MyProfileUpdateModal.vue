@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/features/my/modals/MyProfileUpdateModal.vue`
-문서 제목: My Profile Update Modal 구현 파일 -->
+문서 제목: 기능 페이지/컴포넌트: my-profile-update-modal -->
 
 <template>
   <div>

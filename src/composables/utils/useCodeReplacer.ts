@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/composables/utils/useCodeReplacer.ts`
- * 문서 제목: use Code Replacer 구현 파일
+ * 문서 제목: 컴포저블 유틸: use-code-replacer
  */
 
 import replacementsJson from '@/constants/code-replacements.generated.json'

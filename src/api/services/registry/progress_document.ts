@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/api/services/registry/progress_document.ts`
- * 문서 제목: progress document 구현 파일
+ * 문서 제목: API 서비스: progress-document
  */
 
 // --------------------------------------------------

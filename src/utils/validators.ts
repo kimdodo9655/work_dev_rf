@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/utils/validators.ts`
- * 문서 제목: validators 구현 파일
+ * 문서 제목: 유틸리티 모듈: validators
  */
 
 // utils/validators.ts

@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/components/template/input/FloatingCustomSelect.vue`
-문서 제목: Floating Custom Select 구현 파일 -->
+문서 제목: 재사용 템플릿 컴포넌트: floating-custom-select -->
 
 <template>
   <div class="floating-custom-select" ref="fieldRef">

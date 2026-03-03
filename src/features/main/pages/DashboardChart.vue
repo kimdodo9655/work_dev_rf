@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/features/main/pages/DashboardChart.vue`
-문서 제목: Dashboard Chart 구현 파일 -->
+문서 제목: 기능 페이지/컴포넌트: dashboard-chart -->
 
 <script setup lang="ts">
 import {

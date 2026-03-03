@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/components/layout/AlertDialog.vue`
-문서 제목: Alert Dialog 구현 파일 -->
+문서 제목: 재사용 레이아웃 컴포넌트: alert-dialog -->
 
 <!-- components/layout/AlertDialog.vue -->
 <script setup lang="ts">

@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/utils/format.ts`
- * 문서 제목: format 구현 파일
+ * 문서 제목: 유틸리티 모듈: format
  */
 
 type MessageParams = Record<string, string | number>

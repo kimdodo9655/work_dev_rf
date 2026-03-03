@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/components/template/AccordionGroup.vue`
-문서 제목: Accordion Group 구현 파일 -->
+문서 제목: 재사용 템플릿 컴포넌트: accordion-group -->
 
 <template>
   <slot></slot>

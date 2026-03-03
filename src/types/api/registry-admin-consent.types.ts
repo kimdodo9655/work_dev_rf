@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/types/api/registry-admin-consent.types.ts`
- * 문서 제목: registry admin consent.types 구현 파일
+ * 문서 제목: 타입 정의: registry-admin-consent-types
  */
 
 /**

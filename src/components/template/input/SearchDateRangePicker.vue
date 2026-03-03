@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/components/template/input/SearchDateRangePicker.vue`
-문서 제목: Search Date Range Picker 구현 파일 -->
+문서 제목: 재사용 템플릿 컴포넌트: search-date-range-picker -->
 
 <!-- src/components/template/input/FormDateRangePicker.vue -->
 <template>

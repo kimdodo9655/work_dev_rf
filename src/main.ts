@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/main.ts`
- * 문서 제목: main 구현 파일
+ * 문서 제목: 애플리케이션 부트스트랩
  */
 
 import '@/assets/styles/global.scss'

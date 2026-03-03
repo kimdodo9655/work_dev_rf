@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/api/endpoints/address.ts`
- * 문서 제목: address 구현 파일
+ * 문서 제목: API 엔드포인트: address
  */
 
 export const ADDRESS = {

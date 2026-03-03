@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/api/services/registry/prior_loan.ts`
- * 문서 제목: prior loan 구현 파일
+ * 문서 제목: API 서비스: prior-loan
  */
 
 // --------------------------------------------------

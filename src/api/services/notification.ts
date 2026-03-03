@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/api/services/notification.ts`
- * 문서 제목: notification 구현 파일
+ * 문서 제목: API 서비스: notification
  */
 
 // --------------------------------------------------

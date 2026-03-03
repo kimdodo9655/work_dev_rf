@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/components/template/input/SearchSelect.vue`
-문서 제목: Search Select 구현 파일 -->
+문서 제목: 재사용 템플릿 컴포넌트: search-select -->
 
 <template>
   <div ref="selectRef" class="form-select">

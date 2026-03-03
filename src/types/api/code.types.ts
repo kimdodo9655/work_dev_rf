@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/types/api/code.types.ts`
- * 문서 제목: code.types 구현 파일
+ * 문서 제목: 타입 정의: code-types
  */
 
 /**

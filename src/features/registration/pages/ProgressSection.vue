@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/features/registration/pages/ProgressSection.vue`
-문서 제목: Progress Section 구현 파일 -->
+문서 제목: 기능 페이지/컴포넌트: progress-section -->
 
 <template>
   <ul class="sub-list">

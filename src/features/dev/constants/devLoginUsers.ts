@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/features/dev/constants/devLoginUsers.ts`
- * 문서 제목: dev Login Users 구현 파일
+ * 문서 제목: 기능 모듈: dev-login-users
  */
 
 export type DevLoginUser = {

@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/features/dev/pages/RpacApiTestPage.vue`
-문서 제목: Rpac Api Test Page 구현 파일 -->
+문서 제목: 기능 페이지/컴포넌트: rpac-api-test-page -->
 
 <template>
   <section :class="['rpac-page', { embedded }]">

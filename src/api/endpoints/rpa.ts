@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/api/endpoints/rpa.ts`
- * 문서 제목: rpa 구현 파일
+ * 문서 제목: API 엔드포인트: rpa
  */
 
 export const RPA = {

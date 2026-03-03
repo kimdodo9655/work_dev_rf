@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/api/endpoints/index.ts`
- * 문서 제목: index 구현 파일
+ * 문서 제목: API 엔드포인트: index
  */
 
 import { ADDRESS } from '@/api/endpoints/address'

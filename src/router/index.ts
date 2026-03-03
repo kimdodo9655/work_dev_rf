@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/router/index.ts`
- * 문서 제목: index 구현 파일
+ * 문서 제목: 라우터 모듈: index
  */
 
 import type { NavigationGuardNext, RouteLocationNormalized, RouteRecordRaw } from 'vue-router'

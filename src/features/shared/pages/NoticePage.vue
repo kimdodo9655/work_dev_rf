@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/features/shared/pages/NoticePage.vue`
-문서 제목: Notice Page 구현 파일 -->
+문서 제목: 기능 페이지/컴포넌트: notice-page -->
 
 <template>
   <div>공지사항</div>

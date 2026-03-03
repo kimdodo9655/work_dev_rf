@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/types/api/branch-registry.types.ts`
- * 문서 제목: branch registry.types 구현 파일
+ * 문서 제목: 타입 정의: branch-registry-types
  */
 
 /**

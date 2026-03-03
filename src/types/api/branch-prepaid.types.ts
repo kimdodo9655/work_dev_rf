@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/types/api/branch-prepaid.types.ts`
- * 문서 제목: branch prepaid.types 구현 파일
+ * 문서 제목: 타입 정의: branch-prepaid-types
  */
 
 /**

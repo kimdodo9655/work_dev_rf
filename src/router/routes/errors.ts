@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/router/routes/errors.ts`
- * 문서 제목: errors 구현 파일
+ * 문서 제목: 라우트 정의: errors
  */
 
 import type { RouteRecordRaw } from 'vue-router'

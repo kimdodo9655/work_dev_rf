@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/features/dev/pages/AddrTestPanel.vue`
-문서 제목: Addr Test Panel 구현 파일 -->
+문서 제목: 기능 페이지/컴포넌트: addr-test-panel -->
 
 <template>
   <div class="addr-test-section">

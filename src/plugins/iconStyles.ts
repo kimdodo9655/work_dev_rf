@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/plugins/iconStyles.ts`
- * 문서 제목: icon Styles 구현 파일
+ * 문서 제목: 플러그인 모듈: icon-styles
  */
 
 let iconStylesPromise: Promise<void> | null = null

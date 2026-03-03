@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/types/api/registry-housing-bond.types.ts`
- * 문서 제목: registry housing bond.types 구현 파일
+ * 문서 제목: 타입 정의: registry-housing-bond-types
  */
 
 /**

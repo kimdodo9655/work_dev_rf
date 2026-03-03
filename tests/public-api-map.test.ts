@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/tests/public-api-map.test.ts`
- * 문서 제목: public api map.test 구현 파일
+ * 문서 제목: 테스트: public-api-map-test
  */
 
 import assert from 'node:assert/strict'

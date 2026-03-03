@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/features/shared/modals/AddressSearchTab.vue`
-문서 제목: Address Search Tab 구현 파일 -->
+문서 제목: 기능 페이지/컴포넌트: address-search-tab -->
 
 <template>
   <div>

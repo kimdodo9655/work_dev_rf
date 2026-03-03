@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/features/doc-templates/applications/OwnershipTransfer.vue`
-문서 제목: Ownership Transfer 구현 파일 -->
+문서 제목: 기능 페이지/컴포넌트: ownership-transfer -->
 
 <!-- src/features/doc-templates/applications/OwnershipTransfer.vue -->
 <!-- 소유권이전등기신청 문서 양식 -->

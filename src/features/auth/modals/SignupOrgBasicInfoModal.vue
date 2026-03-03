@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/features/auth/modals/SignupOrgBasicInfoModal.vue`
-문서 제목: Signup Org Basic Info Modal 구현 파일 -->
+문서 제목: 기능 페이지/컴포넌트: signup-org-basic-info-modal -->
 
 <template>
   <div>

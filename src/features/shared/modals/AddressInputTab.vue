@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/features/shared/modals/AddressInputTab.vue`
-문서 제목: Address Input Tab 구현 파일 -->
+문서 제목: 기능 페이지/컴포넌트: address-input-tab -->
 
 <template>
   <div>

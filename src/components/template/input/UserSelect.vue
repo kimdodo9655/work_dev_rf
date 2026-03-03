@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/components/template/input/UserSelect.vue`
-문서 제목: User Select 구현 파일 -->
+문서 제목: 재사용 템플릿 컴포넌트: user-select -->
 
 <template>
   <div class="custom-select" ref="selectRef">

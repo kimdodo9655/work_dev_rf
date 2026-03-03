@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/components/template/AccordionItem.vue`
-문서 제목: Accordion Item 구현 파일 -->
+문서 제목: 재사용 템플릿 컴포넌트: accordion-item -->
 
 <template>
   <li :class="{ active: computedIsOpen }">

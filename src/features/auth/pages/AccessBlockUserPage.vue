@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/features/auth/pages/AccessBlockUserPage.vue`
-문서 제목: Access Block User Page 구현 파일 -->
+문서 제목: 기능 페이지/컴포넌트: access-block-user-page -->
 
 <template>
   <div>

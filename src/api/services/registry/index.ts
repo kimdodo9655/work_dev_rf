@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/api/services/registry/index.ts`
- * 문서 제목: index 구현 파일
+ * 문서 제목: API 서비스: index
  */
 
 export * from './admin_consent'

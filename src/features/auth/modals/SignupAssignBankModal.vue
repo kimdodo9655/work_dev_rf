@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/features/auth/modals/SignupAssignBankModal.vue`
-문서 제목: Signup Assign Bank Modal 구현 파일 -->
+문서 제목: 기능 페이지/컴포넌트: signup-assign-bank-modal -->
 
 <template>
   <div>

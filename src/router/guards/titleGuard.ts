@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/router/guards/titleGuard.ts`
- * 문서 제목: title Guard 구현 파일
+ * 문서 제목: 라우트 가드: title-guard
  */
 
 import type { RouteLocationNormalized } from 'vue-router'

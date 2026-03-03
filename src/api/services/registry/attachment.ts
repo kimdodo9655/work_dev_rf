@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/api/services/registry/attachment.ts`
- * 문서 제목: attachment 구현 파일
+ * 문서 제목: API 서비스: attachment
  */
 
 // --------------------------------------------------

@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/router/routes/auth.ts`
- * 문서 제목: auth 구현 파일
+ * 문서 제목: 라우트 정의: auth
  */
 
 import type { RouteRecordRaw } from 'vue-router'

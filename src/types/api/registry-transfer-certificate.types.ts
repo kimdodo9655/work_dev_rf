@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/types/api/registry-transfer-certificate.types.ts`
- * 문서 제목: registry transfer certificate.types 구현 파일
+ * 문서 제목: 타입 정의: registry-transfer-certificate-types
  */
 
 /**

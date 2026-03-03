@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/router/routes/index.ts`
- * 문서 제목: index 구현 파일
+ * 문서 제목: 라우트 정의: index
  */
 
 import type { RouteRecordRaw } from 'vue-router'

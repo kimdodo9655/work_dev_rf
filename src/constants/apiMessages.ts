@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/constants/apiMessages.ts`
- * 문서 제목: api Messages 구현 파일
+ * 문서 제목: 상수 모듈: api-messages
  */
 
 // src/constants/apiMessages.ts

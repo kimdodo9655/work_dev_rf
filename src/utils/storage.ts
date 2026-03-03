@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/utils/storage.ts`
- * 문서 제목: storage 구현 파일
+ * 문서 제목: 유틸리티 모듈: storage
  */
 
 // localStorage 키 상수

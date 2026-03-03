@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/types/api/registry-progress.types.ts`
- * 문서 제목: registry progress.types 구현 파일
+ * 문서 제목: 타입 정의: registry-progress-types
  */
 
 /**

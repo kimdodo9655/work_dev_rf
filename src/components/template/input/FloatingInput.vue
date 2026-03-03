@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/components/template/input/FloatingInput.vue`
-문서 제목: Floating Input 구현 파일 -->
+문서 제목: 재사용 템플릿 컴포넌트: floating-input -->
 
 <template>
   <div class="floating-field" ref="fieldRef">

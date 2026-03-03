@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/features/registration/composables/useApplicationSection.ts`
- * 문서 제목: use Application Section 구현 파일
+ * 문서 제목: 기능 모듈: use-application-section
  */
 
 import { computed, defineAsyncComponent, type Ref } from 'vue'

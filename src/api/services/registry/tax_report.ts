@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/api/services/registry/tax_report.ts`
- * 문서 제목: tax report 구현 파일
+ * 문서 제목: API 서비스: tax-report
  */
 
 // --------------------------------------------------

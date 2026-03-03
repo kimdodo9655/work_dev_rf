@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/api/publicApiMap.ts`
- * 문서 제목: public Api Map 구현 파일
+ * 문서 제목: API 모듈: public-api-map
  */
 
 /**

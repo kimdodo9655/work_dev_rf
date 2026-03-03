@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/api/endpoints/user.ts`
- * 문서 제목: user 구현 파일
+ * 문서 제목: API 엔드포인트: user
  */
 
 export const USER = {

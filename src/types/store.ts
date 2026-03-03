@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/types/store.ts`
- * 문서 제목: store 구현 파일
+ * 문서 제목: 타입 정의: store
  */
 
 /**

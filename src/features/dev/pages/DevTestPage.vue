@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/features/dev/pages/DevTestPage.vue`
-문서 제목: Dev Test Page 구현 파일 -->
+문서 제목: 기능 페이지/컴포넌트: dev-test-page -->
 
 <template>
   <div class="pdf-window-buttons" style="display: flex; gap: 8px; margin-bottom: 12px">

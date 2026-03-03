@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/features/shared/pages/NoticeDetailPage.vue`
-문서 제목: Notice Detail Page 구현 파일 -->
+문서 제목: 기능 페이지/컴포넌트: notice-detail-page -->
 
 <template>
   <div>공지 디테일 (ID: {{ noticeId }})</div>

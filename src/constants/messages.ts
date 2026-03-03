@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/constants/messages.ts`
- * 문서 제목: messages 구현 파일
+ * 문서 제목: 상수 모듈: messages
  */
 
 export const MESSAGES = {

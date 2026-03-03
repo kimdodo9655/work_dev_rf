@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/features/doc-templates/PdfViewer.vue`
-문서 제목: Pdf Viewer 구현 파일 -->
+문서 제목: 기능 페이지/컴포넌트: pdf-viewer -->
 
 <template>
   <div class="pdf-viewer-root" :class="{ 'is-fullscreen': fullScreen }">

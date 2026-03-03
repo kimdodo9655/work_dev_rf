@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/components/layout/DialogProvider.vue`
-문서 제목: Dialog Provider 구현 파일 -->
+문서 제목: 재사용 레이아웃 컴포넌트: dialog-provider -->
 
 <script setup lang="ts">
 import AlertDialog from '@/components/layout/AlertDialog.vue'

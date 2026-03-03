@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/plugins/vueQuery.ts`
- * 문서 제목: vue Query 구현 파일
+ * 문서 제목: 플러그인 모듈: vue-query
  */
 
 import { VueQueryPlugin } from '@tanstack/vue-query'

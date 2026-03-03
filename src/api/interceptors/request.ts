@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/api/interceptors/request.ts`
- * 문서 제목: request 구현 파일
+ * 문서 제목: API 인터셉터: request
  */
 
 import type { AxiosInstance, InternalAxiosRequestConfig } from 'axios'

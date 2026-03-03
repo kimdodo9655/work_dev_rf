@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/types/env.d.ts`
- * 문서 제목: env.d 구현 파일
+ * 문서 제목: 타입 정의: env-d
  */
 
 /// <reference types="vite/client" />

@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/router/guards/accessGuard.ts`
- * 문서 제목: access Guard 구현 파일
+ * 문서 제목: 라우트 가드: access-guard
  */
 
 import type { RouteLocationNormalized } from 'vue-router'

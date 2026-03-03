@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/api/endpoints/code.ts`
- * 문서 제목: code 구현 파일
+ * 문서 제목: API 엔드포인트: code
  */
 
 export const CODE = {

@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/stores/auth.ts`
- * 문서 제목: auth 구현 파일
+ * 문서 제목: 스토어 모듈: auth
  */
 
 import { defineStore } from 'pinia'

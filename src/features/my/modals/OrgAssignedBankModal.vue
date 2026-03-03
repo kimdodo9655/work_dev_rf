@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/features/my/modals/OrgAssignedBankModal.vue`
-문서 제목: Org Assigned Bank Modal 구현 파일 -->
+문서 제목: 기능 페이지/컴포넌트: org-assigned-bank-modal -->
 
 <template>
   <div>

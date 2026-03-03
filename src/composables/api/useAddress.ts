@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/composables/api/useAddress.ts`
- * 문서 제목: use Address 구현 파일
+ * 문서 제목: 컴포저블 API: use-address
  */
 
 /**

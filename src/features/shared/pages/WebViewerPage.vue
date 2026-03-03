@@ -1,5 +1,5 @@
 <!-- 문서 경로: `@/src/features/shared/pages/WebViewerPage.vue`
-문서 제목: Web Viewer Page 구현 파일 -->
+문서 제목: 기능 페이지/컴포넌트: web-viewer-page -->
 
 <template>
   <div class="web-viewer-page">

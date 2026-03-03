@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/api/services/registry/signature.ts`
- * 문서 제목: signature 구현 파일
+ * 문서 제목: API 서비스: signature
  */
 
 // --------------------------------------------------

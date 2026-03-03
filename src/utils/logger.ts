@@ -1,6 +1,6 @@
 /**
  * 문서 경로: `@/src/utils/logger.ts`
- * 문서 제목: logger 구현 파일
+ * 문서 제목: 유틸리티 모듈: logger
  */
 
 import { ENV } from '@/utils/env'
