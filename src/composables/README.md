@@ -249,7 +249,7 @@ export function useXXX() {
 
 - **API Services**: `api/services/*.ts` - 실제 API 호출 함수
 - **Types**: `types/domains/*.ts` - 타입 정의
-- **Endpoints**: `api/endpoints.ts` - API 엔드포인트 상수
+- **Endpoints**: `api/endpoints/index.ts` - API 엔드포인트 상수
 
 ## 💡 Tips
 
