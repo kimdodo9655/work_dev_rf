@@ -24,10 +24,16 @@ export default defineConfig({
     }
   },
   build: {
+    chunkSizeWarningLimit: 1100,
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes('html2canvas') || id.includes('jspdf')) return 'pdf-convert-vendor'
+          if (id.includes('html2canvas')) return 'html2canvas-vendor'
+          if (id.includes('jspdf')) return 'jspdf-vendor'
+          if (id.includes('pdfjs-dist')) return 'pdfjs-vendor'
+          if (id.includes('@fullcalendar')) return 'calendar-vendor'
+          if (id.includes('chart.js')) return 'chart-vendor'
+          if (id.includes('@tanstack/vue-query')) return 'query-vendor'
           return undefined
         }
       }

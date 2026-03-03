@@ -42,6 +42,7 @@ import AppFooter from '@/components/layout/AppFooter.vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import DialogProvider from '@/components/layout/DialogProvider.vue'
 import { useAuthInitializer } from '@/composables/utils/useAuthInitializer'
+import { ensureIconStylesLoaded } from '@/plugins/iconStyles'
 // import { useDeviceDetection } from '@/composables/utils/useDeviceDetection'
 import { useAuthStore } from '@/stores/auth'
 import { ENV } from '@/utils/env'
@@ -89,6 +90,9 @@ const wrapperClass = computed(() => {
 // Lifecycle
 // ============================================================================
 onMounted(async () => {
+  // 아이콘 폰트 CSS를 비동기로 로드해 초기 번들 블로킹을 줄인다.
+  void ensureIconStylesLoaded()
+
   if (!route.path.startsWith('/error')) {
     // 모바일, macOs 차단
     // checkAndRedirect()

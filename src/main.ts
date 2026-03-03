@@ -1,9 +1,4 @@
 import '@/assets/styles/global.scss'
-import '@flaticon/flaticon-uicons/css/bold/rounded.css'
-import '@flaticon/flaticon-uicons/css/regular/rounded.css'
-import '@flaticon/flaticon-uicons/css/regular/straight.css'
-import '@flaticon/flaticon-uicons/css/solid/rounded.css'
-import '@flaticon/flaticon-uicons/css/solid/straight.css'
 import '@/api/client'
 
 import { createApp } from 'vue'
