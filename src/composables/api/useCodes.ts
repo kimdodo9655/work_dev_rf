@@ -1,6 +1,7 @@
 import { computed, ref } from 'vue'
 
 import { codeAPI } from '@/api/services/code'
+import { useCodeReplacer } from '@/composables/utils/useCodeReplacer'
 import type {
   ApiCodeResponse,
   Code,
@@ -148,6 +149,7 @@ export function useCodes() {
   const codes = ref<CodeResponse>(createInitialCodes())
   const isLoading = ref(false)
   const loadError = ref<string | null>(null)
+  const { findReplacement, replaceText } = useCodeReplacer()
 
   // ── codeMaps ──────────────────────────────────────
   /**
@@ -260,9 +262,13 @@ export function useCodes() {
   function getCodeLabel(category: CodeKey, code: string): string {
     const map = codeMaps.value[category]
     if (category === 'userRoleLevels') {
-      return (map as RoleLevelCodeMap).get(code)?.description ?? code
+      return (
+        (map as RoleLevelCodeMap).get(code)?.description ??
+        findReplacement(code, category) ??
+        replaceText(code)
+      )
     }
-    return (map as CodeMap).get(code) ?? code
+    return (map as CodeMap).get(code) ?? findReplacement(code, category) ?? replaceText(code)
   }
 
   function getRoleLevel(code: string): number | null {
@@ -280,7 +286,9 @@ export function useCodes() {
       // successCodes / errorCodes
       return (codes.value[category] as unknown as ApiCodeResponse[]).map((item) => ({
         value: item.code ?? '',
-        label: item.title ?? item.message ?? item.code ?? ''
+        label: replaceText(
+          item.title ?? item.message ?? findReplacement(item.code, category) ?? item.code ?? ''
+        )
       }))
     }
     return (codes.value[category] as Code[]).map((item) => ({

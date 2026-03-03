@@ -3,6 +3,7 @@
  * @description 에러 핸들링 Composable (유틸리티)
  */
 
+import { useCodeReplacer } from '@/composables/utils/useCodeReplacer'
 import { isApiError, toApiError } from '@/types'
 import { logger } from '@/utils/logger'
 
@@ -22,6 +23,8 @@ import { logger } from '@/utils/logger'
  * }
  */
 export function useErrorHandler() {
+  const { findReplacement, replaceText } = useCodeReplacer()
+
   // ============================================================================
   // Error Handler Functions
   // ============================================================================
@@ -55,11 +58,11 @@ export function useErrorHandler() {
    */
   function getErrorMessage(error: unknown): string {
     if (isApiError(error)) {
-      return error.message
+      return findReplacement(error.code, 'errorCodes') ?? replaceText(error.message)
     }
 
     const apiError = toApiError(error)
-    return apiError.message
+    return findReplacement(apiError.code, 'errorCodes') ?? replaceText(apiError.message)
   }
 
   /**

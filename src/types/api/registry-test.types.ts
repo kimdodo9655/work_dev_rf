@@ -55,15 +55,15 @@ export interface CreateRegistryTypeComboTestDataQuery {
   /** 진행 유형 (ProgressType 코드값) */
   progressType: 'TYPE_01' | 'TYPE_02' | 'TYPE_04' | 'TYPE_05' | 'TYPE_07'
   /** 등기 방식 (RegistryMethod 코드값) */
-  registryMethod: 'ELECTRONIC' | 'E_FORM' | 'PAPER' | 'MIXED'
+  registryMethod?: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
   /** 부동산 개수 */
-  numberOfProperties: number
+  numberOfProperties?: number
   /** 부동산 추가 정보 생성 여부 */
   hasAdditionalPropertyInfo?: boolean
   /** 지상권 설정 부동산 수 */
   numberOfSurfaceRights?: number
   /** 담보제공자 수 */
-  numberOfBuyers: number
+  numberOfBuyers?: number
   /** 담보제공자 추가 정보 생성 여부 */
   hasAdditionalBuyerInfo?: boolean
   /** 담보제공자와 동일한 채무자 수 */

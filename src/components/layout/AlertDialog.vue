@@ -1,5 +1,7 @@
 <!-- components/layout/AlertDialog.vue -->
 <script setup lang="ts">
+import { computed } from 'vue'
+
 import { type AlertOptions } from '@/types/dialog'
 
 interface Props {
@@ -12,8 +14,10 @@ interface Emits {
   (e: 'confirm'): void
 }
 
-defineProps<Props>()
 const emit = defineEmits<Emits>()
+const props = defineProps<Props>()
+
+const dialogMessage = computed(() => props.options.message ?? props.options.content ?? '')
 
 const handleClose = () => {
   emit('close')
@@ -32,7 +36,7 @@ const handleConfirm = async () => {
           <button class="dialog-close" @click="handleClose">×</button>
 
           <h2 class="dialog-title">{{ options.title }}</h2>
-          <p class="dialog-content">{{ options.content }}</p>
+          <p class="dialog-content">{{ dialogMessage }}</p>
 
           <div class="dialog-actions">
             <button class="dialog-btn dialog-btn-primary" @click="handleConfirm">

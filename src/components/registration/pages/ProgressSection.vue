@@ -23,14 +23,14 @@
             </thead>
             <tbody>
               <tr v-for="item in mortgageList" :key="item.eSignatureId">
-                <td>{{ item.partyRoleName }}</td>
+                <td>{{ displayCode(item.partyRoleName, 'partyRoles') }}</td>
                 <td>{{ item.name }}</td>
-                <td>{{ item.signatureMethodName }}</td>
+                <td>{{ displayCode(item.signatureMethodName, 'eSignatureMethods') }}</td>
                 <td>{{ item.signatureRequestedAt ?? '-' }}</td>
                 <td>{{ item.signatureCompletedAt ?? '-' }}</td>
                 <td>
                   <span :class="getSignatureStatusClass(item.signatureStatus)">
-                    {{ item.signatureStatusName }}
+                    {{ displayCode(item.signatureStatusName, 'eSignatureStatuses') }}
                   </span>
                 </td>
                 <td>
@@ -76,14 +76,14 @@
             </thead>
             <tbody>
               <tr v-for="item in transferList" :key="item.eSignatureId">
-                <td>{{ item.partyRoleName }}</td>
+                <td>{{ displayCode(item.partyRoleName, 'partyRoles') }}</td>
                 <td>{{ item.name }}</td>
-                <td>{{ item.signatureMethodName }}</td>
+                <td>{{ displayCode(item.signatureMethodName, 'eSignatureMethods') }}</td>
                 <td>{{ item.signatureRequestedAt ?? '-' }}</td>
                 <td>{{ item.signatureCompletedAt ?? '-' }}</td>
                 <td>
                   <span :class="getSignatureStatusClass(item.signatureStatus)">
-                    {{ item.signatureStatusName }}
+                    {{ displayCode(item.signatureStatusName, 'eSignatureStatuses') }}
                   </span>
                 </td>
                 <td>
@@ -109,6 +109,8 @@
 import { ref, watch } from 'vue'
 
 import { registrySignatureAPI } from '@/api/services/registry'
+import { useCodeReplacer } from '@/composables/utils/useCodeReplacer'
+import { useErrorHandler } from '@/composables/utils/useErrorHandler'
 import { useThrottle } from '@/composables/utils/useThrottle'
 
 interface Props {
@@ -134,6 +136,14 @@ interface ESignatureItem {
 }
 
 const props = defineProps<Props>()
+const { findReplacement, replaceText } = useCodeReplacer()
+const { getErrorMessage } = useErrorHandler()
+
+function displayCode(value?: string | null, category?: string): string {
+  if (!value) return '-'
+  if (!category) return replaceText(value)
+  return findReplacement(value, category) ?? replaceText(value)
+}
 
 // 근저당권 전자서명 (내부)
 const mortgageLoading = ref(false)
@@ -190,7 +200,7 @@ async function fetchMortgageSignatures() {
       mortgageList.value = Array.isArray(data) ? data : []
     } catch (e: any) {
       mortgageList.value = []
-      mortgageErrorMessage.value = e?.message ?? '근저당권 전자서명 정보 조회 실패'
+      mortgageErrorMessage.value = getErrorMessage(e)
     } finally {
       mortgageLoading.value = false
     }
@@ -220,7 +230,7 @@ async function fetchTransferSignatures() {
       transferList.value = Array.isArray(data) ? data : []
     } catch (e: any) {
       transferList.value = []
-      transferErrorMessage.value = e?.message ?? '소유권이전 전자서명 정보 조회 실패'
+      transferErrorMessage.value = getErrorMessage(e)
     } finally {
       transferLoading.value = false
     }

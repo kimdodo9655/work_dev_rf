@@ -39,7 +39,7 @@
           </div>
           <div class="row">
             <span class="label">메시지</span>
-            <span class="value">{{ loanInfo?.managerMessage ?? '-' }}</span>
+            <span class="value">{{ displayText(loanInfo?.managerMessage) }}</span>
           </div>
         </div>
       </section>
@@ -64,19 +64,21 @@
           </div>
           <div class="row">
             <span class="label">진행상태</span>
-            <span class="value">{{ basicInfo?.progressStatus ?? '-' }}</span>
+            <span class="value">{{
+              displayCode(basicInfo?.progressStatus, 'progressStatuses')
+            }}</span>
           </div>
           <div class="row">
             <span class="label">배정업무</span>
-            <span class="value">{{ basicInfo?.assignedWork ?? '-' }}</span>
+            <span class="value">{{ displayCode(basicInfo?.assignedWork, 'assignedWorks') }}</span>
           </div>
           <div class="row">
             <span class="label">업무구분</span>
-            <span class="value">{{ basicInfo?.workType ?? '-' }}</span>
+            <span class="value">{{ displayCode(basicInfo?.workType, 'workTypes') }}</span>
           </div>
           <div class="row">
             <span class="label">진행타입</span>
-            <span class="value">{{ basicInfo?.progressType ?? '-' }}</span>
+            <span class="value">{{ displayCode(basicInfo?.progressType, 'progressTypes') }}</span>
           </div>
           <div class="row">
             <span class="label">첨부 개수</span>
@@ -84,7 +86,7 @@
           </div>
           <div class="row">
             <span class="label">상환말소대상</span>
-            <span class="value">{{ basicInfo?.repaymentCancellationSubject ?? '-' }}</span>
+            <span class="value">{{ displayText(basicInfo?.repaymentCancellationSubject) }}</span>
           </div>
           <div class="row">
             <span class="label">상환말소대상 개수</span>
@@ -105,11 +107,15 @@
         <div v-else-if="mortgageInfo" class="card">
           <div class="row">
             <span class="label">등기 유형</span>
-            <span class="value">{{ mortgageInfo.registryTypeName ?? '-' }}</span>
+            <span class="value">{{
+              displayCode(mortgageInfo.registryTypeName, 'registryTypes')
+            }}</span>
           </div>
           <div class="row">
             <span class="label">등기 원인</span>
-            <span class="value">{{ mortgageInfo.registryCauseName ?? '-' }}</span>
+            <span class="value">{{
+              displayCode(mortgageInfo.registryCauseName, 'registryCauses')
+            }}</span>
           </div>
           <div class="row">
             <span class="label">채권최고액</span>
@@ -119,7 +125,9 @@
           </div>
           <div class="row">
             <span class="label">등기 방식</span>
-            <span class="value">{{ mortgageInfo.registryMethodName ?? '-' }}</span>
+            <span class="value">{{
+              displayCode(mortgageInfo.registryMethodName, 'registryMethods')
+            }}</span>
           </div>
           <div class="row">
             <span class="label">지상권 여부</span>
@@ -144,11 +152,13 @@
         <div v-else-if="transferInfo" class="card">
           <div class="row">
             <span class="label">등기유형</span>
-            <span class="value">{{ transferInfo.registryType ?? '-' }}</span>
+            <span class="value">{{ displayCode(transferInfo.registryType, 'registryTypes') }}</span>
           </div>
           <div class="row">
             <span class="label">등기원인</span>
-            <span class="value">{{ transferInfo.registryCause ?? '-' }}</span>
+            <span class="value">{{
+              displayCode(transferInfo.registryCause, 'registryCauses')
+            }}</span>
           </div>
           <div class="row">
             <span class="label">매매가액</span>
@@ -156,7 +166,9 @@
           </div>
           <div class="row">
             <span class="label">등기방식</span>
-            <span class="value">{{ transferInfo.registryMethod ?? '-' }}</span>
+            <span class="value">{{
+              displayCode(transferInfo.registryMethod, 'registryMethods')
+            }}</span>
           </div>
           <div class="row">
             <span class="label">견적서 작성자</span>
@@ -230,6 +242,8 @@
 import { computed, ref, watch } from 'vue'
 
 import { registryProgressAPI } from '@/api/services/registry'
+import { useCodeReplacer } from '@/composables/utils/useCodeReplacer'
+import { useErrorHandler } from '@/composables/utils/useErrorHandler'
 import { useThrottle } from '@/composables/utils/useThrottle'
 import type {
   RegistryProgressBasicResponse,
@@ -245,6 +259,18 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const { findReplacement, replaceText } = useCodeReplacer()
+const { getErrorMessage } = useErrorHandler()
+
+function displayCode(value?: string | null, category?: string): string {
+  if (!value) return '-'
+  if (!category) return replaceText(value)
+  return findReplacement(value, category) ?? replaceText(value)
+}
+
+function displayText(value?: string | null): string {
+  return value ? replaceText(value) : '-'
+}
 
 // 대출 금융기관 정보
 const loanLoading = ref(false)
@@ -329,7 +355,7 @@ async function fetchLoanInfo() {
       if (!loanInfo.value) loanErrorMessage.value = '대출 금융기관 정보를 불러오지 못했습니다.'
     } catch (e: any) {
       loanInfo.value = null
-      loanErrorMessage.value = e?.message ?? '대출 금융기관 정보 조회 실패'
+      loanErrorMessage.value = getErrorMessage(e)
     } finally {
       loanLoading.value = false
     }
@@ -358,7 +384,7 @@ async function fetchBasicInfo() {
       if (!basicInfo.value) basicErrorMessage.value = '상세 정보를 불러오지 못했습니다.'
     } catch (e: any) {
       basicInfo.value = null
-      basicErrorMessage.value = e?.message ?? '업무 기본 정보 조회 실패'
+      basicErrorMessage.value = getErrorMessage(e)
     } finally {
       basicLoading.value = false
     }
@@ -388,7 +414,7 @@ async function fetchMortgageInfo() {
         mortgageErrorMessage.value = '근저당권설정 정보를 불러오지 못했습니다.'
     } catch (e: any) {
       mortgageInfo.value = null
-      mortgageErrorMessage.value = e?.message ?? '근저당권설정 정보 조회 실패'
+      mortgageErrorMessage.value = getErrorMessage(e)
     } finally {
       mortgageLoading.value = false
     }
@@ -417,7 +443,7 @@ async function fetchTransferInfo() {
       if (!transferInfo.value) transferErrorMessage.value = '소유권이전 정보를 불러오지 못했습니다.'
     } catch (e: any) {
       transferInfo.value = null
-      transferErrorMessage.value = e?.message ?? '소유권이전 정보 조회 실패'
+      transferErrorMessage.value = getErrorMessage(e)
     } finally {
       transferLoading.value = false
     }
@@ -448,7 +474,7 @@ async function fetchMortgageLegalInfo() {
         mortgageLegalErrorMessage.value = '근저당권설정 법무대리인 정보를 불러오지 못했습니다.'
     } catch (e: any) {
       mortgageLegalInfo.value = null
-      mortgageLegalErrorMessage.value = e?.message ?? '근저당권설정 법무대리인 정보 조회 실패'
+      mortgageLegalErrorMessage.value = getErrorMessage(e)
     } finally {
       mortgageLegalLoading.value = false
     }
@@ -479,7 +505,7 @@ async function fetchTransferLegalInfo() {
         transferLegalErrorMessage.value = '소유권이전 법무대리인 정보를 불러오지 못했습니다.'
     } catch (e: any) {
       transferLegalInfo.value = null
-      transferLegalErrorMessage.value = e?.message ?? '소유권이전 법무대리인 정보 조회 실패'
+      transferLegalErrorMessage.value = getErrorMessage(e)
     } finally {
       transferLegalLoading.value = false
     }

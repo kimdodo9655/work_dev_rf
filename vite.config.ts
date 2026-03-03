@@ -23,6 +23,16 @@ export default defineConfig({
       scss: {}
     }
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('html2canvas') || id.includes('jspdf')) return 'pdf-convert-vendor'
+          return undefined
+        }
+      }
+    }
+  },
   server: {
     port: 8101,
     proxy: {

@@ -9,9 +9,18 @@
           :class="['tab-item', { active: activeTabIndex === index }]"
           @click="selectTab(index)"
         >
-          <span class="tab-label">{{ tab.registryTypeLabel || '등기신청서' }}</span>
+          <span class="tab-label">{{
+            displayRegistryType(tab.registryTypeLabel ?? tab.registryType) || '등기신청서'
+          }}</span>
           <!-- 삭제 버튼 (추후 기능 구현) -->
-          <button class="tab-close-btn" @click.stop="handleDeleteTab(tab)">×</button>
+          <button
+            v-if="canDeleteTab(tab)"
+            class="tab-close-btn"
+            :disabled="isDeletingTab(tab)"
+            @click.stop="handleDeleteTab(tab)"
+          >
+            ×
+          </button>
         </div>
 
         <!-- 탭 추가 버튼 (추후 기능 구현) -->
@@ -37,15 +46,15 @@
               </thead>
               <tbody>
                 <tr>
-                  <td>{{ document.registryType || '-' }}</td>
-                  <td>{{ document.registryCause || '-' }}</td>
+                  <td>{{ displayRegistryType(document.registryType) }}</td>
+                  <td>{{ displayRegistryCause(document.registryCause) }}</td>
                   <td>
                     <div class="editable-cell">
-                      <span>{{ document.registryMethod || '-' }}</span>
+                      <span>{{ displayRegistryMethod(document.registryMethod) }}</span>
                       <button class="edit-btn" @click="handleEditRegistryMethod">수정</button>
                     </div>
                   </td>
-                  <td>{{ document.adminInfoLinkTime || '-' }}</td>
+                  <td>{{ displayAdminInfoLinkTime(document.adminInfoLinkTime) }}</td>
                 </tr>
               </tbody>
             </table>
@@ -61,13 +70,13 @@
                 class="section-btn"
                 @click="handleSectionClick(section)"
               >
-                {{ section.title }}
+                {{ displayText(section.title) }}
               </button>
             </div>
           </div>
 
-          <!-- 신청서 양식 -->
-          <PdfConverter />
+          <!-- 신청서 양식 (개발 환경 전용) -->
+          <component :is="pdfConverterComponent" v-if="pdfConverterComponent" />
         </div>
       </div>
     </div>
@@ -87,12 +96,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, ref, watch } from 'vue'
 
 import { registryTypeAPI } from '@/api/services/registry'
-import PdfConverter from '@/components/doc-templates/PdfConverter.vue'
 import CaseCertInfoRegModal from '@/components/registration/modals/CaseCertInfoRegModal.vue'
+import { useCodeReplacer } from '@/composables/utils/useCodeReplacer'
+import { useDialog } from '@/composables/utils/useDialog'
+import { useErrorHandler } from '@/composables/utils/useErrorHandler'
 import { useThrottle } from '@/composables/utils/useThrottle'
+
+const showPdfConverter = import.meta.env.DEV || import.meta.env.VITE_IS_DEV === 'true'
+const pdfConverterComponent = showPdfConverter
+  ? defineAsyncComponent(() => import('@/components/doc-templates/PdfConverter.vue'))
+  : null
 
 interface Props {
   registryManagementNumber: string
@@ -105,6 +121,7 @@ interface RegistryApplicationForm {
   dataSource?: 'REQUEST' | 'MANUAL'
   registryType?: string
   registryTypeLabel?: string
+  registryRole?: 'MAIN' | 'LINKED' | string
 }
 
 interface RegistryApplicationDocument {
@@ -121,12 +138,16 @@ interface RegistryApplicationDocument {
 }
 
 const props = defineProps<Props>()
+const { findReplacement, replaceText } = useCodeReplacer()
+const { getErrorMessage } = useErrorHandler()
 
 const tabsLoading = ref(false)
 const tabsErrorMessage = ref('')
 const tabs = ref<RegistryApplicationForm[]>([])
 const activeTabIndex = ref(0)
 const tabsThrottle = useThrottle(1000)
+const deletingApplicationIds = ref<Set<number>>(new Set())
+const { alert, confirm } = useDialog()
 
 const documentLoading = ref(false)
 const documentErrorMessage = ref('')
@@ -137,6 +158,31 @@ const activeApplicationId = computed(() => {
   const activeTab = tabs.value[activeTabIndex.value]
   return activeTab?.applicationId
 })
+
+function displayCode(value: string | undefined, category: string): string {
+  if (!value) return '-'
+  return findReplacement(value, category) ?? replaceText(value)
+}
+
+function displayText(value?: string): string {
+  return value ? replaceText(value) : '-'
+}
+
+function displayRegistryType(value?: string): string {
+  return displayCode(value, 'registryTypes')
+}
+
+function displayRegistryCause(value?: string): string {
+  return displayCode(value, 'registryCauses')
+}
+
+function displayRegistryMethod(value?: string): string {
+  return displayCode(value, 'registryMethods')
+}
+
+function displayAdminInfoLinkTime(value?: string): string {
+  return displayCode(value, 'adminInfoLinkTime')
+}
 
 function unwrapData<T>(res: any): T {
   if (res?.data && typeof res.data === 'object' && 'data' in res.data) return res.data.data as T
@@ -169,7 +215,7 @@ async function fetchTabs() {
       }
     } catch (e: any) {
       tabs.value = []
-      tabsErrorMessage.value = e?.message ?? '등기신청서 목록 조회 실패'
+      tabsErrorMessage.value = getErrorMessage(e)
     } finally {
       tabsLoading.value = false
     }
@@ -198,7 +244,7 @@ async function fetchDocument(applicationId: number) {
       document.value = data || null
     } catch (e: any) {
       document.value = null
-      documentErrorMessage.value = e?.message ?? '등기신청서 전자문서 조회 실패'
+      documentErrorMessage.value = getErrorMessage(e)
     } finally {
       documentLoading.value = false
     }
@@ -222,10 +268,82 @@ function handleAddTab() {
   // TODO: 모달 열어서 등기유형 선택 후 등기신청서 생성
 }
 
-// 탭 삭제 (추후 구현)
-function handleDeleteTab(tab: RegistryApplicationForm) {
-  console.log('탭 삭제:', tab)
-  // TODO: 삭제 확인 후 DELETE API 호출
+// 탭 삭제 (R02D-03)
+async function handleDeleteTab(tab: RegistryApplicationForm) {
+  if (!canDeleteTab(tab)) return
+  if (!tab.applicationId) {
+    await alert({
+      title: '삭제 실패',
+      message: '신청서 ID가 없어 삭제할 수 없습니다.'
+    })
+    return
+  }
+  if (deletingApplicationIds.value.has(tab.applicationId)) return
+
+  const ok = await confirm({
+    title: '등기신청서 삭제',
+    message: '선택한 등기신청서를 삭제하시겠습니까?',
+    confirmText: '삭제',
+    cancelText: '취소'
+  })
+  if (!ok) return
+
+  deletingApplicationIds.value.add(tab.applicationId)
+  try {
+    await registryTypeAPI.delete({ applicationId: tab.applicationId })
+    removeTabFromState(tab.applicationId)
+    await alert({
+      title: '삭제 완료',
+      message: '등기신청서를 삭제했습니다.'
+    })
+  } catch (e: any) {
+    await alert({
+      title: '삭제 실패',
+      message: getErrorMessage(e)
+    })
+  } finally {
+    deletingApplicationIds.value.delete(tab.applicationId)
+  }
+}
+
+function canDeleteTab(tab: RegistryApplicationForm) {
+  return tab.registryRole !== 'MAIN'
+}
+
+function isDeletingTab(tab: RegistryApplicationForm) {
+  return !!tab.applicationId && deletingApplicationIds.value.has(tab.applicationId)
+}
+
+function removeTabFromState(applicationId: number) {
+  const removedIndex = tabs.value.findIndex((item) => item.applicationId === applicationId)
+  if (removedIndex < 0) return
+
+  const wasActive = activeTabIndex.value === removedIndex
+  tabs.value = tabs.value.filter((item) => item.applicationId !== applicationId)
+
+  if (tabs.value.length === 0) {
+    activeTabIndex.value = 0
+    document.value = null
+    documentErrorMessage.value = ''
+    return
+  }
+
+  if (activeTabIndex.value > removedIndex) {
+    activeTabIndex.value -= 1
+  }
+  if (activeTabIndex.value >= tabs.value.length) {
+    activeTabIndex.value = tabs.value.length - 1
+  }
+
+  if (wasActive) {
+    const nextAppId = activeApplicationId.value
+    if (nextAppId) {
+      void fetchDocument(nextAppId)
+    } else {
+      document.value = null
+      documentErrorMessage.value = ''
+    }
+  }
 }
 
 // 등기방식 수정 (추후 구현)
@@ -372,6 +490,11 @@ watch(
   &:hover {
     background: #fee2e2;
     color: #dc2626;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 }
 

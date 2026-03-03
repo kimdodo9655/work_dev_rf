@@ -17,20 +17,32 @@ import type {
 } from '@/types'
 
 export const registryTestAPI = {
-  async createRequest(_query: CreateRegistryRequestTestDataQuery) {
+  async createRequest(query: CreateRegistryRequestTestDataQuery) {
     // --------------------------------------------------
     // [R00-01][POST - /api/registry/test-data/requests] 등기의뢰 테스트 데이터 생성
     // --------------------------------------------------
-    return apiHelpers.post<CreateRegistryRequestTestDataResponse>(API.REGISTRY_TEST.CREATE_REQUEST)
+    const params = new URLSearchParams()
+    Object.entries(query).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) params.append(key, String(value))
+    })
+    const url = params.toString()
+      ? `${API.REGISTRY_TEST.CREATE_REQUEST}?${params.toString()}`
+      : API.REGISTRY_TEST.CREATE_REQUEST
+    return apiHelpers.post<CreateRegistryRequestTestDataResponse>(url)
   },
 
-  async createProgress(_query: CreateRegistryProgressTestDataQuery) {
+  async createProgress(query: CreateRegistryProgressTestDataQuery) {
     // --------------------------------------------------
     // [R00-02][POST - /api/registry/test-data/progress] 등기진행 테스트 데이터 생성
     // --------------------------------------------------
-    return apiHelpers.post<CreateRegistryProgressTestDataResponse>(
-      API.REGISTRY_TEST.CREATE_PROGRESS
-    )
+    const params = new URLSearchParams()
+    Object.entries(query).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) params.append(key, String(value))
+    })
+    const url = params.toString()
+      ? `${API.REGISTRY_TEST.CREATE_PROGRESS}?${params.toString()}`
+      : API.REGISTRY_TEST.CREATE_PROGRESS
+    return apiHelpers.post<CreateRegistryProgressTestDataResponse>(url)
   },
 
   async generate() {

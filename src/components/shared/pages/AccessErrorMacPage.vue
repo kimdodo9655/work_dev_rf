@@ -39,4 +39,6 @@
   </div>
 </template>
 
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import '@/assets/styles/pages/error.scss'
+</script>

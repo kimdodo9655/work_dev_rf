@@ -5,7 +5,9 @@
 </template>
 
 <script setup lang="ts">
-import PdfTester from '@/components/doc-templates/PdfTester.vue'
+import { defineAsyncComponent } from 'vue'
+
+const PdfTester = defineAsyncComponent(() => import('@/components/doc-templates/PdfTester.vue'))
 </script>
 
 <style lang="scss" scoped>

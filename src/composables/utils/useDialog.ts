@@ -18,6 +18,24 @@ const state = reactive<DialogState>({
   resolve: undefined
 })
 
+const normalizeAlertOptions = (options: AlertOptions): AlertOptions => {
+  const message = options.message ?? options.content ?? ''
+  return {
+    ...options,
+    message,
+    content: message
+  }
+}
+
+const normalizeConfirmOptions = (options: ConfirmOptions): ConfirmOptions => {
+  const message = options.message ?? options.content ?? ''
+  return {
+    ...options,
+    message,
+    content: message
+  }
+}
+
 // ============================================================================
 // Composable
 // ============================================================================
@@ -34,7 +52,7 @@ export const useDialog = () => {
     return new Promise((resolve) => {
       state.isOpen = true
       state.type = 'alert'
-      state.options = options
+      state.options = normalizeAlertOptions(options)
       state.resolve = resolve
     })
   }
@@ -46,7 +64,7 @@ export const useDialog = () => {
     return new Promise((resolve) => {
       state.isOpen = true
       state.type = 'confirm'
-      state.options = options
+      state.options = normalizeConfirmOptions(options)
       state.resolve = resolve
     })
   }

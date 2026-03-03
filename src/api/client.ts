@@ -3,6 +3,8 @@ import axiosRetry from 'axios-retry'
 
 import { API } from '@/api/endpoints'
 import { isPublicApiRequest } from '@/api/publicApiMap'
+import { useApiAlert } from '@/composables/utils/useApiAlert'
+import { useCodeReplacer } from '@/composables/utils/useCodeReplacer'
 import { useAuthStore } from '@/stores/auth'
 import { handleInvalidAuthState, isValidAuthData } from '@/utils/authValidator'
 import { ENV } from '@/utils/env'
@@ -230,7 +232,32 @@ const processQueue = (error: any, token: string | null = null) => {
   failedQueue = []
 }
 
-const handleAuthFailure = () => {
+const { showApiError } = useApiAlert()
+const { findReplacement, replaceText } = useCodeReplacer()
+
+function normalizeApiPayload(payload: unknown, status?: number) {
+  if (!payload || typeof payload !== 'object') return
+
+  const target = payload as {
+    code?: unknown
+    title?: unknown
+    message?: unknown
+  }
+
+  const category = typeof status === 'number' && status >= 400 ? 'errorCodes' : 'successCodes'
+  const byCode = findReplacement(target.code, category)
+
+  if (typeof target.title === 'string') {
+    target.title = byCode ?? findReplacement(target.title, category) ?? replaceText(target.title)
+  }
+
+  if (typeof target.message === 'string') {
+    target.message =
+      byCode ?? findReplacement(target.message, category) ?? replaceText(target.message)
+  }
+}
+
+const handleAuthFailure = async () => {
   if (typeof window === 'undefined') return
 
   // 이미 인증 관련 페이지면 중복 처리 방지
@@ -243,7 +270,10 @@ const handleAuthFailure = () => {
   refreshRetryCount = 0
 
   // 알림 표시
-  alert('세션이 만료되었습니다. 다시 로그인해주세요.')
+  await showApiError({
+    title: '세션 만료',
+    message: '세션이 만료되었습니다. 다시 로그인해주세요.'
+  })
 
   // 로그인 페이지로 이동
   window.location.href = '/auth/login'
@@ -251,6 +281,8 @@ const handleAuthFailure = () => {
 
 api.interceptors.response.use(
   (response) => {
+    normalizeApiPayload(response.data, response.status)
+
     // ✅ 개발 환경에서 성공 응답 로깅
     if (ENV.IS_DEV) {
       logger.debug('[API RESPONSE SUCCESS]', {
@@ -265,6 +297,11 @@ api.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config
+    normalizeApiPayload(error?.response?.data, error?.response?.status)
+
+    if (typeof error?.response?.data?.message === 'string') {
+      error.message = replaceText(error.response.data.message)
+    }
 
     // 401이 아니거나 이미 재시도한 요청이면 에러 반환
     if (error.response?.status !== 401 || originalRequest._retry) {
@@ -296,7 +333,7 @@ api.interceptors.response.use(
         retryCount: refreshRetryCount,
         maxRetries: MAX_REFRESH_RETRIES
       })
-      handleAuthFailure()
+      await handleAuthFailure()
       return Promise.reject(error)
     }
 
@@ -332,7 +369,7 @@ api.interceptors.response.use(
         error: err
       })
       processQueue(err, null)
-      handleAuthFailure()
+      await handleAuthFailure()
       return Promise.reject(err)
     } finally {
       isRefreshing = false

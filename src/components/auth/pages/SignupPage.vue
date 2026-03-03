@@ -194,6 +194,8 @@
 </template>
 
 <script lang="ts" setup>
+import '@/assets/styles/pages/auth.scss'
+
 import AccordionGroup from '@/components/template/AccordionGroup.vue'
 import AccordionItem from '@/components/template/AccordionItem.vue'
 </script>

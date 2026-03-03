@@ -21,5 +21,16 @@ export const devRoutes: RouteRecordRaw[] = [
       allowedAuthStates: ['pre-auth', 'onboarding', 'auth'],
       footerOff: true
     }
+  },
+  {
+    path: '/dev/viewer',
+    name: 'DevWebViewer',
+    component: () => import('@/components/shared/pages/WebViewerPage.vue'),
+    meta: {
+      title: '개발 PDF 뷰어',
+      layout: 'test',
+      allowedAuthStates: ['pre-auth', 'onboarding', 'auth'],
+      footerOff: true
+    }
   }
 ]

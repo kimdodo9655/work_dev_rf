@@ -154,11 +154,13 @@ import SearchDateRangePicker from '@/components/template/input/SearchDateRangePi
 import SearchInput from '@/components/template/input/SearchInput.vue'
 import SearchSelect from '@/components/template/input/SearchSelect.vue'
 import Pagination from '@/components/template/PaginationItem.vue'
+import { useDialog } from '@/composables/utils/useDialog'
 import { useAuthStore } from '@/stores/auth'
 import type { Code, GetAssignableUsersQuery, SearchRegistryProgresssListQuery } from '@/types'
 
 // Auth Store
 const authStore = useAuthStore()
+const { alert, confirm } = useDialog()
 const roleLevel = computed(() => authStore.roleLevel)
 const roleLevelValue = computed(() => roleLevel.value ?? 0)
 const userId = computed(() => authStore.userId)
@@ -564,11 +566,17 @@ async function callAssignManager(
       (res as any)?.message ??
       '업무담당자 배정이 완료되었습니다.'
 
-    window.alert(msg)
+    await alert({
+      title: '배정 완료',
+      message: msg
+    })
     await fetchList(false)
   } catch (e: any) {
     const msg = e?.message ?? '업무담당자 배정에 실패했습니다.'
-    window.alert(msg)
+    await alert({
+      title: '배정 실패',
+      message: msg
+    })
   } finally {
     assigningSet.value.delete(registryManagementNumber)
   }
@@ -577,7 +585,10 @@ async function callAssignManager(
 async function handleAssignMyself(registryManagementNumber: string) {
   if (!isUser30.value) return
   if (!userId.value) {
-    window.alert('사용자 정보가 없습니다. 다시 로그인해 주세요.')
+    await alert({
+      title: '사용자 정보 오류',
+      message: '사용자 정보가 없습니다. 다시 로그인해 주세요.'
+    })
     return
   }
   await callAssignManager(registryManagementNumber, userId.value)
@@ -605,7 +616,12 @@ async function handleAdminSelectChange(registryManagementNumber: string, selecte
   const userLabel =
     assignableUsers.value.find((u) => String(u.userId) === selected)?.userName ?? selected
 
-  const ok = window.confirm(`담당자를 "${userLabel}"(으)로 배정하시겠습니까?`)
+  const ok = await confirm({
+    title: '담당자 배정 확인',
+    message: `담당자를 "${userLabel}"(으)로 배정하시겠습니까?`,
+    confirmText: '배정',
+    cancelText: '취소'
+  })
   if (!ok) {
     const r = rows.value.find((x) => x.registryManagementNumber === registryManagementNumber)
     const rollback = r ? findUserIdByName(r.managerUserName) : ''

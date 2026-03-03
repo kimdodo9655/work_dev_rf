@@ -208,6 +208,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, type Ref, ref, watch } from 'vue'
 
+import { useDialog } from '@/composables/utils/useDialog'
 import { useAuthStore } from '@/stores/auth'
 import { storage } from '@/utils/storage'
 
@@ -219,6 +220,7 @@ interface FrameSize {
 
 // Auth Store
 const authStore = useAuthStore()
+const { alert } = useDialog()
 
 // Storage 데이터 (실시간 갱신)
 const storageData = ref(storage.get())
@@ -433,10 +435,16 @@ const copyToken = async (token: string | null) => {
 
   try {
     await navigator.clipboard.writeText(token)
-    alert('토큰이 클립보드에 복사되었습니다!')
+    await alert({
+      title: '복사 완료',
+      message: '토큰이 클립보드에 복사되었습니다.'
+    })
   } catch (err) {
     console.error('복사 실패:', err)
-    alert('복사에 실패했습니다.')
+    await alert({
+      title: '복사 실패',
+      message: '복사에 실패했습니다.'
+    })
   }
 }
 

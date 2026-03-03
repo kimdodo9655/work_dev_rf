@@ -59,7 +59,7 @@ export default [
   configPrettier,
   // Node.js 설정 파일용 (vite.config.ts 등)
   {
-    files: ['vite.config.ts', 'eslint.config.js'],
+    files: ['vite.config.ts', 'eslint.config.js', 'scripts/**/*.mjs'],
     languageOptions: {
       globals: {
         __dirname: 'readonly',

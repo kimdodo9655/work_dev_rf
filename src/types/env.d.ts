@@ -14,3 +14,8 @@ declare module '*.json' {
   const value: any
   export default value
 }
+
+declare module 'pdfjs-dist/build/pdf.mjs' {
+  const value: any
+  export = value
+}

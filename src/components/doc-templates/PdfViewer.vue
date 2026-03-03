@@ -1,5 +1,5 @@
 <template>
-  <div class="pdf-viewer-root">
+  <div class="pdf-viewer-root" :class="{ 'is-fullscreen': fullScreen }">
     <!-- 1. 인터넷창 헤더 영역 (앱 내에서 유사 헤더 구현) -->
     <header class="browser-header">
       <div class="browser-left">
@@ -145,8 +145,6 @@
 </template>
 
 <script lang="ts" setup>
-import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs'
-import PdfJsWorker from 'pdfjs-dist/legacy/build/pdf.worker.mjs?worker'
 import {
   computed,
   markRaw,
@@ -159,8 +157,26 @@ import {
   watch
 } from 'vue'
 
-const pdfWorker = new PdfJsWorker()
-;(pdfjsLib as any).GlobalWorkerOptions.workerPort = pdfWorker
+let pdfjsLib: any = null
+let pdfWorker: Worker | null = null
+let pdfRuntimePromise: Promise<void> | null = null
+
+async function ensurePdfRuntimeLoaded() {
+  if (pdfjsLib) return
+  if (!pdfRuntimePromise) {
+    pdfRuntimePromise = (async () => {
+      const [lib, workerModule] = await Promise.all([
+        import('pdfjs-dist/build/pdf.mjs'),
+        import('pdfjs-dist/build/pdf.worker.mjs?worker')
+      ])
+      const PdfJsWorker = workerModule.default
+      pdfjsLib = lib
+      pdfWorker = new PdfJsWorker()
+      ;(pdfjsLib as any).GlobalWorkerOptions.workerPort = pdfWorker
+    })()
+  }
+  await pdfRuntimePromise
+}
 
 type ZoomMode = 'custom' | 'fitWidth' | 'fitPage'
 
@@ -170,11 +186,13 @@ const props = withDefaults(
     appTitle?: string
     addressPath?: string
     downloadName?: string
+    fullScreen?: boolean
   }>(),
   {
     appTitle: 'BankClear Web Viewer',
     addressPath: '/pdf/webviewer',
-    downloadName: 'document.pdf'
+    downloadName: 'document.pdf',
+    fullScreen: false
   }
 )
 
@@ -276,15 +294,26 @@ async function computeScaleForMode(page: any) {
   const { w, h } = getViewerSize()
   if (w <= 0 || h <= 0) return zoomPct.value / 100
 
-  if (zoomMode.value === 'fitWidth') return w / baseViewport.width
-  if (zoomMode.value === 'fitPage') return Math.min(w / baseViewport.width, h / baseViewport.height)
+  const fitPageScale = Math.min(w / baseViewport.width, h / baseViewport.height)
 
-  return zoomPct.value / 100
+  if (zoomMode.value === 'fitWidth') return w / baseViewport.width
+  if (zoomMode.value === 'fitPage') return fitPageScale
+
+  // 100% 기준을 "쪽맞춤"으로 통일
+  return fitPageScale * (zoomPct.value / 100)
 }
 
 async function syncZoomPctForFit() {
   if (!pdfReady.value) return
   if (zoomMode.value === 'custom') return
+
+  if (zoomMode.value === 'fitPage') {
+    syncingZoom = true
+    zoomPct.value = 100
+    zoomSelect.value = 'fitPage'
+    syncingZoom = false
+    return
+  }
 
   const page = await getPage(pageNum.value)
   if (!page) return
@@ -337,11 +366,16 @@ async function loadPdf() {
       return
     }
 
+    await ensurePdfRuntimeLoaded()
+
     const task = (pdfjsLib as any).getDocument({
       url: hasUrl ? props.src : undefined,
       data: hasData ? props.src : undefined,
       disableAutoFetch: true,
-      disableStream: true
+      disableStream: true,
+      enableXfa: false,
+      isEvalSupported: false,
+      stopAtErrors: true
     })
 
     const doc = await task.promise
@@ -450,7 +484,8 @@ async function renderPage(pageNumber: number, opts: RenderOpts = {}) {
   const renderTask = page.render({
     canvasContext: ctx,
     viewport,
-    transform: [dpr, 0, 0, dpr, 0, 0]
+    transform: [dpr, 0, 0, dpr, 0, 0],
+    annotationMode: (pdfjsLib as any).AnnotationMode?.DISABLE
   })
 
   pageRenderTaskMap.set(pageNumber, renderTask)
@@ -535,7 +570,8 @@ async function renderThumb(pageNumber: number, opts: RenderOpts = {}) {
   const task = page.render({
     canvasContext: ctx,
     viewport,
-    transform: [dpr, 0, 0, dpr, 0, 0]
+    transform: [dpr, 0, 0, dpr, 0, 0],
+    annotationMode: (pdfjsLib as any).AnnotationMode?.DISABLE
   })
 
   try {
@@ -672,14 +708,26 @@ function setZoomCustom(pct: number) {
   zoomSelect.value = String(Math.round(zoomPct.value))
 }
 
-function zoomIn() {
+async function setZoomFromFitPagePercent(targetPct: number) {
+  setZoomCustom(targetPct)
+}
+
+async function zoomIn() {
+  if (zoomMode.value === 'fitPage') {
+    await setZoomFromFitPagePercent(110)
+    return
+  }
   setZoomCustom(zoomPct.value + 10)
 }
-function zoomOut() {
+async function zoomOut() {
+  if (zoomMode.value === 'fitPage') {
+    await setZoomFromFitPagePercent(90)
+    return
+  }
   setZoomCustom(zoomPct.value - 10)
 }
 
-function applyZoomSelect() {
+async function applyZoomSelect() {
   const v = zoomSelect.value
   if (v === 'fitWidth') {
     zoomMode.value = 'fitWidth'
@@ -689,7 +737,13 @@ function applyZoomSelect() {
     zoomSelect.value = 'fitPage'
   } else {
     const pct = Number(v)
-    if (!Number.isNaN(pct)) setZoomCustom(pct)
+    if (!Number.isNaN(pct)) {
+      if (zoomMode.value === 'fitPage') {
+        await setZoomFromFitPagePercent(pct)
+      } else {
+        setZoomCustom(pct)
+      }
+    }
   }
 }
 
@@ -843,7 +897,8 @@ onBeforeUnmount(() => {
   resizeObserver = null
 
   cancelAllRenderTasks()
-  pdfWorker.terminate()
+  pdfWorker?.terminate()
+  pdfWorker = null
 })
 </script>
 
@@ -863,6 +918,15 @@ onBeforeUnmount(() => {
 
   border: 1px solid #ddd;
   background: #f7f7f7;
+}
+
+.pdf-viewer-root.is-fullscreen {
+  min-width: 0;
+  min-height: 0;
+  max-width: none;
+  max-height: none;
+  width: 100%;
+  height: 100%;
 }
 
 /* 1. 인터넷창 헤더 영역 */

@@ -29,6 +29,7 @@
       <AppFooter v-if="shouldShowFooter" />
     </div>
 
+    <DialogProvider />
     <component :is="DevNav" v-if="isDev && DevNav" />
   </div>
 </template>
@@ -39,6 +40,7 @@ import { useRoute } from 'vue-router'
 
 import AppFooter from '@/components/layout/AppFooter.vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
+import DialogProvider from '@/components/layout/DialogProvider.vue'
 import { useAuthInitializer } from '@/composables/utils/useAuthInitializer'
 // import { useDeviceDetection } from '@/composables/utils/useDeviceDetection'
 import { useAuthStore } from '@/stores/auth'

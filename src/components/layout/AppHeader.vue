@@ -131,9 +131,11 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { authAPI } from '@/api/services/auth'
+import { useDialog } from '@/composables/utils/useDialog'
 import locale from '@/locales/ko.json'
 import { useAuthStore } from '@/stores/auth'
 import { UserRoleLevel } from '@/types'
+import { markManualLogoutInProgress } from '@/utils/authValidator'
 import { storage } from '@/utils/storage'
 
 /** axios 응답({data}) / DTO 응답(그 자체) 둘 다 지원 */
@@ -145,6 +147,7 @@ function unwrap<T>(res: any): T {
 const authStore = useAuthStore()
 const route = useRoute()
 const router = useRouter()
+const { alert, confirm } = useDialog()
 
 const breadcrumbsRef = ref<HTMLElement | null>(null)
 const headerRef = ref<HTMLElement | null>(null)
@@ -296,7 +299,15 @@ const closeMyMenu = () => {
 // ============================================================================
 
 const handleLogout = async () => {
-  if (!confirm('로그아웃 하시겠습니까?')) return
+  const confirmed = await confirm({
+    title: '로그아웃',
+    message: '로그아웃 하시겠습니까?',
+    confirmText: '로그아웃',
+    cancelText: '취소'
+  })
+  if (!confirmed) return
+
+  markManualLogoutInProgress()
 
   try {
     await authAPI.logout()
@@ -322,11 +333,17 @@ const handleExtendSession = async () => {
     // updateTokens가 기대하는 형태에 맞게 그대로 전달
     authStore.updateTokens(tokenData)
 
-    alert('세션이 연장되었습니다.')
+    await alert({
+      title: '세션 연장',
+      message: '세션이 연장되었습니다.'
+    })
   } catch (error: any) {
     console.error('세션 연장 오류:', error)
     if (error?.message === 'Invalid auth data') return
-    alert('세션 연장에 실패했습니다.')
+    await alert({
+      title: '세션 연장 실패',
+      message: '세션 연장에 실패했습니다.'
+    })
   }
 }
 

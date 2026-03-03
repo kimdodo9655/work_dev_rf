@@ -209,6 +209,7 @@
 import { computed, onMounted, ref } from 'vue'
 
 import { registryCertificateAPI } from '@/api/services/registry'
+import { useDialog } from '@/composables/utils/useDialog'
 
 interface Props {
   applicationId: number
@@ -242,6 +243,7 @@ const props = defineProps<Props>()
 const emit = defineEmits<{
   close: []
 }>()
+const { alert } = useDialog()
 
 const loading = ref(false)
 const errorMessage = ref('')
@@ -428,7 +430,10 @@ async function handleSave() {
       { certificateItems } as any // 타입 불일치로 as any 필요
     )
 
-    alert('저장되었습니다')
+    await alert({
+      title: '저장 완료',
+      message: '저장되었습니다.'
+    })
     emit('close')
   } catch (e: any) {
     errorMessage.value = e?.message || '저장 실패'

@@ -12,6 +12,7 @@
     "build:dev": "vue-tsc -b && vite build --mode development",
     "build": "vue-tsc -b && vite build --mode prod",
     "generate:public-api-map": "node scripts/generate-public-api-map.mjs",
+    "generate:code-replacements": "node scripts/generate-code-replacements.mjs",
     "test": "node --experimental-strip-types --test \"tests/**/*.test.ts\"",
     "test:watch": "node --experimental-strip-types --test --watch \"tests/**/*.test.ts\"",
     "preview": "vite preview",

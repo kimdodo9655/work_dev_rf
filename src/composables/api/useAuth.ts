@@ -11,6 +11,7 @@ import { useRouter } from 'vue-router'
 import { authAPI } from '@/api/services/auth'
 import { useAuthStore } from '@/stores/auth'
 import type { LoginRequest } from '@/types'
+import { clearManualLogoutInProgress, markManualLogoutInProgress } from '@/utils/authValidator'
 import { logger } from '@/utils/logger'
 
 /** axios 응답({data}) / DTO 응답(그 자체) 둘 다 지원 */
@@ -57,6 +58,7 @@ export function useAuth() {
       })
 
       queryClient.invalidateQueries({ queryKey: ['auth'] })
+      clearManualLogoutInProgress()
 
       logger.info('[AUTH] Login successful', {
         loginId: loginData.loginId,
@@ -70,7 +72,10 @@ export function useAuth() {
   })
 
   const logoutMutation = useMutation({
-    mutationFn: () => authAPI.logout(),
+    mutationFn: async () => {
+      markManualLogoutInProgress()
+      return authAPI.logout()
+    },
 
     onSettled: () => {
       store.clearAuth()

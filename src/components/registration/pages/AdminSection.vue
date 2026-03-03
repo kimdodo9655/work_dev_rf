@@ -44,6 +44,8 @@
 import { ref, watch } from 'vue'
 
 import { registryAdminConsentAPI } from '@/api/services/registry'
+import { useCodeReplacer } from '@/composables/utils/useCodeReplacer'
+import { useErrorHandler } from '@/composables/utils/useErrorHandler'
 import { useThrottle } from '@/composables/utils/useThrottle'
 
 interface Props {
@@ -66,6 +68,8 @@ const props = defineProps<Props>()
 const emit = defineEmits<{
   loaded: [hasData: boolean]
 }>()
+const { findReplacement, replaceText } = useCodeReplacer()
+const { getErrorMessage } = useErrorHandler()
 
 const throttle = useThrottle(1000)
 const loading = ref(false)
@@ -78,43 +82,16 @@ function unwrapData<T>(res: any): T {
   return undefined as unknown as T
 }
 
-// 등기유형 한글 변환
 function getRegistryTypeName(type: string): string {
-  const types: Record<string, string> = {
-    MORTGAGE: '근저당권설정',
-    OWNERSHIP_TRANSFER: '소유권이전',
-    SURFACE_RIGHT: '지상권',
-    CHANGE: '변경',
-    CORRECTION: '정정',
-    MORTGAGE_CANCELLATION: '근저당권말소',
-    SURFACE_RIGHT_CANCELLATION: '지상권말소'
-  }
-  return types[type] || type
+  return findReplacement(type, 'registryTypes') ?? replaceText(type)
 }
 
-// 등기원인 한글 변환
 function getRegistryCauseName(cause: string): string {
-  const causes: Record<string, string> = {
-    ESTABLISHMENT_CONTRACT: '설정계약',
-    SALE: '매매',
-    GIFT: '증여',
-    INHERITANCE: '상속',
-    DIVISION: '분할',
-    PAYMENT: '변제',
-    CANCELLATION: '해지'
-  }
-  return causes[cause] || cause
+  return findReplacement(cause, 'registryCauses') ?? replaceText(cause)
 }
 
-// 등기방식 한글 변환
 function getRegistryMethodName(method: string): string {
-  const methods: Record<string, string> = {
-    ELECTRONIC: '전자',
-    'E-FORM': 'E-form',
-    PAPER: '서면',
-    MIXED: '혼합'
-  }
-  return methods[method] || method
+  return findReplacement(method, 'registryMethods') ?? replaceText(method)
 }
 
 function handleDetail(item: AdminInfoRequest) {
@@ -143,7 +120,7 @@ async function fetchData() {
       emit('loaded', list.value.length > 0)
     } catch (e: any) {
       list.value = []
-      errorMessage.value = e?.message ?? '행정정보 제공 요구 동의요청 조회 실패'
+      errorMessage.value = getErrorMessage(e)
       emit('loaded', false)
     } finally {
       loading.value = false

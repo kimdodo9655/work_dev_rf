@@ -4,6 +4,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import { api } from '@/api/client'
 import defaultOpenApiSpec from '@/api/openapi.json'
+import { useDialog } from '@/composables/utils/useDialog'
 import { DEV_LOGIN_USERS } from '@/features/dev/constants/devLoginUsers'
 import RpacApiTestPage from '@/features/dev/pages/RpacApiTestPage.vue'
 import { useAuthStore } from '@/stores/auth'
@@ -26,6 +27,7 @@ const props = withDefaults(defineProps<Props>(), {
 // Auth Store & Storage
 // ============================================================================
 const authStore = useAuthStore()
+const { alert, confirm } = useDialog()
 
 // Storage 데이터 (실시간 갱신) - DevNav 방식 그대로
 const storageData = ref(storage.get())
@@ -469,7 +471,10 @@ const refreshToken = async () => {
 
     const { refreshToken } = currentStorage
     if (!refreshToken) {
-      alert('Refresh Token이 없습니다.')
+      await alert({
+        title: '토큰 갱신 실패',
+        message: 'Refresh Token이 없습니다.'
+      })
       return
     }
 
@@ -492,12 +497,18 @@ const refreshToken = async () => {
     console.log('After refresh, storage:', storage.get())
     console.log('========================')
 
-    alert('토큰이 갱신되었습니다!')
+    await alert({
+      title: '토큰 갱신 성공',
+      message: '토큰이 갱신되었습니다.'
+    })
   } catch (err: any) {
     // onError: 에러 처리
     console.error('[Token Refresh] Failed:', err)
     console.error('Error response:', err.response)
-    alert(`토큰 갱신 실패: ${err.response?.data?.message || err.message}`)
+    await alert({
+      title: '토큰 갱신 실패',
+      message: `토큰 갱신 실패: ${err.response?.data?.message || err.message}`
+    })
   }
 }
 
@@ -510,7 +521,13 @@ const handleLogin = () => {
 }
 
 const handleLogout = async () => {
-  if (!confirm('로그아웃 하시겠습니까?')) {
+  const confirmed = await confirm({
+    title: '로그아웃',
+    message: '로그아웃 하시겠습니까?',
+    confirmText: '로그아웃',
+    cancelText: '취소'
+  })
+  if (!confirmed) {
     return
   }
 
@@ -548,12 +565,18 @@ const handleLogout = async () => {
 
 const executeLogin = async () => {
   if (!loginId.value.trim()) {
-    alert('로그인 아이디를 입력해주세요.')
+    await alert({
+      title: '입력 확인',
+      message: '로그인 아이디를 입력해주세요.'
+    })
     return
   }
 
   if (!password.value.trim()) {
-    alert('비밀번호를 입력해주세요.')
+    await alert({
+      title: '입력 확인',
+      message: '비밀번호를 입력해주세요.'
+    })
     return
   }
 
@@ -601,12 +624,18 @@ const executeLogin = async () => {
     loginId.value = ''
     password.value = 'P@ssw0rd1!'
 
-    alert('로그인 성공!')
+    await alert({
+      title: '로그인 성공',
+      message: '로그인 성공!'
+    })
   } catch (err: any) {
     // onError: 로그인 실패 처리
     console.error('[Login] Failed:', err)
     console.error('Error response:', err.response)
-    alert(`로그인 실패: ${err.response?.data?.message || err.message}`)
+    await alert({
+      title: '로그인 실패',
+      message: `로그인 실패: ${err.response?.data?.message || err.message}`
+    })
   }
 }
 
@@ -617,9 +646,12 @@ const handleBaseUrlChange = async (newMode: 'production' | 'local') => {
 
   // 로그인 상태인 경우 로그아웃 확인
   if (authStore.isLoggedIn) {
-    const confirmed = confirm(
-      'BASE URL을 변경하면 재로그인이 필요합니다.\n현재 세션에서 로그아웃 하시겠습니까?'
-    )
+    const confirmed = await confirm({
+      title: 'BASE URL 변경 확인',
+      message: 'BASE URL을 변경하면 재로그인이 필요합니다.\n현재 세션에서 로그아웃 하시겠습니까?',
+      confirmText: '변경',
+      cancelText: '취소'
+    })
 
     if (!confirmed) {
       return

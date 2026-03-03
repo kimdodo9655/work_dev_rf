@@ -33,6 +33,7 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { bankAPI } from '@/api/services/bank'
+import { useDialog } from '@/composables/utils/useDialog'
 import { useAuthStore } from '@/stores/auth'
 import type { BankResponse } from '@/types'
 import { logger } from '@/utils/logger'
@@ -45,6 +46,7 @@ function unwrap<T>(res: any): T {
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { alert } = useDialog()
 
 // ============================================================================
 // 금융기관 목록 조회
@@ -79,10 +81,13 @@ const banks = computed<BankResponse[]>(() => {
 // ============================================================================
 const selectedBankCode = ref<string | null>(null)
 
-const handleClickBank = (bank: BankResponse) => {
+const handleClickBank = async (bank: BankResponse) => {
   if (!bank.isActive) {
     logger.warn('[BANK_SELECT] Inactive bank clicked', { bank })
-    alert('현재 사용할 수 없는 금융기관입니다.')
+    await alert({
+      title: '선택 불가',
+      message: '현재 사용할 수 없는 금융기관입니다.'
+    })
     return
   }
 
@@ -97,16 +102,22 @@ const handleClickBank = (bank: BankResponse) => {
 // ============================================================================
 // 금융기관 선택 완료
 // ============================================================================
-const handleConfirmSelection = () => {
+const handleConfirmSelection = async () => {
   if (!selectedBankCode.value) {
-    alert('금융기관을 선택해주세요.')
+    await alert({
+      title: '선택 필요',
+      message: '금융기관을 선택해주세요.'
+    })
     return
   }
 
   const selectedBank = banks.value.find((bank) => bank.code === selectedBankCode.value)
 
   if (!selectedBank?.code) {
-    alert('선택한 금융기관 정보를 찾을 수 없습니다.')
+    await alert({
+      title: '선택 오류',
+      message: '선택한 금융기관 정보를 찾을 수 없습니다.'
+    })
     return
   }
 

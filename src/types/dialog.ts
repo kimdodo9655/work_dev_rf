@@ -1,14 +1,16 @@
 // types/dialog.ts
 export interface AlertOptions {
   title: string
-  content: string
+  content?: string
+  message?: string
   confirmText?: string
   onConfirm?: () => void | Promise<void>
 }
 
 export interface ConfirmOptions {
   title: string
-  content: string
+  content?: string
+  message?: string
   confirmText?: string
   cancelText?: string
   onConfirm?: () => void | Promise<void>

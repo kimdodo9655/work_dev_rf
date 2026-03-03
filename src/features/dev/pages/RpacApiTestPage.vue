@@ -467,6 +467,7 @@ import {
   registryTransferCertificateAPI
 } from '@/api/services/registry'
 import { userAPI } from '@/api/services/user'
+import { useDialog } from '@/composables/utils/useDialog'
 import { DEV_LOGIN_USERS } from '@/features/dev/constants/devLoginUsers'
 import { useAuthStore } from '@/stores/auth'
 import { storage } from '@/utils/storage'
@@ -509,6 +510,7 @@ const props = withDefaults(defineProps<Props>(), {
 const LOGIN_USERS = DEV_LOGIN_USERS
 
 const authStore = useAuthStore()
+const { alert } = useDialog()
 const storageData = ref(storage.get())
 const showLoginModal = ref(false)
 const selectedLoginUser = ref<(typeof LOGIN_USERS)[number] | null>(null)
@@ -827,7 +829,10 @@ async function executeLogin() {
     refreshStorageData()
     showLoginModal.value = false
   } catch (error: any) {
-    alert(error?.message ?? '로그인 실패')
+    await alert({
+      title: '로그인 실패',
+      message: error?.message ?? '로그인 실패'
+    })
   }
 }
 
@@ -835,7 +840,10 @@ async function refreshToken() {
   try {
     const current = storage.get()
     if (!current.refreshToken) {
-      alert('refreshToken이 없습니다.')
+      await alert({
+        title: '토큰 갱신 실패',
+        message: 'refreshToken이 없습니다.'
+      })
       return
     }
     const res: any = await authAPI.refresh({ refreshToken: current.refreshToken } as any)
@@ -844,7 +852,10 @@ async function refreshToken() {
     authStore.updateTokens(data)
     refreshStorageData()
   } catch (error: any) {
-    alert(error?.message ?? '토큰 갱신 실패')
+    await alert({
+      title: '토큰 갱신 실패',
+      message: error?.message ?? '토큰 갱신 실패'
+    })
   }
 }
 
@@ -918,7 +929,7 @@ function stringify(value: any): string {
   return JSON.stringify(value, null, 2) ?? 'null'
 }
 
-function copyToClipboard(text: string) {
+async function copyToClipboard(text: string) {
   try {
     const textarea = document.createElement('textarea')
     textarea.value = text
@@ -939,12 +950,21 @@ function copyToClipboard(text: string) {
     document.body.removeChild(textarea)
 
     if (success) {
-      alert('복사되었습니다.')
+      await alert({
+        title: '복사 완료',
+        message: '복사되었습니다.'
+      })
     } else {
-      alert('복사에 실패했습니다.')
+      await alert({
+        title: '복사 실패',
+        message: '복사에 실패했습니다.'
+      })
     }
   } catch {
-    alert('복사에 실패했습니다.')
+    await alert({
+      title: '복사 실패',
+      message: '복사에 실패했습니다.'
+    })
   }
 }
 

@@ -68,9 +68,12 @@
 </template>
 
 <script lang="ts" setup>
+import '@/assets/styles/pages/auth.scss'
+
 import { computed, onMounted, ref } from 'vue'
 
 import { useAuth } from '@/composables/api/useAuth'
+import { useApiAlert } from '@/composables/utils/useApiAlert'
 import { useErrorHandler } from '@/composables/utils/useErrorHandler'
 import { ENV } from '@/utils/env'
 import { logger } from '@/utils/logger'
@@ -80,6 +83,7 @@ import { logger } from '@/utils/logger'
 // ============================================================================
 const { login, loginMutation } = useAuth()
 const { getErrorMessage } = useErrorHandler()
+const { showApiSuccess, showApiError } = useApiAlert()
 
 // ============================================================================
 // Constants
@@ -173,13 +177,22 @@ const handleSubmit = async (): Promise<void> => {
       },
       {
         redirectTo: '/bank-select',
-        onSuccess: () => {
+        onSuccess: async () => {
           saveLoginId()
+          await showApiSuccess({
+            title: '로그인 성공',
+            message: '정상적으로 로그인되었습니다.'
+          })
         }
       }
     )
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    const message = getErrorMessage(error)
+    errorMessage.value = message
+    await showApiError({
+      title: '로그인 실패',
+      message
+    })
     password.value = ''
   }
 }

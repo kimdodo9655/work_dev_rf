@@ -4,7 +4,11 @@ import { computed, ref } from 'vue'
 import type { AuthState } from '@/types'
 import type { TokenRefreshResponse } from '@/types'
 import { UserRoleLevel } from '@/types'
-import { handleInvalidAuthState, isValidAuthData } from '@/utils/authValidator'
+import {
+  clearManualLogoutInProgress,
+  handleInvalidAuthState,
+  isValidAuthData
+} from '@/utils/authValidator'
 import { logger } from '@/utils/logger'
 import { storage } from '@/utils/storage'
 
@@ -113,6 +117,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     // storage에 저장
     storage.save(data)
+    clearManualLogoutInProgress()
 
     // state 업데이트
     loginId.value = data.loginId

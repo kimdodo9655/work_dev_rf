@@ -1,4 +1,13 @@
 <template>
+  <div class="pdf-window-buttons" style="display: flex; gap: 8px; margin-bottom: 12px">
+    <button type="button" class="load-codes-btn" @click="openViewerInNewTab('/pdf/pdf.pdf')">
+      pdf.pdf 새 탭 열기
+    </button>
+    <button type="button" class="load-codes-btn" @click="openViewerInNewTab('/pdf/test.pdf')">
+      test.pdf 새 탭 열기
+    </button>
+  </div>
+
   <div style="width: 1000px; height: 1000px">
     <PdfViewer
       src="/pdf/test.pdf"
@@ -759,21 +768,24 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { defineAsyncComponent, reactive, ref } from 'vue'
 
 import PdfConverter from '@/components/doc-templates/PdfConverter.vue'
-import PdfViewer from '@/components/doc-templates/PdfViewer.vue'
 import FloatingCustomSelect from '@/components/template/input/FloatingCustomSelect.vue'
 import FloatingInnerSelect from '@/components/template/input/FloatingInnerSelect.vue'
 import FloatingInput from '@/components/template/input/FloatingInput.vue'
 import Pagination from '@/components/template/PaginationItem.vue'
 import { useCodes } from '@/composables/api/useCodes'
+import { useDialog } from '@/composables/utils/useDialog'
 import AddrTest from '@/features/dev/pages/AddrTestPanel.vue'
 import PdfTest from '@/features/dev/pages/PdfTestPanel.vue'
 import RPATest from '@/features/dev/pages/RPATestPanel.vue'
 
+const PdfViewer = defineAsyncComponent(() => import('@/components/doc-templates/PdfViewer.vue'))
+
 // ✨ useCodes 사용
 const { codes, isLoading, loadError, fetchAllCodes, clearCache } = useCodes()
+const { alert } = useDialog()
 
 // ✨ 토스트 상태
 const showToast = ref(false)
@@ -793,6 +805,11 @@ async function handleLoadAllCodes() {
 function handleClearCodes() {
   clearCache()
   console.log('🗑️ 공통코드 데이터 초기화 완료')
+}
+
+function openViewerInNewTab(src: string) {
+  const query = encodeURIComponent(src)
+  window.open(`/dev/viewer?src=${query}`, '_blank', 'noopener,noreferrer')
 }
 
 // ✨ 코드 복사 핸들러
@@ -1031,8 +1048,11 @@ function validateExperience() {
   experienceError.value = form.experience === null
 }
 
-function sendVerifyCode() {
-  alert('인증번호가 발송되었습니다')
+async function sendVerifyCode() {
+  await alert({
+    title: '인증번호 발송',
+    message: '인증번호가 발송되었습니다.'
+  })
 }
 
 function searchAddress() {
