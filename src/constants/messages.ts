@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/constants/messages.ts`
+ * 문서 제목: messages 구현 파일
+ */
+
 export const MESSAGES = {
   pageTitle: {
     error: {

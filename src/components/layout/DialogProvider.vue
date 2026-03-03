@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/components/layout/DialogProvider.vue`
+문서 제목: Dialog Provider 구현 파일 -->
+
 <script setup lang="ts">
 import AlertDialog from '@/components/layout/AlertDialog.vue'
 import ConfirmDialog from '@/components/layout/ConfirmDialog.vue'

@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/doc-templates/applications/MortgageRegistration.vue`
+문서 제목: Mortgage Registration 구현 파일 -->
+
 <!-- src/features/doc-templates/applications/MortgageRegistration.vue -->
 <!-- 근저당권설정등기신청 문서 양식 -->
 

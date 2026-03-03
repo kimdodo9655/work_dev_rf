@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/types/api/user.types.ts`
+ * 문서 제목: user.types 구현 파일
+ */
+
+/**
  * USER API Types
  * @generated 2025-01-27
  */

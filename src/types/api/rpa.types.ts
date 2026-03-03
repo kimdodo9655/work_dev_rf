@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/types/api/rpa.types.ts`
+ * 문서 제목: rpa.types 구현 파일
+ */
+
+/**
  * RPA API Types
  * @generated 2025-01-28
  */

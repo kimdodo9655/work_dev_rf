@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/router/index.ts`
+ * 문서 제목: index 구현 파일
+ */
+
 import type { NavigationGuardNext, RouteLocationNormalized, RouteRecordRaw } from 'vue-router'
 import { createRouter, createWebHistory } from 'vue-router'
 

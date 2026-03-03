@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/api/endpoints/auth.ts`
+ * 문서 제목: auth 구현 파일
+ */
+
 export const AUTH = {
   SIGNUP: '/api/auth/signup',
   LOGIN: '/api/auth/login',

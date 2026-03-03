@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/main/pages/BankSelectionPage.vue`
+문서 제목: Bank Selection Page 구현 파일 -->
+
 <template>
   <div class="bank-list">
     <div

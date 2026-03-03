@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/registration/pages/CaseScheduleMgmtPage.vue`
+문서 제목: Case Schedule Mgmt Page 구현 파일 -->
+
 <template>
   <div class="calendar-container">
     <!-- 상단 컨트롤 영역 -->

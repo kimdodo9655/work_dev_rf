@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/types/api/registry-request-document.types.ts`
+ * 문서 제목: registry request document.types 구현 파일
+ */
+
+/**
  * REGISTRY_REQUEST_DOCUMENT API Types
  * @generated 2025-01-27
  */

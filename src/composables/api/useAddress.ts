@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/composables/api/useAddress.ts`
+ * 문서 제목: use Address 구현 파일
+ */
+
+/**
  * @file useAddress.ts
  * @description 주소/등기소 관련 Composable (조회 전용)
  * @domain [A01] 주소/등기소

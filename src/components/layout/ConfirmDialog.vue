@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/components/layout/ConfirmDialog.vue`
+문서 제목: Confirm Dialog 구현 파일 -->
+
 <!-- components/layout/ConfirmDialog.vue -->
 <script setup lang="ts">
 import { computed } from 'vue'

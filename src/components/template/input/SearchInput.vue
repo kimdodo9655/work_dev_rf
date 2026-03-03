@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/components/template/input/SearchInput.vue`
+문서 제목: Search Input 구현 파일 -->
+
 <template>
   <div class="form-search-input">
     <div class="input-wrapper" @click="toggleInput">

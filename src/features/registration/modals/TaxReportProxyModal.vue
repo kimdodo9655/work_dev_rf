@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/registration/modals/TaxReportProxyModal.vue`
+문서 제목: Tax Report Proxy Modal 구현 파일 -->
+
 <template>
   <div>
     <h1>

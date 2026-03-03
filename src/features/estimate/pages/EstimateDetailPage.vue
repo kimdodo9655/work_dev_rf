@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/estimate/pages/EstimateDetailPage.vue`
+문서 제목: Estimate Detail Page 구현 파일 -->
+
 <template>
   <div class="estimate-detail-page">
     <div class="page-header">

@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/registration/modals/ESignStatusMgmtModal.vue`
+문서 제목: ESign Status Mgmt Modal 구현 파일 -->
+
 <template>
   <div>
     <h1>

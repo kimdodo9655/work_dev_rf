@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/components/layout/AppHeader.vue`
+문서 제목: App Header 구현 파일 -->
+
 <template>
   <div class="fixed-area">
     <div class="fixed-inner">

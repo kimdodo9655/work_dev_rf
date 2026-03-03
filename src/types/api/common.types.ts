@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/types/api/common.types.ts`
+ * 문서 제목: common.types 구현 파일
+ */
+
+/**
  * 공통 타입 정의
  * @file common.types.ts
  * @generated 2025-01-27

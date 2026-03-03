@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/estimate/pages/EstimateMgmtPage.vue`
+문서 제목: Estimate Mgmt Page 구현 파일 -->
+
 <template>
   <div class="estimate-mgmt-page">
     <div class="Search-panel">

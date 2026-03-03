@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/types/api/index.ts`
+ * 문서 제목: index 구현 파일
+ */
+
+/**
  * API Types Index
  * @generated 2025-01-27
  */

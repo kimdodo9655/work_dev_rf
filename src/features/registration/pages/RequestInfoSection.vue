@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/registration/pages/RequestInfoSection.vue`
+문서 제목: Request Info Section 구현 파일 -->
+
 <template>
   <ul class="sub-list">
     <!-- 대출 금융기관 정보 -->

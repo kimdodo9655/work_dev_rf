@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/api/endpoints/registry.ts`
+ * 문서 제목: registry 구현 파일
+ */
+
 export const REGISTRY_TEST = {
   CREATE_REQUEST: '/api/registry/test-data/requests',
   CREATE_PROGRESS: '/api/registry/test-data/progress',

@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/components/template/input/SearchDateRangePicker.vue`
+문서 제목: Search Date Range Picker 구현 파일 -->
+
 <!-- src/components/template/input/FormDateRangePicker.vue -->
 <template>
   <div ref="pickerRef" class="date-range-picker">

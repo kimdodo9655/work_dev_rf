@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/main/pages/DashboardPage.vue`
+문서 제목: Dashboard Page 구현 파일 -->
+
 <template>
   <div class="dashboard-page">
     <div class="dashboard-options">

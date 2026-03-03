@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/tests/format.test.ts`
+ * 문서 제목: format.test 구현 파일
+ */
+
 import assert from 'node:assert/strict'
 import test from 'node:test'
 

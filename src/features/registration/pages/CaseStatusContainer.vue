@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/registration/pages/CaseStatusContainer.vue`
+문서 제목: Case Status Container 구현 파일 -->
+
 <template>
   <section class="registry-progress">
     <div class="Search-panel">

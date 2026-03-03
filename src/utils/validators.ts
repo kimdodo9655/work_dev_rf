@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/utils/validators.ts`
+ * 문서 제목: validators 구현 파일
+ */
+
 // utils/validators.ts
 
 export interface ValidationRule {

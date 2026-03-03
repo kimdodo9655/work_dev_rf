@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/tests/public-api-map.test.ts`
+ * 문서 제목: public api map.test 구현 파일
+ */
+
 import assert from 'node:assert/strict'
 import test from 'node:test'
 

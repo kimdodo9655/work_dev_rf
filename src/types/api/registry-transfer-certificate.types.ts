@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/types/api/registry-transfer-certificate.types.ts`
+ * 문서 제목: registry transfer certificate.types 구현 파일
+ */
+
+/**
  * REGISTRY_TRANSFER_CERTIFICATE API Types
  * @generated 2025-01-27
  */

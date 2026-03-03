@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/types/api/registry-change.types.ts`
+ * 문서 제목: registry change.types 구현 파일
+ */
+
+/**
  * REGISTRY_CHANGE API Types
  * @generated 2025-01-27
  */

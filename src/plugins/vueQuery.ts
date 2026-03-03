@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/plugins/vueQuery.ts`
+ * 문서 제목: vue Query 구현 파일
+ */
+
 import { VueQueryPlugin } from '@tanstack/vue-query'
 import type { App } from 'vue'
 

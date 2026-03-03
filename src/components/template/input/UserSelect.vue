@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/components/template/input/UserSelect.vue`
+문서 제목: User Select 구현 파일 -->
+
 <template>
   <div class="custom-select" ref="selectRef">
     <div

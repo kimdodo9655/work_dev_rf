@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/composables/api/useCodes.ts`
+ * 문서 제목: use Codes 구현 파일
+ */
+
 import { computed, ref } from 'vue'
 
 import { codeAPI } from '@/api/services/code'

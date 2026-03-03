@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/types/api/crypto.types.ts`
+ * 문서 제목: crypto.types 구현 파일
+ */
+
+/**
  * CRYPTO API Types
  * @generated 2026-02-23
  */

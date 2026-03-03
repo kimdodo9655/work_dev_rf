@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/constants/apiMessages.ts`
+ * 문서 제목: api Messages 구현 파일
+ */
+
 // src/constants/apiMessages.ts
 
 // HTTP 상태 코드 메시지

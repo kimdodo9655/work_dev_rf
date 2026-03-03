@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/my/pages/OrgMgmtPage.vue`
+문서 제목: Org Mgmt Page 구현 파일 -->
+
 <template>
   <div>
     <h1>

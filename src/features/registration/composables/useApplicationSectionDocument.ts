@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/features/registration/composables/useApplicationSectionDocument.ts`
+ * 문서 제목: use Application Section Document 구현 파일
+ */
+
 import { ref } from 'vue'
 
 import { registryTypeAPI } from '@/api/services/registry'

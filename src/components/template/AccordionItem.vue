@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/components/template/AccordionItem.vue`
+문서 제목: Accordion Item 구현 파일 -->
+
 <template>
   <li :class="{ active: computedIsOpen }">
     <h1 @click="handleToggle">

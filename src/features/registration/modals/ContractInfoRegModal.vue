@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/registration/modals/ContractInfoRegModal.vue`
+문서 제목: Contract Info Reg Modal 구현 파일 -->
+
 <template>
   <div>
     <h1>

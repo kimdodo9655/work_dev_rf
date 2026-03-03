@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/stores/auth.ts`
+ * 문서 제목: auth 구현 파일
+ */
+
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 

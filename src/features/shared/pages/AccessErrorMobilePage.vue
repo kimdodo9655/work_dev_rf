@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/shared/pages/AccessErrorMobilePage.vue`
+문서 제목: Access Error Mobile Page 구현 파일 -->
+
 <template>
   <div class="mob-content">
     <div class="mobile-error-page">

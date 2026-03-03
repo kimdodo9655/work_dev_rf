@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/dev/components/DevNav.vue`
+문서 제목: Dev Nav 구현 파일 -->
+
 <template>
   <div class="floating-navigation">
     <!-- 네비게이션 토글 버튼 -->

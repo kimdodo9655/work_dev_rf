@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/utils/env.ts`
+ * 문서 제목: env 구현 파일
+ */
+
+/**
  * 환경변수 유틸리티
  */
 export const ENV = {

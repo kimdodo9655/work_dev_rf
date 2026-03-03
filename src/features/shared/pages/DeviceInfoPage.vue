@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/shared/pages/DeviceInfoPage.vue`
+문서 제목: Device Info Page 구현 파일 -->
+
 <template>
   <div class="all-content-inner">
     <h1>

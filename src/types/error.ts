@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/types/error.ts`
+ * 문서 제목: error 구현 파일
+ */
+
+/**
  * API 에러 타입
  */
 export interface ApiError {

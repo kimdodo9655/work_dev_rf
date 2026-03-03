@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/types/api/address.types.ts`
+ * 문서 제목: address.types 구현 파일
+ */
+
+/**
  * ADDRESS API Types
  * @generated 2025-01-27
  */

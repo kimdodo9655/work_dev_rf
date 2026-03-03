@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/router/routes/errors.ts`
+ * 문서 제목: errors 구현 파일
+ */
+
 import type { RouteRecordRaw } from 'vue-router'
 
 import locale from '@/locales/ko.json'

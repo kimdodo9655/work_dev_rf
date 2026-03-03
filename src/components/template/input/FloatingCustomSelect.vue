@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/components/template/input/FloatingCustomSelect.vue`
+문서 제목: Floating Custom Select 구현 파일 -->
+
 <template>
   <div class="floating-custom-select" ref="fieldRef">
     <div class="field-container" @click="handleContainerClick">

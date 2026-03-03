@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/composables/utils/useAccordionState.ts`
+ * 문서 제목: use Accordion State 구현 파일
+ */
+
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 

@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/api/endpoints/branch.ts`
+ * 문서 제목: branch 구현 파일
+ */
+
 export const BRANCH = {
   SEARCH: '/api/branches/search',
   DETAIL: (branchId: string | number) => `/api/branches/${branchId}`,

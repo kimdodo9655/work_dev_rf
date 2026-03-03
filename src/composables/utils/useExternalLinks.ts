@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/composables/utils/useExternalLinks.ts`
+ * 문서 제목: use External Links 구현 파일
+ */
+
+/**
  * @file useExternalLinks.ts
  * @description 외부 링크 관리 Composable (유틸리티)
  */

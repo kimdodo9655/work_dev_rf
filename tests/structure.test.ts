@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/tests/structure.test.ts`
+ * 문서 제목: structure.test 구현 파일
+ */
+
 import assert from 'node:assert/strict'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'

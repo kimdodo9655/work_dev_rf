@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/registration/pages/AccordionSection.vue`
+문서 제목: Accordion Section 구현 파일 -->
+
 <template>
   <section class="acc-section">
     <button type="button" class="acc-header" @click="emit('toggle')">

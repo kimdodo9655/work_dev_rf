@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/components/template/input/FloatingInnerSelect.vue`
+문서 제목: Floating Inner Select 구현 파일 -->
+
 <template>
   <div
     ref="selectRef"

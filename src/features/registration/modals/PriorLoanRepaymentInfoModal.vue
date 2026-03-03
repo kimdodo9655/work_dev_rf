@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/registration/modals/PriorLoanRepaymentInfoModal.vue`
+문서 제목: Prior Loan Repayment Info Modal 구현 파일 -->
+
 <template>
   <div>
     <h1>

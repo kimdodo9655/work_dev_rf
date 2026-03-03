@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/components/layout/AppFooter.vue`
+문서 제목: App Footer 구현 파일 -->
+
 <template>
   <footer class="main-footer" :class="authStore.authState === 'pre-auth' ? 'pre-auth-footer' : ''">
     <img src="@/assets/images/logo/bankclear_logo_bk.png" alt="bank logo" />

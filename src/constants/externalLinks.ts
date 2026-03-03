@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/constants/externalLinks.ts`
+ * 문서 제목: external Links 구현 파일
+ */
+
 export const EXTERNAL_LINKS = {
   register: {
     iros: 'https://www.iros.go.kr/',

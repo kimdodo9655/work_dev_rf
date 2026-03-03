@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/dev/pages/ApiTesterPage.vue`
+문서 제목: Api Tester Page 구현 파일 -->
+
 <script setup lang="ts">
 import axios from 'axios'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'

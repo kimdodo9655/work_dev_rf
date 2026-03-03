@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/types/api/registry-receipt-document.types.ts`
+ * 문서 제목: registry receipt document.types 구현 파일
+ */
+
+/**
  * REGISTRY_RECEIPT_DOCUMENT API Types
  * @generated 2025-01-27
  */

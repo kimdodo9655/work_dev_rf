@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/features/registration/composables/useApplicationSectionTabs.ts`
+ * 문서 제목: use Application Section Tabs 구현 파일
+ */
+
 import { computed, type Ref, ref, watch } from 'vue'
 
 import { registryTypeAPI } from '@/api/services/registry'

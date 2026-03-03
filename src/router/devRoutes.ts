@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/router/devRoutes.ts`
+ * 문서 제목: dev Routes 구현 파일
+ */
+
 import type { RouteRecordRaw } from 'vue-router'
 
 export const devRoutes: RouteRecordRaw[] = [

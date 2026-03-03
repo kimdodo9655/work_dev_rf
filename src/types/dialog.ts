@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/types/dialog.ts`
+ * 문서 제목: dialog 구현 파일
+ */
+
 // types/dialog.ts
 export interface AlertOptions {
   title: string

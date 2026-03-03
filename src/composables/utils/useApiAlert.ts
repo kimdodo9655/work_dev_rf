@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/composables/utils/useApiAlert.ts`
+ * 문서 제목: use Api Alert 구현 파일
+ */
+
 import type { AxiosError } from 'axios'
 
 import { useCodeReplacer } from '@/composables/utils/useCodeReplacer'

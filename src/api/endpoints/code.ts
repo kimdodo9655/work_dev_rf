@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/api/endpoints/code.ts`
+ * 문서 제목: code 구현 파일
+ */
+
 export const CODE = {
   ORGANIZATION_TYPES: '/api/codes/organization-types',
   ORGANIZATION_STATUSES: '/api/codes/organization-statuses',

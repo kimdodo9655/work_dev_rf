@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/auth/pages/PasswordSetupPage.vue`
+문서 제목: Password Setup Page 구현 파일 -->
+
 <template>
   <div>
     <h1>

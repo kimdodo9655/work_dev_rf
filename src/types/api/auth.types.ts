@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/types/api/auth.types.ts`
+ * 문서 제목: auth.types 구현 파일
+ */
+
+/**
  * AUTH API Types
  * @generated 2025-01-27
  */

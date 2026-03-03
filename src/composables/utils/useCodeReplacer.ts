@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/composables/utils/useCodeReplacer.ts`
+ * 문서 제목: use Code Replacer 구현 파일
+ */
+
 import replacementsJson from '@/constants/code-replacements.generated.json'
 
 type ReplacementCategoryMap = Record<string, string>

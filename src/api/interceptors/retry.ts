@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/api/interceptors/retry.ts`
+ * 문서 제목: retry 구현 파일
+ */
+
 import type { AxiosInstance } from 'axios'
 import axiosRetry from 'axios-retry'
 

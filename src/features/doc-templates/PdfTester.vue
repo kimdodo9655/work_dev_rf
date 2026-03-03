@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/doc-templates/PdfTester.vue`
+문서 제목: Pdf Tester 구현 파일 -->
+
 <template>
   <div class="pdf-wrapper" ref="wrapperRef" :style="{ height: `${wrapperHeight}px` }">
     <div class="content" :style="{ transform: `scale(${scale})` }">

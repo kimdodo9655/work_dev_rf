@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/registration/modals/CaseCertInfoRegModal.vue`
+문서 제목: Case Cert Info Reg Modal 구현 파일 -->
+
 <template>
   <div class="modal-overlay" @click.self="handleClose">
     <div class="modal-container">

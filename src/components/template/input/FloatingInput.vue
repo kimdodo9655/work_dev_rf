@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/components/template/input/FloatingInput.vue`
+문서 제목: Floating Input 구현 파일 -->
+
 <template>
   <div class="floating-field" ref="fieldRef">
     <div class="field-container" @click="handleContainerClick">

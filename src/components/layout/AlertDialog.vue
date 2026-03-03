@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/components/layout/AlertDialog.vue`
+문서 제목: Alert Dialog 구현 파일 -->
+
 <!-- components/layout/AlertDialog.vue -->
 <script setup lang="ts">
 import { computed } from 'vue'

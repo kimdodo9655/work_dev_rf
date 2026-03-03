@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/types/api/registry-completion.types.ts`
+ * 문서 제목: registry completion.types 구현 파일
+ */
+
+/**
  * REGISTRY_COMPLETION API Types
  * @generated 2025-01-27
  */

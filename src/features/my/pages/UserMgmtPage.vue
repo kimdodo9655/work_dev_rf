@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/my/pages/UserMgmtPage.vue`
+문서 제목: User Mgmt Page 구현 파일 -->
+
 <template>
   <div class="Search-panel">
     <form @submit.prevent="handleSubmit">

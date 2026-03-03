@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/components/template/AccordionGroup.vue`
+문서 제목: Accordion Group 구현 파일 -->
+
 <template>
   <slot></slot>
 </template>

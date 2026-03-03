@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/api/client.ts`
+ * 문서 제목: client 구현 파일
+ */
+
 import type { AxiosInstance } from 'axios'
 import axios from 'axios'
 

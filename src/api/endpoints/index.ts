@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/api/endpoints/index.ts`
+ * 문서 제목: index 구현 파일
+ */
+
 import { ADDRESS } from '@/api/endpoints/address'
 import { AUTH } from '@/api/endpoints/auth'
 import { BANK } from '@/api/endpoints/bank'

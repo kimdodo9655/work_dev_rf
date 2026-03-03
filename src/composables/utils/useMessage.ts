@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/composables/utils/useMessage.ts`
+ * 문서 제목: use Message 구현 파일
+ */
+
+/**
  * @file useMessage.ts
  * @description 메시지 및 포맷 유틸리티 Composable (유틸리티)
  */

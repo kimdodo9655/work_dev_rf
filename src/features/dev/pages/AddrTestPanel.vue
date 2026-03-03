@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/dev/pages/AddrTestPanel.vue`
+문서 제목: Addr Test Panel 구현 파일 -->
+
 <template>
   <div class="addr-test-section">
     <h3>주소 검색 모달 테스트</h3>

@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/api/interceptors/refresh.ts`
+ * 문서 제목: refresh 구현 파일
+ */
+
 import axios from 'axios'
 
 import { API } from '@/api/endpoints'

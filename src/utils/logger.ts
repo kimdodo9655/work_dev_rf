@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/utils/logger.ts`
+ * 문서 제목: logger 구현 파일
+ */
+
 import { ENV } from '@/utils/env'
 
 type LogLevel = 'log' | 'info' | 'warn' | 'error' | 'debug'

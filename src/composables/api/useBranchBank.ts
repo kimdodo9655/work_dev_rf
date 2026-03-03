@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/composables/api/useBranchBank.ts`
+ * 문서 제목: use Branch Bank 구현 파일
+ */
+
+/**
  * @file useBranchBank.ts
  * @description 지점-금융기관배정 관련 Mutation Composable
  * @domain [P02B] 지점-금융기관배정

@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/utils/storage.ts`
+ * 문서 제목: storage 구현 파일
+ */
+
 // localStorage 키 상수
 const KEYS = {
   ACCESS_TOKEN: 'access_token',

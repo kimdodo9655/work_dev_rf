@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/types/env.d.ts`
+ * 문서 제목: env.d 구현 파일
+ */
+
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {

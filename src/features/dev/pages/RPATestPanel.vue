@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/dev/pages/RPATestPanel.vue`
+문서 제목: RPATest Panel 구현 파일 -->
+
 <template>
   <div class="rpa-test-container">
     <div class="container">

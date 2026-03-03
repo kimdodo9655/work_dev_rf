@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/composables/api/useAuth.ts`
+ * 문서 제목: use Auth 구현 파일
+ */
+
+/**
  * @file useAuth.ts
  * @description 인증 관련 Mutation Composable
  * @domain [P04] 인증

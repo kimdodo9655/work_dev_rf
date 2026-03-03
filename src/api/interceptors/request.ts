@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/api/interceptors/request.ts`
+ * 문서 제목: request 구현 파일
+ */
+
 import type { AxiosInstance, InternalAxiosRequestConfig } from 'axios'
 
 import { runRefreshOnce, shouldSkipAutoRefresh } from '@/api/interceptors/refresh'

@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/doc-templates/PdfConverter.vue`
+문서 제목: Pdf Converter 구현 파일 -->
+
 <template>
   <div class="container">
     <PdfTester />

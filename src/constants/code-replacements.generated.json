@@ -1,15 +1,24 @@
 {
-  "organizationStatuses": {
-    "PENDING_APPROVAL": "승인대기",
-    "ACTIVE": "사용",
-    "INACTIVE": "미사용",
-    "DELETED": "삭제"
+  "registryCauses": {
+    "TRADE": "매매",
+    "ESTABLISHMENT_CONTRACT": "설정계약",
+    "ADDRESS_CHANGE": "주소변경",
+    "ROAD_NAME_ADDRESS": "도로명주소",
+    "APPLICATION_ERROR": "신청착오",
+    "TERMINATION": "해지",
+    "NAME_CHANGE": "개명",
+    "REGISTRATION_NUMBER": "등록번호변경"
   },
   "branchStatuses": {
     "PENDING_APPROVAL": "승인대기",
     "ACTIVE": "사용",
     "INACTIVE": "미사용",
     "DELETED": "삭제"
+  },
+  "registryMethods": {
+    "ELECTRONIC": "전자등기",
+    "E_FORM": "E-FORM등기",
+    "PAPER": "서면등기"
   },
   "registryTypes": {
     "OWNERSHIP_TRANSFER": "소유권이전",
@@ -24,12 +33,10 @@
     "LEGAL_SCRIVENER": "법무사",
     "LAWYER": "변호사"
   },
-  "userRoleLevels": {
-    "SUPER_ADMIN": "시스템 관리자",
-    "ADMIN": "서비스 관리자",
-    "ORGANIZATION_ADMIN": "기관 관리자",
-    "BRANCH_ADMIN": "지점 관리자",
-    "USER": "사용자"
+  "propertyTypes": {
+    "LAND": "토지",
+    "BUILDING": "건물",
+    "COLLECTIVE_BUILDING": "집합건물"
   },
   "organizationTypes": {
     "LEGAL_SCRIVENER_OFFICE": "법무사사무소",
@@ -46,56 +53,49 @@
     "FOREIGNER": "외국인",
     "CORPORATION": "법인"
   },
-  "registryCauses": {
-    "TRADE": "매매",
-    "ESTABLISHMENT_CONTRACT": "설정계약",
-    "ADDRESS_CHANGE": "주소변경",
-    "ROAD_NAME_ADDRESS": "도로명주소",
-    "APPLICATION_ERROR": "신청착오",
-    "TERMINATION": "해지",
-    "NAME_CHANGE": "개명",
-    "REGISTRATION_NUMBER": "등록번호변경"
+  "securedDebtScopeTypes": {
+    "LIMITED": "한정근담보",
+    "SPECIFIC": "특정근담보"
   },
-  "registryMethods": {
-    "ELECTRONIC": "전자등기",
-    "E_FORM": "E-FORM등기",
-    "PAPER": "서면등기"
+  "organizationStatuses": {
+    "PENDING_APPROVAL": "승인대기",
+    "ACTIVE": "사용",
+    "INACTIVE": "미사용",
+    "DELETED": "삭제"
+  },
+  "userRoleLevels": {
+    "SUPER_ADMIN": "시스템 관리자",
+    "ADMIN": "서비스 관리자",
+    "ORGANIZATION_ADMIN": "기관 관리자",
+    "BRANCH_ADMIN": "지점 관리자",
+    "USER": "사용자"
   },
   "sections": {
     "GAP": "갑구",
     "EUL": "을구"
   },
-  "securedDebtScopeTypes": {
-    "LIMITED": "한정근담보",
-    "SPECIFIC": "특정근담보"
+  "adminInfoLinkTime": {
+    "BEFORE_SUBMISSION": "신청서 작성 이전",
+    "AFTER_SUBMISSION": "신청서 작성 이후"
   },
-  "propertyTypes": {
-    "LAND": "토지",
-    "BUILDING": "건물",
-    "COLLECTIVE_BUILDING": "집합건물"
+  "paymentStatuses": {
+    "PAYMENT": "납부",
+    "EXEMPTION": "면제"
+  },
+  "userStatuses": {
+    "PENDING_APPROVAL": "승인대기",
+    "APPROVED": "승인완료",
+    "ACTIVE": "사용",
+    "EMAIL_UNVERIFIED": "이메일 미인증",
+    "TEMPORARY_APPROVAL": "임시승인",
+    "INACTIVE": "미사용",
+    "DELETED": "삭제"
   },
   "certificateTypes": {
     "REGISTRY_CERT_INFO": "등기필정보",
     "REGISTRY_CERTIFICATE": "등기필증",
     "CONFIRMATION_DOCUMENT": "확인서면",
     "PRIOR_REGISTRY_LINK": "선행등기연계"
-  },
-  "workTypes": {
-    "ESTABLISHMENT": "설정",
-    "TRANSFER_AND_ESTABLISHMENT": "이전+설정"
-  },
-  "paymentStatuses": {
-    "PAYMENT": "납부",
-    "EXEMPTION": "면제"
-  },
-  "adminInfoLinkTime": {
-    "BEFORE_SUBMISSION": "신청서 작성 이전",
-    "AFTER_SUBMISSION": "신청서 작성 이후"
-  },
-  "estimateSelectionStatuses": {
-    "WAITING": "선정 대기",
-    "SELECTED": "선정",
-    "NOT_SELECTED": "미선정"
   },
   "progressStatuses": {
     "ASSIGN_MANAGER": "담당자 배정",
@@ -123,14 +123,16 @@
     "REGISTRY_COMPLETED": "등기 완료",
     "REGISTRY_CANCELLED": "등기 취소"
   },
-  "userStatuses": {
-    "PENDING_APPROVAL": "승인대기",
-    "APPROVED": "승인완료",
-    "ACTIVE": "사용",
-    "EMAIL_UNVERIFIED": "이메일 미인증",
-    "TEMPORARY_APPROVAL": "임시승인",
-    "INACTIVE": "미사용",
-    "DELETED": "삭제"
+  "workTypes": {
+    "ESTABLISHMENT": "설정",
+    "TRANSFER_AND_ESTABLISHMENT": "이전+설정"
+  },
+  "quoteProgressStatuses": {
+    "QUOTE_IN_PROGRESS": "견적 진행",
+    "QUOTE_CLOSED": "견적 마감",
+    "ESTIMATE_SELECTED": "견적서 선정",
+    "SELECTION_COMPLETED": "선정 완료",
+    "REQUEST_CANCELLED": "요청 취소"
   },
   "assignedWorks": {
     "ESTABLISHMENT": "설정",
@@ -141,12 +143,24 @@
     "TRANSFER_ESTABLISHMENT": "이전,설정",
     "CANCELLATION_TRANSFER_ESTABLISHMENT": "말소,이전,설정"
   },
-  "quoteProgressStatuses": {
-    "QUOTE_IN_PROGRESS": "견적 진행",
-    "QUOTE_CLOSED": "견적 마감",
-    "ESTIMATE_SELECTED": "견적서 선정",
-    "SELECTION_COMPLETED": "선정 완료",
-    "REQUEST_CANCELLED": "요청 취소"
+  "estimateWritingStatuses": {
+    "WAITING": "작성 대기",
+    "COMPLETED": "작성 완료",
+    "WITHDRAWN": "견적 철회"
+  },
+  "partyRoles": {
+    "REGISTRY_OBLIGOR": "등기의무자",
+    "REGISTRY_OBLIGEE": "등기권리자",
+    "DEBTOR": "채무자"
+  },
+  "estimateSelectionStatuses": {
+    "WAITING": "선정 대기",
+    "SELECTED": "선정",
+    "NOT_SELECTED": "미선정"
+  },
+  "registryTypesForAssign": {
+    "OWNERSHIP_TRANSFER": "소유권이전",
+    "MORTGAGE_REGISTRATION": "근저당권설정"
   },
   "progressTypes": {
     "TYPE_01": "[후행]설정-설정",
@@ -160,29 +174,15 @@
     "SELLER": "매도자",
     "DEBTOR": "채무자"
   },
-  "estimateWritingStatuses": {
-    "WAITING": "작성 대기",
-    "COMPLETED": "작성 완료",
-    "WITHDRAWN": "견적 철회"
-  },
-  "partyRoles": {
-    "REGISTRY_OBLIGOR": "등기의무자",
-    "REGISTRY_OBLIGEE": "등기권리자",
-    "DEBTOR": "채무자"
+  "actionTypes": {
+    "ADD": "추가",
+    "MODIFY": "수정",
+    "DELETE": "삭제"
   },
   "bondPurchaseTypes": {
     "PURCHASE": "채권매입",
     "DISCOUNT": "채권할인",
     "EXEMPTION": "채권면제"
-  },
-  "registryTypesForAssign": {
-    "OWNERSHIP_TRANSFER": "소유권이전",
-    "MORTGAGE_REGISTRATION": "근저당권설정"
-  },
-  "actionTypes": {
-    "ADD": "추가",
-    "MODIFY": "수정",
-    "DELETE": "삭제"
   },
   "correctionTypes": {
     "REGISTRATION_NUMBER": "등록번호구분",
@@ -190,10 +190,33 @@
     "RESIDENT_REGISTRATION_NUMBER": "(주민)등록번호",
     "ADDRESS": "주소(소재지)"
   },
-  "ownershipTypes": {
-    "SOLE": "소유",
-    "CO_OWNERSHIP": "공유",
-    "JOINT_OWNERSHIP": "합유"
+  "eSignatureStatuses": {
+    "COMPLETED": "서명완료",
+    "REQUESTED": "서명요청",
+    "WAITING": "서명요청대기"
+  },
+  "dataSources": {
+    "REQUEST": "등기의뢰",
+    "MANUAL": "수동추가"
+  },
+  "eSignatureMethods": {
+    "DIRECT": "직접서명",
+    "DELEGATED": "위임서명"
+  },
+  "fileRegistryTypes": {
+    "OT": "소유권이전",
+    "MR": "근저당권설정",
+    "SR": "지상권설정",
+    "CH": "등기명의인표시변경",
+    "CO": "등기명의인표시경정",
+    "MC": "근저당권말소",
+    "SC": "지상권말소"
+  },
+  "propertyBuildTypes": {
+    "BUILDING": "건물",
+    "COLLECTIVE_BUILDING": "집합건물",
+    "AGRICULTURAL_LAND": "토지(농지)",
+    "LAND_ETC": "토지(농지 외)"
   },
   "processActions": {
     "COMPLETE_INSPECTION": "등기 검수 완료",
@@ -217,6 +240,35 @@
     "SUBMIT_COST_STATEMENT": "비용명세서 전송",
     "SUBMIT_COMPLETION_DOCUMENTS": "등기 완료 문서 전송",
     "SUBMIT_COMPLETION_DOCUMENTS_VISIT": "제출 완료"
+  },
+  "rpaUserTaskTypes": {
+    "VIEW_FULL_CERTIFICATE": "등기사항전부증명서 열람",
+    "ISSUE_FULL_CERTIFICATE": "등기사항전부증명서 발급",
+    "GENERATE_PROPERTY_DESCRIPTION": "부동산의표시 생성",
+    "QUERY_REGISTRATION_PASSWORD": "등기필정보 비밀번호 조회",
+    "ETAX_ACQUISITION_TAX": "이택스 취득세 신고 대행",
+    "ETAX_REGISTRATION_TAX": "이택스 등록면허세 신고 대행",
+    "WETAX_ACQUISITION_TAX": "위택스 취득세 신고 대행",
+    "WETAX_REGISTRATION_TAX": "위택스 등록면허세 신고 대행",
+    "QUERY_REGISTRATION_CASE": "등기 신청사건 조회",
+    "ADMIN_INFO_CONSENT_REQUEST": "행정정보 제공 요구 동의요청 작성 대행",
+    "REGISTRATION_APPLICATION": "등기신청서 작성 대행"
+  },
+  "confirmationDocumentTypes": {
+    "RESIDENT_REGISTRATION": "주민등록증",
+    "DRIVER_LICENSE": "운전면허증",
+    "PASSPORT": "여권",
+    "FOREIGN_REGISTRATION": "외국인등록증",
+    "DOMESTIC_RESIDENCE_REPORT": "국내거소신고증"
+  },
+  "fileBranchDocumentTypes": {
+    "BLF": "사업자등록증",
+    "ICF": "보험가입증명서"
+  },
+  "fileRequestDocumentTypes": {
+    "CNT": "계약서",
+    "RGC": "등기권리증",
+    "RRC": "주민등록초본"
   },
   "fileProgressDocumentTypes": {
     "LST": "매매목록",
@@ -246,64 +298,16 @@
     "CSM": "법인인감증명서",
     "ECS": "전자법인인감증명서"
   },
-  "fileRequestDocumentTypes": {
-    "CNT": "계약서",
-    "RGC": "등기권리증",
-    "RRC": "주민등록초본"
-  },
-  "eSignatureStatuses": {
-    "COMPLETED": "서명완료",
-    "REQUESTED": "서명요청",
-    "WAITING": "서명요청대기"
-  },
-  "rpaUserTaskTypes": {
-    "VIEW_FULL_CERTIFICATE": "등기사항전부증명서 열람",
-    "ISSUE_FULL_CERTIFICATE": "등기사항전부증명서 발급",
-    "GENERATE_PROPERTY_DESCRIPTION": "부동산의표시 생성",
-    "QUERY_REGISTRATION_PASSWORD": "등기필정보 비밀번호 조회",
-    "ETAX_ACQUISITION_TAX": "이택스 취득세 신고 대행",
-    "ETAX_REGISTRATION_TAX": "이택스 등록면허세 신고 대행",
-    "WETAX_ACQUISITION_TAX": "위택스 취득세 신고 대행",
-    "WETAX_REGISTRATION_TAX": "위택스 등록면허세 신고 대행",
-    "QUERY_REGISTRATION_CASE": "등기 신청사건 조회",
-    "ADMIN_INFO_CONSENT_REQUEST": "행정정보 제공 요구 동의요청 작성 대행",
-    "REGISTRATION_APPLICATION": "등기신청서 작성 대행"
-  },
-  "fileRegistryTypes": {
-    "OT": "소유권이전",
-    "MR": "근저당권설정",
-    "SR": "지상권설정",
-    "CH": "등기명의인표시변경",
-    "CO": "등기명의인표시경정",
-    "MC": "근저당권말소",
-    "SC": "지상권말소"
-  },
-  "propertyBuildTypes": {
-    "BUILDING": "건물",
-    "COLLECTIVE_BUILDING": "집합건물",
-    "AGRICULTURAL_LAND": "토지(농지)",
-    "LAND_ETC": "토지(농지 외)"
-  },
-  "eSignatureMethods": {
-    "DIRECT": "직접서명",
-    "DELEGATED": "위임서명"
-  },
-  "confirmationDocumentTypes": {
-    "RESIDENT_REGISTRATION": "주민등록증",
-    "DRIVER_LICENSE": "운전면허증",
-    "PASSPORT": "여권",
-    "FOREIGN_REGISTRATION": "외국인등록증",
-    "DOMESTIC_RESIDENCE_REPORT": "국내거소신고증"
+  "ownershipTypes": {
+    "SOLE": "소유",
+    "CO_OWNERSHIP": "공유",
+    "JOINT_OWNERSHIP": "합유"
   },
   "rpaUserTaskStatuses": {
     "PENDING": "대기",
     "IN_PROGRESS": "진행중",
     "SUCCESS": "성공",
     "FAILED": "실패"
-  },
-  "dataSources": {
-    "REQUEST": "등기의뢰",
-    "MANUAL": "수동추가"
   },
   "successCodes": {
     "ACCESS_TOKEN_REISSUED": "토큰 재갱신 성공",
@@ -335,10 +339,6 @@
     "CREATED": "리소스 생성 성공",
     "ACCEPTED": "요청 수락됨",
     "NO_CONTENT": "요청 성공, 응답 본문 없음"
-  },
-  "fileBranchDocumentTypes": {
-    "BLF": "사업자등록증",
-    "ICF": "보험가입증명서"
   },
   "errorCodes": {
     "LOGIN_ID_IS_EMPTY": "아이디 미입력",

@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/components/template/input/SearchSelect.vue`
+문서 제목: Search Select 구현 파일 -->
+
 <template>
   <div ref="selectRef" class="form-select">
     <div class="input-wrapper" @click="toggleDropdown">

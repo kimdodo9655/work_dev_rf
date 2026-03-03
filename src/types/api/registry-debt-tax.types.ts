@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/types/api/registry-debt-tax.types.ts`
+ * 문서 제목: registry debt tax.types 구현 파일
+ */
+
+/**
  * REGISTRY_DEBT_TAX API Types
  * @generated 2025-01-27
  */

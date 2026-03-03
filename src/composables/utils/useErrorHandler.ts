@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/composables/utils/useErrorHandler.ts`
+ * 문서 제목: use Error Handler 구현 파일
+ */
+
+/**
  * @file useErrorHandler.ts
  * @description 에러 핸들링 Composable (유틸리티)
  */

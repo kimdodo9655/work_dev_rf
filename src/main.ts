@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/main.ts`
+ * 문서 제목: main 구현 파일
+ */
+
 import '@/assets/styles/global.scss'
 import '@/api/client'
 

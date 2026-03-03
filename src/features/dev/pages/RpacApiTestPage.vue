@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/dev/pages/RpacApiTestPage.vue`
+문서 제목: Rpac Api Test Page 구현 파일 -->
+
 <template>
   <section :class="['rpac-page', { embedded }]">
     <header v-if="!embedded" class="page-header card">

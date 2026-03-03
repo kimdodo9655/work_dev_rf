@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/my/modals/OrgRegistryIdModal.vue`
+문서 제목: Org Registry Id Modal 구현 파일 -->
+
 <template>
   <div>
     <h1>

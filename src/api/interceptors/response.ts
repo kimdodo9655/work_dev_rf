@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/api/interceptors/response.ts`
+ * 문서 제목: response 구현 파일
+ */
+
 import type { AxiosInstance } from 'axios'
 
 import { runRefreshOnce } from '@/api/interceptors/refresh'

@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/types/api/notice.types.ts`
+ * 문서 제목: notice.types 구현 파일
+ */
+
+/**
  * NOTICE API Types
  * @generated 2025-01-27
  */

@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/types/api/bank.types.ts`
+ * 문서 제목: bank.types 구현 파일
+ */
+
+/**
  * BANK API Types
  * @generated 2025-01-27
  */

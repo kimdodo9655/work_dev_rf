@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/my/modals/OrgBranchCreateInfoTab.vue`
+문서 제목: Org Branch Create Info Tab 구현 파일 -->
+
 <template>
   <div>
     <h1>

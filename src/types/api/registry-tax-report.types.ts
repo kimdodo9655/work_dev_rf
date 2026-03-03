@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/types/api/registry-tax-report.types.ts`
+ * 문서 제목: registry tax report.types 구현 파일
+ */
+
+/**
  * REGISTRY_TAX_REPORT API Types
  * @generated 2025-01-27
  */

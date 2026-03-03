@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/shared/pages/AccessErrorMacPage.vue`
+문서 제목: Access Error Mac Page 구현 파일 -->
+
 <template>
   <div class="all-content-inner">
     <div class="error-area">

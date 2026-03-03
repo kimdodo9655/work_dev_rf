@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/types/store.ts`
+ * 문서 제목: store 구현 파일
+ */
+
+/**
  * 클라이언트 상태 관리 타입
  * @file store.ts
  */

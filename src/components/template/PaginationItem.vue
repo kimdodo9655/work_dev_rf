@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/components/template/PaginationItem.vue`
+문서 제목: Pagination Item 구현 파일 -->
+
 <template>
   <div v-if="totalPages > 0" class="pagination">
     <button

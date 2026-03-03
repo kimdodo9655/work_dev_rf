@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/auth/pages/ProgramInstallPage.vue`
+문서 제목: Program Install Page 구현 파일 -->
+
 <template>
   <div>
     <h1>

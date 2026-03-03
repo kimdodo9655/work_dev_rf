@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/composables/utils/useDialog.ts`
+ * 문서 제목: use Dialog 구현 파일
+ */
+
+/**
  * @file useDialog.ts
  * @description 다이얼로그 관리 Composable (유틸리티)
  */

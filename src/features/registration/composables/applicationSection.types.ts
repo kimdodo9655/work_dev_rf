@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/features/registration/composables/applicationSection.types.ts`
+ * 문서 제목: application Section.types 구현 파일
+ */
+
 export interface RegistryApplicationForm {
   applicationId?: number
   registryManagementNumber?: string

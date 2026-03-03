@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/types/api/code.types.ts`
+ * 문서 제목: code.types 구현 파일
+ */
+
+/**
  * 공통코드 관련 타입 정의
  * @file code.types.ts
  *

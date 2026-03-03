@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/auth/pages/SignupPage.vue`
+문서 제목: Signup Page 구현 파일 -->
+
 <template>
   <div class="signup-page">
     <div class="signup-header">

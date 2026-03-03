@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/App.vue`
+문서 제목: App 구현 파일 -->
+
 <template>
   <div id="app">
     <div class="wrapper" :class="wrapperClass">

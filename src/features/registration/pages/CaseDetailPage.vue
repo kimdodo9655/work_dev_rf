@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/registration/pages/CaseDetailPage.vue`
+문서 제목: Case Detail Page 구현 파일 -->
+
 <template>
   <section class="detail-layout">
     <!-- 좌측: 비워두는 영역(폭 200px) -->

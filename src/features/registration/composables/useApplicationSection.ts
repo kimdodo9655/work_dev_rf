@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/features/registration/composables/useApplicationSection.ts`
+ * 문서 제목: use Application Section 구현 파일
+ */
+
 import { computed, defineAsyncComponent, type Ref } from 'vue'
 
 import { useCodeReplacer } from '@/composables/utils/useCodeReplacer'

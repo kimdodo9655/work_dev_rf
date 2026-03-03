@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/registration/pages/ProgressSection.vue`
+문서 제목: Progress Section 구현 파일 -->
+
 <template>
   <ul class="sub-list">
     <!-- [내부] 전자서명 진행 (근저당권) -->

@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/composables/utils/useThrottle.ts`
+ * 문서 제목: use Throttle 구현 파일
+ */
+
 import { ref } from 'vue'
 
 /**

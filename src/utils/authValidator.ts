@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/utils/authValidator.ts`
+ * 문서 제목: auth Validator 구현 파일
+ */
+
 import { useApiAlert } from '@/composables/utils/useApiAlert'
 import { ENV } from '@/utils/env'
 import { logger } from '@/utils/logger'

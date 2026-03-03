@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/dev/pages/PdfTestPanel.vue`
+문서 제목: Pdf Test Panel 구현 파일 -->
+
 <!-- <script setup lang="ts">
 // 2줄 이상의 테이블
 

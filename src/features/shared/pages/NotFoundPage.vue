@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/shared/pages/NotFoundPage.vue`
+문서 제목: Not Found Page 구현 파일 -->
+
 <template>
   <div class="all-content-inner">
     <div class="error-area">

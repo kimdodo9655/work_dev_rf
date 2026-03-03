@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/types/api/registry-housing-bond.types.ts`
+ * 문서 제목: registry housing bond.types 구현 파일
+ */
+
+/**
  * REGISTRY_HOUSING_BOND API Types
  * @generated 2025-01-27
  */

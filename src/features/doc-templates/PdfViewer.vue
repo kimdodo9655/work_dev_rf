@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/doc-templates/PdfViewer.vue`
+문서 제목: Pdf Viewer 구현 파일 -->
+
 <template>
   <div class="pdf-viewer-root" :class="{ 'is-fullscreen': fullScreen }">
     <!-- 1. 인터넷창 헤더 영역 (앱 내에서 유사 헤더 구현) -->

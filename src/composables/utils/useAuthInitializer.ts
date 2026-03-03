@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/composables/utils/useAuthInitializer.ts`
+ * 문서 제목: use Auth Initializer 구현 파일
+ */
+
+/**
  * @file useAuthInitializer.ts
  * @description 인증 초기화 Composable (유틸리티)
  */

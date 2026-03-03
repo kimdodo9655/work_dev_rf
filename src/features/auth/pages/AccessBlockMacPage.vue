@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/auth/pages/AccessBlockMacPage.vue`
+문서 제목: Access Block Mac Page 구현 파일 -->
+
 <template>
   <div>
     <h1>

@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/registration/modals/AttachDocListCreateModal.vue`
+문서 제목: Attach Doc List Create Modal 구현 파일 -->
+
 <template>
   <div>
     <h1>

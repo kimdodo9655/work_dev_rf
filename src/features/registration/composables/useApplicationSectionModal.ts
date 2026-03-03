@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/features/registration/composables/useApplicationSectionModal.ts`
+ * 문서 제목: use Application Section Modal 구현 파일
+ */
+
 import { computed, type Ref, ref } from 'vue'
 
 export function useApplicationSectionModal({

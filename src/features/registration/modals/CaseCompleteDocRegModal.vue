@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/registration/modals/CaseCompleteDocRegModal.vue`
+문서 제목: Case Complete Doc Reg Modal 구현 파일 -->
+
 <template>
   <div>
     <h1>

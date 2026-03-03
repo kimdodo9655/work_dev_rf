@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/plugins/iconStyles.ts`
+ * 문서 제목: icon Styles 구현 파일
+ */
+
 let iconStylesPromise: Promise<void> | null = null
 
 export function ensureIconStylesLoaded() {

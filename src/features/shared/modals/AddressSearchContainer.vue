@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/shared/modals/AddressSearchContainer.vue`
+문서 제목: Address Search Container 구현 파일 -->
+
 <template>
   <div>
     <h1>

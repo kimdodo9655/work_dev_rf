@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/types/common.ts`
+ * 문서 제목: common 구현 파일
+ */
+
+/**
  * Select 옵션
  */
 export interface SelectOption<T = string | number> {

@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/registration/pages/AdminSection.vue`
+문서 제목: Admin Section 구현 파일 -->
+
 <template>
   <ul v-if="list.length > 0" class="sub-list">
     <li class="sub-item">

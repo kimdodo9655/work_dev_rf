@@ -1,3 +1,8 @@
+/**
+ * 문서 경로: `@/src/features/dev/constants/devLoginUsers.ts`
+ * 문서 제목: dev Login Users 구현 파일
+ */
+
 export type DevLoginUser = {
   기관ID: string
   권한값: string

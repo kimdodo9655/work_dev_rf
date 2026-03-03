@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/types/api/branch-prepaid.types.ts`
+ * 문서 제목: branch prepaid.types 구현 파일
+ */
+
+/**
  * BRANCH_PREPAID API Types
  * @generated 2025-01-27
  */

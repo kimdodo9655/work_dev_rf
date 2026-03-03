@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/registration/pages/ApplicationSection.vue`
+문서 제목: Application Section 구현 파일 -->
+
 <template>
   <div v-if="tabs.length > 0" class="application-container">
     <!-- 탭 메뉴 -->

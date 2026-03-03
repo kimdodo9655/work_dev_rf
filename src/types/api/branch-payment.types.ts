@@ -1,4 +1,9 @@
 /**
+ * 문서 경로: `@/src/types/api/branch-payment.types.ts`
+ * 문서 제목: branch payment.types 구현 파일
+ */
+
+/**
  * BRANCH_PAYMENT API Types
  * @generated 2025-01-27
  */

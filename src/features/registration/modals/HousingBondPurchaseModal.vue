@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/registration/modals/HousingBondPurchaseModal.vue`
+문서 제목: Housing Bond Purchase Modal 구현 파일 -->
+
 <template>
   <div>
     <h1>

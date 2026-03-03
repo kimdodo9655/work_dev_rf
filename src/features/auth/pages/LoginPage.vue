@@ -1,3 +1,6 @@
+<!-- 문서 경로: `@/src/features/auth/pages/LoginPage.vue`
+문서 제목: Login Page 구현 파일 -->
+
 <template>
   <div class="login-page">
     <div class="left">
