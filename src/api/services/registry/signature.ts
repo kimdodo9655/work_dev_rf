@@ -11,9 +11,12 @@ import { apiHelpers } from '@/api/client'
 import { API } from '@/api/endpoints'
 import type {
   CompleteESignatureParams,
+  CompleteESignatureRequest,
   CompleteESignatureResponse,
+  GetDetailedESignaturesQuery,
   GetDetailedESignaturesRequest,
   GetDetailedESignaturesResponse,
+  GetESignaturesQuery,
   GetESignaturesRequest,
   GetESignaturesResponse,
   RequestESignatureParams,
@@ -27,10 +30,11 @@ export const registrySignatureAPI = {
     // --------------------------------------------------
     // [R02O-01][GET - /api/registry/progress/{registryManagementNumber}/e-signatures/detail] 전자서명 진행 정보 조회
     // --------------------------------------------------
-    const { registryManagementNumber, ...params } = query as any
+    const { registryManagementNumber, ...params } = query
+    const detailQuery: GetDetailedESignaturesQuery = params
     return apiHelpers.get<GetDetailedESignaturesResponse>(
       API.REGISTRY_SIGNATURE.DETAIL(registryManagementNumber),
-      params
+      detailQuery
     )
   },
 
@@ -38,20 +42,17 @@ export const registrySignatureAPI = {
     // --------------------------------------------------
     // [R02O-02][POST - /api/registry/progress/{registryManagementNumber}/e-signatures/{eSignatureId}/request] 전자서명 요청
     // --------------------------------------------------
-    const { registryManagementNumber, eSignatureId, ...data } = params as any
     return apiHelpers.post<RequestESignatureResponse>(
-      API.REGISTRY_SIGNATURE.REQUEST(registryManagementNumber, eSignatureId),
-      data
+      API.REGISTRY_SIGNATURE.REQUEST(params.registryManagementNumber, params.eSignatureId)
     )
   },
 
-  async complete(params: CompleteESignatureParams) {
+  async complete(params: CompleteESignatureParams, data: CompleteESignatureRequest) {
     // --------------------------------------------------
     // [R02O-03][POST - /api/registry/progress/{registryManagementNumber}/e-signatures/{eSignatureId}/complete] 전자서명 완료
     // --------------------------------------------------
-    const { registryManagementNumber, eSignatureId, ...data } = params as any
     return apiHelpers.post<CompleteESignatureResponse>(
-      API.REGISTRY_SIGNATURE.COMPLETE(registryManagementNumber, eSignatureId),
+      API.REGISTRY_SIGNATURE.COMPLETE(params.registryManagementNumber, params.eSignatureId),
       data
     )
   },
@@ -60,10 +61,8 @@ export const registrySignatureAPI = {
     // --------------------------------------------------
     // [R02O-04][POST - /api/registry/progress/{registryManagementNumber}/e-signatures/{eSignatureId}/re-request] 전자서명 재요청
     // --------------------------------------------------
-    const { registryManagementNumber, eSignatureId, ...data } = params as any
     return apiHelpers.post<ReRequestESignatureResponse>(
-      API.REGISTRY_SIGNATURE.RE_REQUEST(registryManagementNumber, eSignatureId),
-      data
+      API.REGISTRY_SIGNATURE.RE_REQUEST(params.registryManagementNumber, params.eSignatureId)
     )
   },
 
@@ -71,10 +70,11 @@ export const registrySignatureAPI = {
     // --------------------------------------------------
     // [R02O-05][GET - /api/registry/progress/{registryManagementNumber}/e-signatures/list] 전자서명 진행 정보 목록 조회
     // --------------------------------------------------
-    const { registryManagementNumber, ...params } = query as any
+    const { registryManagementNumber, ...params } = query
+    const listQuery: GetESignaturesQuery = params
     return apiHelpers.get<GetESignaturesResponse>(
       API.REGISTRY_SIGNATURE.LIST(registryManagementNumber),
-      params
+      listQuery
     )
   }
 }

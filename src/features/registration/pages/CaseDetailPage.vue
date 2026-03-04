@@ -3,8 +3,64 @@
 
 <template>
   <section class="detail-layout">
-    <!-- 좌측: 비워두는 영역(폭 200px) -->
-    <aside class="sidebar" aria-hidden="true"></aside>
+    <!-- 좌측: 업무 프로세스 아코디언 -->
+    <aside class="sidebar">
+      <section class="work-process">
+        <h2 class="work-process-title">업무 프로세스</h2>
+
+        <div v-if="processLoading" class="process-state">업무 프로세스를 불러오는 중입니다.</div>
+        <div v-else-if="processErrorMessage" class="process-state error">
+          {{ processErrorMessage }}
+        </div>
+        <div v-else-if="processItems.length === 0" class="process-state">
+          표시할 업무 프로세스가 없습니다.
+        </div>
+
+        <ul v-else class="process-list">
+          <li v-for="(item, index) in processItems" :key="item.id" class="process-item-wrap">
+            <article :class="['process-item', { active: item.isCurrent }]">
+              <button
+                type="button"
+                class="process-header-btn"
+                @click="toggleProcessItem(item.id)"
+                :aria-expanded="openedProcessId === item.id"
+              >
+                <span class="process-header-title">{{ item.title }}</span>
+                <span v-if="openedProcessId !== item.id" class="process-arrow">&gt;</span>
+              </button>
+
+              <div v-if="openedProcessId === item.id" class="process-body">
+                <p
+                  class="process-text"
+                  v-for="(line, lineIdx) in item.descriptionLines"
+                  :key="lineIdx"
+                >
+                  {{ line }}
+                </p>
+                <div class="process-buttons">
+                  <button
+                    v-for="(btn, btnIdx) in item.buttons"
+                    :key="`${item.id}-btn-${btnIdx}-${btn.action || 'ACTION'}`"
+                    type="button"
+                    class="process-btn"
+                    :disabled="isChangingProcess"
+                    @click="handleProcessActionClick(btn)"
+                  >
+                    {{ btn.label }}
+                  </button>
+                </div>
+              </div>
+            </article>
+
+            <div
+              v-if="index < processItems.length - 1"
+              class="process-dot"
+              aria-hidden="true"
+            ></div>
+          </li>
+        </ul>
+      </section>
+    </aside>
 
     <!-- 우측: 전체 UI -->
     <main class="content">
@@ -60,10 +116,20 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
+import { registryProgressAPI } from '@/api/services/registry'
 import { useAccordionState } from '@/composables/utils/useAccordionState'
+import { useCodeReplacer } from '@/composables/utils/useCodeReplacer'
+import { useDialog } from '@/composables/utils/useDialog'
+import { useErrorHandler } from '@/composables/utils/useErrorHandler'
+import type {
+  ChangeRegistryProgressProcessQuery,
+  ProcessActionResponse,
+  ProcessStepResponse,
+  RegistryProgressProcessResponse
+} from '@/types'
 
 import AccordionSection from './AccordionSection.vue'
 import AdminSection from './AdminSection.vue'
@@ -73,29 +139,334 @@ import RequestInfoSection from './RequestInfoSection.vue'
 
 const route = useRoute()
 const registryManagementNumber = computed(() => String(route.params.caseId ?? ''))
+const { getErrorMessage } = useErrorHandler()
+const { findReplacement } = useCodeReplacer()
+const { alert, confirm } = useDialog()
 
 // 아코디언 상태 관리
 const { openMap, toggle } = useAccordionState()
 
 // AdminSection 표시 여부 (데이터가 있을 때만 표시)
 const showAdminSection = ref(false) // 초기에는 숨김 (AdminSection이 데이터 로드 후 알려줌)
+const openedProcessId = ref('')
+const processLoading = ref(false)
+const processErrorMessage = ref('')
+const processData = ref<RegistryProgressProcessResponse | null>(null)
+const isChangingProcess = ref(false)
+
+interface WorkProcessItem {
+  id: string
+  title: string
+  descriptionLines: string[]
+  buttons: WorkProcessActionItem[]
+  isCurrent: boolean
+}
+
+interface WorkProcessActionItem {
+  action?: string
+  nextStatus?: string
+  nextStatusDescription?: string
+  label: string
+}
+
+const processItems = computed<WorkProcessItem[]>(() => {
+  const steps = processData.value?.steps ?? []
+  return steps.map((step, index) => {
+    const actions = step.actions ?? []
+    return {
+      id: step.step || `STEP_${index + 1}`,
+      title: step.stepTitle || step.step || `프로세스 ${index + 1}`,
+      descriptionLines: toDescriptionLines(step),
+      buttons: actions.map((action) => mapAction(action)),
+      isCurrent: Boolean(step.isCurrentStep) || step.step === processData.value?.currentStatus
+    }
+  })
+})
 
 function handleAdminLoaded(hasData: boolean) {
   showAdminSection.value = hasData
 }
+
+function toggleProcessItem(id: string) {
+  openedProcessId.value = openedProcessId.value === id ? '' : id
+}
+
+function mapAction(action: ProcessActionResponse): WorkProcessActionItem {
+  const actionLabel =
+    action.actionDescription ||
+    findReplacement(action.action, 'processActions') ||
+    action.action ||
+    '상태 변경'
+
+  return {
+    action: action.action,
+    nextStatus: action.nextStatus,
+    nextStatusDescription: action.nextStatusDescription,
+    label: actionLabel
+  }
+}
+
+function toDescriptionLines(step: ProcessStepResponse): string[] {
+  const text = step.stepDescription?.trim()
+  if (!text) return ['설명 정보가 없습니다.']
+  return text
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+}
+
+function unwrapProcessData(payload: unknown): RegistryProgressProcessResponse | null {
+  if (!payload || typeof payload !== 'object') return null
+
+  const withData = payload as { data?: unknown; steps?: unknown }
+  if (Array.isArray(withData.steps)) {
+    return payload as RegistryProgressProcessResponse
+  }
+  if (withData.data && typeof withData.data === 'object') {
+    return withData.data as RegistryProgressProcessResponse
+  }
+  return null
+}
+
+function findCurrentStepId(data: RegistryProgressProcessResponse | null): string {
+  if (!data?.steps || data.steps.length === 0) return ''
+  const current =
+    data.steps.find((step) => step.isCurrentStep) ??
+    data.steps.find((step) => step.step === data.currentStatus) ??
+    data.steps[0]
+  return current?.step || ''
+}
+
+function getApiErrorDialogContent(error: unknown, fallbackTitle: string) {
+  const errorObj = error as {
+    response?: {
+      data?: {
+        title?: unknown
+        message?: unknown
+      }
+    }
+  }
+
+  const apiTitle = errorObj?.response?.data?.title
+  const apiMessage = errorObj?.response?.data?.message
+
+  return {
+    title: typeof apiTitle === 'string' && apiTitle ? apiTitle : fallbackTitle,
+    message: typeof apiMessage === 'string' && apiMessage ? apiMessage : getErrorMessage(error)
+  }
+}
+
+async function fetchProcess() {
+  if (!registryManagementNumber.value) {
+    processData.value = null
+    processErrorMessage.value = '등기관리번호가 없습니다.'
+    return
+  }
+
+  processLoading.value = true
+  processErrorMessage.value = ''
+
+  try {
+    const response = await registryProgressAPI.process({
+      registryManagementNumber: registryManagementNumber.value
+    })
+    const data = unwrapProcessData(response)
+    processData.value = data
+    openedProcessId.value = findCurrentStepId(data)
+  } catch (error) {
+    processData.value = null
+    processErrorMessage.value = getApiErrorDialogContent(error, '업무 프로세스 조회 실패').message
+  } finally {
+    processLoading.value = false
+  }
+}
+
+async function handleProcessActionClick(item: WorkProcessActionItem) {
+  if (isChangingProcess.value) return
+
+  if (!item.nextStatus) {
+    await alert({
+      title: '상태 변경 실패',
+      message: '다음 진행 상태(nextStatus) 정보가 없어 변경할 수 없습니다.'
+    })
+    return
+  }
+
+  const ok = await confirm({
+    title: '진행상태 업데이트',
+    message: `${item.label}를 진행하시겠습니까?`,
+    confirmText: '진행',
+    cancelText: '취소'
+  })
+  if (!ok) return
+
+  isChangingProcess.value = true
+  processErrorMessage.value = ''
+
+  try {
+    await registryProgressAPI.changeProcess(
+      { registryManagementNumber: registryManagementNumber.value },
+      { newStatus: item.nextStatus as ChangeRegistryProgressProcessQuery['newStatus'] }
+    )
+
+    await alert({
+      title: '처리 완료',
+      message: '진행상태가 업데이트되었습니다.'
+    })
+
+    await fetchProcess()
+  } catch (error) {
+    const apiError = getApiErrorDialogContent(error, '처리 실패')
+    await alert({
+      title: apiError.title,
+      message: apiError.message
+    })
+  } finally {
+    isChangingProcess.value = false
+  }
+}
+
+watch(
+  () => registryManagementNumber.value,
+  (value) => {
+    if (value) {
+      void fetchProcess()
+      return
+    }
+    processData.value = null
+    openedProcessId.value = ''
+  },
+  { immediate: true }
+)
 </script>
 
 <style scoped lang="scss">
 .detail-layout {
   display: grid;
-  grid-template-columns: 200px 1fr;
+  grid-template-columns: 280px minmax(0, 1fr);
   gap: 12px;
   align-items: start;
   background-color: #fff;
 }
 
 .sidebar {
-  min-height: 1px;
+  position: sticky;
+  top: 16px;
+}
+
+.work-process {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.work-process-title {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.process-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.process-state {
+  font-size: 12px;
+  color: #6b7280;
+  padding: 6px 2px 2px;
+}
+
+.process-state.error {
+  color: #b91c1c;
+}
+
+.process-item-wrap {
+  display: block;
+}
+
+.process-item {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.process-item.active {
+  border-color: #2563eb;
+  background: #f9fafb;
+}
+
+.process-header-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 0;
+  background: transparent;
+  padding: 10px 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.process-header-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.process-arrow {
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.process-body {
+  padding: 0 12px 10px;
+}
+
+.process-text {
+  margin: 0;
+  font-size: 12px;
+  color: #4b5563;
+  line-height: 1.45;
+}
+
+.process-buttons {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.process-btn {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #374151;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.process-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.process-dot {
+  display: none;
+}
+
+.process-item-wrap + .process-item-wrap {
+  margin-top: 8px;
 }
 
 .content {
@@ -103,6 +474,7 @@ function handleAdminLoaded(hasData: boolean) {
   flex-direction: column;
   gap: 12px;
   padding: 40px 20px 80px;
+  min-width: 0;
 }
 
 .accordion {

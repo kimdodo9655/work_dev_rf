@@ -68,28 +68,23 @@
             <th style="width: 130px">접수일자</th>
             <th style="width: 160px">담당자</th>
             <th style="width: 140px">진행상태</th>
+            <th style="width: 90px">상세</th>
           </tr>
         </thead>
         <tbody>
           <tr v-if="loading" class="info-text">
-            <td colspan="10">불러오는 중...</td>
+            <td colspan="11">불러오는 중...</td>
           </tr>
           <tr v-else-if="rows.length === 0" class="info-text">
-            <td colspan="10">조회 결과가 없습니다.</td>
+            <td colspan="11">조회 결과가 없습니다.</td>
           </tr>
-          <tr
-            v-for="r in rows"
-            v-else
-            :key="r.registryManagementNumber"
-            class="row"
-            @click="goDetail(r.registryManagementNumber)"
-          >
+          <tr v-for="r in rows" v-else :key="r.registryManagementNumber" class="row">
             <td>{{ r.rowNum }}</td>
             <td>{{ r.registryRequestNumber }}</td>
             <td>{{ r.workType }}</td>
             <td>{{ r.assignedWork }}</td>
             <td>{{ r.registryMethod }}</td>
-            <td class="address-cell">{{ r.propertyAddress ?? '-' }}</td>
+            <td class="address-cell">{{ displayAddress(r.propertyAddress) }}</td>
             <td>{{ r.registryRequestDate }}</td>
             <td>{{ r.registryReceiptDate }}</td>
             <td>
@@ -111,7 +106,7 @@
                   @click.stop
                   @change.stop="(e) => onAdminSelectChange(r.registryManagementNumber, e)"
                 >
-                  <option value="" disabled>담당자 선택</option>
+                  <option value="" disabled>미배정</option>
                   <option v-for="u in assignableUsers" :key="u.userId" :value="String(u.userId)">
                     {{ u.userName }}
                   </option>
@@ -122,6 +117,15 @@
               </template>
             </td>
             <td>{{ r.progressStatus }}</td>
+            <td>
+              <button
+                class="detail-btn"
+                type="button"
+                @click="goDetail(r.registryManagementNumber)"
+              >
+                <i class="fi fi-sr-angle-circle-right"></i>
+              </button>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -207,12 +211,21 @@ function isUnassigned(name: string) {
   return name === '미배정' || !name
 }
 
+function displayAddress(value?: string | null): string {
+  if (!value) return '-'
+  return value
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&#160;/gi, ' ')
+    .replace(/&#xA0;/gi, ' ')
+    .replace(/\u00A0/g, ' ')
+}
+
 type AssignableUser = { userId: string | number; userName: string }
 
 const assignableUsers = ref<AssignableUser[]>([])
 
 function findUserIdByName(name: string): string {
-  if (!name || name === '미배정') return ''
+  if (isUnassigned(name)) return ''
   const hit = assignableUsers.value.find((u) => u.userName === name)
   return hit ? String(hit.userId) : ''
 }
@@ -549,18 +562,30 @@ function onChangePageSize() {
  * ======================= */
 const assigningSet = ref<Set<string>>(new Set())
 
+function addAssigning(registryManagementNumber: string) {
+  const next = new Set(assigningSet.value)
+  next.add(registryManagementNumber)
+  assigningSet.value = next
+}
+
+function removeAssigning(registryManagementNumber: string) {
+  const next = new Set(assigningSet.value)
+  next.delete(registryManagementNumber)
+  assigningSet.value = next
+}
+
 async function callAssignManager(
   registryManagementNumber: string,
   managerUserIdToAssign: number | string
 ) {
   if (assigningSet.value.has(registryManagementNumber)) return
-  assigningSet.value.add(registryManagementNumber)
+  addAssigning(registryManagementNumber)
 
   try {
-    const res: any = await registryProgressAPI.assignManager({
-      registryManagementNumber,
-      managerUserId: managerUserIdToAssign
-    } as any)
+    const res: any = await registryProgressAPI.assignManager(
+      { registryManagementNumber },
+      { managerUserId: Number(managerUserIdToAssign) }
+    )
 
     const payload = unwrap<any>(res)
     const msg =
@@ -569,11 +594,13 @@ async function callAssignManager(
       (res as any)?.message ??
       '업무담당자 배정이 완료되었습니다.'
 
-    await alert({
+    const acknowledged = await alert({
       title: '배정 완료',
       message: msg
     })
-    await fetchList(false)
+    if (acknowledged) {
+      await fetchList(false)
+    }
   } catch (e: any) {
     const msg = e?.message ?? '업무담당자 배정에 실패했습니다.'
     await alert({
@@ -581,7 +608,7 @@ async function callAssignManager(
       message: msg
     })
   } finally {
-    assigningSet.value.delete(registryManagementNumber)
+    removeAssigning(registryManagementNumber)
   }
 }
 
@@ -691,13 +718,8 @@ onMounted(async () => {
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
-.Search-panel form {
-  align-items: flex-start;
-  gap: 10px;
-}
-
 .row {
-  cursor: pointer;
+  cursor: default;
 }
 
 .address-cell {

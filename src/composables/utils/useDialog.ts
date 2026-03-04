@@ -41,6 +41,16 @@ const normalizeConfirmOptions = (options: ConfirmOptions): ConfirmOptions => {
   }
 }
 
+function scheduleCleanup(expectedResolve?: DialogState['resolve']) {
+  setTimeout(() => {
+    // 이전 다이얼로그의 지연 cleanup이 새 다이얼로그 상태를 덮어쓰지 않도록 보호
+    if (state.resolve !== expectedResolve || state.isOpen) return
+    state.type = null
+    state.options = null
+    state.resolve = undefined
+  }, 200)
+}
+
 // ============================================================================
 // Composable
 // ============================================================================
@@ -78,21 +88,19 @@ export const useDialog = () => {
    * 다이얼로그 닫기
    */
   const close = () => {
+    const currentResolve = state.resolve
     state.isOpen = false
     if (state.resolve) {
       state.resolve(false)
     }
-    setTimeout(() => {
-      state.type = null
-      state.options = null
-      state.resolve = undefined
-    }, 200)
+    scheduleCleanup(currentResolve)
   }
 
   /**
    * 확인 버튼 핸들러
    */
   const handleConfirm = async () => {
+    const currentResolve = state.resolve
     const options = state.options as AlertOptions | ConfirmOptions
 
     if (options?.onConfirm) {
@@ -104,17 +112,14 @@ export const useDialog = () => {
     }
 
     state.isOpen = false
-    setTimeout(() => {
-      state.type = null
-      state.options = null
-      state.resolve = undefined
-    }, 200)
+    scheduleCleanup(currentResolve)
   }
 
   /**
    * 취소 버튼 핸들러
    */
   const handleCancel = async () => {
+    const currentResolve = state.resolve
     const options = state.options as ConfirmOptions
 
     if (options?.onCancel) {
@@ -126,11 +131,7 @@ export const useDialog = () => {
     }
 
     state.isOpen = false
-    setTimeout(() => {
-      state.type = null
-      state.options = null
-      state.resolve = undefined
-    }, 200)
+    scheduleCleanup(currentResolve)
   }
 
   // ============================================================================

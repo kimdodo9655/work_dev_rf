@@ -18,28 +18,42 @@ import type {
   DownloadDocumentAsBase64_1Response,
   GetDocuments_1Params,
   GetDocuments_1Response,
-  UploadDocumentQuery
+  UploadDocumentParams,
+  UploadDocumentQuery,
+  UploadDocumentRequest,
+  UploadDocumentResponse
 } from '@/types'
+
+type UploadProgressHandler = (progress: number) => void
+type UploadRequestDocumentInput = UploadDocumentParams &
+  UploadDocumentQuery &
+  Omit<UploadDocumentRequest, 'file'> & {
+    file: File
+    onProgress?: UploadProgressHandler
+  }
 
 export const registryRequestDocumentAPI = {
   async getList(params: GetDocuments_1Params) {
     // --------------------------------------------------
     // [R00D-01][GET - /api/registry/requests/{requestNumber}/documents] 문서 목록 조회
     // --------------------------------------------------
-    const { requestNumber, ...query } = params as any
     return apiHelpers.get<GetDocuments_1Response>(
-      API.REGISTRY_REQUEST_DOCUMENT.LIST(requestNumber),
-      query
+      API.REGISTRY_REQUEST_DOCUMENT.LIST(params.requestNumber)
     )
   },
 
-  async upload(query: UploadDocumentQuery) {
+  async upload(query: UploadRequestDocumentInput) {
     // --------------------------------------------------
     // [R00D-02][POST - /api/registry/requests/{requestNumber}/documents] 문서 업로드
     // --------------------------------------------------
-    const { requestNumber, file, onProgress } = query as any
-    return apiHelpers.uploadFile(
-      API.REGISTRY_REQUEST_DOCUMENT.UPLOAD(requestNumber),
+    const { requestNumber, file, onProgress, ...params } = query
+    return apiHelpers.uploadFile<UploadDocumentResponse>(
+      `${API.REGISTRY_REQUEST_DOCUMENT.UPLOAD(requestNumber)}?${new URLSearchParams(
+        Object.entries(params).reduce<Record<string, string>>((acc, [key, value]) => {
+          acc[key] = String(value)
+          return acc
+        }, {})
+      ).toString()}`,
       file,
       onProgress
     )
