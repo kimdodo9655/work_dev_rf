@@ -15,7 +15,7 @@ const PdfTester = defineAsyncComponent(() => import('@/features/doc-templates/Pd
 
 <style lang="scss" scoped>
 .container {
-  width: 1080px;
+  width: 100%;
   height: 700px;
   padding: 20px;
   overflow-y: auto;

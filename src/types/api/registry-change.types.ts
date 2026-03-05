@@ -32,6 +32,16 @@ export type ReplaceApplicationChangesResponse = RegistryApplicationChangeRespons
 
 // ==================== Schemas ====================
 
+export interface ChangeApplicantRepresentativeItem {
+  representativeId?: number
+  representativeType?: 'DOMESTIC' | 'OVERSEAS_KOREAN' | 'FOREIGNER' | 'CORPORATION'
+  representativePosition?: string
+  representativeName?: string
+  representativeNationality?: string
+  representativePhone?: string
+  isConsentRequestTarget?: boolean
+}
+
 /** 계약당사자 옵션 항목 (변경) */
 export interface RegistryApplicationChangePartyItem {
   id?: number
@@ -43,10 +53,7 @@ export interface RegistryApplicationChangePartyItem {
   contact?: string
   handlingBranch?: string
   nationality?: string
-  representativeType?: 'DOMESTIC' | 'OVERSEAS_KOREAN' | 'FOREIGNER' | 'CORPORATION'
-  representativePosition?: string
-  representativeName?: string
-  representativeNationality?: string
+  representatives?: ChangeApplicantRepresentativeItem[]
   address?: string
   addressDetail?: string
 }
@@ -61,10 +68,7 @@ export interface ChangeApplicantItem {
   registrationNumber?: string
   contact?: string
   nationality?: string
-  representativeType?: 'DOMESTIC' | 'OVERSEAS_KOREAN' | 'FOREIGNER' | 'CORPORATION'
-  representativePosition?: string
-  representativeName?: string
-  representativeNationality?: string
+  representatives?: ChangeApplicantRepresentativeItem[]
   address?: string
   addressDetail?: string
 }

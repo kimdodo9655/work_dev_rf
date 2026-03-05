@@ -105,7 +105,9 @@
                     @keydown.escape="cancelCustomInput"
                   />
                   <div class="custom-input-actions">
-                    <button class="btn-cancel" @click="cancelCustomInput">{{ button.cancel }}</button>
+                    <button class="btn-cancel" @click="cancelCustomInput">
+                      {{ button.cancel }}
+                    </button>
                     <button class="btn-confirm" @click="confirmCustomInput">
                       {{ button.confirm }}
                     </button>
@@ -127,6 +129,7 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+
 import { MESSAGES } from '@/constants/messages'
 
 interface Option {

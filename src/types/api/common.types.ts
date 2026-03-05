@@ -333,6 +333,29 @@ export interface ContractPartyDetail {
   transferShareNumerator?: number
   /** 취급지점 */
   handlingBranch?: string
+  /** 대표자 목록 */
+  representatives?: RepresentativeInfo[]
+}
+
+/** 대표자 정보 목록 */
+export interface RepresentativeItem {
+  representativeType?: PartyType
+  representativePosition?: string
+  representativeName?: string
+  representativeNationality?: string
+  representativePhone?: string
+  isConsentRequestTarget?: boolean
+}
+
+/** 대표자 목록 */
+export interface RepresentativeInfo {
+  progressPartyId?: number
+  representativeType?: PartyType
+  representativePosition?: string
+  representativeName?: string
+  representativeNationality?: string
+  representativePhone?: string
+  isConsentRequestTarget?: boolean
 }
 
 /** 계약 당사자 응답 */
@@ -399,6 +422,7 @@ export interface RegistryApplicationPartyItem {
   representativePosition?: string
   representativeName?: string
   representativeNationality?: string
+  representatives?: RepresentativeItem[]
   isSameAsDebtor?: boolean
   ownershipType?: 'SOLE' | 'CO_OWNERSHIP' | 'JOINT_OWNERSHIP'
   transferShareDenominator?: number

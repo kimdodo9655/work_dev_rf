@@ -32,6 +32,16 @@ export type ReplaceApplicationCorrectionsResponse = RegistryApplicationCorrectio
 
 // ==================== Schemas ====================
 
+export interface CorrectionApplicantRepresentativeItem {
+  representativeId?: number
+  representativeType?: 'DOMESTIC' | 'OVERSEAS_KOREAN' | 'FOREIGNER' | 'CORPORATION'
+  representativePosition?: string
+  representativeName?: string
+  representativeNationality?: string
+  representativePhone?: string
+  isConsentRequestTarget?: boolean
+}
+
 /** 계약당사자 옵션 항목 (경정) */
 export interface RegistryApplicationCorrectionPartyItem {
   id?: number
@@ -43,10 +53,7 @@ export interface RegistryApplicationCorrectionPartyItem {
   contact?: string
   handlingBranch?: string
   nationality?: string
-  representativeType?: 'DOMESTIC' | 'OVERSEAS_KOREAN' | 'FOREIGNER' | 'CORPORATION'
-  representativePosition?: string
-  representativeName?: string
-  representativeNationality?: string
+  representatives?: CorrectionApplicantRepresentativeItem[]
   address?: string
   addressDetail?: string
 }
@@ -62,10 +69,7 @@ export interface CorrectionApplicantItem {
   contact?: string
   handlingBranch?: string
   nationality?: string
-  representativeType?: 'DOMESTIC' | 'OVERSEAS_KOREAN' | 'FOREIGNER' | 'CORPORATION'
-  representativePosition?: string
-  representativeName?: string
-  representativeNationality?: string
+  representatives?: CorrectionApplicantRepresentativeItem[]
   address?: string
   addressDetail?: string
 }

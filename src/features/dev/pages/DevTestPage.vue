@@ -32,11 +32,7 @@
           {{ isLoading ? '로딩 중...' : '공통코드 일괄 호출' }}
         </button>
 
-        <button
-          v-if="codes.organizationTypes.length > 0"
-          class="clear-codes-btn"
-          @click="handleClearCodes"
-        >
+        <button v-if="hasLoadedCodes" class="clear-codes-btn" @click="handleClearCodes">
           데이터 초기화
         </button>
       </div>
@@ -50,7 +46,11 @@
         <p>{{ loadError }}</p>
       </div>
 
-      <div v-if="codes.organizationTypes.length > 0" class="codes-display">
+      <div v-if="hasTriedLoad && !isLoading && !loadError && !hasLoadedCodes" class="error-state">
+        <p>호출은 성공했지만 표시 가능한 공통코드 데이터가 없습니다.</p>
+      </div>
+
+      <div v-if="hasLoadedCodes" class="codes-display">
         <div class="code-group">
           <h4>[P06-01] 기관 구분 ({{ codes.organizationTypes.length }}개)</h4>
           <div class="code-items">
@@ -771,7 +771,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineAsyncComponent, reactive, ref } from 'vue'
+import { computed, defineAsyncComponent, reactive, ref } from 'vue'
 
 import FloatingCustomSelect from '@/components/template/input/FloatingCustomSelect.vue'
 import FloatingInnerSelect from '@/components/template/input/FloatingInnerSelect.vue'
@@ -789,6 +789,10 @@ const PdfViewer = defineAsyncComponent(() => import('@/features/doc-templates/Pd
 // ✨ useCodes 사용
 const { codes, isLoading, loadError, fetchAllCodes, clearCache } = useCodes()
 const { alert } = useDialog()
+const hasLoadedCodes = computed(() =>
+  Object.values(codes.value).some((list) => Array.isArray(list) && list.length > 0)
+)
+const hasTriedLoad = ref(false)
 
 // ✨ 토스트 상태
 const showToast = ref(false)
@@ -796,6 +800,7 @@ const toastMessage = ref('')
 
 // 공통코드 로드 핸들러
 async function handleLoadAllCodes() {
+  hasTriedLoad.value = true
   try {
     await fetchAllCodes()
     console.log('✅ 공통코드 로드 완료!')
@@ -807,6 +812,7 @@ async function handleLoadAllCodes() {
 // 데이터 초기화 핸들러
 function handleClearCodes() {
   clearCache()
+  hasTriedLoad.value = false
   console.log('🗑️ 공통코드 데이터 초기화 완료')
 }
 

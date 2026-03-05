@@ -3134,9 +3134,19 @@
     "/api/notices": {
       "get": {
         "tags": ["[P08] 공지사항"],
-        "summary": "[P08-01] 공지사항 목록 조회",
+        "summary": "[P08-01] 메인 공지사항 목록 조회",
         "description": "최근 공지사항 상위 5개 목록을 조회합니다.",
         "operationId": "getNotices",
+        "parameters": [
+          {
+            "name": "X-Bank-Code",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "공지사항 조회 성공",
@@ -3144,6 +3154,112 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/NoticeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notices/search": {
+      "get": {
+        "tags": ["[P08] 공지사항"],
+        "summary": "[P08-02] 공지사항 검색 목록 조회",
+        "description": "금융기관/통합검색/페이징 기준으로 공지사항 목록을 조회합니다.",
+        "operationId": "searchNotices",
+        "parameters": [
+          {
+            "name": "X-Bank-Code",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "searchKyword",
+            "in": "query",
+            "description": "통합검색어 (제목/내용)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "통합검색어 (제목/내용)",
+              "example": "점검"
+            },
+            "example": "점검"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "페이지 번호",
+            "required": true,
+            "schema": {
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "페이지 크기",
+            "required": true,
+            "schema": {
+              "maximum": 20,
+              "minimum": 10,
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "공지사항 검색 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoticeListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notices/{id}": {
+      "get": {
+        "tags": ["[P08] 공지사항"],
+        "summary": "[P08-03] 공지사항 상세 조회",
+        "description": "공지사항 상세 정보를 조회하며 조회수를 1 증가시킵니다.",
+        "operationId": "getNoticeDetail",
+        "parameters": [
+          {
+            "name": "X-Bank-Code",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "공지사항 상세 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoticeDetailResponse"
                 }
               }
             }
@@ -5477,7 +5593,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/RegistryApplicationPropertyOwnerCertificateResponse"
+                  "$ref": "#/components/schemas/ApplicationCertificateFormResponse"
                 }
               }
             }
@@ -5789,6 +5905,84 @@
         }
       }
     },
+    "/api/registry/applications/{applicationId}/attachments/docInfo": {
+      "get": {
+        "tags": ["[R02J] 등기진행-첨부서면"],
+        "summary": "[R02J-04] 첨부서면 데이터 조회",
+        "description": "파일명에 해당하는 첨부서면 데이터를 조회합니다.",
+        "operationId": "getApplicationAttachmentData",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "description": "신청서ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          },
+          {
+            "name": "fileProgressDocumentType",
+            "in": "query",
+            "description": "파일명 코드",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "LST",
+                "POA",
+                "SGN",
+                "CRT",
+                "CNT",
+                "RFC",
+                "RPC",
+                "RRC",
+                "TAX",
+                "SMP",
+                "SVC",
+                "ESC",
+                "RRIO",
+                "RRIE",
+                "LRIO",
+                "LRIE",
+                "LRCO",
+                "LRCE",
+                "CNF",
+                "RPS",
+                "LTP",
+                "LBK",
+                "GBK",
+                "CBK",
+                "CRP",
+                "CSM",
+                "ECS",
+                "BSC",
+                "RLS",
+                "TRC",
+                "DRW",
+                "LPA",
+                "RPA"
+              ]
+            },
+            "example": "RM202512100001_MR_POA_1.pdf"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "첨부서면 데이터 조회 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachmentFormDocumentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/registry/applications/{applicationId}/changes": {
       "get": {
         "tags": ["[R02K] 등기진행-변경사항"],
@@ -5855,7 +6049,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/RegistryApplicationChangeResponse"
+                  "$ref": "#/components/schemas/ApplicationChangeFormResponse"
                 }
               }
             }
@@ -8914,18 +9108,18 @@
           "registryType": {
             "type": "string"
           },
-          "section": {
-            "type": "string",
-            "enum": ["GAP", "EUL"]
-          },
-          "rankNumber": {
-            "type": "string"
-          },
           "registryCause": {
             "type": "string"
           },
           "propertyUniqueNumber": {
             "type": "string"
+          },
+          "rankNumber": {
+            "type": "string"
+          },
+          "section": {
+            "type": "string",
+            "enum": ["GAP", "EUL"]
           },
           "ownerId": {
             "type": "integer",
@@ -8940,6 +9134,13 @@
           "certificatePassword": {
             "type": "string"
           },
+          "receiptDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "receiptNumber": {
+            "type": "string"
+          },
           "certificateType": {
             "type": "string",
             "enum": [
@@ -8948,13 +9149,6 @@
               "CONFIRMATION_DOCUMENT",
               "PRIOR_REGISTRY_LINK"
             ]
-          },
-          "receiptDate": {
-            "type": "string",
-            "format": "date"
-          },
-          "receiptNumber": {
-            "type": "string"
           },
           "isUseCertificatePassword": {
             "type": "boolean"
@@ -9031,7 +9225,7 @@
           "paymentAgency": {
             "type": "string",
             "description": "납부기관",
-            "example": "서울시청"
+            "example": "wetax"
           },
           "paymentAmount": {
             "type": "number",
@@ -9041,12 +9235,12 @@
           "taxNumber": {
             "type": "string",
             "description": "납세 번호",
-            "example": "123-45-67890"
+            "example": "12311212345612345611231234561"
           },
           "electronicPaymentNumber": {
             "type": "string",
             "description": "전자납부 번호",
-            "example": "110012345678"
+            "example": "12345112112112345671"
           }
         },
         "description": "세금신고 정보 저장 요청"
@@ -9148,10 +9342,6 @@
             "type": "string",
             "description": "납부기관"
           },
-          "paymentAmount": {
-            "type": "number",
-            "description": "납부 금액"
-          },
           "taxNumber": {
             "type": "string",
             "description": "납세 번호"
@@ -9163,19 +9353,6 @@
           "totalAmount": {
             "type": "number",
             "description": "합계"
-          },
-          "registryType": {
-            "type": "string",
-            "description": "등기 유형",
-            "enum": [
-              "OWNERSHIP_TRANSFER",
-              "MORTGAGE",
-              "SURFACE_RIGHT",
-              "CHANGE",
-              "CORRECTION",
-              "MORTGAGE_CANCELLATION",
-              "SURFACE_RIGHT_CANCELLATION"
-            ]
           }
         },
         "description": "세금신고 정보 응답"
@@ -9556,10 +9733,10 @@
         "description": "매도자 요약"
       },
       "BondPropertyItem": {
-        "required": ["propertyId", "request"],
+        "required": ["propertyUniqueNumber", "request"],
         "type": "object",
         "properties": {
-          "propertyId": {
+          "propertyUniqueNumber": {
             "minLength": 1,
             "type": "string",
             "description": "부동산 고유번호",
@@ -9658,7 +9835,7 @@
           "housingBondNumber": {
             "type": "string",
             "description": "국민주택채권 번호",
-            "example": "KB-2025-0001"
+            "example": "12341212341234"
           }
         },
         "description": "국민주택채권 신청서 단위 정보 저장 요청"
@@ -9990,6 +10167,53 @@
         },
         "description": "지점 선불지급수단 응답"
       },
+      "BranchRegistryCredentialResponse": {
+        "type": "object",
+        "properties": {
+          "credentialId": {
+            "type": "integer",
+            "description": "지점 인터넷등기소 아이디 고유번호",
+            "format": "int64",
+            "example": 1
+          },
+          "branchId": {
+            "type": "integer",
+            "description": "지점 ID",
+            "format": "int64",
+            "example": 1
+          },
+          "qualifiedType": {
+            "$ref": "#/components/schemas/QualifiedType"
+          },
+          "qualifiedTypeDescription": {
+            "type": "string",
+            "description": "자격자 구분 설명",
+            "example": "변호사"
+          },
+          "qualifiedName": {
+            "type": "string",
+            "description": "자격자 성명",
+            "example": "홍길동"
+          },
+          "registryLoginId": {
+            "type": "string",
+            "description": "인터넷등기소 로그인 아이디",
+            "example": "hongid123"
+          },
+          "registryPassword": {
+            "type": "string",
+            "description": "인터넷등기소 로그인 비밀번호",
+            "example": "****"
+          }
+        },
+        "description": "지점 인터넷등기소 아이디 응답"
+      },
+      "QualifiedType": {
+        "type": "string",
+        "description": "자격자 구분",
+        "example": "LAWYER",
+        "enum": ["LEGAL_SCRIVENER", "LAWYER"]
+      },
       "RegistryApplicationPropertyItemResponse": {
         "type": "object",
         "properties": {
@@ -10040,6 +10264,13 @@
             "description": "부동산 목록",
             "items": {
               "$ref": "#/components/schemas/RegistryApplicationPropertyItemResponse"
+            }
+          },
+          "credentialOptions": {
+            "type": "array",
+            "description": "인터넷등기소 정보",
+            "items": {
+              "$ref": "#/components/schemas/BranchRegistryCredentialResponse"
             }
           },
           "prepaidCardOptions": {
@@ -10265,6 +10496,32 @@
             "type": "string",
             "description": "국적"
           },
+          "representatives": {
+            "type": "array",
+            "description": "대표자 목록",
+            "items": {
+              "$ref": "#/components/schemas/CorrectionApplicantRepresentativeItem"
+            }
+          },
+          "address": {
+            "type": "string",
+            "description": "기본주소"
+          },
+          "addressDetail": {
+            "type": "string",
+            "description": "상세주소"
+          }
+        },
+        "description": "등기신청인 정보"
+      },
+      "CorrectionApplicantRepresentativeItem": {
+        "type": "object",
+        "properties": {
+          "representativeId": {
+            "type": "integer",
+            "description": "대표자 ID",
+            "format": "int64"
+          },
           "representativeType": {
             "type": "string",
             "description": "대표자 구분",
@@ -10282,16 +10539,16 @@
             "type": "string",
             "description": "대표자 국적"
           },
-          "address": {
+          "representativePhone": {
             "type": "string",
-            "description": "기본주소"
+            "description": "대표자 전화번호"
           },
-          "addressDetail": {
-            "type": "string",
-            "description": "상세주소"
+          "isConsentRequestTarget": {
+            "type": "boolean",
+            "description": "동의요청 대상자 여부"
           }
         },
-        "description": "등기신청인 정보"
+        "description": "신청인 대표자 정보"
       },
       "CorrectionItem": {
         "type": "object",
@@ -10436,22 +10693,12 @@
             "type": "string",
             "description": "국적"
           },
-          "representativeType": {
-            "type": "string",
-            "description": "대표자 구분",
-            "enum": ["DOMESTIC", "OVERSEAS_KOREAN", "FOREIGNER", "CORPORATION"]
-          },
-          "representativePosition": {
-            "type": "string",
-            "description": "대표자 직책"
-          },
-          "representativeName": {
-            "type": "string",
-            "description": "대표자 성명(명칭)"
-          },
-          "representativeNationality": {
-            "type": "string",
-            "description": "대표자 국적"
+          "representatives": {
+            "type": "array",
+            "description": "대표자 목록",
+            "items": {
+              "$ref": "#/components/schemas/CorrectionApplicantRepresentativeItem"
+            }
           },
           "address": {
             "type": "string",
@@ -10620,7 +10867,7 @@
       },
       "PartyType": {
         "type": "string",
-        "description": "대표자 유형",
+        "description": "당사자 유형",
         "example": "PERSON",
         "enum": ["DOMESTIC", "OVERSEAS_KOREAN", "FOREIGNER", "CORPORATION"]
       },
@@ -10726,6 +10973,13 @@
             "type": "string",
             "description": "취급지점",
             "example": "강남지점"
+          },
+          "representatives": {
+            "type": "array",
+            "description": "대표자 정보 목록",
+            "items": {
+              "$ref": "#/components/schemas/RepresentativeItem"
+            }
           }
         },
         "description": "계약당사자 정보 목록"
@@ -10742,6 +10996,40 @@
             }
           }
         }
+      },
+      "RepresentativeItem": {
+        "type": "object",
+        "properties": {
+          "representativeType": {
+            "$ref": "#/components/schemas/PartyType"
+          },
+          "representativePosition": {
+            "type": "string",
+            "description": "대표자 직책",
+            "example": "대표이사"
+          },
+          "representativeName": {
+            "type": "string",
+            "description": "대표자 성명",
+            "example": "김대표"
+          },
+          "representativeNationality": {
+            "type": "string",
+            "description": "대표자 국적",
+            "example": "대한민국"
+          },
+          "representativePhone": {
+            "type": "string",
+            "description": "대표자 전화번호",
+            "example": "0212345678"
+          },
+          "isConsentRequestTarget": {
+            "type": "boolean",
+            "description": "동의요청 대상자 여부",
+            "example": true
+          }
+        },
+        "description": "대표자 정보 목록"
       },
       "ApiResultContractPartyReplaceResponse": {
         "type": "object",
@@ -11275,272 +11563,36 @@
         },
         "description": "등기명의인표시변경 정보 전체 교체 요청"
       },
-      "ChangeApplicantItem": {
+      "ApplicationChangeFormResponse": {
         "type": "object",
         "properties": {
-          "applicantId": {
-            "type": "integer",
-            "description": "신청인 ID",
-            "format": "int64"
-          },
-          "progressPartyId": {
-            "type": "integer",
-            "description": "진행 당사자 ID",
-            "format": "int64"
-          },
-          "partyRole": {
+          "changeContent": {
             "type": "string",
-            "description": "신청인구분"
+            "description": "변경사항"
           },
-          "partyType": {
-            "type": "string",
-            "description": "등록번호구분",
-            "enum": ["DOMESTIC", "OVERSEAS_KOREAN", "FOREIGNER", "CORPORATION"]
-          },
+          "applicant": {
+            "$ref": "#/components/schemas/ChangeApplicantInfoResponse"
+          }
+        },
+        "description": "등기명의인표시변경 변경사항정보"
+      },
+      "ChangeApplicantInfoResponse": {
+        "type": "object",
+        "properties": {
           "name": {
             "type": "string",
-            "description": "신청인명"
+            "description": "성명"
           },
           "registrationNumber": {
             "type": "string",
-            "description": "주민등록번호"
-          },
-          "contact": {
-            "type": "string",
-            "description": "연락처"
-          },
-          "nationality": {
-            "type": "string",
-            "description": "국적"
-          },
-          "representativeType": {
-            "type": "string",
-            "description": "대표자 구분",
-            "enum": ["DOMESTIC", "OVERSEAS_KOREAN", "FOREIGNER", "CORPORATION"]
-          },
-          "representativePosition": {
-            "type": "string",
-            "description": "대표자 직책"
-          },
-          "representativeName": {
-            "type": "string",
-            "description": "대표자 성명(명칭)"
-          },
-          "representativeNationality": {
-            "type": "string",
-            "description": "대표자 국적"
+            "description": "등록번호"
           },
           "address": {
             "type": "string",
-            "description": "기본주소"
-          },
-          "addressDetail": {
-            "type": "string",
-            "description": "상세주소"
+            "description": "주소"
           }
         },
-        "description": "등기신청인 정보"
-      },
-      "ChangeItem": {
-        "type": "object",
-        "properties": {
-          "changeId": {
-            "type": "integer",
-            "description": "변경사항 ID",
-            "format": "int64"
-          },
-          "propertyUniqueNumber": {
-            "type": "string",
-            "description": "부동산 고유번호"
-          },
-          "changeType": {
-            "type": "string",
-            "description": "변경구분"
-          },
-          "section": {
-            "type": "string",
-            "description": "해당구",
-            "enum": ["GAP", "EUL"]
-          },
-          "rankNumber": {
-            "type": "string",
-            "description": "순위번호"
-          },
-          "receiptNumber": {
-            "type": "string",
-            "description": "접수번호"
-          },
-          "registryName": {
-            "type": "string",
-            "description": "등기상성명"
-          },
-          "registryRegistrationNumber": {
-            "type": "string",
-            "description": "등기상(주민)등록번호"
-          },
-          "registryAddress": {
-            "type": "string",
-            "description": "등기상주소"
-          }
-        },
-        "description": "변경사항 정보"
-      },
-      "ChangePropertyOwnerItem": {
-        "type": "object",
-        "properties": {
-          "propertyUniqueNumber": {
-            "type": "string",
-            "description": "부동산 고유번호"
-          },
-          "progressPartyId": {
-            "type": "integer",
-            "description": "진행당사자ID",
-            "format": "int64"
-          },
-          "section": {
-            "type": "string",
-            "description": "해당구",
-            "enum": ["GAP", "EUL"]
-          },
-          "rankNumber": {
-            "type": "string",
-            "description": "순위번호"
-          },
-          "receiptNumber": {
-            "type": "string",
-            "description": "접수번호"
-          },
-          "ownerAddress": {
-            "type": "string",
-            "description": "소유자주소"
-          },
-          "changeCount": {
-            "type": "integer",
-            "description": "변경건수",
-            "format": "int32"
-          }
-        },
-        "description": "부동산 소유자 정보"
-      },
-      "RegistryApplicationChangePartyItem": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "description": "신청서 당사자 ID",
-            "format": "int64"
-          },
-          "progressPartyId": {
-            "type": "integer",
-            "description": "진행 당사자 ID",
-            "format": "int64"
-          },
-          "partyRole": {
-            "type": "string",
-            "description": "신청인구분"
-          },
-          "partyType": {
-            "type": "string",
-            "description": "등록번호구분",
-            "enum": ["DOMESTIC", "OVERSEAS_KOREAN", "FOREIGNER", "CORPORATION"]
-          },
-          "name": {
-            "type": "string",
-            "description": "신청인명"
-          },
-          "registrationNumber": {
-            "type": "string",
-            "description": "(주민)등록번호"
-          },
-          "contact": {
-            "type": "string",
-            "description": "연락처"
-          },
-          "handlingBranch": {
-            "type": "string",
-            "description": "취급 지점"
-          },
-          "nationality": {
-            "type": "string",
-            "description": "국적"
-          },
-          "representativeType": {
-            "type": "string",
-            "description": "대표자 구분",
-            "enum": ["DOMESTIC", "OVERSEAS_KOREAN", "FOREIGNER", "CORPORATION"]
-          },
-          "representativePosition": {
-            "type": "string",
-            "description": "대표자 직책"
-          },
-          "representativeName": {
-            "type": "string",
-            "description": "대표자 성명(명칭)"
-          },
-          "representativeNationality": {
-            "type": "string",
-            "description": "대표자 국적"
-          },
-          "address": {
-            "type": "string",
-            "description": "기본주소"
-          },
-          "addressDetail": {
-            "type": "string",
-            "description": "상세주소"
-          }
-        },
-        "description": "계약당사자 정보"
-      },
-      "RegistryApplicationChangeResponse": {
-        "type": "object",
-        "properties": {
-          "partiesOptions": {
-            "type": "array",
-            "description": "계약당사자 목록 (드롭다운 옵션)",
-            "items": {
-              "$ref": "#/components/schemas/RegistryApplicationChangePartyItem"
-            }
-          },
-          "applicantItems": {
-            "type": "array",
-            "description": "등기신청인 목록",
-            "items": {
-              "$ref": "#/components/schemas/ChangeApplicantItem"
-            }
-          },
-          "basicItems": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object",
-              "description": "등기기본정보"
-            },
-            "description": "등기기본정보"
-          },
-          "propertyOptions": {
-            "type": "array",
-            "description": "부동산 소유자 목록",
-            "items": {
-              "$ref": "#/components/schemas/ChangePropertyOwnerItem"
-            }
-          },
-          "registryCauseOptions": {
-            "type": "array",
-            "description": "등기원인 목록",
-            "items": {
-              "type": "string",
-              "description": "등기원인 목록"
-            }
-          },
-          "changesItems": {
-            "type": "array",
-            "description": "변경사항 목록",
-            "items": {
-              "$ref": "#/components/schemas/ChangeItem"
-            }
-          }
-        },
-        "description": "등기명의인표시변경"
+        "description": "신청인 정보"
       },
       "PropertyOwnerCertificateItem": {
         "required": [
@@ -11678,208 +11730,69 @@
         },
         "description": "등기권리증 정보 전체 교체 요청"
       },
-      "PartyOption": {
+      "ApplicationCertificateFormResponse": {
         "type": "object",
         "properties": {
-          "partyId": {
-            "type": "integer",
-            "description": "당사자ID",
-            "format": "int64",
-            "example": 1
+          "shares": {
+            "type": "array",
+            "description": "등기권리증 지분정보 목록",
+            "items": {
+              "$ref": "#/components/schemas/CertificateShareResponse"
+            }
           },
+          "registryCertificate": {
+            "type": "array",
+            "description": "등기필정보목록",
+            "items": {
+              "$ref": "#/components/schemas/RegistryCertificateFormResponse"
+            }
+          }
+        },
+        "description": "등기필정보"
+      },
+      "CertificateShareResponse": {
+        "type": "object",
+        "properties": {
           "progressPartyId": {
             "type": "integer",
-            "description": "진행 계약 당사자ID",
-            "format": "int64",
-            "example": 1
+            "description": "진행당사자ID",
+            "format": "int64"
           },
           "name": {
             "type": "string",
-            "description": "성명",
-            "example": "홍길동"
-          }
-        },
-        "description": "당사자(의무자) 옵션"
-      },
-      "PropertyOwnerCertificateItemResponse": {
-        "type": "object",
-        "properties": {
-          "propertyUniqueNumber": {
-            "type": "string",
-            "description": "부동산고유번호",
-            "example": "21113655300780"
-          },
-          "holdingShareDenominator": {
-            "type": "integer",
-            "description": "보유지분 분모",
-            "format": "int32",
-            "example": 1
+            "description": "성명(명칭)"
           },
           "holdingShareNumerator": {
             "type": "integer",
             "description": "보유지분 분자",
-            "format": "int32",
-            "example": 1
+            "format": "int32"
           },
-          "transferShareDenominator": {
+          "holdingShareDenominator": {
             "type": "integer",
-            "description": "이전지분 분모",
-            "format": "int32",
-            "example": 1
+            "description": "보유지분 분모",
+            "format": "int32"
           },
           "transferShareNumerator": {
             "type": "integer",
             "description": "이전지분 분자",
-            "format": "int32",
-            "example": 1
+            "format": "int32"
           },
-          "progressPropertyOwnerId": {
+          "transferShareDenominator": {
             "type": "integer",
-            "description": "진행 부동산 소유자 고유번호",
-            "format": "int64",
-            "example": 1
-          },
-          "progressPartyId": {
-            "type": "integer",
-            "description": "진행 당사자 참조 ID",
-            "format": "int64",
-            "example": 1
+            "description": "이전지분 분모",
+            "format": "int32"
           },
           "section": {
             "type": "string",
-            "description": "구분",
-            "example": "GAP",
+            "description": "해당구 (갑구/을구)",
             "enum": ["GAP", "EUL"]
           },
           "rankNumber": {
             "type": "string",
-            "description": "순위번호",
-            "example": "1"
-          },
-          "receiptDate": {
-            "type": "string",
-            "description": "접수일자",
-            "format": "date",
-            "example": "2025-12-08"
-          },
-          "receiptNumber": {
-            "type": "string",
-            "description": "접수번호",
-            "example": "12345"
-          },
-          "certificateType": {
-            "type": "string",
-            "description": "등기권리증 구분",
-            "example": "REGISTRY_CERT_INFO",
-            "enum": [
-              "REGISTRY_CERT_INFO",
-              "REGISTRY_CERTIFICATE",
-              "CONFIRMATION_DOCUMENT",
-              "PRIOR_REGISTRY_LINK"
-            ]
-          },
-          "certificateSerialNumber": {
-            "type": "string",
-            "description": "일련번호",
-            "example": "A1B2C3D4E5F6"
-          },
-          "certificatePasswordSequence": {
-            "type": "string",
-            "description": "일련번호",
-            "example": "01"
-          },
-          "certificatePassword": {
-            "type": "string",
-            "description": "비밀번호",
-            "example": "1234"
-          },
-          "confirmationDocumentType": {
-            "type": "string",
-            "description": "본인확인 구분(확인서면인경우)",
-            "example": "RESIDENT_REGISTRATION",
-            "enum": [
-              "RESIDENT_REGISTRATION",
-              "DRIVER_LICENSE",
-              "PASSPORT",
-              "FOREIGN_REGISTRATION",
-              "DOMESTIC_RESIDENCE_REPORT"
-            ]
-          },
-          "specialNote": {
-            "type": "string",
-            "description": "특이사항",
-            "example": "특이사항입니다"
+            "description": "순위번호"
           }
         },
-        "description": "등기권리증 정보 조회"
-      },
-      "PropertyUniqueNumberOption": {
-        "type": "object",
-        "properties": {
-          "applicationId": {
-            "type": "integer",
-            "description": "신청서ID",
-            "format": "int64",
-            "example": 1
-          },
-          "propertyUniqueNumber": {
-            "type": "string",
-            "description": "부동산고유번호",
-            "example": "21113655300780"
-          }
-        },
-        "description": "부동산고유번호 옵션"
-      },
-      "RegistryApplicationPropertyOwnerCertificateResponse": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "description": "등기권리증 목록",
-            "items": {
-              "$ref": "#/components/schemas/PropertyOwnerCertificateItemResponse"
-            }
-          },
-          "propertyUniqueNumberOptions": {
-            "type": "array",
-            "description": "부동산 고유번호 옵션 (부동산 테이블)",
-            "items": {
-              "$ref": "#/components/schemas/PropertyUniqueNumberOption"
-            }
-          },
-          "ownerOptions": {
-            "type": "array",
-            "description": "소유자(성명) 옵션 (의무자)",
-            "items": {
-              "$ref": "#/components/schemas/PartyOption"
-            }
-          },
-          "sectionOptions": {
-            "type": "array",
-            "description": "해당구 옵션 (Enum)",
-            "items": {
-              "type": "string",
-              "description": "해당구 옵션 (Enum)"
-            }
-          },
-          "certificateTypeOptions": {
-            "type": "array",
-            "description": "등기권리증 구분 옵션 (Enum)",
-            "items": {
-              "type": "string",
-              "description": "등기권리증 구분 옵션 (Enum)"
-            }
-          },
-          "identityDocumentOptions": {
-            "type": "array",
-            "description": "확인서면 구분 옵션 - 등기권리증이 확인서면일경우에만 노출 (Enum)",
-            "items": {
-              "type": "string",
-              "description": "확인서면 구분 옵션 - 등기권리증이 확인서면일경우에만 노출 (Enum)"
-            }
-          }
-        },
-        "description": "등기권리증 정보 조회"
+        "description": "등기권리증 지분 정보"
       },
       "CancellationItemRequest": {
         "required": [
@@ -12006,18 +11919,6 @@
           "addressDetail": {
             "type": "string"
           },
-          "representativeType": {
-            "$ref": "#/components/schemas/PartyType"
-          },
-          "representativePosition": {
-            "type": "string"
-          },
-          "representativeName": {
-            "type": "string"
-          },
-          "representativeNationality": {
-            "type": "string"
-          },
           "isSameAsDebtor": {
             "type": "boolean"
           },
@@ -12031,98 +11932,29 @@
           },
           "handlingBranch": {
             "type": "string"
+          },
+          "representatives": {
+            "type": "array",
+            "description": "대표자 목록",
+            "items": {
+              "$ref": "#/components/schemas/RepresentativeInfo"
+            }
           }
         },
-        "description": "채무자 목록"
+        "description": "계약당사자 목록"
       },
       "ContractPartyResponse": {
         "type": "object",
         "properties": {
-          "obligors": {
+          "contractParties": {
             "type": "array",
-            "description": "등기의무자 목록",
+            "description": "계약당사자 목록",
             "items": {
               "$ref": "#/components/schemas/ContractPartyDetail"
-            }
-          },
-          "obligees": {
-            "type": "array",
-            "description": "등기권리자 목록",
-            "items": {
-              "$ref": "#/components/schemas/ContractPartyDetail"
-            }
-          },
-          "debtors": {
-            "type": "array",
-            "description": "채무자 목록",
-            "items": {
-              "$ref": "#/components/schemas/ContractPartyDetail"
-            }
-          },
-          "progressPartyOptions": {
-            "type": "array",
-            "description": "진행당사자 선택 옵션",
-            "items": {
-              "$ref": "#/components/schemas/ProgressPartyOption"
             }
           }
         },
         "description": "계약당사자 정보"
-      },
-      "ProgressPartyOption": {
-        "type": "object",
-        "properties": {
-          "progressPartyId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "dataSource": {
-            "type": "string",
-            "enum": ["REQUEST", "MANUAL"]
-          },
-          "partyType": {
-            "type": "string",
-            "enum": ["DOMESTIC", "OVERSEAS_KOREAN", "FOREIGNER", "CORPORATION"]
-          },
-          "name": {
-            "type": "string"
-          },
-          "registrationNumber": {
-            "type": "string"
-          },
-          "contact": {
-            "type": "string"
-          },
-          "nationality": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          },
-          "address": {
-            "type": "string"
-          },
-          "addressDetail": {
-            "type": "string"
-          },
-          "representativeType": {
-            "type": "string",
-            "enum": ["DOMESTIC", "OVERSEAS_KOREAN", "FOREIGNER", "CORPORATION"]
-          },
-          "representativePosition": {
-            "type": "string"
-          },
-          "representativeName": {
-            "type": "string"
-          },
-          "representativeNationality": {
-            "type": "string"
-          },
-          "handlingBranch": {
-            "type": "string"
-          }
-        },
-        "description": "진행당사자 선택 옵션"
       },
       "RegistryApplicationCancellationItemResponse": {
         "type": "object",
@@ -12295,6 +12127,35 @@
         },
         "description": "선순위 대출 상환 정보"
       },
+      "RepresentativeInfo": {
+        "type": "object",
+        "properties": {
+          "progressPartyId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "representativeType": {
+            "type": "string",
+            "enum": ["DOMESTIC", "OVERSEAS_KOREAN", "FOREIGNER", "CORPORATION"]
+          },
+          "representativePosition": {
+            "type": "string"
+          },
+          "representativeName": {
+            "type": "string"
+          },
+          "representativeNationality": {
+            "type": "string"
+          },
+          "representativePhone": {
+            "type": "string"
+          },
+          "isConsentRequestTarget": {
+            "type": "boolean"
+          }
+        },
+        "description": "대표자 목록"
+      },
       "AttachmentReplaceItem": {
         "required": ["attachmentName", "submissionMethod"],
         "type": "object",
@@ -12316,27 +12177,34 @@
               "SMP",
               "SVC",
               "ESC",
-              "RRI",
-              "LRI",
-              "LRC",
+              "RRIO",
+              "RRIE",
+              "LRIO",
+              "LRIE",
+              "LRCO",
+              "LRCE",
               "CNF",
               "RPS",
               "LTP",
               "LBK",
               "GBK",
               "CBK",
-              "LPA",
-              "RPA",
               "CRP",
               "CSM",
-              "ECS"
+              "ECS",
+              "BSC",
+              "RLS",
+              "TRC",
+              "DRW",
+              "LPA",
+              "RPA"
             ]
           },
           "submissionMethod": {
             "type": "string",
             "description": "제출방식",
-            "example": "ELECTRONIC_CREATE",
-            "enum": ["ELECTRONIC_CREATE", "ELECTRONIC_UPLOAD", "VISIT_SUBMIT", "ADMIN_INFO_LINK"]
+            "example": "ELECTRONIC",
+            "enum": ["ELECTRONIC", "SCAN", "VISIT_SUBMIT", "ADMIN_INFO_LINK"]
           },
           "additionalInfo": {
             "type": "string",
@@ -12415,20 +12283,27 @@
               "SMP",
               "SVC",
               "ESC",
-              "RRI",
-              "LRI",
-              "LRC",
+              "RRIO",
+              "RRIE",
+              "LRIO",
+              "LRIE",
+              "LRCO",
+              "LRCE",
               "CNF",
               "RPS",
               "LTP",
               "LBK",
               "GBK",
               "CBK",
-              "LPA",
-              "RPA",
               "CRP",
               "CSM",
-              "ECS"
+              "ECS",
+              "BSC",
+              "RLS",
+              "TRC",
+              "DRW",
+              "LPA",
+              "RPA"
             ]
           },
           "registryMethod": {
@@ -12451,21 +12326,21 @@
             "type": "integer",
             "format": "int32"
           },
+          "rentalBusinessRegistrationNumber": {
+            "type": "string"
+          },
           "jurisdictionRegistryOffice": {
             "type": "string"
           },
           "submissionMethod": {
             "type": "string",
-            "enum": ["ELECTRONIC_CREATE", "ELECTRONIC_UPLOAD", "VISIT_SUBMIT", "ADMIN_INFO_LINK"]
+            "enum": ["ELECTRONIC", "SCAN", "VISIT_SUBMIT", "ADMIN_INFO_LINK"]
           },
           "referenceMethod": {
             "type": "string",
             "enum": ["NOT_APPLICABLE", "OFFICE_USE", "SIMULTANEOUS_SUBMIT", "PREVIOUS_ATTACHMENT"]
           },
           "additionalInfo": {
-            "type": "string"
-          },
-          "rentalBusinessRegistrationNumber": {
             "type": "string"
           }
         },
@@ -12984,7 +12859,7 @@
         "description": "등기필정보 비밀번호 조회 작업 요청"
       },
       "RegistrationCaseQueryTaskRequest": {
-        "required": ["progressPartyId", "propertyUniqueNumber"],
+        "required": ["progressPropertyOwnerId", "propertyUniqueNumber"],
         "type": "object",
         "properties": {
           "propertyUniqueNumber": {
@@ -12993,9 +12868,9 @@
             "description": "부동산 고유번호",
             "example": "12345678901234"
           },
-          "progressPartyId": {
+          "progressPropertyOwnerId": {
             "type": "integer",
-            "description": "신청인고유ID",
+            "description": "부동산소유자고유ID",
             "format": "int64",
             "example": 1
           }
@@ -13003,7 +12878,7 @@
         "description": "등기 신청사건 조회 작업 요청"
       },
       "RegistrationApplicationTaskRequest": {
-        "required": ["applicationId", "propertyId"],
+        "required": ["applicationId"],
         "type": "object",
         "properties": {
           "applicationId": {
@@ -13011,12 +12886,6 @@
             "description": "신청서 ID",
             "format": "int64",
             "example": 456
-          },
-          "propertyId": {
-            "type": "integer",
-            "description": "부동산 ID",
-            "format": "int64",
-            "example": 789
           }
         },
         "description": "등기신청서 작성 작업 요청"
@@ -13428,7 +13297,7 @@
         ]
       },
       "FilingFeeRequest": {
-        "required": ["paymentStatus", "registryMethod"],
+        "required": ["paymentStatus"],
         "type": "object",
         "properties": {
           "paymentStatus": {
@@ -13440,12 +13309,6 @@
           "exemptionReason": {
             "type": "string",
             "description": "면제 사유"
-          },
-          "registryMethod": {
-            "type": "string",
-            "description": "등기 방식",
-            "example": "ELECTRONIC",
-            "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
           },
           "registryCount": {
             "type": "integer",
@@ -13468,11 +13331,57 @@
           "tax": {
             "$ref": "#/components/schemas/TaxInfoRequest"
           },
+          "taxBase": {
+            "$ref": "#/components/schemas/TaxBaseRequest"
+          },
           "filingFee": {
             "$ref": "#/components/schemas/FilingFeeRequest"
           }
         },
         "description": "세금정보 및 등기신청수수료"
+      },
+      "TaxBasePropertyRequest": {
+        "required": ["propertyUniqueNumber"],
+        "type": "object",
+        "properties": {
+          "propertyUniqueNumber": {
+            "minLength": 1,
+            "type": "string",
+            "description": "부동산 고유번호",
+            "example": "11680-12345"
+          },
+          "officialLandPrice": {
+            "type": "number",
+            "description": "공시지가",
+            "example": 1500000
+          },
+          "area": {
+            "type": "number",
+            "description": "면적",
+            "example": 84.32
+          },
+          "taxBaseAmount": {
+            "type": "number",
+            "description": "과세표준액(시가표준액)",
+            "example": 252960000
+          }
+        },
+        "description": "과세표준액 부동산 항목"
+      },
+      "TaxBaseRequest": {
+        "required": ["properties"],
+        "type": "object",
+        "properties": {
+          "properties": {
+            "minItems": 1,
+            "type": "array",
+            "description": "부동산별 과세표준액 목록",
+            "items": {
+              "$ref": "#/components/schemas/TaxBasePropertyRequest"
+            }
+          }
+        },
+        "description": "과세표준액 입력 요청"
       },
       "FilingFeeSection": {
         "type": "object",
@@ -13703,6 +13612,19 @@
           "applicationFee": {
             "type": "number",
             "description": "등기신청수수료"
+          },
+          "registryType": {
+            "type": "string",
+            "description": "등기 유형",
+            "enum": [
+              "OWNERSHIP_TRANSFER",
+              "MORTGAGE",
+              "SURFACE_RIGHT",
+              "CHANGE",
+              "CORRECTION",
+              "MORTGAGE_CANCELLATION",
+              "SURFACE_RIGHT_CANCELLATION"
+            ]
           }
         },
         "description": "등기신청수수료 정보 응답"
@@ -13840,6 +13762,11 @@
             "type": "string",
             "description": "등기신청번호",
             "example": "REG20250101001"
+          },
+          "registryManagementNumber": {
+            "type": "string",
+            "description": "등기관리번호",
+            "example": "RMN20250101001"
           },
           "message": {
             "type": "string",
@@ -14596,6 +14523,12 @@
             "description": "등기신청인 구분",
             "example": "소유자"
           },
+          "progressPropertyOwnerId": {
+            "type": "integer",
+            "description": "진행 부동산 소유자 ID",
+            "format": "int64",
+            "example": 1001
+          },
           "ownerName": {
             "type": "string",
             "description": "소유자 이름",
@@ -14865,47 +14798,6 @@
         },
         "description": "기본 정보"
       },
-      "BranchRegistryCredentialResponse": {
-        "type": "object",
-        "properties": {
-          "credentialId": {
-            "type": "integer",
-            "description": "지점 인터넷등기소 아이디 고유번호",
-            "format": "int64",
-            "example": 1
-          },
-          "branchId": {
-            "type": "integer",
-            "description": "지점 ID",
-            "format": "int64",
-            "example": 1
-          },
-          "qualifiedType": {
-            "$ref": "#/components/schemas/QualifiedType"
-          },
-          "qualifiedTypeDescription": {
-            "type": "string",
-            "description": "자격자 구분 설명",
-            "example": "변호사"
-          },
-          "qualifiedName": {
-            "type": "string",
-            "description": "자격자 성명",
-            "example": "홍길동"
-          },
-          "registryLoginId": {
-            "type": "string",
-            "description": "인터넷등기소 로그인 아이디",
-            "example": "hongid123"
-          },
-          "registryPassword": {
-            "type": "string",
-            "description": "인터넷등기소 로그인 비밀번호",
-            "example": "****"
-          }
-        },
-        "description": "지점 인터넷등기소 아이디 응답"
-      },
       "InputInfoItem": {
         "type": "object",
         "properties": {
@@ -15020,12 +14912,6 @@
           }
         },
         "description": "부동산 정보"
-      },
-      "QualifiedType": {
-        "type": "string",
-        "description": "자격자 구분",
-        "example": "LAWYER",
-        "enum": ["LEGAL_SCRIVENER", "LAWYER"]
       },
       "RegistryApplicationAdminInfoRequestResponse": {
         "type": "object",
@@ -16005,6 +15891,78 @@
         },
         "description": "목록 합계"
       },
+      "FeeDetail": {
+        "type": "object",
+        "properties": {
+          "baseFee": {
+            "type": "number",
+            "description": "기본 보수"
+          },
+          "additionalFee": {
+            "type": "number",
+            "description": "가산 보수"
+          },
+          "certificateFee": {
+            "type": "number",
+            "description": "제증명 비용"
+          },
+          "registryCauseDocumentFee": {
+            "type": "number",
+            "description": "등기원인증서 작성"
+          },
+          "taxPaymentAgencyFee": {
+            "type": "number",
+            "description": "공과금 신고/납부 대행"
+          },
+          "bondSaleAgencyFee": {
+            "type": "number",
+            "description": "국민주택채권 즉시매도 대행"
+          },
+          "inspectionTradeReportAgencyFee": {
+            "type": "number",
+            "description": "검인/부동산거래신고 대행"
+          },
+          "actualExpense": {
+            "type": "number",
+            "description": "실비변상(교통비/숙박비/일당)"
+          },
+          "confirmationDocumentFee": {
+            "type": "number",
+            "description": "확인서면"
+          },
+          "otherFee": {
+            "type": "number",
+            "description": "기타 비용"
+          },
+          "vat": {
+            "type": "number",
+            "description": "부가가치세"
+          },
+          "feeSubtotal": {
+            "type": "number",
+            "description": "보수료 소계"
+          }
+        },
+        "description": "보수료 내역"
+      },
+      "HousingBondDetail": {
+        "type": "object",
+        "properties": {
+          "bondPurchaseAmount": {
+            "type": "number",
+            "description": "국민주택채권 매입액"
+          },
+          "housingBondDiscountAmount": {
+            "type": "number",
+            "description": "국민주택채권 할인액"
+          },
+          "housingBondSubtotal": {
+            "type": "number",
+            "description": "국민주택채권 소계"
+          }
+        },
+        "description": "국민주택채권 내역"
+      },
       "ReceiptDetailItem": {
         "type": "object",
         "properties": {
@@ -16016,21 +15974,85 @@
           "registryType": {
             "$ref": "#/components/schemas/RegistryType"
           },
-          "feeSubtotal": {
-            "type": "number",
-            "description": "보수료 소계"
+          "registryObligeeName": {
+            "type": "string",
+            "description": "등기권리자 명칭"
           },
-          "taxSubtotal": {
-            "type": "number",
-            "description": "공과금 소계"
+          "registryCause": {
+            "$ref": "#/components/schemas/RegistryCause"
           },
-          "bondDiscountAmount": {
+          "tradeAmount": {
             "type": "number",
-            "description": "채권 할인금액"
+            "description": "매매금액 또는 채권최고액"
+          },
+          "standardMarketPrice": {
+            "type": "number",
+            "description": "시가표준액/과세표준액"
+          },
+          "maximumCreditAmount": {
+            "type": "number",
+            "description": "채권최고액"
+          },
+          "bondPurchaseAmount": {
+            "type": "number",
+            "description": "채권 매입액"
+          },
+          "changeCount": {
+            "type": "integer",
+            "description": "변경건수",
+            "format": "int32"
+          },
+          "correctionCount": {
+            "type": "integer",
+            "description": "경정건수",
+            "format": "int32"
+          },
+          "cancellationCount": {
+            "type": "integer",
+            "description": "말소건수",
+            "format": "int32"
+          },
+          "propertyDescription": {
+            "type": "string",
+            "description": "부동산 표시"
+          },
+          "fee": {
+            "$ref": "#/components/schemas/FeeDetail"
+          },
+          "tax": {
+            "$ref": "#/components/schemas/TaxDetail"
+          },
+          "housingBond": {
+            "$ref": "#/components/schemas/HousingBondDetail"
           },
           "costTotal": {
             "type": "number",
-            "description": "등기비용 합계"
+            "description": "등기비용 합계 (보수료+공과금+채권소계)"
+          },
+          "creationDate": {
+            "type": "string",
+            "description": "작성일자",
+            "format": "date"
+          },
+          "businessRegistrationNumber": {
+            "type": "string",
+            "description": "사업자등록번호"
+          },
+          "officeAddress": {
+            "type": "string",
+            "description": "사무소 주소"
+          },
+          "businessName": {
+            "type": "string",
+            "description": "상호(법인명)"
+          },
+          "representative": {
+            "type": "string",
+            "description": "대표자"
+          },
+          "depositAccountNumber": {
+            "type": "string",
+            "description": "입금계좌 원문"
           },
           "depositAccountLabel": {
             "type": "string",
@@ -16059,6 +16081,40 @@
           }
         },
         "description": "등기 영수증 상세 목록 응답"
+      },
+      "TaxDetail": {
+        "type": "object",
+        "properties": {
+          "acquisitionTax": {
+            "type": "number",
+            "description": "취득세"
+          },
+          "registrationLicenseTax": {
+            "type": "number",
+            "description": "등록면허세"
+          },
+          "educationTax": {
+            "type": "number",
+            "description": "교육세"
+          },
+          "ruralSpecialTax": {
+            "type": "number",
+            "description": "농어촌특별세"
+          },
+          "stampTax": {
+            "type": "number",
+            "description": "인지세"
+          },
+          "registryApplicationFee": {
+            "type": "number",
+            "description": "등기신청수수료"
+          },
+          "taxSubtotal": {
+            "type": "number",
+            "description": "공과금 소계"
+          }
+        },
+        "description": "공과금 내역"
       },
       "BusinessSection": {
         "type": "object",
@@ -16822,6 +16878,13 @@
             "type": "string",
             "description": "부동산주소",
             "example": "서울특별시 용산구 이태원동 225-39"
+          },
+          "branchCredentialOptions": {
+            "type": "array",
+            "description": "선불지급수단 옵션 목록",
+            "items": {
+              "$ref": "#/components/schemas/BranchRegistryCredentialResponse"
+            }
           },
           "prepaidCardOptions": {
             "type": "array",
@@ -17737,39 +17800,6 @@
         },
         "description": "말소사항정보"
       },
-      "ApplicationCertificateFormResponse": {
-        "type": "object",
-        "properties": {
-          "shares": {
-            "type": "array",
-            "description": "등기권리증 지분정보 목록",
-            "items": {
-              "$ref": "#/components/schemas/CertificateShareResponse"
-            }
-          },
-          "registryCertificate": {
-            "type": "array",
-            "description": "등기필정보목록",
-            "items": {
-              "$ref": "#/components/schemas/RegistryCertificateFormResponse"
-            }
-          }
-        },
-        "description": "등기필정보"
-      },
-      "ApplicationChangeFormResponse": {
-        "type": "object",
-        "properties": {
-          "changeContent": {
-            "type": "string",
-            "description": "변경사항"
-          },
-          "applicant": {
-            "$ref": "#/components/schemas/ChangeApplicantInfoResponse"
-          }
-        },
-        "description": "등기명의인표시변경 변경사항정보"
-      },
       "ApplicationCorrectionFormResponse": {
         "type": "object",
         "properties": {
@@ -17840,68 +17870,6 @@
         },
         "description": "등기신청서 - 첨부문서정보"
       },
-      "CertificateShareResponse": {
-        "type": "object",
-        "properties": {
-          "progressPartyId": {
-            "type": "integer",
-            "description": "진행당사자ID",
-            "format": "int64"
-          },
-          "name": {
-            "type": "string",
-            "description": "성명(명칭)"
-          },
-          "holdingShareNumerator": {
-            "type": "integer",
-            "description": "보유지분 분자",
-            "format": "int32"
-          },
-          "holdingShareDenominator": {
-            "type": "integer",
-            "description": "보유지분 분모",
-            "format": "int32"
-          },
-          "transferShareNumerator": {
-            "type": "integer",
-            "description": "이전지분 분자",
-            "format": "int32"
-          },
-          "transferShareDenominator": {
-            "type": "integer",
-            "description": "이전지분 분모",
-            "format": "int32"
-          },
-          "section": {
-            "type": "string",
-            "description": "해당구 (갑구/을구)",
-            "enum": ["GAP", "EUL"]
-          },
-          "rankNumber": {
-            "type": "string",
-            "description": "순위번호"
-          }
-        },
-        "description": "등기권리증 지분 정보"
-      },
-      "ChangeApplicantInfoResponse": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "성명"
-          },
-          "registrationNumber": {
-            "type": "string",
-            "description": "등록번호"
-          },
-          "address": {
-            "type": "string",
-            "description": "주소"
-          }
-        },
-        "description": "신청인 정보"
-      },
       "CorrectionApplicantInfoResponse": {
         "type": "object",
         "properties": {
@@ -17934,9 +17902,88 @@
           "housingBondNumber": {
             "type": "string",
             "description": "국민주택채권 번호"
+          },
+          "registryType": {
+            "type": "string",
+            "description": "등기유형",
+            "enum": [
+              "OWNERSHIP_TRANSFER",
+              "MORTGAGE",
+              "SURFACE_RIGHT",
+              "CHANGE",
+              "CORRECTION",
+              "MORTGAGE_CANCELLATION",
+              "SURFACE_RIGHT_CANCELLATION"
+            ]
+          },
+          "taxTotalAmount": {
+            "type": "number",
+            "description": "세금 합계"
+          },
+          "taxPaymentStatus": {
+            "type": "string",
+            "description": "세금 납부 여부",
+            "enum": ["PAYMENT", "EXEMPTION"]
+          },
+          "filingFeeAmount": {
+            "type": "number",
+            "description": "등기신청수수료 합계"
+          },
+          "filingFeeRegistryCount": {
+            "type": "integer",
+            "description": "등기신청수수료 건수",
+            "format": "int32"
+          },
+          "filingFeeRegistryMethod": {
+            "type": "string",
+            "description": "등기신청수수료 등기 방식",
+            "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
+          },
+          "properties": {
+            "type": "array",
+            "description": "부동산별 채권/시가표준액 요약 목록",
+            "items": {
+              "$ref": "#/components/schemas/PropertyBondSummary"
+            }
           }
         },
         "description": "채권·세금·수수료 통합 응답"
+      },
+      "PropertyBondSummary": {
+        "type": "object",
+        "properties": {
+          "propertyId": {
+            "type": "string",
+            "description": "부동산 고유번호"
+          },
+          "propertyType": {
+            "type": "string",
+            "description": "부동산 구분",
+            "enum": ["LAND", "BUILDING", "COLLECTIVE_BUILDING"]
+          },
+          "propertyAddress": {
+            "type": "string",
+            "description": "부동산 주소"
+          },
+          "standardMarketPrice": {
+            "type": "number",
+            "description": "시가표준액"
+          },
+          "bondPurchaseType": {
+            "type": "string",
+            "description": "채권 매입 구분",
+            "enum": ["PURCHASE", "DISCOUNT", "EXEMPTION"]
+          },
+          "bondExemptionReason": {
+            "type": "string",
+            "description": "채권 면제 사유"
+          },
+          "bondPurchaseAmount": {
+            "type": "number",
+            "description": "채권 매입 금액"
+          }
+        },
+        "description": "부동산별 채권/시가표준액 요약"
       },
       "RegistryOfficeFormResponse": {
         "type": "object",
@@ -18354,6 +18401,663 @@
         },
         "description": "피담보채무 범위 상세"
       },
+      "ChangeApplicantItem": {
+        "type": "object",
+        "properties": {
+          "applicantId": {
+            "type": "integer",
+            "description": "신청인 ID",
+            "format": "int64"
+          },
+          "progressPartyId": {
+            "type": "integer",
+            "description": "진행 당사자 ID",
+            "format": "int64"
+          },
+          "partyRole": {
+            "type": "string",
+            "description": "신청인구분"
+          },
+          "partyType": {
+            "type": "string",
+            "description": "등록번호구분",
+            "enum": ["DOMESTIC", "OVERSEAS_KOREAN", "FOREIGNER", "CORPORATION"]
+          },
+          "name": {
+            "type": "string",
+            "description": "신청인명"
+          },
+          "registrationNumber": {
+            "type": "string",
+            "description": "주민등록번호"
+          },
+          "contact": {
+            "type": "string",
+            "description": "연락처"
+          },
+          "nationality": {
+            "type": "string",
+            "description": "국적"
+          },
+          "representatives": {
+            "type": "array",
+            "description": "대표자 목록",
+            "items": {
+              "$ref": "#/components/schemas/ChangeApplicantRepresentativeItem"
+            }
+          },
+          "address": {
+            "type": "string",
+            "description": "기본주소"
+          },
+          "addressDetail": {
+            "type": "string",
+            "description": "상세주소"
+          }
+        },
+        "description": "등기신청인 정보"
+      },
+      "ChangeApplicantRepresentativeItem": {
+        "type": "object",
+        "properties": {
+          "representativeId": {
+            "type": "integer",
+            "description": "대표자 ID",
+            "format": "int64"
+          },
+          "representativeType": {
+            "type": "string",
+            "description": "대표자 구분",
+            "enum": ["DOMESTIC", "OVERSEAS_KOREAN", "FOREIGNER", "CORPORATION"]
+          },
+          "representativePosition": {
+            "type": "string",
+            "description": "대표자 직책"
+          },
+          "representativeName": {
+            "type": "string",
+            "description": "대표자 성명(명칭)"
+          },
+          "representativeNationality": {
+            "type": "string",
+            "description": "대표자 국적"
+          },
+          "representativePhone": {
+            "type": "string",
+            "description": "대표자 전화번호"
+          },
+          "isConsentRequestTarget": {
+            "type": "boolean",
+            "description": "동의요청 대상자 여부"
+          }
+        },
+        "description": "신청인 대표자 정보"
+      },
+      "ChangeItem": {
+        "type": "object",
+        "properties": {
+          "changeId": {
+            "type": "integer",
+            "description": "변경사항 ID",
+            "format": "int64"
+          },
+          "propertyUniqueNumber": {
+            "type": "string",
+            "description": "부동산 고유번호"
+          },
+          "changeType": {
+            "type": "string",
+            "description": "변경구분"
+          },
+          "section": {
+            "type": "string",
+            "description": "해당구",
+            "enum": ["GAP", "EUL"]
+          },
+          "rankNumber": {
+            "type": "string",
+            "description": "순위번호"
+          },
+          "receiptNumber": {
+            "type": "string",
+            "description": "접수번호"
+          },
+          "registryName": {
+            "type": "string",
+            "description": "등기상성명"
+          },
+          "registryRegistrationNumber": {
+            "type": "string",
+            "description": "등기상(주민)등록번호"
+          },
+          "registryAddress": {
+            "type": "string",
+            "description": "등기상주소"
+          }
+        },
+        "description": "변경사항 정보"
+      },
+      "ChangePropertyOwnerItem": {
+        "type": "object",
+        "properties": {
+          "propertyUniqueNumber": {
+            "type": "string",
+            "description": "부동산 고유번호"
+          },
+          "progressPartyId": {
+            "type": "integer",
+            "description": "진행당사자ID",
+            "format": "int64"
+          },
+          "section": {
+            "type": "string",
+            "description": "해당구",
+            "enum": ["GAP", "EUL"]
+          },
+          "rankNumber": {
+            "type": "string",
+            "description": "순위번호"
+          },
+          "receiptNumber": {
+            "type": "string",
+            "description": "접수번호"
+          },
+          "ownerAddress": {
+            "type": "string",
+            "description": "소유자주소"
+          },
+          "changeCount": {
+            "type": "integer",
+            "description": "변경건수",
+            "format": "int32"
+          }
+        },
+        "description": "부동산 소유자 정보"
+      },
+      "RegistryApplicationChangePartyItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "신청서 당사자 ID",
+            "format": "int64"
+          },
+          "progressPartyId": {
+            "type": "integer",
+            "description": "진행 당사자 ID",
+            "format": "int64"
+          },
+          "partyRole": {
+            "type": "string",
+            "description": "신청인구분"
+          },
+          "partyType": {
+            "type": "string",
+            "description": "등록번호구분",
+            "enum": ["DOMESTIC", "OVERSEAS_KOREAN", "FOREIGNER", "CORPORATION"]
+          },
+          "name": {
+            "type": "string",
+            "description": "신청인명"
+          },
+          "registrationNumber": {
+            "type": "string",
+            "description": "(주민)등록번호"
+          },
+          "contact": {
+            "type": "string",
+            "description": "연락처"
+          },
+          "handlingBranch": {
+            "type": "string",
+            "description": "취급 지점"
+          },
+          "nationality": {
+            "type": "string",
+            "description": "국적"
+          },
+          "representatives": {
+            "type": "array",
+            "description": "대표자 목록",
+            "items": {
+              "$ref": "#/components/schemas/ChangeApplicantRepresentativeItem"
+            }
+          },
+          "address": {
+            "type": "string",
+            "description": "기본주소"
+          },
+          "addressDetail": {
+            "type": "string",
+            "description": "상세주소"
+          }
+        },
+        "description": "계약당사자 정보"
+      },
+      "RegistryApplicationChangeResponse": {
+        "type": "object",
+        "properties": {
+          "partiesOptions": {
+            "type": "array",
+            "description": "계약당사자 목록 (드롭다운 옵션)",
+            "items": {
+              "$ref": "#/components/schemas/RegistryApplicationChangePartyItem"
+            }
+          },
+          "applicantItems": {
+            "type": "array",
+            "description": "등기신청인 목록",
+            "items": {
+              "$ref": "#/components/schemas/ChangeApplicantItem"
+            }
+          },
+          "basicItems": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "description": "등기기본정보"
+            },
+            "description": "등기기본정보"
+          },
+          "propertyOptions": {
+            "type": "array",
+            "description": "부동산 소유자 목록",
+            "items": {
+              "$ref": "#/components/schemas/ChangePropertyOwnerItem"
+            }
+          },
+          "registryCauseOptions": {
+            "type": "array",
+            "description": "등기원인 목록",
+            "items": {
+              "type": "string",
+              "description": "등기원인 목록"
+            }
+          },
+          "changesItems": {
+            "type": "array",
+            "description": "변경사항 목록",
+            "items": {
+              "$ref": "#/components/schemas/ChangeItem"
+            }
+          }
+        },
+        "description": "등기명의인표시변경"
+      },
+      "PartyOption": {
+        "type": "object",
+        "properties": {
+          "partyId": {
+            "type": "integer",
+            "description": "당사자ID",
+            "format": "int64",
+            "example": 1
+          },
+          "progressPartyId": {
+            "type": "integer",
+            "description": "진행 계약 당사자ID",
+            "format": "int64",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "description": "성명",
+            "example": "홍길동"
+          }
+        },
+        "description": "당사자(의무자) 옵션"
+      },
+      "PropertyOwnerCertificateItemResponse": {
+        "type": "object",
+        "properties": {
+          "propertyUniqueNumber": {
+            "type": "string",
+            "description": "부동산고유번호",
+            "example": "21113655300780"
+          },
+          "holdingShareDenominator": {
+            "type": "integer",
+            "description": "보유지분 분모",
+            "format": "int32",
+            "example": 1
+          },
+          "holdingShareNumerator": {
+            "type": "integer",
+            "description": "보유지분 분자",
+            "format": "int32",
+            "example": 1
+          },
+          "transferShareDenominator": {
+            "type": "integer",
+            "description": "이전지분 분모",
+            "format": "int32",
+            "example": 1
+          },
+          "transferShareNumerator": {
+            "type": "integer",
+            "description": "이전지분 분자",
+            "format": "int32",
+            "example": 1
+          },
+          "progressPropertyOwnerId": {
+            "type": "integer",
+            "description": "진행 부동산 소유자 고유번호",
+            "format": "int64",
+            "example": 1
+          },
+          "progressPartyId": {
+            "type": "integer",
+            "description": "진행 당사자 참조 ID",
+            "format": "int64",
+            "example": 1
+          },
+          "section": {
+            "type": "string",
+            "description": "구분",
+            "example": "GAP",
+            "enum": ["GAP", "EUL"]
+          },
+          "rankNumber": {
+            "type": "string",
+            "description": "순위번호",
+            "example": "1"
+          },
+          "receiptDate": {
+            "type": "string",
+            "description": "접수일자",
+            "format": "date",
+            "example": "2025-12-08"
+          },
+          "receiptNumber": {
+            "type": "string",
+            "description": "접수번호",
+            "example": "12345"
+          },
+          "certificateType": {
+            "type": "string",
+            "description": "등기권리증 구분",
+            "example": "REGISTRY_CERT_INFO",
+            "enum": [
+              "REGISTRY_CERT_INFO",
+              "REGISTRY_CERTIFICATE",
+              "CONFIRMATION_DOCUMENT",
+              "PRIOR_REGISTRY_LINK"
+            ]
+          },
+          "certificateSerialNumber": {
+            "type": "string",
+            "description": "일련번호",
+            "example": "A1B2C3D4E5F6"
+          },
+          "certificatePasswordSequence": {
+            "type": "string",
+            "description": "일련번호",
+            "example": "01"
+          },
+          "certificatePassword": {
+            "type": "string",
+            "description": "비밀번호",
+            "example": "1234"
+          },
+          "confirmationDocumentType": {
+            "type": "string",
+            "description": "본인확인 구분(확인서면인경우)",
+            "example": "RESIDENT_REGISTRATION",
+            "enum": [
+              "RESIDENT_REGISTRATION",
+              "DRIVER_LICENSE",
+              "PASSPORT",
+              "FOREIGN_REGISTRATION",
+              "DOMESTIC_RESIDENCE_REPORT"
+            ]
+          },
+          "specialNote": {
+            "type": "string",
+            "description": "특이사항",
+            "example": "특이사항입니다"
+          }
+        },
+        "description": "등기권리증 정보 조회"
+      },
+      "PropertyUniqueNumberOption": {
+        "type": "object",
+        "properties": {
+          "applicationId": {
+            "type": "integer",
+            "description": "신청서ID",
+            "format": "int64",
+            "example": 1
+          },
+          "propertyUniqueNumber": {
+            "type": "string",
+            "description": "부동산고유번호",
+            "example": "21113655300780"
+          }
+        },
+        "description": "부동산고유번호 옵션"
+      },
+      "RegistryApplicationPropertyOwnerCertificateResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "등기권리증 목록",
+            "items": {
+              "$ref": "#/components/schemas/PropertyOwnerCertificateItemResponse"
+            }
+          },
+          "propertyUniqueNumberOptions": {
+            "type": "array",
+            "description": "부동산 고유번호 옵션 (부동산 테이블)",
+            "items": {
+              "$ref": "#/components/schemas/PropertyUniqueNumberOption"
+            }
+          },
+          "ownerOptions": {
+            "type": "array",
+            "description": "소유자(성명) 옵션 (의무자)",
+            "items": {
+              "$ref": "#/components/schemas/PartyOption"
+            }
+          },
+          "sectionOptions": {
+            "type": "array",
+            "description": "해당구 옵션 (Enum)",
+            "items": {
+              "type": "string",
+              "description": "해당구 옵션 (Enum)"
+            }
+          },
+          "certificateTypeOptions": {
+            "type": "array",
+            "description": "등기권리증 구분 옵션 (Enum)",
+            "items": {
+              "type": "string",
+              "description": "등기권리증 구분 옵션 (Enum)"
+            }
+          },
+          "identityDocumentOptions": {
+            "type": "array",
+            "description": "확인서면 구분 옵션 - 등기권리증이 확인서면일경우에만 노출 (Enum)",
+            "items": {
+              "type": "string",
+              "description": "확인서면 구분 옵션 - 등기권리증이 확인서면일경우에만 노출 (Enum)"
+            }
+          }
+        },
+        "description": "등기권리증 정보 조회"
+      },
+      "AttachmentFormDocumentResponse": {
+        "type": "object",
+        "properties": {
+          "attachmentName": {
+            "type": "string",
+            "description": "문서명"
+          },
+          "propertyDescription": {
+            "type": "array",
+            "description": "부동산의표시 목록",
+            "items": {
+              "type": "string",
+              "description": "부동산의표시 목록"
+            }
+          },
+          "transactionAmount": {
+            "type": "string",
+            "description": "거래가액"
+          },
+          "acceptanceOfficeName": {
+            "type": "string",
+            "description": "접수등기소"
+          },
+          "jurisdictionOfficeName": {
+            "type": "string",
+            "description": "관할등기소"
+          },
+          "registryCause": {
+            "type": "string",
+            "description": "등기원인"
+          },
+          "registryPurpose": {
+            "type": "string",
+            "description": "등기목적"
+          },
+          "shareDescription": {
+            "type": "string",
+            "description": "설정할 지분"
+          },
+          "cancellationContent": {
+            "type": "string",
+            "description": "말소할사항"
+          },
+          "registryCauseDate": {
+            "type": "string",
+            "description": "등기원인일"
+          },
+          "registryReceiptDate": {
+            "type": "string",
+            "description": "등기접수일자"
+          },
+          "consentParties": {
+            "type": "array",
+            "description": "동의인 목록",
+            "items": {
+              "$ref": "#/components/schemas/ConsentPartyResponse"
+            }
+          },
+          "agentInfo": {
+            "$ref": "#/components/schemas/AgentInfoResponse"
+          },
+          "confirmationInfos": {
+            "type": "array",
+            "description": "본인확인정보 목록",
+            "items": {
+              "$ref": "#/components/schemas/ConfirmationInfoResponse"
+            }
+          }
+        },
+        "description": "등기신청서 - 첨부문서 양식 전용 응답"
+      },
+      "ConfirmationInfoResponse": {
+        "type": "object",
+        "properties": {
+          "confirmationDocumentType": {
+            "type": "string",
+            "description": "본인확인정보 구분"
+          },
+          "specialNote": {
+            "type": "string",
+            "description": "특이사항"
+          }
+        },
+        "description": "본인확인정보 목록"
+      },
+      "ConsentPartyResponse": {
+        "type": "object",
+        "properties": {
+          "partyRole": {
+            "type": "string",
+            "description": "당사자역할"
+          },
+          "partyType": {
+            "type": "string",
+            "description": "당사자유형"
+          },
+          "ownershipType": {
+            "type": "string",
+            "description": "지분유형"
+          },
+          "name": {
+            "type": "string",
+            "description": "성명"
+          },
+          "registrationNumber": {
+            "type": "string",
+            "description": "주민등록번호"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "description": "전화번호"
+          },
+          "nationality": {
+            "type": "string",
+            "description": "국적"
+          },
+          "email": {
+            "type": "string",
+            "description": "이메일"
+          },
+          "address": {
+            "type": "string",
+            "description": "주소"
+          },
+          "addressDetail": {
+            "type": "string",
+            "description": "상세주소"
+          },
+          "share": {
+            "type": "string",
+            "description": "지분"
+          },
+          "holdingShare": {
+            "type": "string",
+            "description": "보유지분"
+          },
+          "transferShare": {
+            "type": "string",
+            "description": "이전/설정지분"
+          },
+          "section": {
+            "type": "string",
+            "description": "해당구"
+          },
+          "rankNumber": {
+            "type": "string",
+            "description": "순위번호"
+          },
+          "representativeType": {
+            "type": "string",
+            "description": "대표자유형"
+          },
+          "representativePosition": {
+            "type": "string",
+            "description": "대표자직책"
+          },
+          "representativeName": {
+            "type": "string",
+            "description": "대표자성명"
+          },
+          "representativeNationality": {
+            "type": "string",
+            "description": "대표자국적"
+          },
+          "rentalBusinessRegistrationNumber": {
+            "type": "string",
+            "description": "임대사업자등록번호"
+          }
+        },
+        "description": "동의인 목록"
+      },
       "RegistryApplicationFormResponse": {
         "type": "object",
         "properties": {
@@ -18580,6 +19284,153 @@
           }
         },
         "description": "공지사항 응답"
+      },
+      "NoticeDetailResponse": {
+        "type": "object",
+        "properties": {
+          "noticeId": {
+            "type": "integer",
+            "description": "공지사항 일련번호",
+            "format": "int64",
+            "example": 152
+          },
+          "bankName": {
+            "type": "string",
+            "description": "금융기관명",
+            "example": "뱅글은행"
+          },
+          "category": {
+            "type": "string",
+            "description": "공지 분류",
+            "example": "시스템 개선"
+          },
+          "isImportant": {
+            "type": "boolean",
+            "description": "중요 여부",
+            "example": true
+          },
+          "isPublished": {
+            "type": "boolean",
+            "description": "게시 여부",
+            "example": true
+          },
+          "title": {
+            "type": "string",
+            "description": "제목",
+            "example": "[중요] 서비스 안정화를 위한 x월 시스템 개선 작업 안내"
+          },
+          "content": {
+            "type": "string",
+            "description": "내용",
+            "example": "공지사항 본문 내용"
+          },
+          "noticeDate": {
+            "type": "string",
+            "description": "작성일자",
+            "format": "date",
+            "example": "2025-05-08"
+          },
+          "viewCount": {
+            "type": "integer",
+            "description": "조회수",
+            "format": "int32",
+            "example": 123
+          },
+          "prevNoticeId": {
+            "type": "integer",
+            "description": "이전 공지 ID (없으면 null)",
+            "format": "int64",
+            "example": 151
+          },
+          "nextNoticeId": {
+            "type": "integer",
+            "description": "다음 공지 ID (없으면 null)",
+            "format": "int64",
+            "example": 153
+          }
+        },
+        "description": "공지사항 상세 응답"
+      },
+      "Item": {
+        "type": "object",
+        "properties": {
+          "noticeId": {
+            "type": "integer",
+            "description": "번호",
+            "format": "int64",
+            "example": 152
+          },
+          "bankName": {
+            "type": "string",
+            "description": "금융기관",
+            "example": "뱅글은행"
+          },
+          "category": {
+            "type": "string",
+            "description": "공지 분류(enum)",
+            "example": "SYSTEM_IMPROVEMENT",
+            "enum": ["ALL", "SYSTEM_IMPROVEMENT", "SYSTEM_MAINTENANCE", "ETC"]
+          },
+          "isImportant": {
+            "type": "boolean",
+            "description": "중요 여부",
+            "example": true
+          },
+          "title": {
+            "type": "string",
+            "description": "제목",
+            "example": "[중요] 서비스 안정화를 위한 x월 시스템 개선 작업 안내"
+          },
+          "noticeDate": {
+            "type": "string",
+            "description": "작성일자",
+            "format": "date",
+            "example": "2025-05-08"
+          },
+          "isNew": {
+            "type": "boolean",
+            "description": "신규 표시 여부",
+            "example": true
+          }
+        },
+        "description": "공지사항 항목"
+      },
+      "NoticeListResponse": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "description": "현재 페이지(1부터 시작)",
+            "format": "int32",
+            "example": 1
+          },
+          "size": {
+            "type": "integer",
+            "description": "페이지 크기",
+            "format": "int32",
+            "example": 10
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "전체 페이지 수",
+            "format": "int32",
+            "example": 16
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "전체 건수",
+            "format": "int64",
+            "example": 154
+          },
+          "noticeList": {
+            "type": "array",
+            "description": "공지사항 목록",
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            }
+          }
+        },
+        "description": "공지사항 목록 조회 응답"
       },
       "CodeResponse": {
         "type": "object",

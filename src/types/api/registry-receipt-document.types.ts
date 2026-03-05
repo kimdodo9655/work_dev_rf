@@ -146,12 +146,57 @@ export interface FeeSection {
   vat?: number
 }
 
+export interface FeeDetail {
+  baseFee?: number
+  additionalFee?: number
+  certificateFee?: number
+  registryCauseDocumentFee?: number
+  taxPaymentAgencyFee?: number
+  bondSaleAgencyFee?: number
+  inspectionTradeReportAgencyFee?: number
+  actualExpense?: number
+  confirmationDocumentFee?: number
+  otherFee?: number
+  vat?: number
+  feeSubtotal?: number
+}
+
+export interface TaxDetail {
+  acquisitionTax?: number
+  registrationLicenseTax?: number
+  educationTax?: number
+  ruralSpecialTax?: number
+  stampTax?: number
+  registryApplicationFee?: number
+  taxSubtotal?: number
+}
+
+export interface HousingBondDetail {
+  bondPurchaseAmount?: number
+  housingBondDiscountAmount?: number
+  housingBondSubtotal?: number
+}
+
 /** 영수증 상세 항목 */
 export interface ReceiptDetailItem {
   /** 영수증ID */
   receiptDocumentId?: number
   /** 등기유형명 */
   registryTypeName?: string
+  registryType?: string
+  registryObligeeName?: string
+  registryCause?: string
+  tradeAmount?: number
+  standardMarketPrice?: number
+  maximumCreditAmount?: number
+  bondPurchaseAmount?: number
+  changeCount?: number
+  correctionCount?: number
+  cancellationCount?: number
+  propertyDescription?: string
+  fee?: FeeDetail
+  tax?: TaxDetail
+  housingBond?: HousingBondDetail
   /** 보수료 소계 */
   feeSubtotal?: number
   /** 공과금 소계 */

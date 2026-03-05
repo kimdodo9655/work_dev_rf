@@ -4,8 +4,9 @@
  */
 
 import type { RouteRecordRaw } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
+
 import { MESSAGES } from '@/constants/messages'
+import { useAuthStore } from '@/stores/auth'
 import { logger } from '@/utils/logger'
 
 export const authRoutes: RouteRecordRaw[] = [

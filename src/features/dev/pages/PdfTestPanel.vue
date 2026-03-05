@@ -1880,7 +1880,7 @@ onMounted(() => {
 </style> -->
 
 <template>
-  <div style="width: 1000px; height: 1000px">
+  <div style="width: 100%; height: 1000px">
     <PdfViewer
       :src="previewUrl"
       app-title="BankClear Web Viewer"

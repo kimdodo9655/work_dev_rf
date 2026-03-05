@@ -151,9 +151,9 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { codeAPI } from '@/api/services/code'
-import { MESSAGES } from '@/constants/messages'
 import { registryQuoteAPI } from '@/api/services/registry/quote'
 import SearchSelect from '@/components/template/input/SearchSelect.vue'
+import { MESSAGES } from '@/constants/messages'
 import type { Code, EstimateDetailResponse, EstimateInfoResponse, SelectOption } from '@/types'
 
 defineOptions({
@@ -174,7 +174,9 @@ const selectedRegistryMethod = ref<string | number | null>('')
 
 const isCreateMode = computed(() => route.name === 'EstimateCreate')
 const pageTitle = computed(() =>
-  isCreateMode.value ? MESSAGES.pageTitle.estimate.createDetail : MESSAGES.pageTitle.estimate.confirmDetail
+  isCreateMode.value
+    ? MESSAGES.pageTitle.estimate.createDetail
+    : MESSAGES.pageTitle.estimate.confirmDetail
 )
 
 const registryRequestNumber = computed(() => String(route.params.registrationNo ?? ''))

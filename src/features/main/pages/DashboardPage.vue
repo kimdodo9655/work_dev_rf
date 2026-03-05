@@ -158,35 +158,16 @@
           </h4>
 
           <ul class="notice-list">
-            <li>
-              <router-link :to="{ name: 'NoticeDetail', params: { noticeId: '1' } }">
-                <p>여기는 공지사항 제목</p>
-                <p>2025.12.16</p>
+            <li v-for="item in notices" :key="item.noticeId">
+              <router-link
+                :to="{ name: 'NoticeDetail', params: { noticeId: String(item.noticeId) } }"
+              >
+                <p>{{ item.title || '-' }}</p>
+                <p>{{ item.noticeDate || '-' }}</p>
               </router-link>
             </li>
-            <li>
-              <router-link :to="{ name: 'NoticeDetail', params: { noticeId: '2' } }">
-                <p>여기는 공지사항 제목 길어지면 이렇게 나옴</p>
-                <p>2025.12.16</p>
-              </router-link>
-            </li>
-            <li>
-              <router-link :to="{ name: 'NoticeDetail', params: { noticeId: '3' } }">
-                <p>여기는 공지사항 제목</p>
-                <p>2025.12.16</p>
-              </router-link>
-            </li>
-            <li>
-              <router-link :to="{ name: 'NoticeDetail', params: { noticeId: '4' } }">
-                <p>여기는 공지사항 제목</p>
-                <p>2025.12.16</p>
-              </router-link>
-            </li>
-            <li>
-              <router-link :to="{ name: 'NoticeDetail', params: { noticeId: '5' } }">
-                <p>여기는 공지사항 제목</p>
-                <p>2025.12.16</p>
-              </router-link>
+            <li v-if="!isLoading && notices.length === 0">
+              <p>공지사항이 없습니다.</p>
             </li>
           </ul>
         </div>
@@ -255,11 +236,13 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref, watch } from 'vue'
 
+import { noticeAPI } from '@/api/services/notice'
 import { registryDashboardAPI } from '@/api/services/registry/dashboard'
 import { userAPI } from '@/api/services/user'
 import FormSelect, { type SelectOption } from '@/components/template/input/UserSelect.vue'
 import { useExternalLinks } from '@/composables/utils/useExternalLinks'
 import type {
+  NoticeResponse,
   RegistryEstimateSummaryResponse,
   RegistryProgressSummaryResponse,
   RegistryProgressTodayResponse,
@@ -331,6 +314,7 @@ const progressSummary = reactive<Required<RegistryProgressSummaryResponse>>({
 
 // [R02A-02] 오늘의 접수사건 조회 결과
 const todayCases = ref<RegistryProgressTodayResponse[]>([])
+const notices = ref<NoticeResponse[]>([])
 
 // 로딩/에러 상태
 const isLoading = ref(false)
@@ -392,6 +376,18 @@ function normalizeEstimateSummary(source: unknown): Required<RegistryEstimateSum
   }
 }
 
+function normalizeNoticeList(source: unknown): NoticeResponse[] {
+  if (Array.isArray(source)) return source as NoticeResponse[]
+  if (source && typeof source === 'object') {
+    const obj = source as Record<string, unknown>
+    if (Array.isArray(obj.content)) return obj.content as NoticeResponse[]
+    if (Array.isArray(obj.noticeList)) return obj.noticeList as NoticeResponse[]
+    if (Array.isArray(obj.items)) return obj.items as NoticeResponse[]
+    if ('noticeId' in obj || 'title' in obj) return [obj as NoticeResponse]
+  }
+  return []
+}
+
 // Date -> YYYYMMDD (R02A 대시보드 API 스펙 요구 포맷)
 function formatApiDate(date: Date): string {
   const year = date.getFullYear()
@@ -400,14 +396,40 @@ function formatApiDate(date: Date): string {
   return `${year}${month}${day}`
 }
 
+function getDaysInMonth(year: number, monthIndex: number): number {
+  return new Date(year, monthIndex + 1, 0).getDate()
+}
+
+function getOneMonthInclusiveStart(end: Date): Date {
+  const endYear = end.getFullYear()
+  const endMonth = end.getMonth()
+  const endDay = end.getDate()
+
+  const prevMonthDate = new Date(endYear, endMonth - 1, 1)
+  const targetYear = prevMonthDate.getFullYear()
+  const targetMonth = prevMonthDate.getMonth()
+  const maxDay = getDaysInMonth(targetYear, targetMonth)
+  const clampedDay = Math.min(endDay, maxDay)
+
+  const start = new Date(targetYear, targetMonth, clampedDay)
+  start.setDate(start.getDate() + 1)
+  return start
+}
+
 // 탭 값에 맞는 기간(시작일/종료일) 계산
 function getDateRange(tabValue: string): { startDate: string; endDate: string } {
   const end = new Date()
   const start = new Date(end)
 
-  if (tabValue === '1d') start.setDate(start.getDate() - 1)
-  if (tabValue === '1w') start.setDate(start.getDate() - 7)
-  if (tabValue === '1m') start.setMonth(start.getMonth() - 1)
+  // 1일: 오늘 하루만 조회
+  if (tabValue === '1d') start.setDate(start.getDate())
+  // 1주: 오늘 포함 7일 (예: 금요일이면 전주 토요일 ~ 금요일)
+  if (tabValue === '1w') start.setDate(start.getDate() - 6)
+  // 1개월: 오늘 포함 기준 전월 동일일 다음날부터 (예: 3/5 -> 2/6)
+  if (tabValue === '1m') {
+    const monthlyStart = getOneMonthInclusiveStart(end)
+    start.setTime(monthlyStart.getTime())
+  }
 
   return {
     startDate: formatApiDate(start),
@@ -478,10 +500,11 @@ async function fetchDashboardData() {
   try {
     const query = buildBaseQuery()
 
-    const [estimateRes, progressRes, todayRes] = await Promise.allSettled([
+    const [estimateRes, progressRes, todayRes, noticeRes] = await Promise.allSettled([
       registryDashboardAPI.summary2(query),
       registryDashboardAPI.summary(query),
-      registryDashboardAPI.today(query)
+      registryDashboardAPI.today(query),
+      noticeAPI.getList()
     ])
 
     const estimateData =
@@ -519,10 +542,17 @@ async function fetchDashboardData() {
             ? [todayRoot as RegistryProgressTodayResponse]
             : []
 
+    const noticeRoot =
+      noticeRes.status === 'fulfilled'
+        ? extractApiRoot<unknown>(unwrapResponse(noticeRes.value))
+        : null
+    notices.value = normalizeNoticeList(noticeRoot).slice(0, 5)
+
     if (
       estimateRes.status === 'rejected' ||
       progressRes.status === 'rejected' ||
-      todayRes.status === 'rejected'
+      todayRes.status === 'rejected' ||
+      noticeRes.status === 'rejected'
     ) {
       loadError.value = '일부 대시보드 데이터를 불러오지 못했습니다.'
     }
@@ -536,6 +566,7 @@ async function fetchDashboardData() {
     progressSummary.inProgressCount = 0
     progressSummary.completedCount = 0
     todayCases.value = []
+    notices.value = []
     console.error('[DASHBOARD] Failed to fetch dashboard data', error)
   } finally {
     isLoading.value = false

@@ -4,6 +4,7 @@
  */
 
 import type { RouteRecordRaw } from 'vue-router'
+
 import { MESSAGES } from '@/constants/messages'
 
 export const protectedRoutes: RouteRecordRaw[] = [

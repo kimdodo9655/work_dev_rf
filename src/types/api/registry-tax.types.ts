@@ -39,7 +39,19 @@ export type SaveTaxInfoResponse = TaxPopupResponse
 /** 세금정보 및 등기신청수수료 */
 export interface OwnershipTaxRequest {
   tax: TaxInfoRequest
+  taxBase?: TaxBaseRequest
   filingFee: FilingFeeRequest
+}
+
+export interface TaxBasePropertyRequest {
+  propertyUniqueNumber: string
+  officialLandPrice?: number
+  area?: number
+  taxBaseAmount?: number
+}
+
+export interface TaxBaseRequest {
+  properties: TaxBasePropertyRequest[]
 }
 
 /** 세금 조회 팝업 응답 */

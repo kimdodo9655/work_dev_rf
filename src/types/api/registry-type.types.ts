@@ -275,6 +275,30 @@ export interface MortgageFinancialSaveResponse {
   bondPurchaseAmount?: number
   bondExemptionReason?: string
   housingBondNumber?: string
+  registryType?:
+    | 'OWNERSHIP_TRANSFER'
+    | 'MORTGAGE'
+    | 'SURFACE_RIGHT'
+    | 'CHANGE'
+    | 'CORRECTION'
+    | 'MORTGAGE_CANCELLATION'
+    | 'SURFACE_RIGHT_CANCELLATION'
+  taxTotalAmount?: number
+  taxPaymentStatus?: 'PAYMENT' | 'EXEMPTION'
+  filingFeeAmount?: number
+  filingFeeRegistryCount?: number
+  filingFeeRegistryMethod?: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
+  properties?: PropertyBondSummary[]
+}
+
+export interface PropertyBondSummary {
+  propertyId?: string
+  propertyType?: 'LAND' | 'BUILDING' | 'COLLECTIVE_BUILDING'
+  propertyAddress?: string
+  standardMarketPrice?: number
+  bondPurchaseType?: 'PURCHASE' | 'DISCOUNT' | 'EXEMPTION'
+  bondExemptionReason?: string
+  bondPurchaseAmount?: number
 }
 
 export interface RegistryOfficeFormResponse {

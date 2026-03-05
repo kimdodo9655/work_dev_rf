@@ -79,7 +79,7 @@
           </div>
 
           <!-- 신청서 양식 (개발 환경 전용) -->
-          <!-- <component :is="pdfConverterComponent" v-if="pdfConverterComponent" /> -->
+          <component :is="pdfConverterComponent" v-if="pdfConverterComponent" />
         </div>
       </div>
     </div>

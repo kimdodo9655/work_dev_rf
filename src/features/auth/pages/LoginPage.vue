@@ -185,7 +185,11 @@ const handleSubmit = async (): Promise<void> => {
         redirectTo: '/bank-select',
         onSuccess: async (response) => {
           saveLoginId()
-          const dialog = extractApiSuccessContent(response, '로그인 성공', '정상적으로 로그인되었습니다.')
+          const dialog = extractApiSuccessContent(
+            response,
+            '로그인 성공',
+            '정상적으로 로그인되었습니다.'
+          )
           await showApiSuccess(dialog)
         }
       }

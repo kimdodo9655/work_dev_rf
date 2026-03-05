@@ -4,6 +4,7 @@
  */
 
 import type { RouteLocationNormalized } from 'vue-router'
+
 import { MESSAGES } from '@/constants/messages'
 
 type AuthState = 'pre-auth' | 'onboarding' | 'auth'

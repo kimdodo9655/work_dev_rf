@@ -4,8 +4,9 @@
  */
 
 import type { RouteRecordRaw } from 'vue-router'
-import { UserRoleLevel } from '@/types'
+
 import { MESSAGES } from '@/constants/messages'
+import { UserRoleLevel } from '@/types'
 
 export const onboardingRoutes: RouteRecordRaw[] = [
   {

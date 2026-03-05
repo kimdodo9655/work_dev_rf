@@ -13,6 +13,9 @@ import type {
   DownloadApplicationAttachmentParams,
   DownloadApplicationAttachmentQuery,
   DownloadApplicationAttachmentResponse,
+  GetApplicationAttachmentDataParams,
+  GetApplicationAttachmentDataQuery,
+  GetApplicationAttachmentDataResponse,
   GetDetailedApplicationAttachmentParams,
   GetDetailedApplicationAttachmentResponse,
   ReplaceApplicationAttachmentsParams,
@@ -68,6 +71,19 @@ export const registryAttachmentAPI = {
     // --------------------------------------------------
     return apiHelpers.get<ViewRegistryApplicationAttachmentResponse>(
       API.REGISTRY_ATTACHMENT.PREVIEW(params.applicationId),
+      query
+    )
+  },
+
+  async getDocInfo(
+    params: GetApplicationAttachmentDataParams,
+    query: GetApplicationAttachmentDataQuery
+  ) {
+    // --------------------------------------------------
+    // [R02J-04][GET - /api/registry/applications/{applicationId}/attachments/docInfo] 첨부서면 데이터 조회
+    // --------------------------------------------------
+    return apiHelpers.get<GetApplicationAttachmentDataResponse>(
+      API.REGISTRY_ATTACHMENT.DOC_INFO(params.applicationId),
       query
     )
   }

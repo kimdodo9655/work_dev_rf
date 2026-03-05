@@ -66,6 +66,20 @@ export interface ViewRegistryApplicationAttachmentParams {
 
 export type ViewRegistryApplicationAttachmentResponse = DocumentDownloadBase64Response
 
+/**
+ * R02J-04
+ * GET /api/registry/applications/{applicationId}/attachments/docInfo
+ */
+export interface GetApplicationAttachmentDataQuery {
+  fileProgressDocumentType: string
+}
+
+export interface GetApplicationAttachmentDataParams {
+  applicationId: number
+}
+
+export type GetApplicationAttachmentDataResponse = AttachmentFormDocumentResponse
+
 // ==================== Schemas ====================
 
 /** 첨부서면 정보 목록 */
@@ -183,4 +197,56 @@ export interface RegistryApplicationAttachmentDetailResponse {
   partyNamesOptions?: string[]
   /** 관할등기소 옵션 목록 */
   jurisdictionRegistryOfficeOptions?: string[]
+}
+
+export interface ConsentPartyResponse {
+  partyRole?: string
+  partyType?: string
+  ownershipType?: string
+  name?: string
+  registrationNumber?: string
+  phoneNumber?: string
+  nationality?: string
+  email?: string
+  address?: string
+  addressDetail?: string
+  share?: string
+  holdingShare?: string
+  transferShare?: string
+  section?: string
+  rankNumber?: string
+  representativeType?: string
+  representativePosition?: string
+  representativeName?: string
+  representativeNationality?: string
+  rentalBusinessRegistrationNumber?: string
+}
+
+export interface ConfirmationInfoResponse {
+  confirmationDocumentType?: string
+  specialNote?: string
+}
+
+export interface AttachmentFormDocumentResponse {
+  attachmentName?: string
+  propertyDescription?: string[]
+  transactionAmount?: string
+  acceptanceOfficeName?: string
+  jurisdictionOfficeName?: string
+  registryCause?: string
+  registryPurpose?: string
+  shareDescription?: string
+  cancellationContent?: string
+  registryCauseDate?: string
+  registryReceiptDate?: string
+  consentParties?: ConsentPartyResponse[]
+  agentInfo?: {
+    lawFirmName?: string
+    qualificationType?: string
+    qualifiedPersonName?: string
+    phoneNumber?: string
+    extensionNumber?: string
+    address?: string
+  }
+  confirmationInfos?: ConfirmationInfoResponse[]
 }

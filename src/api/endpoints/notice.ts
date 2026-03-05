@@ -4,5 +4,7 @@
  */
 
 export const NOTICE = {
-  LIST: '/api/notices'
+  LIST: '/api/notices',
+  SEARCH: '/api/notices/search',
+  DETAIL: (id: string | number) => `/api/notices/${id}`
 } as const

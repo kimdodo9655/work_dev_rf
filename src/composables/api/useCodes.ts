@@ -196,6 +196,32 @@ export function useCodes() {
   // ── 내부 헬퍼: API 응답을 배열로 정규화 ───────────
   function toList(payload: unknown): unknown[] {
     if (Array.isArray(payload)) return payload
+    if (!payload || typeof payload !== 'object') return []
+
+    const maybe = payload as Record<string, unknown>
+    if (Array.isArray(maybe.data)) return maybe.data
+    if (Array.isArray(maybe.codes)) return maybe.codes
+    if (Array.isArray(maybe.items)) return maybe.items
+    if (Array.isArray(maybe.content)) return maybe.content
+    if (Array.isArray(maybe.result)) return maybe.result
+
+    const data = maybe.data
+    if (data && typeof data === 'object') {
+      const dataObj = data as Record<string, unknown>
+      if (Array.isArray(dataObj.codes)) return dataObj.codes
+      if (Array.isArray(dataObj.items)) return dataObj.items
+      if (Array.isArray(dataObj.content)) return dataObj.content
+      if (Array.isArray(dataObj.result)) return dataObj.result
+    }
+
+    const nested = maybe.result
+    if (nested && typeof nested === 'object') {
+      const resultObj = nested as Record<string, unknown>
+      if (Array.isArray(resultObj.codes)) return resultObj.codes
+      if (Array.isArray(resultObj.items)) return resultObj.items
+      if (Array.isArray(resultObj.content)) return resultObj.content
+    }
+
     return []
   }
 
@@ -236,21 +262,35 @@ export function useCodes() {
 
       const results = await Promise.allSettled(entries.map(([, fn]) => fn()))
 
+      let successCount = 0
+      let failCount = 0
+
       results.forEach((result, idx) => {
         const entry = entries[idx]
         if (!entry) return
         const [key] = entry
         if (result.status === 'fulfilled') {
           codes.value[key] = toList(result.value) as any
+          successCount += 1
         } else {
           logger.warn('[CODES] Failed to fetch category', { key, reason: result.reason })
+          failCount += 1
         }
       })
 
       logger.info('[CODES] All codes loaded', {
         loadTime: `${(performance.now() - startTime).toFixed(2)}ms`,
-        failed: results.filter((r) => r.status === 'rejected').length
+        failed: failCount
       })
+
+      if (successCount === 0) {
+        loadError.value = '공통코드 로드 실패'
+        throw new Error('Failed to load all code categories')
+      }
+
+      if (failCount > 0) {
+        loadError.value = `일부 공통코드 로드 실패 (${failCount}/${entries.length})`
+      }
 
       return codes.value
     } catch (error) {

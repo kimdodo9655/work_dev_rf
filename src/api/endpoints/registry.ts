@@ -131,7 +131,9 @@ export const REGISTRY_ATTACHMENT = {
   DOWNLOAD: (applicationId: string | number) =>
     `/api/registry/applications/${applicationId}/attachments/download`,
   PREVIEW: (applicationId: string | number) =>
-    `/api/registry/applications/${applicationId}/attachments/preview`
+    `/api/registry/applications/${applicationId}/attachments/preview`,
+  DOC_INFO: (applicationId: string | number) =>
+    `/api/registry/applications/${applicationId}/attachments/docInfo`
 } as const
 
 export const REGISTRY_CHANGE = {
