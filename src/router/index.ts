@@ -12,6 +12,7 @@ import { resolvePageTitle } from '@/router/guards/titleGuard'
 import { appRoutes } from '@/router/routes'
 import { useAuthStore } from '@/stores/auth'
 import { UserRoleLevel } from '@/types'
+import { ENV } from '@/utils/env'
 import { logger } from '@/utils/logger'
 
 declare module 'vue-router' {
@@ -64,7 +65,9 @@ router.beforeEach(
     })
 
     const pageTitle = resolvePageTitle(to, currentAuthState)
-    document.title = pageTitle ? `${pageTitle} - 전자등기` : '전자등기'
+    document.title = pageTitle
+      ? `${ENV.APP_ENV_PREFIX}${pageTitle} - ${ENV.APP_TITLE_BASE}`
+      : `${ENV.APP_ENV_PREFIX}${ENV.APP_TITLE_BASE}`
     const redirectPath = resolveAccessRedirect(to, from, authStore)
     if (redirectPath) {
       next(redirectPath)

@@ -97,11 +97,11 @@ export function useAuth() {
     credentials: LoginRequest,
     options?: {
       redirectTo?: string
-      onSuccess?: () => void | Promise<void>
+      onSuccess?: (response: unknown) => void | Promise<void>
     }
   ): Promise<void> => {
-    await loginMutation.mutateAsync(credentials)
-    await options?.onSuccess?.()
+    const response = await loginMutation.mutateAsync(credentials)
+    await options?.onSuccess?.(response)
     await router.push(options?.redirectTo || '/bank-select')
   }
 

@@ -105,8 +105,10 @@
                     @keydown.escape="cancelCustomInput"
                   />
                   <div class="custom-input-actions">
-                    <button class="btn-cancel" @click="cancelCustomInput">취소</button>
-                    <button class="btn-confirm" @click="confirmCustomInput">확인</button>
+                    <button class="btn-cancel" @click="cancelCustomInput">{{ button.cancel }}</button>
+                    <button class="btn-confirm" @click="confirmCustomInput">
+                      {{ button.confirm }}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -125,6 +127,7 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { MESSAGES } from '@/constants/messages'
 
 interface Option {
   label: string
@@ -173,6 +176,7 @@ const emit = defineEmits<{
   'update:customText': [value: string | null]
   blur: []
 }>()
+const button = MESSAGES.commonButtons
 
 // 고유 ID 생성
 const selectId = `select-${Math.random().toString(36).substr(2, 9)}`

@@ -4,8 +4,7 @@
  */
 
 import type { RouteRecordRaw } from 'vue-router'
-
-import locale from '@/locales/ko.json'
+import { MESSAGES } from '@/constants/messages'
 
 export const protectedRoutes: RouteRecordRaw[] = [
   {
@@ -13,7 +12,7 @@ export const protectedRoutes: RouteRecordRaw[] = [
     name: 'Dashboard',
     component: () => import('@/features/main/pages/DashboardPage.vue'),
     meta: {
-      title: locale.pageTitle.main.dashboard,
+      title: MESSAGES.pageTitle.main.dashboard,
       requiresAuth: true,
       requiresBankCode: true,
       allowedAuthStates: ['auth']
@@ -24,7 +23,7 @@ export const protectedRoutes: RouteRecordRaw[] = [
     name: 'WebViewer',
     component: () => import('@/features/shared/pages/WebViewerPage.vue'),
     meta: {
-      title: locale.pageTitle.shared.viewer,
+      title: MESSAGES.pageTitle.shared.viewer,
       requiresAuth: true,
       requiresBankCode: true,
       allowedAuthStates: ['auth']
@@ -35,7 +34,7 @@ export const protectedRoutes: RouteRecordRaw[] = [
     name: 'Notice',
     component: () => import('@/features/shared/pages/NoticePage.vue'),
     meta: {
-      title: locale.pageTitle.shared.notice,
+      title: MESSAGES.pageTitle.shared.notice,
       requiresAuth: true,
       requiresBankCode: true,
       allowedAuthStates: ['auth']
@@ -46,7 +45,7 @@ export const protectedRoutes: RouteRecordRaw[] = [
     name: 'NoticeDetail',
     component: () => import('@/features/shared/pages/NoticeDetailPage.vue'),
     meta: {
-      title: locale.pageTitle.shared.noticeDetail,
+      title: MESSAGES.pageTitle.shared.noticeDetail,
       requiresAuth: true,
       requiresBankCode: true,
       allowedAuthStates: ['auth']
@@ -57,7 +56,7 @@ export const protectedRoutes: RouteRecordRaw[] = [
     name: 'EstimateMgmt',
     component: () => import('@/features/estimate/pages/EstimateMgmtPage.vue'),
     meta: {
-      title: locale.pageTitle.estimate.list,
+      title: MESSAGES.pageTitle.estimate.list,
       requiresAuth: true,
       requiresBankCode: true,
       allowedAuthStates: ['auth'],
@@ -69,7 +68,7 @@ export const protectedRoutes: RouteRecordRaw[] = [
     name: 'EstimateCreate',
     component: () => import('@/features/estimate/pages/EstimateDetailPage.vue'),
     meta: {
-      title: locale.pageTitle.estimate.createDetail,
+      title: MESSAGES.pageTitle.estimate.createDetail,
       requiresAuth: true,
       requiresBankCode: true,
       allowedAuthStates: ['auth'],
@@ -81,7 +80,7 @@ export const protectedRoutes: RouteRecordRaw[] = [
     name: 'EstimateDetail',
     component: () => import('@/features/estimate/pages/EstimateDetailPage.vue'),
     meta: {
-      title: locale.pageTitle.estimate.confirmDetail,
+      title: MESSAGES.pageTitle.estimate.confirmDetail,
       requiresAuth: true,
       requiresBankCode: true,
       allowedAuthStates: ['auth'],
@@ -93,7 +92,7 @@ export const protectedRoutes: RouteRecordRaw[] = [
     name: 'RegistrationStatus',
     component: () => import('@/features/registration/pages/CaseStatusContainer.vue'),
     meta: {
-      title: locale.pageTitle.registration.caseStatus,
+      title: MESSAGES.pageTitle.registration.caseStatus,
       requiresAuth: true,
       requiresBankCode: true,
       allowedAuthStates: ['auth']
@@ -104,7 +103,7 @@ export const protectedRoutes: RouteRecordRaw[] = [
     name: 'RegistrationDetail',
     component: () => import('@/features/registration/pages/CaseDetailPage.vue'),
     meta: {
-      title: locale.pageTitle.registration.caseDetail,
+      title: MESSAGES.pageTitle.registration.caseDetail,
       requiresAuth: true,
       requiresBankCode: true,
       allowedAuthStates: ['auth']
@@ -115,7 +114,7 @@ export const protectedRoutes: RouteRecordRaw[] = [
     name: 'RegistrationSchedule',
     component: () => import('@/features/registration/pages/CaseScheduleMgmtPage.vue'),
     meta: {
-      title: locale.pageTitle.registration.schedule,
+      title: MESSAGES.pageTitle.registration.schedule,
       requiresAuth: true,
       requiresBankCode: true,
       allowedAuthStates: ['auth']

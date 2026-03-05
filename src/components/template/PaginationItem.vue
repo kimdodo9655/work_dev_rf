@@ -8,7 +8,7 @@
       :disabled="currentPage === 1"
       class="page-button"
     >
-      이전
+      {{ button.previous }}
     </button>
 
     <template v-for="(page, index) in visiblePages" :key="index">
@@ -29,13 +29,14 @@
       :disabled="currentPage === totalPages"
       class="page-button"
     >
-      다음
+      {{ button.next }}
     </button>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { MESSAGES } from '@/constants/messages'
 
 interface Props {
   /** 전체 아이템 개수 */
@@ -55,6 +56,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<Emits>()
+const button = MESSAGES.commonButtons
 
 // 전체 페이지 수 계산
 const totalPages = computed(() => Math.ceil(props.totalItems / props.itemsPerPage))

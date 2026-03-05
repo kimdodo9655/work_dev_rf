@@ -262,13 +262,21 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-const { findReplacement, replaceText } = useCodeReplacer()
+const { findOriginalCode, findReplacement, replaceText } = useCodeReplacer()
 const { getErrorMessage } = useErrorHandler()
 
 function displayCode(value?: string | null, category?: string): string {
   if (!value) return '-'
-  if (!category) return replaceText(value)
-  return findReplacement(value, category) ?? replaceText(value)
+  const original = String(value)
+  const directReplaced = category ? findReplacement(original, category) : replaceText(original)
+  if (directReplaced && directReplaced !== original) return `${original} -> ${directReplaced}`
+
+  if (category) {
+    const inferredCode = findOriginalCode(original, category)
+    if (inferredCode) return `${inferredCode} -> ${original}`
+  }
+
+  return original
 }
 
 function displayText(value?: string | null): string {

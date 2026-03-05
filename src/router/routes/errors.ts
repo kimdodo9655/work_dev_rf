@@ -4,8 +4,7 @@
  */
 
 import type { RouteRecordRaw } from 'vue-router'
-
-import locale from '@/locales/ko.json'
+import { MESSAGES } from '@/constants/messages'
 
 export const errorRoutes: RouteRecordRaw[] = [
   {
@@ -13,7 +12,7 @@ export const errorRoutes: RouteRecordRaw[] = [
     name: 'NotFound',
     component: () => import('@/features/shared/pages/NotFoundPage.vue'),
     meta: {
-      title: locale.pageTitle.error['404'],
+      title: MESSAGES.pageTitle.error['404'],
       allowedAuthStates: ['pre-auth', 'onboarding', 'auth'],
       layout: 'all'
     }
@@ -23,7 +22,7 @@ export const errorRoutes: RouteRecordRaw[] = [
     name: 'ErrorMacOS',
     component: () => import('@/features/shared/pages/AccessErrorMacPage.vue'),
     meta: {
-      title: locale.pageTitle.error.macOs,
+      title: MESSAGES.pageTitle.error.macOs,
       allowedAuthStates: ['pre-auth', 'onboarding', 'auth'],
       layout: 'all',
       footerOff: true
@@ -34,7 +33,7 @@ export const errorRoutes: RouteRecordRaw[] = [
     name: 'ErrorMobile',
     component: () => import('@/features/shared/pages/AccessErrorMobilePage.vue'),
     meta: {
-      title: locale.pageTitle.error.mobile,
+      title: MESSAGES.pageTitle.error.mobile,
       allowedAuthStates: ['pre-auth', 'onboarding', 'auth'],
       layout: 'all',
       mobile: true,

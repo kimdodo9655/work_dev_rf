@@ -7,19 +7,18 @@
     <nav>
       <ul>
         <li>
-          <router-link to="/terms">{{ locale.footer.terms }}</router-link>
+          <router-link to="/terms">서비스 이용약관</router-link>
         </li>
         <li>
-          <router-link to="/privacy">{{ locale.footer.privacy }}</router-link>
+          <router-link to="/privacy">개인정보처리방침</router-link>
         </li>
       </ul>
     </nav>
-    <p>{{ locale.footer.copyright }}</p>
+    <p>COPYRIGHT ⓒ 2025 BANKCLEAR Inc. ALL RIGHTS RESERVED.</p>
   </footer>
 </template>
 
 <script lang="ts" setup>
-import locale from '@/locales/ko.json'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()

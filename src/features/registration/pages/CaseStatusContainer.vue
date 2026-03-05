@@ -161,6 +161,7 @@ import SearchDateRangePicker from '@/components/template/input/SearchDateRangePi
 import SearchInput from '@/components/template/input/SearchInput.vue'
 import SearchSelect from '@/components/template/input/SearchSelect.vue'
 import Pagination from '@/components/template/PaginationItem.vue'
+import { useApiAlert } from '@/composables/utils/useApiAlert'
 import { useDialog } from '@/composables/utils/useDialog'
 import { useAuthStore } from '@/stores/auth'
 import type { Code, GetAssignableUsersQuery, SearchRegistryProgresssListQuery } from '@/types'
@@ -168,6 +169,7 @@ import type { Code, GetAssignableUsersQuery, SearchRegistryProgresssListQuery } 
 // Auth Store
 const authStore = useAuthStore()
 const { alert, confirm } = useDialog()
+const { extractApiSuccessContent, extractApiErrorContent } = useApiAlert()
 const roleLevel = computed(() => authStore.roleLevel)
 const roleLevelValue = computed(() => roleLevel.value ?? 0)
 const userId = computed(() => authStore.userId)
@@ -587,25 +589,20 @@ async function callAssignManager(
       { managerUserId: Number(managerUserIdToAssign) }
     )
 
-    const payload = unwrap<any>(res)
-    const msg =
-      payload?.message ??
-      payload?.result?.message ??
-      (res as any)?.message ??
-      '업무담당자 배정이 완료되었습니다.'
+    const dialog = extractApiSuccessContent(res, '배정 완료', '업무담당자 배정이 완료되었습니다.')
 
     const acknowledged = await alert({
-      title: '배정 완료',
-      message: msg
+      title: dialog.title,
+      message: dialog.message
     })
     if (acknowledged) {
       await fetchList(false)
     }
   } catch (e: any) {
-    const msg = e?.message ?? '업무담당자 배정에 실패했습니다.'
+    const dialog = extractApiErrorContent(e, '배정 실패', '업무담당자 배정에 실패했습니다.')
     await alert({
-      title: '배정 실패',
-      message: msg
+      title: dialog.title,
+      message: dialog.message
     })
   } finally {
     removeAssigning(registryManagementNumber)

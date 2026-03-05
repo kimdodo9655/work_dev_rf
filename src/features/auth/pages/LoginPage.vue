@@ -8,7 +8,7 @@
       <h1 class="multi-line">법무대리인<br />등기지원시스템</h1>
     </div>
     <div class="right">
-      <h4><i class="fi fi-br-sign-in-alt"></i>로그인</h4>
+      <h4><i class="fi fi-br-sign-in-alt"></i>{{ button.login }}</h4>
 
       <form @submit.prevent="handleSubmit">
         <ul>
@@ -52,7 +52,7 @@
             <router-link to="/auth/password-setup">비밀번호 변경</router-link>
           </li>
           <li>
-            <input type="submit" value="로그인" :disabled="isSubmitting" />
+            <input type="submit" :value="button.login" :disabled="isSubmitting" />
           </li>
           <li class="line-option">
             <i class="fi fi-rs-exclamation"></i>
@@ -78,6 +78,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useAuth } from '@/composables/api/useAuth'
 import { useApiAlert } from '@/composables/utils/useApiAlert'
 import { useErrorHandler } from '@/composables/utils/useErrorHandler'
+import { MESSAGES } from '@/constants/messages'
 import { ENV } from '@/utils/env'
 import { logger } from '@/utils/logger'
 
@@ -86,12 +87,14 @@ import { logger } from '@/utils/logger'
 // ============================================================================
 const { login, loginMutation } = useAuth()
 const { getErrorMessage } = useErrorHandler()
-const { showApiSuccess, showApiError } = useApiAlert()
+const { showApiSuccess, showApiError, extractApiSuccessContent, extractApiErrorContent } =
+  useApiAlert()
 
 // ============================================================================
 // Constants
 // ============================================================================
 const STORAGE_KEY = 'REMEMBER_LOGIN_ID' as const
+const button = MESSAGES.commonButtons
 
 const DEV_DEFAULT_CREDENTIALS = {
   loginId: ENV.IS_DEV ? 'admin' : '',
@@ -180,22 +183,18 @@ const handleSubmit = async (): Promise<void> => {
       },
       {
         redirectTo: '/bank-select',
-        onSuccess: async () => {
+        onSuccess: async (response) => {
           saveLoginId()
-          await showApiSuccess({
-            title: '로그인 성공',
-            message: '정상적으로 로그인되었습니다.'
-          })
+          const dialog = extractApiSuccessContent(response, '로그인 성공', '정상적으로 로그인되었습니다.')
+          await showApiSuccess(dialog)
         }
       }
     )
   } catch (error) {
     const message = getErrorMessage(error)
     errorMessage.value = message
-    await showApiError({
-      title: '로그인 실패',
-      message
-    })
+    const dialog = extractApiErrorContent(error, '로그인 실패', message)
+    await showApiError(dialog)
     password.value = ''
   }
 }

@@ -6,6 +6,7 @@
 import { computed, type Ref, ref, watch } from 'vue'
 
 import { registryTypeAPI } from '@/api/services/registry'
+import { useApiAlert } from '@/composables/utils/useApiAlert'
 import { useDialog } from '@/composables/utils/useDialog'
 import { useThrottle } from '@/composables/utils/useThrottle'
 import type { RegistryApplicationForm } from '@/features/registration/composables/applicationSection.types'
@@ -41,6 +42,7 @@ export function useApplicationSectionTabs({
   const tabsThrottle = useThrottle(1000)
   const deletingApplicationIds = ref<Set<number>>(new Set())
   const { alert, confirm } = useDialog()
+  const { extractApiSuccessContent, extractApiErrorContent } = useApiAlert()
 
   const activeApplicationId = computed(() => {
     const activeTab = tabs.value[activeTabIndex.value]
@@ -141,16 +143,18 @@ export function useApplicationSectionTabs({
 
     deletingApplicationIds.value.add(tab.applicationId)
     try {
-      await registryTypeAPI.delete({ applicationId: tab.applicationId })
+      const response = await registryTypeAPI.delete({ applicationId: tab.applicationId })
       removeTabFromState(tab.applicationId)
+      const dialog = extractApiSuccessContent(response, '삭제 완료', '등기신청서를 삭제했습니다.')
       await alert({
-        title: '삭제 완료',
-        message: '등기신청서를 삭제했습니다.'
+        title: dialog.title,
+        message: dialog.message
       })
     } catch (e) {
+      const dialog = extractApiErrorContent(e, '삭제 실패', getErrorMessage(e))
       await alert({
-        title: '삭제 실패',
-        message: getErrorMessage(e)
+        title: dialog.title,
+        message: dialog.message
       })
     } finally {
       deletingApplicationIds.value.delete(tab.applicationId)

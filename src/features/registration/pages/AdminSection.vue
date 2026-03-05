@@ -71,7 +71,7 @@ const props = defineProps<Props>()
 const emit = defineEmits<{
   loaded: [hasData: boolean]
 }>()
-const { findReplacement, replaceText } = useCodeReplacer()
+const { findOriginalCode, findReplacement, replaceText } = useCodeReplacer()
 const { getErrorMessage } = useErrorHandler()
 
 const throttle = useThrottle(1000)
@@ -86,15 +86,24 @@ function unwrapData<T>(res: any): T {
 }
 
 function getRegistryTypeName(type: string): string {
-  return findReplacement(type, 'registryTypes') ?? replaceText(type)
+  const replaced = findReplacement(type, 'registryTypes') ?? replaceText(type)
+  if (replaced !== type) return `${type} -> ${replaced}`
+  const inferredCode = findOriginalCode(type, 'registryTypes')
+  return inferredCode ? `${inferredCode} -> ${type}` : type
 }
 
 function getRegistryCauseName(cause: string): string {
-  return findReplacement(cause, 'registryCauses') ?? replaceText(cause)
+  const replaced = findReplacement(cause, 'registryCauses') ?? replaceText(cause)
+  if (replaced !== cause) return `${cause} -> ${replaced}`
+  const inferredCode = findOriginalCode(cause, 'registryCauses')
+  return inferredCode ? `${inferredCode} -> ${cause}` : cause
 }
 
 function getRegistryMethodName(method: string): string {
-  return findReplacement(method, 'registryMethods') ?? replaceText(method)
+  const replaced = findReplacement(method, 'registryMethods') ?? replaceText(method)
+  if (replaced !== method) return `${method} -> ${replaced}`
+  const inferredCode = findOriginalCode(method, 'registryMethods')
+  return inferredCode ? `${inferredCode} -> ${method}` : method
 }
 
 function handleDetail(item: AdminInfoRequest) {

@@ -8,50 +8,50 @@
         <!-- 기관구분 선택 -->
         <SearchSelect
           v-model="searchParams.organizationType"
-          :label="t('my.users.search.organizationType')"
+          label="기관구분 선택"
           :options="optionOrganizationType"
         />
 
         <!-- 기관명칭 선택 -->
         <SearchSelect
           v-model="searchParams.organizationName"
-          :label="t('my.users.search.organizationName')"
+          label="기관명칭 선택"
           :options="optionOrganizationName"
         />
 
         <!-- 지점명칭 선택 -->
         <SearchSelect
           v-model="searchParams.branchName"
-          :label="t('my.users.search.branchName')"
+          label="지점명칭 선택"
           :options="optionBranchName"
         />
 
         <!-- 사용권한 선택 -->
         <SearchSelect
           v-model="searchParams.roleLevel"
-          :label="t('my.users.search.permission')"
+          label="사용권한 선택"
           :options="optionRoleLevel"
         />
 
         <!-- 이메일 인증 선택 -->
         <SearchSelect
           v-model="emailVerifiedFilter"
-          :label="t('my.users.search.emailVerification')"
+          label="이메일 인증 선택"
           :options="optionEmailVerification"
         />
 
         <!-- 사용유무 선택 -->
         <SearchSelect
           v-model="searchParams.userStatus"
-          :label="t('my.users.search.activeStatus')"
+          label="사용유무 선택"
           :options="optionUserStatus"
         />
 
         <!-- 통합검색 (아이디 및 사용자 이름) -->
         <SearchInput
           v-model="searchParams.keyword"
-          :label="t('common.integrated')"
-          :placeholder="t('my.users.search.searchPlaceholder')"
+          label="통합검색"
+          placeholder="아이디 및 사용자 이름 입력"
           @search="handleSearch"
         />
       </div>
@@ -68,7 +68,6 @@ import { api } from '@/api/client'
 import SearchInput from '@/components/template/input/SearchInput.vue'
 import SearchSelect from '@/components/template/input/SearchSelect.vue'
 import { useCodes } from '@/composables/api/useCodes'
-import { useMessage } from '@/composables/utils/useMessage'
 import type { SelectOption } from '@/types'
 import { logger } from '@/utils/logger'
 
@@ -146,7 +145,6 @@ const USER_STATUS_CONFIG = {
 // ============================================================================
 // Composables
 // ============================================================================
-const { t } = useMessage()
 const { codes, fetchCodesByCategory } = useCodes()
 
 // ============================================================================
@@ -225,8 +223,8 @@ const optionRoleLevel = computed<SelectOption[]>(() => {
 // 이메일 인증 옵션 (하드코딩)
 const optionEmailVerification = computed<SelectOption[]>(() => [
   { label: '전체', value: '' },
-  { label: '인증완료', value: 'true' },
-  { label: '미인증', value: 'false' }
+  { label: '인증 완료', value: 'true' },
+  { label: '인증 미완료', value: 'false' }
 ])
 
 // TODO: 실제 API에서 조직명, 지점명 목록을 가져와야 함

@@ -4,8 +4,7 @@
  */
 
 import type { RouteLocationNormalized } from 'vue-router'
-
-import locale from '@/locales/ko.json'
+import { MESSAGES } from '@/constants/messages'
 
 type AuthState = 'pre-auth' | 'onboarding' | 'auth'
 
@@ -15,13 +14,13 @@ export function resolvePageTitle(to: RouteLocationNormalized, authState: AuthSta
   if (to.path === '/' || to.name === 'Root') {
     switch (authState) {
       case 'pre-auth':
-        pageTitle = locale.pageTitle.auth.login
+        pageTitle = MESSAGES.pageTitle.auth.login
         break
       case 'onboarding':
-        pageTitle = locale.pageTitle.main.bankSelect
+        pageTitle = MESSAGES.pageTitle.main.bankSelect
         break
       case 'auth':
-        pageTitle = locale.pageTitle.main.dashboard
+        pageTitle = MESSAGES.pageTitle.main.dashboard
         break
       default:
         pageTitle = '전자등기'

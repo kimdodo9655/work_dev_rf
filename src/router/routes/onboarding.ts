@@ -4,9 +4,8 @@
  */
 
 import type { RouteRecordRaw } from 'vue-router'
-
-import locale from '@/locales/ko.json'
 import { UserRoleLevel } from '@/types'
+import { MESSAGES } from '@/constants/messages'
 
 export const onboardingRoutes: RouteRecordRaw[] = [
   {
@@ -14,7 +13,7 @@ export const onboardingRoutes: RouteRecordRaw[] = [
     name: 'BankSelection',
     component: () => import('@/features/main/pages/BankSelectionPage.vue'),
     meta: {
-      title: locale.pageTitle.main.bankSelect,
+      title: MESSAGES.pageTitle.main.bankSelect,
       requiresAuth: true,
       allowedAuthStates: ['onboarding', 'auth']
     }
@@ -24,7 +23,7 @@ export const onboardingRoutes: RouteRecordRaw[] = [
     name: 'OrgMgmt',
     component: () => import('@/features/my/pages/OrgMgmtPage.vue'),
     meta: {
-      title: locale.pageTitle.my.organization,
+      title: MESSAGES.pageTitle.my.organization,
       requiresAuth: true,
       allowedAuthStates: ['onboarding', 'auth'],
       requiredRoles: [UserRoleLevel.ORGANIZATION_ADMIN, UserRoleLevel.BRANCH_ADMIN]
@@ -35,7 +34,7 @@ export const onboardingRoutes: RouteRecordRaw[] = [
     name: 'OrgDetail',
     component: () => import('@/features/my/pages/OrgDetailPage.vue'),
     meta: {
-      title: locale.pageTitle.my.organizationDetail,
+      title: MESSAGES.pageTitle.my.organizationDetail,
       requiresAuth: true,
       allowedAuthStates: ['onboarding', 'auth'],
       requiredRoles: [UserRoleLevel.ORGANIZATION_ADMIN, UserRoleLevel.BRANCH_ADMIN]
@@ -46,7 +45,7 @@ export const onboardingRoutes: RouteRecordRaw[] = [
     name: 'UserMgmt',
     component: () => import('@/features/my/pages/UserMgmtPage.vue'),
     meta: {
-      title: locale.pageTitle.my.users,
+      title: MESSAGES.pageTitle.my.users,
       requiresAuth: true,
       allowedAuthStates: ['onboarding', 'auth'],
       requiredRoles: [UserRoleLevel.ORGANIZATION_ADMIN, UserRoleLevel.BRANCH_ADMIN]
@@ -57,7 +56,7 @@ export const onboardingRoutes: RouteRecordRaw[] = [
     name: 'UserDetail',
     component: () => import('@/features/my/pages/UserDetailPage.vue'),
     meta: {
-      title: locale.pageTitle.my.userDetail,
+      title: MESSAGES.pageTitle.my.userDetail,
       requiresAuth: true,
       allowedAuthStates: ['onboarding', 'auth'],
       requiredRoles: [UserRoleLevel.ORGANIZATION_ADMIN, UserRoleLevel.BRANCH_ADMIN]
@@ -68,7 +67,7 @@ export const onboardingRoutes: RouteRecordRaw[] = [
     name: 'MyProfile',
     component: () => import('@/features/my/pages/MyProfilePage.vue'),
     meta: {
-      title: locale.pageTitle.my.profile,
+      title: MESSAGES.pageTitle.my.profile,
       requiresAuth: true,
       allowedAuthStates: ['onboarding', 'auth'],
       requiredRoles: [UserRoleLevel.USER]
@@ -79,7 +78,7 @@ export const onboardingRoutes: RouteRecordRaw[] = [
     name: 'DeviceInfo',
     component: () => import('@/features/shared/pages/DeviceInfoPage.vue'),
     meta: {
-      title: locale.pageTitle.shared.deviceInfo,
+      title: MESSAGES.pageTitle.shared.deviceInfo,
       allowedAuthStates: ['pre-auth', 'onboarding', 'auth'],
       layout: 'all'
     }

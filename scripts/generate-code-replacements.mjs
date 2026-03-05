@@ -192,7 +192,10 @@ async function main() {
   )
 
   const timeoutMs = Number(
-    getArg('timeout-ms') || process.env.CODE_API_TIMEOUT_MS || process.env.CODE_TIMEOUT_MS || '15000'
+    getArg('timeout-ms') ||
+      process.env.CODE_API_TIMEOUT_MS ||
+      process.env.CODE_TIMEOUT_MS ||
+      '15000'
   )
 
   const accessToken = getArg('access-token') || process.env.CODE_API_ACCESS_TOKEN

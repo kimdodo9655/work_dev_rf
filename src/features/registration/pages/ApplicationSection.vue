@@ -79,7 +79,7 @@
           </div>
 
           <!-- 신청서 양식 (개발 환경 전용) -->
-          <component :is="pdfConverterComponent" v-if="pdfConverterComponent" />
+          <!-- <component :is="pdfConverterComponent" v-if="pdfConverterComponent" /> -->
         </div>
       </div>
     </div>
@@ -96,6 +96,22 @@
     :application-id="certModalApplicationId"
     @close="closeCertModal"
   />
+
+  <div v-if="showSectionModal" class="modal-overlay" @click.self="closeSectionModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2 class="modal-title">{{ activeSectionTitle || '등기신청서 섹션' }}</h2>
+        <button type="button" class="modal-close" @click="closeSectionModal">×</button>
+      </div>
+      <div class="modal-body">
+        <SectionApiPreviewModal
+          v-if="sectionModalApplicationId"
+          :application-id="sectionModalApplicationId"
+          :section-code="activeSectionCode"
+        />
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -103,6 +119,7 @@ import { toRef } from 'vue'
 
 import { useApplicationSection } from '@/features/registration/composables/useApplicationSection'
 import CaseCertInfoRegModal from '@/features/registration/modals/CaseCertInfoRegModal.vue'
+import SectionApiPreviewModal from '@/features/registration/modals/SectionApiPreviewModal.vue'
 
 interface Props {
   registryManagementNumber: string
@@ -112,9 +129,13 @@ interface Props {
 const props = defineProps<Props>()
 const {
   activeTabIndex,
+  activeSectionCode,
+  sectionModalApplicationId,
+  activeSectionTitle,
   canDeleteTab,
   certModalApplicationId,
   closeCertModal,
+  closeSectionModal,
   displayAdminInfoLinkTime,
   displayRegistryCause,
   displayRegistryMethod,
@@ -131,6 +152,7 @@ const {
   pdfConverterComponent,
   selectTab,
   showCertModal,
+  showSectionModal,
   tabs
 } = useApplicationSection({
   registryManagementNumber: toRef(props, 'registryManagementNumber'),
@@ -381,5 +403,52 @@ const {
   &:hover {
     background: #2563eb;
   }
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+}
+
+.modal-container {
+  width: min(960px, calc(100vw - 32px));
+  max-height: calc(100vh - 40px);
+  overflow: auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.modal-close {
+  border: 0;
+  background: transparent;
+  font-size: 24px;
+  line-height: 1;
+  color: #6b7280;
+  cursor: pointer;
+}
+
+.modal-body {
+  padding: 16px;
 }
 </style>

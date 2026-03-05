@@ -212,6 +212,7 @@
 import { computed, onMounted, ref } from 'vue'
 
 import { registryCertificateAPI } from '@/api/services/registry'
+import { useApiAlert } from '@/composables/utils/useApiAlert'
 import { useDialog } from '@/composables/utils/useDialog'
 
 interface Props {
@@ -247,6 +248,7 @@ const emit = defineEmits<{
   close: []
 }>()
 const { alert } = useDialog()
+const { extractApiSuccessContent } = useApiAlert()
 
 const loading = ref(false)
 const errorMessage = ref('')
@@ -428,14 +430,15 @@ async function handleSave() {
     })
 
     // API 호출 - R02G-02 등기권리증 대체
-    await registryCertificateAPI.replace(
+    const response = await registryCertificateAPI.replace(
       { applicationId: props.applicationId },
       { certificateItems } as any // 타입 불일치로 as any 필요
     )
 
+    const dialog = extractApiSuccessContent(response, '저장 완료', '저장되었습니다.')
     await alert({
-      title: '저장 완료',
-      message: '저장되었습니다.'
+      title: dialog.title,
+      message: dialog.message
     })
     emit('close')
   } catch (e: any) {

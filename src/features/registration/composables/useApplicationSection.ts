@@ -23,7 +23,7 @@ export function useApplicationSection({
     ? defineAsyncComponent(() => import('@/features/doc-templates/PdfConverter.vue'))
     : null
 
-  const { findReplacement, replaceText } = useCodeReplacer()
+  const { findOriginalCode, findReplacement, replaceText } = useCodeReplacer()
   const { getErrorMessage } = useErrorHandler()
 
   const { document, documentErrorMessage, documentLoading, handleActiveApplicationChanged } =
@@ -51,14 +51,27 @@ export function useApplicationSection({
     return activeTab?.applicationId
   })
 
-  const { certModalApplicationId, closeCertModal, handleSectionClick, showCertModal } =
-    useApplicationSectionModal({
-      activeApplicationId
-    })
+  const {
+    activeSectionCode,
+    sectionModalApplicationId,
+    activeSectionTitle,
+    certModalApplicationId,
+    closeCertModal,
+    closeSectionModal,
+    handleSectionClick,
+    showCertModal,
+    showSectionModal
+  } = useApplicationSectionModal({
+    activeApplicationId
+  })
 
   function displayCode(value: string | undefined, category: string): string {
     if (!value) return '-'
-    return findReplacement(value, category) ?? replaceText(value)
+    const original = String(value)
+    const replaced = findReplacement(original, category) ?? replaceText(original)
+    if (replaced !== original) return `${original} -> ${replaced}`
+    const inferredCode = findOriginalCode(original, category)
+    return inferredCode ? `${inferredCode} -> ${original}` : original
   }
 
   function displayText(value?: string): string {
@@ -89,7 +102,11 @@ export function useApplicationSection({
     activeTabIndex,
     canDeleteTab,
     certModalApplicationId,
+    activeSectionCode,
+    sectionModalApplicationId,
+    activeSectionTitle,
     closeCertModal,
+    closeSectionModal,
     displayAdminInfoLinkTime,
     displayRegistryCause,
     displayRegistryMethod,
@@ -106,6 +123,7 @@ export function useApplicationSection({
     pdfConverterComponent,
     selectTab,
     showCertModal,
+    showSectionModal,
     tabs,
     tabsErrorMessage,
     tabsLoading

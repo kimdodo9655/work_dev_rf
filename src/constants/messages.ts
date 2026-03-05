@@ -54,122 +54,17 @@ export const MESSAGES = {
 
   common: {
     home: 'HOME',
-    my: '마이',
-    ok: '확인',
+    my: '마이'
+  },
+
+  commonButtons: {
+    previous: '이전',
+    next: '다음',
+    login: '로그인',
+    logout: '로그아웃',
     cancel: '취소',
-    register: '등록',
-    all: '전체',
-    selectAll: '전체 선택',
-    deselectAll: '전체 해제',
-    add: '추가',
-    save: '저장',
-    registerInfo: '정보 등록',
-    view: '보기',
-    viewDetail: '상세보기',
-    edit: '수정',
-    download: '파일 다운로드',
-    delete: '삭제',
-    search: '검색',
-    reset: '초기화',
-    noData: '조회 조건에 맞는 데이터가 존재하지 않습니다.',
-    integrated: '통합검색',
-    totalCount: '전체 <span>{count}</span>건'
-  },
-
-  header: {
     extend: '연장',
-    logout: '로그아웃'
-  },
-
-  footer: {
-    terms: '서비스 이용약관',
-    privacy: '개인정보처리방침',
-    copyright: 'COPYRIGHT ⓒ 2025 BANKCLEAR Inc. ALL RIGHTS RESERVED.'
-  },
-  help: {
-    title: '서비스 이용 문의',
-    callTitle: '문의 전화',
-    callContent: '070-1234-1234',
-    timeTitle: '운영시간',
-    timeContent: '월~금 09:00~18:00',
-    timeSubContent: '(공휴일 제뢰)'
-  },
-  estimate: {
-    search: {
-      registrationType: '등기유형 선택',
-      lot: '필지 선택',
-      requestDate: '등기의뢰일자 선택',
-      receiptDate: '등기접수일자 선택',
-      status: '진행상태 선택',
-      writeStatus: '작성여부 선택',
-      selectStatus: '선정여부 선택',
-      value: {
-        ownershipTransfer: '소유권이전',
-        estimateProgress: '견적진행',
-        estimateClosed: '견적마감',
-        estimateSelected: '견적서 선정',
-        selectionComplete: '선정 완료',
-        requestCanceled: '요청 취소',
-        writePending: '작성대기',
-        writeComplete: '작성완료',
-        estimateWithdrawn: '견적철회',
-        selectPending: '선정대기',
-        selected: '선정',
-        notSelected: '미선정',
-        placeholder: '부동산 및 신청번호 입력',
-        tabRequestStatus: '견적서 요청 현황',
-        tabWriteStatus: '견적서 작성 현황',
-        tabCaseStatus: '사건 수임 현황'
-      }
-    },
-    table: {
-      number: '번호',
-      registrationNumber: '등기신청번호',
-      tradeAmount: '매매 금액',
-      propertyAddress: '부동산 주소',
-      lot: '필지',
-      requestDate: '등기의뢰일자',
-      receiptDate: '등기접수일자',
-      status: '진행상태',
-      writeStatus: '작성여부',
-      selectStatus: '선정여부'
-    }
-  },
-  login: {
-    serviceTitle: '법무대리인<br/>등기지원시스템',
-    id: '아이디',
-    password: '비밀번호',
-    forgetId: '아이디 기억하기',
-    passwordSetup: '비밀번호 변경',
-    signup: '아직 회원이 아니신가요?'
-  },
-  my: {
-    users: {
-      search: {
-        organizationType: '기관구분 선택',
-        organizationName: '기관명칭 선택',
-        branchName: '지점명칭 선택',
-        permission: '사용권한 선택',
-        emailVerification: '이메일 인증 선택',
-        activeStatus: '사용유무 선택',
-        searchPlaceholder: '아이디 및 사용자 이름 입력',
-        value: {
-          emailVerificationTrue: '인증 완료',
-          emailVerificationFalse: '인증 미완료'
-        }
-      },
-      table: {
-        number: '번호',
-        organizationType: '기관구분',
-        organizationName: '기관명칭',
-        branchName: '지점명칭',
-        userId: '아이디',
-        userName: '사용자 이름',
-        permission: '사용권한',
-        emailVerification: '이메일 인증',
-        activeStatus: '사용유무'
-      }
-    }
+    confirm: '확인'
   }
 } as const
 

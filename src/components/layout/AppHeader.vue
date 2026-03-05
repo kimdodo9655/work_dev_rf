@@ -134,12 +134,25 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { authAPI } from '@/api/services/auth'
+import { useApiAlert } from '@/composables/utils/useApiAlert'
 import { useDialog } from '@/composables/utils/useDialog'
-import locale from '@/locales/ko.json'
+import { MESSAGES } from '@/constants/messages'
 import { useAuthStore } from '@/stores/auth'
 import { UserRoleLevel } from '@/types'
 import { markManualLogoutInProgress } from '@/utils/authValidator'
 import { storage } from '@/utils/storage'
+
+const locale = {
+  common: {
+    home: MESSAGES.common.home,
+    my: MESSAGES.common.my
+  },
+  header: {
+    extend: MESSAGES.commonButtons.extend,
+    logout: MESSAGES.commonButtons.logout
+  },
+  pageTitle: MESSAGES.pageTitle
+} as const
 
 /** axios 응답({data}) / DTO 응답(그 자체) 둘 다 지원 */
 function unwrap<T>(res: any): T {
@@ -151,6 +164,7 @@ const authStore = useAuthStore()
 const route = useRoute()
 const router = useRouter()
 const { alert, confirm } = useDialog()
+const { extractApiSuccessContent, extractApiErrorContent } = useApiAlert()
 
 const breadcrumbsRef = ref<HTMLElement | null>(null)
 const headerRef = ref<HTMLElement | null>(null)
@@ -184,7 +198,9 @@ const navigationMenuItems = computed(() => {
   }
 
   if (authStore.authState === 'onboarding') {
-    const items = [{ path: '/bank-select', label: locale.pageTitle.main.bankSelect }]
+    const items: Array<{ path: string; label: string }> = [
+      { path: '/bank-select', label: locale.pageTitle.main.bankSelect }
+    ]
 
     if (canAccessOrgMgmt.value) {
       items.push({ path: '/my/organization', label: locale.pageTitle.my.organization })
@@ -303,10 +319,10 @@ const closeMyMenu = () => {
 
 const handleLogout = async () => {
   const confirmed = await confirm({
-    title: '로그아웃',
+    title: MESSAGES.commonButtons.logout,
     message: '로그아웃 하시겠습니까?',
-    confirmText: '로그아웃',
-    cancelText: '취소'
+    confirmText: MESSAGES.commonButtons.logout,
+    cancelText: MESSAGES.commonButtons.cancel
   })
   if (!confirmed) return
 
@@ -336,16 +352,18 @@ const handleExtendSession = async () => {
     // updateTokens가 기대하는 형태에 맞게 그대로 전달
     authStore.updateTokens(tokenData)
 
+    const dialog = extractApiSuccessContent(res, '세션 연장', '세션이 연장되었습니다.')
     await alert({
-      title: '세션 연장',
-      message: '세션이 연장되었습니다.'
+      title: dialog.title,
+      message: dialog.message
     })
   } catch (error: any) {
     console.error('세션 연장 오류:', error)
     if (error?.message === 'Invalid auth data') return
+    const dialog = extractApiErrorContent(error, '세션 연장 실패', '세션 연장에 실패했습니다.')
     await alert({
-      title: '세션 연장 실패',
-      message: '세션 연장에 실패했습니다.'
+      title: dialog.title,
+      message: dialog.message
     })
   }
 }

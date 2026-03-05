@@ -5,6 +5,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
+import { MESSAGES } from '@/constants/messages'
 import { type ConfirmOptions } from '@/types/dialog'
 
 interface Props {
@@ -20,6 +21,7 @@ interface Emits {
 
 const emit = defineEmits<Emits>()
 const props = defineProps<Props>()
+const button = MESSAGES.commonButtons
 
 const dialogMessage = computed(() => props.options.message ?? props.options.content ?? '')
 
@@ -48,10 +50,10 @@ const handleConfirm = async () => {
 
           <div class="dialog-actions">
             <button class="dialog-btn dialog-btn-secondary" @click="handleCancel">
-              {{ options.cancelText || '취소' }}
+              {{ options.cancelText || button.cancel }}
             </button>
             <button class="dialog-btn dialog-btn-primary" @click="handleConfirm">
-              {{ options.confirmText || '확인' }}
+              {{ options.confirmText || button.confirm }}
             </button>
           </div>
         </div>

@@ -66,61 +66,70 @@
     <main class="content">
       <div class="accordion">
         <!-- 1) 등기 의뢰 정보 -->
-        <AccordionSection title="등기 의뢰 정보" :is-open="openMap.REQ" @toggle="toggle('REQ')">
-          <RequestInfoSection
-            :registry-management-number="registryManagementNumber"
-            :is-open="openMap.REQ"
-          />
-        </AccordionSection>
+        <div data-scroll-id="accordion-REQ">
+          <AccordionSection title="등기 의뢰 정보" :is-open="openMap.REQ" @toggle="toggle('REQ')">
+            <RequestInfoSection
+              :registry-management-number="registryManagementNumber"
+              :is-open="openMap.REQ"
+            />
+          </AccordionSection>
+        </div>
 
         <!-- 2) 등기신청서 정보 등록 -->
-        <AccordionSection
-          title="등기신청서 정보 등록"
-          :is-open="openMap.APP"
-          @toggle="toggle('APP')"
-        >
-          <ApplicationSection
-            :registry-management-number="registryManagementNumber"
+        <div data-scroll-id="accordion-APP">
+          <AccordionSection
+            title="등기신청서 정보 등록"
             :is-open="openMap.APP"
-          />
-        </AccordionSection>
+            @toggle="toggle('APP')"
+          >
+            <ApplicationSection
+              :registry-management-number="registryManagementNumber"
+              :is-open="openMap.APP"
+            />
+          </AccordionSection>
+        </div>
 
         <!-- 3) 행정정보 제공 요구 동의요청 -->
-        <AccordionSection
-          v-show="showAdminSection"
-          title="행정정보 제공 요구 동의요청"
-          :is-open="openMap.ADMIN"
-          @toggle="toggle('ADMIN')"
-        >
-          <AdminSection
-            :registry-management-number="registryManagementNumber"
+        <div v-show="showAdminSection" data-scroll-id="accordion-ADMIN">
+          <AccordionSection
+            title="행정정보 제공 요구 동의요청"
             :is-open="openMap.ADMIN"
-            @loaded="handleAdminLoaded"
-          />
-        </AccordionSection>
+            @toggle="toggle('ADMIN')"
+          >
+            <AdminSection
+              :registry-management-number="registryManagementNumber"
+              :is-open="openMap.ADMIN"
+              @loaded="handleAdminLoaded"
+            />
+          </AccordionSection>
+        </div>
 
         <!-- 4) 등기 진행 정보 등록 -->
-        <AccordionSection
-          title="등기 진행 정보 등록"
-          :is-open="openMap.PROG"
-          @toggle="toggle('PROG')"
-        >
-          <ProgressSection
-            :registry-management-number="registryManagementNumber"
+        <div data-scroll-id="accordion-PROG">
+          <AccordionSection
+            title="등기 진행 정보 등록"
             :is-open="openMap.PROG"
-          />
-        </AccordionSection>
+            @toggle="toggle('PROG')"
+          >
+            <ProgressSection
+              :registry-management-number="registryManagementNumber"
+              :is-open="openMap.PROG"
+            />
+          </AccordionSection>
+        </div>
       </div>
     </main>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { registryProgressAPI } from '@/api/services/registry'
+import type { AccordionKey } from '@/composables/utils/useAccordionState'
 import { useAccordionState } from '@/composables/utils/useAccordionState'
+import { useApiAlert } from '@/composables/utils/useApiAlert'
 import { useCodeReplacer } from '@/composables/utils/useCodeReplacer'
 import { useDialog } from '@/composables/utils/useDialog'
 import { useErrorHandler } from '@/composables/utils/useErrorHandler'
@@ -140,6 +149,7 @@ import RequestInfoSection from './RequestInfoSection.vue'
 const route = useRoute()
 const registryManagementNumber = computed(() => String(route.params.caseId ?? ''))
 const { getErrorMessage } = useErrorHandler()
+const { extractApiSuccessContent, extractApiErrorContent } = useApiAlert()
 const { findReplacement } = useCodeReplacer()
 const { alert, confirm } = useDialog()
 
@@ -153,6 +163,41 @@ const processLoading = ref(false)
 const processErrorMessage = ref('')
 const processData = ref<RegistryProgressProcessResponse | null>(null)
 const isChangingProcess = ref(false)
+
+interface ProcessScrollTarget {
+  accordion: AccordionKey
+  sectionId?: string
+}
+
+const PROCESS_SCROLL_TARGET_MAP: Record<string, ProcessScrollTarget> = {
+  ASSIGN_MANAGER: { accordion: 'REQ' },
+  INSPECT_REGISTRY_INFO: { accordion: 'REQ' },
+  REQUEST_RESUBMISSION: { accordion: 'REQ' },
+  REGISTER_APPLICATION_INFO: { accordion: 'APP' },
+  REQUEST_ADMIN_INFO_CONSENT: { accordion: 'ADMIN' },
+  OBLIGOR_E_SIGNATURE: { accordion: 'PROG', sectionId: 'progress-e-sign' },
+  OBLIGEE_E_SIGNATURE: { accordion: 'PROG', sectionId: 'progress-e-sign' },
+  TAX_DECLARATION_AGENCY: { accordion: 'PROG', sectionId: 'progress-tax-declaration' },
+  PURCHASE_HOUSING_BOND: { accordion: 'PROG', sectionId: 'progress-housing-bond' },
+  REGISTER_LOAN_ACCOUNT: { accordion: 'PROG', sectionId: 'progress-loan-account' },
+  WAITING_LOAN_PAYMENT: { accordion: 'PROG', sectionId: 'progress-loan-account' },
+  LOAN_PAYMENT_COMPLETED: { accordion: 'PROG', sectionId: 'progress-loan-account' },
+  REGISTER_TRANSFER_CERTIFICATE: { accordion: 'PROG', sectionId: 'progress-transfer-certificate' },
+  CREATE_APPLICATION: { accordion: 'PROG', sectionId: 'progress-receipt-info' },
+  INTERNET_REGISTRY_E_SIGNATURE: { accordion: 'PROG', sectionId: 'progress-e-sign-status' },
+  REQUEST_CASE_DELEGATION: { accordion: 'PROG', sectionId: 'progress-receipt-info' },
+  WAITING_CASE_DELEGATION: { accordion: 'PROG', sectionId: 'progress-receipt-info' },
+  CASE_DELEGATION_COMPLETED: { accordion: 'PROG', sectionId: 'progress-case-delegation' },
+  REGISTRY_RECEIVED: { accordion: 'PROG', sectionId: 'progress-receipt-info' },
+  CREATE_COST_STATEMENT: { accordion: 'PROG', sectionId: 'progress-cost-statement' },
+  REGISTER_COMPLETION_DOCUMENTS: {
+    accordion: 'PROG',
+    sectionId: 'progress-completion-doc-register'
+  },
+  SUBMIT_COMPLETION_DOCUMENTS: { accordion: 'PROG', sectionId: 'progress-completion-doc-submit' },
+  REGISTRY_COMPLETED: { accordion: 'REQ' },
+  REGISTRY_CANCELLED: { accordion: 'REQ' }
+}
 
 interface WorkProcessItem {
   id: string
@@ -188,15 +233,70 @@ function handleAdminLoaded(hasData: boolean) {
 }
 
 function toggleProcessItem(id: string) {
-  openedProcessId.value = openedProcessId.value === id ? '' : id
+  const nextOpenedId = openedProcessId.value === id ? '' : id
+  openedProcessId.value = nextOpenedId
+  if (!nextOpenedId) return
+  void scrollToProcessTarget(nextOpenedId)
+}
+
+function scrollElementWithOffset(element: HTMLElement, topOffset: number) {
+  const y = window.scrollY + element.getBoundingClientRect().top - topOffset
+  window.scrollTo({
+    top: Math.max(0, y),
+    behavior: 'smooth'
+  })
+}
+
+function getHeaderHeight(): number {
+  const fixedHeader = document.querySelector<HTMLElement>('.fixed-area')
+  return fixedHeader?.offsetHeight ?? 0
+}
+
+async function scrollToProcessTarget(statusCode: string, retry = 0): Promise<void> {
+  const target = PROCESS_SCROLL_TARGET_MAP[statusCode]
+  if (!target) return
+
+  if (target.accordion === 'ADMIN' && !showAdminSection.value) {
+    if (retry < 8) {
+      window.setTimeout(() => {
+        void scrollToProcessTarget(statusCode, retry + 1)
+      }, 120)
+    }
+    return
+  }
+
+  if (!openMap.value[target.accordion]) {
+    openMap.value[target.accordion] = true
+  }
+
+  await nextTick()
+  await nextTick()
+
+  const selector = target.sectionId
+    ? `[data-scroll-id="${target.sectionId}"]`
+    : `[data-scroll-id="accordion-${target.accordion}"]`
+  const element = document.querySelector<HTMLElement>(selector)
+  if (!element) {
+    if (retry < 8) {
+      window.setTimeout(() => {
+        void scrollToProcessTarget(statusCode, retry + 1)
+      }, 120)
+    }
+    return
+  }
+
+  const headerHeight = getHeaderHeight()
+  const topOffset = target.accordion === 'REQ' ? headerHeight : headerHeight + 10
+  scrollElementWithOffset(element, topOffset)
 }
 
 function mapAction(action: ProcessActionResponse): WorkProcessActionItem {
-  const actionLabel =
+  const replacedLabel =
     action.actionDescription ||
     findReplacement(action.action, 'processActions') ||
     action.action ||
     '상태 변경'
+  const actionLabel = action.action ? `${action.action} -> ${replacedLabel}` : replacedLabel
 
   return {
     action: action.action,
@@ -237,25 +337,6 @@ function findCurrentStepId(data: RegistryProgressProcessResponse | null): string
   return current?.step || ''
 }
 
-function getApiErrorDialogContent(error: unknown, fallbackTitle: string) {
-  const errorObj = error as {
-    response?: {
-      data?: {
-        title?: unknown
-        message?: unknown
-      }
-    }
-  }
-
-  const apiTitle = errorObj?.response?.data?.title
-  const apiMessage = errorObj?.response?.data?.message
-
-  return {
-    title: typeof apiTitle === 'string' && apiTitle ? apiTitle : fallbackTitle,
-    message: typeof apiMessage === 'string' && apiMessage ? apiMessage : getErrorMessage(error)
-  }
-}
-
 async function fetchProcess() {
   if (!registryManagementNumber.value) {
     processData.value = null
@@ -275,7 +356,11 @@ async function fetchProcess() {
     openedProcessId.value = findCurrentStepId(data)
   } catch (error) {
     processData.value = null
-    processErrorMessage.value = getApiErrorDialogContent(error, '업무 프로세스 조회 실패').message
+    processErrorMessage.value = extractApiErrorContent(
+      error,
+      '업무 프로세스 조회 실패',
+      getErrorMessage(error)
+    ).message
   } finally {
     processLoading.value = false
   }
@@ -304,19 +389,20 @@ async function handleProcessActionClick(item: WorkProcessActionItem) {
   processErrorMessage.value = ''
 
   try {
-    await registryProgressAPI.changeProcess(
+    const response = await registryProgressAPI.changeProcess(
       { registryManagementNumber: registryManagementNumber.value },
       { newStatus: item.nextStatus as ChangeRegistryProgressProcessQuery['newStatus'] }
     )
 
+    const dialog = extractApiSuccessContent(response, '처리 완료', '진행상태가 업데이트되었습니다.')
     await alert({
-      title: '처리 완료',
-      message: '진행상태가 업데이트되었습니다.'
+      title: dialog.title,
+      message: dialog.message
     })
 
     await fetchProcess()
   } catch (error) {
-    const apiError = getApiErrorDialogContent(error, '처리 실패')
+    const apiError = extractApiErrorContent(error, '처리 실패', getErrorMessage(error))
     await alert({
       title: apiError.title,
       message: apiError.message

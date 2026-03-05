@@ -10,7 +10,6 @@
 
 import { ref } from 'vue'
 
-import { MESSAGES } from '@/constants/messages'
 import {
   formatCurrency,
   formatDate,
@@ -22,6 +21,9 @@ import {
 } from '@/utils/format'
 
 type MessageParams = Record<string, string | number>
+
+// 외부 메시지 상수 의존 제거: 필요한 값은 직접 정의
+const LOCAL_MESSAGES = {} as const
 
 // ============================================================================
 // State
@@ -55,7 +57,7 @@ export function useMessage() {
    */
   const t = (key: string, params?: MessageParams): string => {
     const keys = key.split('.')
-    let value: any = MESSAGES
+    let value: any = LOCAL_MESSAGES
 
     for (const k of keys) {
       value = value?.[k]
@@ -113,7 +115,7 @@ export function useMessage() {
     isVisible,
 
     // 원본 메시지 객체 (직접 접근용)
-    messages: MESSAGES,
+    messages: LOCAL_MESSAGES,
 
     // Message Functions
     t,

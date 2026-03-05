@@ -151,6 +151,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { codeAPI } from '@/api/services/code'
+import { MESSAGES } from '@/constants/messages'
 import { registryQuoteAPI } from '@/api/services/registry/quote'
 import SearchSelect from '@/components/template/input/SearchSelect.vue'
 import type { Code, EstimateDetailResponse, EstimateInfoResponse, SelectOption } from '@/types'
@@ -173,7 +174,7 @@ const selectedRegistryMethod = ref<string | number | null>('')
 
 const isCreateMode = computed(() => route.name === 'EstimateCreate')
 const pageTitle = computed(() =>
-  isCreateMode.value ? '견적서 작성/제출 상세' : '견적서 확인/철회 상세'
+  isCreateMode.value ? MESSAGES.pageTitle.estimate.createDetail : MESSAGES.pageTitle.estimate.confirmDetail
 )
 
 const registryRequestNumber = computed(() => String(route.params.registrationNo ?? ''))
