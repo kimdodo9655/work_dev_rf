@@ -104,6 +104,8 @@ export interface RegistryProgressTaxAgencyTableResponse {
 export interface Row {
   /** 신청서 ID */
   applicationId?: number
+  /** 등기유형 코드 */
+  registryType?: string
   /** 등기유형 명 */
   registryTypeName?: string
   /** 등기원인 */
@@ -114,6 +116,8 @@ export interface Row {
     | 'ROAD_NAME_ADDRESS'
     | 'APPLICATION_ERROR'
     | 'TERMINATION'
+  /** 납부 상태 코드 */
+  paymentStatus?: string
   /** 납부 상태 명 */
   paymentStatusName?: string
   /** 납부 금액 */

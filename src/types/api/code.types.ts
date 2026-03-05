@@ -341,6 +341,10 @@ export type GetErrorCodesResponse = ApiCodeResponse[]
  * 주로 초기 로딩 시 모든 코드를 한 번에 불러올 때 사용
  */
 export interface CodeResponse {
+  /** 코드 값 (단건 응답 호환) */
+  code?: string
+  /** 코드 설명 (단건 응답 호환) */
+  description?: string
   /** [P06-01] 기관 구분 목록 */
   organizationTypes: Code[]
   /** [P06-02] 기관 상태 목록 */

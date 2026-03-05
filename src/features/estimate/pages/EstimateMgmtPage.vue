@@ -13,38 +13,48 @@
             :disabled="true"
           />
 
-          <SearchSelect v-model="filters.plotCount" label="필지" :options="plotOptions" />
+          <SearchSelect
+            v-model="filters.plotCount"
+            label="필지 선택"
+            :options="plotOptions"
+            :disabled="isLoading"
+          />
 
-          <SearchDateRangePicker v-model="requestDateRange" label="등기의뢰일자" />
+          <SearchDateRangePicker v-model="requestDateRange" label="등기의뢰일자 선택" />
 
-          <SearchDateRangePicker v-model="receiptDateRange" label="등기접수일자" />
+          <SearchDateRangePicker v-model="receiptDateRange" label="등기접수일자 선택" />
 
           <SearchSelect
             v-model="filters.progressStatus"
             label="진행상태"
             :options="progressStatusOptions"
+            :disabled="codesLoading"
           />
 
           <SearchSelect
             v-model="filters.writingStatus"
             label="작성여부"
             :options="writingStatusOptions"
+            :disabled="codesLoading"
           />
 
           <SearchSelect
             v-model="filters.selectionStatus"
             label="선정여부"
             :options="selectionStatusOptions"
+            :disabled="codesLoading"
           />
 
           <SearchInput
             v-model="filters.keyword"
             label="통합검색"
             placeholder="부동산 주소 또는 등기신청번호"
+            :disabled="isLoading"
           />
         </div>
-        <input type="submit" value="검색" />
+        <input type="submit" value="검색" :disabled="isLoading" />
       </form>
+      <div v-if="codesError" class="inline-error">{{ codesError }}</div>
     </div>
 
     <div class="list-header">
@@ -150,10 +160,16 @@ const loadError = ref('')
 const quoteProgressStatusCodes = ref<Code[]>([])
 const writingStatusCodes = ref<Code[]>([])
 const selectionStatusCodes = ref<Code[]>([])
+const codesLoading = ref(false)
+const codesError = ref('')
 
 const filters = reactive<{
   registryType: string | number | null
   plotCount: string | number | null
+  requestDateFrom: string
+  requestDateTo: string
+  receiptDateFrom: string
+  receiptDateTo: string
   progressStatus: string | number | null
   writingStatus: string | number | null
   selectionStatus: string | number | null
@@ -161,14 +177,71 @@ const filters = reactive<{
 }>({
   registryType: 'OWNERSHIP_TRANSFER',
   plotCount: '',
+  requestDateFrom: '',
+  requestDateTo: '',
+  receiptDateFrom: '',
+  receiptDateTo: '',
   progressStatus: '',
   writingStatus: '',
   selectionStatus: '',
   keyword: ''
 })
 
-const requestDateRange = ref<DateRange>({ startDate: null, endDate: null })
-const receiptDateRange = ref<DateRange>({ startDate: null, endDate: null })
+function toYMD(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function addMonths(base: Date, months: number): Date {
+  const next = new Date(base)
+  next.setMonth(next.getMonth() + months)
+  return next
+}
+
+function clampRangeWithin3Months(start: string, end: string): { start: string; end: string } {
+  const startDate = new Date(start)
+  const endDate = new Date(end)
+  const maxEndDate = addMonths(startDate, 3)
+  if (endDate > maxEndDate) {
+    return { start, end: toYMD(maxEndDate) }
+  }
+  return { start, end }
+}
+
+const today = new Date()
+const defaultRequestFrom = toYMD(addMonths(today, -1))
+const defaultRequestTo = toYMD(today)
+const defaultReceiptFrom = toYMD(today)
+const defaultReceiptTo = toYMD(addMonths(today, 1))
+
+filters.requestDateFrom = defaultRequestFrom
+filters.requestDateTo = defaultRequestTo
+filters.receiptDateFrom = defaultReceiptFrom
+filters.receiptDateTo = defaultReceiptTo
+
+const requestDateRange = computed<DateRange>({
+  get: () => ({
+    startDate: filters.requestDateFrom || null,
+    endDate: filters.requestDateTo || null
+  }),
+  set: (value) => {
+    filters.requestDateFrom = value.startDate ?? defaultRequestFrom
+    filters.requestDateTo = value.endDate ?? defaultRequestTo
+  }
+})
+
+const receiptDateRange = computed<DateRange>({
+  get: () => ({
+    startDate: filters.receiptDateFrom || null,
+    endDate: filters.receiptDateTo || null
+  }),
+  set: (value) => {
+    filters.receiptDateFrom = value.startDate ?? defaultReceiptFrom
+    filters.receiptDateTo = value.endDate ?? defaultReceiptTo
+  }
+})
 
 const registryTypeOptions = ref<SelectOption[]>([
   { label: '소유권이전', value: 'OWNERSHIP_TRANSFER' }
@@ -224,6 +297,23 @@ function getListRoot(payload: unknown): ListRoot {
   return (data ?? {}) as ListRoot
 }
 
+function pickCodes(payload: unknown): Code[] {
+  const data = unwrapData<unknown>(payload)
+  const root =
+    data && typeof data === 'object' && 'result' in (data as Record<string, unknown>)
+      ? (data as { result: unknown }).result
+      : data
+
+  if (Array.isArray(root)) return root as Code[]
+  if (root && typeof root === 'object') {
+    const objectRoot = root as Record<string, unknown>
+    if (Array.isArray(objectRoot.content)) return objectRoot.content as Code[]
+    if (Array.isArray(objectRoot.items)) return objectRoot.items as Code[]
+    if (Array.isArray(objectRoot.codes)) return objectRoot.codes as Code[]
+  }
+  return []
+}
+
 function toList(payload: unknown): EstimateListItemResponse[] {
   const root = getListRoot(payload)
 
@@ -249,6 +339,12 @@ function toTotal(payload: unknown): number {
 }
 
 function buildQuery(): GetEstimateListQuery {
+  const requestRange = clampRangeWithin3Months(filters.requestDateFrom, filters.requestDateTo)
+  const receiptRange = clampRangeWithin3Months(filters.receiptDateFrom, filters.receiptDateTo)
+
+  filters.requestDateTo = requestRange.end
+  filters.receiptDateTo = receiptRange.end
+
   const progressStatus = (
     filters.progressStatus ? String(filters.progressStatus) : undefined
   ) as GetEstimateListQuery['progressStatus']
@@ -262,10 +358,10 @@ function buildQuery(): GetEstimateListQuery {
   return {
     registryType: 'OWNERSHIP_TRANSFER',
     plotCount: filters.plotCount ? String(filters.plotCount) : undefined,
-    requestDateFrom: requestDateRange.value.startDate ?? undefined,
-    requestDateTo: requestDateRange.value.endDate ?? undefined,
-    receiptDateFrom: receiptDateRange.value.startDate ?? undefined,
-    receiptDateTo: receiptDateRange.value.endDate ?? undefined,
+    requestDateFrom: requestRange.start,
+    requestDateTo: requestRange.end,
+    receiptDateFrom: receiptRange.start,
+    receiptDateTo: receiptRange.end,
     progressStatus,
     writingStatus,
     selectionStatus,
@@ -310,15 +406,27 @@ function moveDetail(item: EstimateListItemResponse) {
 }
 
 async function loadCodeOptions() {
-  const [progressRes, writingRes, selectionRes] = await Promise.all([
-    codeAPI.quoteProgressStatuses(),
-    codeAPI.estimateWritingStatuses(),
-    codeAPI.estimateSelectionStatuses()
-  ])
+  codesLoading.value = true
+  codesError.value = ''
+  try {
+    const [progressRes, writingRes, selectionRes] = await Promise.all([
+      codeAPI.quoteProgressStatuses(),
+      codeAPI.estimateWritingStatuses(),
+      codeAPI.estimateSelectionStatuses()
+    ])
 
-  quoteProgressStatusCodes.value = Array.isArray(progressRes) ? progressRes : []
-  writingStatusCodes.value = Array.isArray(writingRes) ? writingRes : []
-  selectionStatusCodes.value = Array.isArray(selectionRes) ? selectionRes : []
+    quoteProgressStatusCodes.value = pickCodes(progressRes)
+    writingStatusCodes.value = pickCodes(writingRes)
+    selectionStatusCodes.value = pickCodes(selectionRes)
+  } catch (error) {
+    console.error(error)
+    quoteProgressStatusCodes.value = []
+    writingStatusCodes.value = []
+    selectionStatusCodes.value = []
+    codesError.value = '검색 코드 목록을 불러오지 못했습니다.'
+  } finally {
+    codesLoading.value = false
+  }
 }
 
 async function fetchList() {
@@ -356,11 +464,7 @@ watch(currentPage, () => {
 })
 
 onMounted(async () => {
-  try {
-    await loadCodeOptions()
-  } catch (error) {
-    console.error(error)
-  }
+  await loadCodeOptions()
   await fetchList()
 })
 </script>

@@ -252,6 +252,8 @@ export interface LegalAgentInfo {
 export interface ObligeeInfo {
   /** 등기권리자 수 */
   obligeeCount?: number
+  /** 전자증명서 유형 */
+  obligeeEcertificateType?: string
   /** 전자서명 상태 */
   eSignatureStatus?: string
   /** 주택수 */
@@ -273,6 +275,12 @@ export interface PublicChargeDetails {
 
 /** 등기 기본 정보 */
 export interface RegistryInfo {
+  /** 등기유형 코드 */
+  registryType?: string
+  /** 등기원인 코드 */
+  registryCause?: string
+  /** 등기방식 코드 */
+  registryMethod?: string
   /** 등기유형 */
   workTypeDescription?: string
   /** 매매금액 */

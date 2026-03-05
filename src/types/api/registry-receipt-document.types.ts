@@ -207,6 +207,12 @@ export interface ReceiptDetailItem {
   costTotal?: number
   /** 등기수수료 지급계좌 레이블 (계좌번호 / 금융기관명) */
   depositAccountLabel?: string
+  creationDate?: string
+  businessRegistrationNumber?: string
+  officeAddress?: string
+  businessName?: string
+  representative?: string
+  depositAccountNumber?: string
   /** 전자문서 생성 여부 */
   documentGenerated?: boolean
   /** PDF 파일명 */
@@ -225,6 +231,7 @@ export interface ReceiptDocumentFormResponse {
   receiptDocumentId?: number
   /** 신청서ID */
   applicationId?: number
+  registryType?: string
   /** 등기유형명 */
   registryTypeName?: string
   /** 등기권리자 명칭 */
@@ -266,6 +273,8 @@ export interface ReceiptSaveItem {
 export interface ReceiptSummaryItem {
   /** 영수증ID */
   receiptDocumentId?: number
+  /** 등기유형 코드 */
+  registryType?: string
   /** 등기유형명 */
   registryTypeName?: string
   /** 보수료 소계 */
@@ -292,6 +301,8 @@ export interface SummaryTotals {
 
 /** 공과금 정보 */
 export interface TaxSection {
+  paymentAmount?: number
+  bondPurchaseAmount?: number
   /** 납부여부 */
   paymentStatus?: 'PAYMENT' | 'EXEMPTION'
   /** 면제사유 */

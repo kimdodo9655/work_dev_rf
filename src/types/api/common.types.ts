@@ -155,6 +155,7 @@ export interface PartyItem {
 
 /** 부동산 정보 */
 export interface PropertyInfo {
+  propertyType?: string
   propertyClassification?: string
   propertyCount?: number
   propertyAddress?: string
@@ -165,6 +166,8 @@ export interface PropertyInfo {
 /** 채무자 정보 */
 export interface ObligorInfo {
   obligorCount?: number
+  obligorEcertificateType?: string
+  obligorCertificateType?: string
   eSignatureStatus?: string
   certificateStatus?: string
   addressChangeCount?: number
@@ -360,6 +363,8 @@ export interface RepresentativeInfo {
 
 /** 계약 당사자 응답 */
 export interface ContractPartyResponse {
+  /** 계약당사자 목록 */
+  contractParties?: ContractPartyDetail[]
   /** 등기의무자 목록 */
   obligors?: ContractPartyDetail[]
   /** 등기권리자 목록 */
@@ -457,6 +462,7 @@ export interface FilingFeeRequest {
 /** 등록면허세 응답 */
 export interface FilingFeeResponse {
   applicationId?: number
+  registryType?: string
   paymentStatus?: 'PAYMENT' | 'EXEMPTION'
   exemptionReason?: string
   registryMethod?: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
@@ -506,6 +512,7 @@ export interface TaxInfoResponse {
 export interface BondPropertyItem {
   /** 부동산 고유번호 */
   propertyId: string
+  propertyUniqueNumber?: string
   request: BondPropertyUpdateRequest
 }
 

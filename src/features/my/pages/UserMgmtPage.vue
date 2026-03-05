@@ -64,11 +64,11 @@
 import { AxiosError } from 'axios'
 import { computed, onMounted, reactive, ref } from 'vue'
 
-import { api } from '@/api/client'
+import { userAPI } from '@/api/services/user'
 import SearchInput from '@/components/template/input/SearchInput.vue'
 import SearchSelect from '@/components/template/input/SearchSelect.vue'
 import { useCodes } from '@/composables/api/useCodes'
-import type { SelectOption } from '@/types'
+import type { SearchUsersQuery, SelectOption } from '@/types'
 import { logger } from '@/utils/logger'
 
 // ============================================================================
@@ -95,31 +95,6 @@ interface User {
   userStatusDescription: string
 }
 
-interface ApiResponse {
-  status: number
-  code: string
-  title: string
-  message: string
-  data: {
-    content: User[]
-    pageable: {
-      pageNumber: number
-      pageSize: number
-      offset: number
-      paged: boolean
-      unpaged: boolean
-    }
-    last: boolean
-    totalElements: number
-    totalPages: number
-    size: number
-    number: number
-    first: boolean
-    numberOfElements: number
-    empty: boolean
-  }
-}
-
 interface SearchParams {
   organizationType?: string
   organizationName?: string
@@ -130,6 +105,16 @@ interface SearchParams {
   userStatus?: string
   page: number
   size: number
+}
+
+interface UserSearchPageResponse {
+  content?: User[]
+  first?: boolean
+  last?: boolean
+  totalElements?: number
+  totalPages?: number
+  number?: number
+  size?: number
 }
 
 // ============================================================================
@@ -274,7 +259,7 @@ const fetchUsers = async () => {
     error.value = null
 
     // 쿼리 파라미터 구성 - page와 size는 필수
-    const params: Record<string, string | number | boolean> = {
+    const params: SearchUsersQuery = {
       page: searchParams.page,
       size: searchParams.size
     }
@@ -295,28 +280,29 @@ const fetchUsers = async () => {
 
     logger.info('[사용자 관리] API 요청', { url: '/api/users/search', params })
 
-    const response = await api.get<ApiResponse>('/api/users/search', { params })
+    const response: any = await userAPI.search(params)
+    const root: UserSearchPageResponse =
+      (response?.data?.data as UserSearchPageResponse) ||
+      (response?.data as UserSearchPageResponse) ||
+      (response as UserSearchPageResponse)
+    const rows = Array.isArray(root?.content) ? root.content : []
 
     logger.info('[사용자 관리] API 응답 성공', {
-      totalElements: response.data.data.totalElements,
-      contentLength: response.data.data.content.length
+      totalElements: root?.totalElements ?? 0,
+      contentLength: rows.length
     })
 
-    if (response.data.status === 200) {
-      users.value = response.data.data.content
+    users.value = rows
 
-      // 페이지네이션 정보 업데이트
-      Object.assign(pagination, {
-        first: response.data.data.first,
-        last: response.data.data.last,
-        totalElements: response.data.data.totalElements,
-        totalPages: response.data.data.totalPages,
-        number: response.data.data.number,
-        size: response.data.data.size
-      })
-    } else {
-      throw new Error(response.data.message || '알 수 없는 오류가 발생했습니다.')
-    }
+    // 페이지네이션 정보 업데이트
+    Object.assign(pagination, {
+      first: Boolean(root?.first ?? true),
+      last: Boolean(root?.last ?? true),
+      totalElements: Number(root?.totalElements ?? rows.length),
+      totalPages: Number(root?.totalPages ?? (rows.length > 0 ? 1 : 0)),
+      number: Number(root?.number ?? searchParams.page),
+      size: Number(root?.size ?? searchParams.size)
+    })
   } catch (err) {
     logger.error('[사용자 관리] API 요청 실패', { error: err })
 
