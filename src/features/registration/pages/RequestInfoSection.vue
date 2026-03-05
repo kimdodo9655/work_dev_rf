@@ -111,13 +111,19 @@
           <div class="row">
             <span class="label">등기 유형</span>
             <span class="value">{{
-              displayCode(mortgageInfo.registryTypeName, 'registryTypes')
+              displayCode(
+                mortgageInfo.registryTypeName || mortgageInfo.registryType,
+                'registryTypes'
+              )
             }}</span>
           </div>
           <div class="row">
             <span class="label">등기 원인</span>
             <span class="value">{{
-              displayCode(mortgageInfo.registryCauseName, 'registryCauses')
+              displayCode(
+                mortgageInfo.registryCauseName || mortgageInfo.registryCause,
+                'registryCauses'
+              )
             }}</span>
           </div>
           <div class="row">
@@ -129,7 +135,10 @@
           <div class="row">
             <span class="label">등기 방식</span>
             <span class="value">{{
-              displayCode(mortgageInfo.registryMethodName, 'registryMethods')
+              displayCode(
+                mortgageInfo.registryMethodName || mortgageInfo.registryMethod,
+                'registryMethods'
+              )
             }}</span>
           </div>
           <div class="row">
@@ -322,7 +331,13 @@ const transferLegalThrottle = useThrottle(1000)
 // 진행타입별 섹션 표시 여부
 const showMortgage = computed(() => {
   const type = basicInfo.value?.progressType
-  return type === 'TYPE_01' || type === 'TYPE_02' || type === 'TYPE_05' || type === 'TYPE_07'
+  return (
+    type === 'TYPE_01' ||
+    type === 'TYPE_02' ||
+    type === 'TYPE_04' ||
+    type === 'TYPE_05' ||
+    type === 'TYPE_07'
+  )
 })
 
 const showTransfer = computed(() => {
@@ -538,38 +553,36 @@ watch(
   { immediate: true }
 )
 
-// basicInfo가 로드되면 진행타입에 따라 추가 API 호출
-watch(
-  () => basicInfo.value?.progressType,
-  (progressType) => {
-    if (!progressType || !props.isOpen) return
+// basicInfo 또는 아코디언 오픈 상태가 바뀌면 진행타입에 따라 추가 API 호출
+watch([() => basicInfo.value?.progressType, () => props.isOpen], ([progressType, isOpen]) => {
+  if (!progressType || !isOpen) return
 
-    // 근저당권설정 정보: TYPE_01, TYPE_02, TYPE_05, TYPE_07
-    if (
-      progressType === 'TYPE_01' ||
-      progressType === 'TYPE_02' ||
-      progressType === 'TYPE_05' ||
-      progressType === 'TYPE_07'
-    ) {
-      fetchMortgageInfo()
-    }
-
-    // 소유권이전 정보: TYPE_04, TYPE_07
-    if (progressType === 'TYPE_04' || progressType === 'TYPE_07') {
-      fetchTransferInfo()
-    }
-
-    // 근저당권설정 법무대리인 정보: TYPE_04
-    if (progressType === 'TYPE_04') {
-      fetchMortgageLegalInfo()
-    }
-
-    // 소유권이전 법무대리인 정보: TYPE_05
-    if (progressType === 'TYPE_05') {
-      fetchTransferLegalInfo()
-    }
+  // 근저당권설정 정보: TYPE_01, TYPE_02, TYPE_04, TYPE_05, TYPE_07
+  if (
+    progressType === 'TYPE_01' ||
+    progressType === 'TYPE_02' ||
+    progressType === 'TYPE_04' ||
+    progressType === 'TYPE_05' ||
+    progressType === 'TYPE_07'
+  ) {
+    fetchMortgageInfo()
   }
-)
+
+  // 소유권이전 정보: TYPE_04, TYPE_07
+  if (progressType === 'TYPE_04' || progressType === 'TYPE_07') {
+    fetchTransferInfo()
+  }
+
+  // 근저당권설정 법무대리인 정보: TYPE_04
+  if (progressType === 'TYPE_04') {
+    fetchMortgageLegalInfo()
+  }
+
+  // 소유권이전 법무대리인 정보: TYPE_05
+  if (progressType === 'TYPE_05') {
+    fetchTransferLegalInfo()
+  }
+})
 
 // 등기관리번호가 변경되면 즉시 재로드 (열려있는 경우에만)
 watch(
