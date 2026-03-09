@@ -58,12 +58,6 @@ export async function runRefreshOnce({
       const { refreshToken } = storage.get()
       if (!refreshToken) throw new Error('No refresh token')
 
-      const bankCode = storage.getBankCode()
-      if (!bankCode && !refreshToken) {
-        logger.debug('[REFRESH] Skipped - Not in auth state (no bankCode)')
-        return
-      }
-
       logger.info('[REFRESH] Refresh started', { ignoreCooldown })
 
       const { data } = await axios.post(`${ENV.API_BASE_URL}${API.AUTH.REFRESH}`, { refreshToken })

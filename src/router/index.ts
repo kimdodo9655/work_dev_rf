@@ -29,10 +29,7 @@ declare module 'vue-router' {
   }
 }
 
-const shouldEnableDevRoutes =
-  import.meta.env.DEV ||
-  import.meta.env.MODE === 'development' ||
-  import.meta.env.VITE_IS_DEV === 'true'
+const shouldEnableDevRoutes = import.meta.env.DEV || import.meta.env.MODE === 'development'
 
 const routes: RouteRecordRaw[] = [...(shouldEnableDevRoutes ? devRoutes : []), ...appRoutes]
 let hasLoadedAuthFromStorage = false
