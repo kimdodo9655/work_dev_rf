@@ -35,6 +35,7 @@ const shouldEnableDevRoutes =
   import.meta.env.VITE_IS_DEV === 'true'
 
 const routes: RouteRecordRaw[] = [...(shouldEnableDevRoutes ? devRoutes : []), ...appRoutes]
+let hasLoadedAuthFromStorage = false
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -50,7 +51,10 @@ const router = createRouter({
 router.beforeEach(
   (to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
     const authStore = useAuthStore()
-    authStore.loadAuth()
+    if (!hasLoadedAuthFromStorage) {
+      authStore.loadAuth()
+      hasLoadedAuthFromStorage = true
+    }
 
     const currentAuthState = authStore.authState
     const userRoleLevel = authStore.roleLevel

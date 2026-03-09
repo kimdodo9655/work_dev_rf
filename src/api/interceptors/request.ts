@@ -12,6 +12,8 @@ import { ENV } from '@/utils/env'
 import { logger } from '@/utils/logger'
 import { storage } from '@/utils/storage'
 
+const AUTO_REFRESH_THRESHOLD_SECONDS = 5 * 60
+
 export function setupRequestInterceptor(api: AxiosInstance) {
   if (ENV.IS_DEV) {
     api.interceptors.request.use((config) => {
@@ -53,7 +55,12 @@ export function setupRequestInterceptor(api: AxiosInstance) {
       config.headers['X-Bank-Code'] = bankCode
     }
 
-    if (!shouldSkipAutoRefresh(config.url) && bankCode) {
+    const now = Math.floor(Date.now() / 1000)
+    const remainingSeconds = authData.accessExpires - now
+    const shouldAttemptAutoRefresh =
+      remainingSeconds > 0 && remainingSeconds <= AUTO_REFRESH_THRESHOLD_SECONDS
+
+    if (!shouldSkipAutoRefresh(config.url) && bankCode && shouldAttemptAutoRefresh) {
       runRefreshOnce({ ignoreCooldown: false }).catch((err) => {
         logger.warn('[AUTO_REFRESH] Background refresh failed', { error: err })
       })
