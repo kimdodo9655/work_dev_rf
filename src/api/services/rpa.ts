@@ -7,7 +7,7 @@
 // [RPAC] RPA
 // --------------------------------------------------
 
-import { apiHelpers } from '@/api/client'
+import { api, apiHelpers } from '@/api/client'
 import { API } from '@/api/endpoints'
 import type {
   CreateAdminConsentTaskParams,
@@ -51,6 +51,14 @@ import type {
 } from '@/types'
 
 export const rpaAPI = {
+  async requestRaw(method: 'get' | 'post' | 'patch', url: string, data?: unknown) {
+    const response = await api.request({ method, url, data })
+    return {
+      status: response.status,
+      data: response.data
+    }
+  },
+
   async create(
     params: CreateFullCertificateViewTaskParams,
     data: CreateFullCertificateViewTaskRequest

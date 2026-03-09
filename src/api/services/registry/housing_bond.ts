@@ -40,10 +40,10 @@ export const registryHousingBondAPI = {
 
   async detail2(params: SaveHousingBondParams, data: SaveHousingBondRequest) {
     // --------------------------------------------------
-    // [R02Q-02][PUT - /api/registry/progress/{registryManagementNumber}/housing-bonds/{registryType}] 국민주택채권 상세 저장
+    // [R02Q-02][PUT - /api/registry/progress/{registryManagementNumber}/housing-bonds] 국민주택채권 상세 저장
     // --------------------------------------------------
     return apiHelpers.put<SaveHousingBondResponse>(
-      API.REGISTRY_HOUSING_BOND.DETAIL_2(params.registryManagementNumber, params.registryType),
+      API.REGISTRY_HOUSING_BOND.DETAIL_2(params.registryManagementNumber),
       data
     )
   }

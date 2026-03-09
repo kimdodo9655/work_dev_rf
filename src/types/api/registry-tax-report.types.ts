@@ -8,7 +8,7 @@
  * @generated 2025-01-27
  */
 
-import type { TaxInfoRequest, TaxInfoResponse } from './common.types'
+import type { PropertyInfo, TaxInfoRequest, TaxInfoResponse } from './common.types'
 
 /**
  * R02P-01
@@ -68,6 +68,7 @@ export interface RegistryProgressTaxAgencyItemResponse {
     | 'ROAD_NAME_ADDRESS'
     | 'APPLICATION_ERROR'
     | 'TERMINATION'
+  inputInfo?: RegistryProgressTaxAgencyInputInfoResponse
   taxInfo?: TaxInfoResponse
 }
 
@@ -92,6 +93,48 @@ export interface RegistryProgressTaxAgencyReplaceRequestItem {
   tax: TaxInfoRequest
 }
 
+/** 구비서류 정보 */
+export interface AttachmentInfo {
+  /** 위임장 파일명 (JPG) */
+  powerOfAttorneyFileName?: string
+}
+
+/** 등록원인 정보 */
+export interface RegistryCauseInfo {
+  /** 물건종류 */
+  propertyType?: string
+  /** 물건상세 */
+  propertyDetail?: string
+  /** 등록원인 */
+  registryCause?: string
+}
+
+/** 납세자 정보 */
+export interface TaxPayer {
+  /** 성명 */
+  name?: string
+  /** 법인명 (법인일 경우) */
+  corporationName?: string
+  /** 공동명의 구분 */
+  jointOwnershipType?: string
+  /** 주민등록번호/법인등록번호 */
+  registrationNumber?: string
+  /** 사업자등록번호 */
+  businessRegistrationNumber?: string
+  /** 휴대전화번호 */
+  mobile?: string
+  /** 주소 */
+  address?: string
+}
+
+/** 세금신고 대행 입력정보 */
+export interface RegistryProgressTaxAgencyInputInfoResponse {
+  taxpayer?: TaxPayer
+  registryCause?: RegistryCauseInfo
+  property?: PropertyInfo
+  attachment?: AttachmentInfo
+}
+
 /** 세금신고 대행 작업 프로세스 테이블 응답 */
 export interface RegistryProgressTaxAgencyTableResponse {
   /** 등기관리번호 */
@@ -104,8 +147,6 @@ export interface RegistryProgressTaxAgencyTableResponse {
 export interface Row {
   /** 신청서 ID */
   applicationId?: number
-  /** 등기유형 코드 */
-  registryType?: string
   /** 등기유형 명 */
   registryTypeName?: string
   /** 등기원인 */
@@ -116,8 +157,6 @@ export interface Row {
     | 'ROAD_NAME_ADDRESS'
     | 'APPLICATION_ERROR'
     | 'TERMINATION'
-  /** 납부 상태 코드 */
-  paymentStatus?: string
   /** 납부 상태 명 */
   paymentStatusName?: string
   /** 납부 금액 */

@@ -456,7 +456,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 
-import { api } from '@/api/client'
 import { authAPI } from '@/api/services/auth'
 import { branchPrepaidAPI } from '@/api/services/branch_prepaid'
 import {
@@ -469,10 +468,12 @@ import {
   registryPropertyAPI,
   registryTransferCertificateAPI
 } from '@/api/services/registry'
+import { rpaAPI } from '@/api/services/rpa'
 import { userAPI } from '@/api/services/user'
 import { useDialog } from '@/composables/utils/useDialog'
 import { DEV_LOGIN_USERS } from '@/features/dev/constants/devLoginUsers'
 import { useAuthStore } from '@/stores/auth'
+import { ENV } from '@/utils/env'
 import { storage } from '@/utils/storage'
 
 type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'HTTP'
@@ -878,11 +879,7 @@ async function handleLogout() {
 
 async function fetchAssignedBanks() {
   try {
-    const res: any = await api.get('/api/users/assigned-banks', {
-      headers: {
-        'X-Bank-Code': selectedBankCode.value
-      }
-    })
+    const res: any = await userAPI.assignedBanks()
     const payload = unwrap<any>(res)
     const data = payload?.result ?? payload
     const banks = Array.isArray(data) ? data : []
@@ -1448,7 +1445,7 @@ async function executeRpaAuto(taskToken: string, taskType: string) {
 
   const context = {
     bankCode: effectiveBankCode.value,
-    apiBaseUrl: api.defaults.baseURL,
+    apiBaseUrl: ENV.API_BASE_URL,
     taskToken,
     taskType
   }
@@ -1913,20 +1910,11 @@ async function callEndpoint(endpointId: string) {
       data.cardNumber = cardNumber
     }
 
-    const accessToken = storage.getAccessToken()
-    const headers: Record<string, string> = {
-      'X-Bank-Code': effectiveBankCode.value
-    }
-    if (accessToken) {
-      headers.Authorization = `Bearer ${accessToken}`
-    }
-
-    const res = await api.request({
-      method: ep.method.toLowerCase() as 'get' | 'post' | 'patch',
+    const res = await rpaAPI.requestRaw(
+      ep.method.toLowerCase() as 'get' | 'post' | 'patch',
       url,
-      data,
-      headers
-    })
+      data
+    )
 
     const elapsed = Date.now() - startedAt
     responseByEndpoint[endpointId] = {

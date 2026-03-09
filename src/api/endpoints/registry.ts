@@ -189,8 +189,8 @@ export const REGISTRY_TAX_REPORT = {
 export const REGISTRY_HOUSING_BOND = {
   DETAIL: (registryManagementNumber: string | number) =>
     `/api/registry/progress/${registryManagementNumber}/housing-bonds/detail`,
-  DETAIL_2: (registryManagementNumber: string | number, registryType: string | number) =>
-    `/api/registry/progress/${registryManagementNumber}/housing-bonds/${registryType}`,
+  DETAIL_2: (registryManagementNumber: string | number) =>
+    `/api/registry/progress/${registryManagementNumber}/housing-bonds`,
   LIST: (registryManagementNumber: string | number) =>
     `/api/registry/progress/${registryManagementNumber}/housing-bonds/list`
 } as const

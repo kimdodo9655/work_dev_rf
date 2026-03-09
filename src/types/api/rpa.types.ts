@@ -215,7 +215,6 @@ export interface TaxAutoFillTaskRequest {
 export interface PropertyDescriptionTaskRequest {
   /** 부동산 고유번호 */
   propertyUniqueNumber: string
-  propertyType?: string
 }
 
 /** 등기신청서 작성 작업 요청 */
@@ -230,8 +229,6 @@ export interface RegistrationApplicationTaskRequest {
 export interface RegistrationCaseQueryTaskRequest {
   /** 부동산 고유번호 */
   propertyUniqueNumber: string
-  /** 부동산 소유자 고유ID */
-  progressPropertyOwnerId?: number
   /** 신청인고유ID */
   progressPartyId: number
 }

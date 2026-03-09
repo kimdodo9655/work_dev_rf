@@ -70,13 +70,9 @@
                 <td colspan="6" class="empty-cell">조회된 목록이 없습니다.</td>
               </tr>
               <tr v-for="(row, idx) in taxRows" :key="`tax-${idx}-${row.applicationId ?? idx}`">
-                <td>
-                  {{ displayCode(row.registryTypeName || row.registryType, 'registryTypes') }}
-                </td>
+                <td>{{ displayCode(row.registryTypeName, 'registryTypes') }}</td>
                 <td>{{ displayCode(row.registryCause, 'registryCauses') }}</td>
-                <td>
-                  {{ displayCode(row.paymentStatusName || row.paymentStatus, 'paymentStatuses') }}
-                </td>
+                <td>{{ row.paymentStatusName ?? '-' }}</td>
                 <td>{{ formatNumber(row.paymentAmount) }}</td>
                 <td>{{ row.taxNumber ?? '-' }}</td>
                 <td>{{ row.electronicPaymentNumber ?? '-' }}</td>
@@ -381,9 +377,7 @@
                 v-for="(row, idx) in receiptDocumentRows"
                 :key="`receipt-doc-${idx}-${row.receiptDocumentId ?? idx}`"
               >
-                <td>
-                  {{ displayCode(row.registryTypeName || row.registryType, 'registryTypes') }}
-                </td>
+                <td>{{ row.registryTypeName ?? '-' }}</td>
                 <td>{{ formatNumber(row.feeSubtotal) }}</td>
                 <td>{{ formatNumber(row.bondDiscountAmount) }}</td>
                 <td>{{ formatNumber(row.costTotal) }}</td>

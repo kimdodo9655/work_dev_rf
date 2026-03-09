@@ -330,6 +330,18 @@ export type GetSuccessCodesResponse = ApiCodeResponse[]
  */
 export type GetErrorCodesResponse = ApiCodeResponse[]
 
+/**
+ * P06-45
+ * GET /api/codes/workflow-notification-event
+ */
+export type GetWorkflowNotificationEventResponse = Code[]
+
+/**
+ * P06-46
+ * GET /api/codes/notice-category
+ */
+export type GetNoticeCategoryResponse = Code[]
+
 // ============================================================================
 // 통합 응답 타입
 // ============================================================================
@@ -341,10 +353,6 @@ export type GetErrorCodesResponse = ApiCodeResponse[]
  * 주로 초기 로딩 시 모든 코드를 한 번에 불러올 때 사용
  */
 export interface CodeResponse {
-  /** 코드 값 (단건 응답 호환) */
-  code?: string
-  /** 코드 설명 (단건 응답 호환) */
-  description?: string
   /** [P06-01] 기관 구분 목록 */
   organizationTypes: Code[]
   /** [P06-02] 기관 상태 목록 */
@@ -433,6 +441,10 @@ export interface CodeResponse {
   successCodes: Code[]
   /** [P06-44] API 오류 코드 목록 */
   errorCodes: Code[]
+  /** [P06-45] 알림 이벤트 템플릿 목록 */
+  workflowNotificationEvent: Code[]
+  /** [P06-46] 공지사항 분류 목록 */
+  noticeCategory: Code[]
 }
 
 /**

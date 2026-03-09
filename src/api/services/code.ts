@@ -28,6 +28,7 @@ import type {
   GetFileProgressDocumentTypesResponse,
   GetFileRegistryTypesResponse,
   GetFileRequestDocumentTypesResponse,
+  GetNoticeCategoryResponse,
   GetOrganizationStatusesResponse,
   GetOrganizationTypesResponse,
   GetOwnershipTypesResponse,
@@ -53,6 +54,7 @@ import type {
   GetSuccessCodesResponse,
   GetUserRoleLevelsResponse,
   GetUserStatusesResponse,
+  GetWorkflowNotificationEventResponse,
   GetWorkTypesResponse
 } from '@/types'
 
@@ -362,6 +364,22 @@ export const codeAPI = {
     // [P06-44][GET - /api/codes/error-codes] API 오류 코드 목록 조회
     // --------------------------------------------------
     return apiHelpers.get<GetErrorCodesResponse>(API.CODE.ERROR_CODES)
+  },
+
+  async workflowNotificationEvent() {
+    // --------------------------------------------------
+    // [P06-45][GET - /api/codes/workflow-notification-event] 알림 이벤트 템플릿 목록 조회
+    // --------------------------------------------------
+    return apiHelpers.get<GetWorkflowNotificationEventResponse>(
+      API.CODE.WORKFLOW_NOTIFICATION_EVENT
+    )
+  },
+
+  async noticeCategory() {
+    // --------------------------------------------------
+    // [P06-46][GET - /api/codes/notice-category] 공지사항 분류 목록 조회
+    // --------------------------------------------------
+    return apiHelpers.get<GetNoticeCategoryResponse>(API.CODE.NOTICE_CATEGORY)
   },
 
   async registryTypesForAssign() {

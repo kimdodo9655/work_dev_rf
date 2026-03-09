@@ -80,7 +80,9 @@ function createInitialCodes(): CodeResponse {
     confirmationDocumentTypes: [],
     fileBranchDocumentTypes: [],
     successCodes: [],
-    errorCodes: []
+    errorCodes: [],
+    workflowNotificationEvent: [],
+    noticeCategory: []
   }
 }
 
@@ -141,9 +143,11 @@ const API_METHOD_MAP: Record<CodeKey, () => Promise<Code[] | RoleLevelCode[] | A
     rpaUserTaskTypes: codeAPI.rpaUserTaskTypes,
     confirmationDocumentTypes: codeAPI.confirmationDocumentTypes,
     fileBranchDocumentTypes: codeAPI.fileBranchDocumentTypes,
-    // P06-43 ~ 44 (ApiCodeResponse[] — Code[]와 구조 다름)
+    // P06-43 ~ 46
     successCodes: codeAPI.successCodes,
-    errorCodes: codeAPI.errorCodes
+    errorCodes: codeAPI.errorCodes,
+    workflowNotificationEvent: codeAPI.workflowNotificationEvent,
+    noticeCategory: codeAPI.noticeCategory
   }
 
 // ──────────────────────────────────────────────────────

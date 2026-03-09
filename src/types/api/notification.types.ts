@@ -67,8 +67,6 @@ export interface NotificationDeleteRequest {
 export interface NotificationDetailResponse {
   /** 알림ID */
   notificationId?: number
-  /** 등기관리번호 */
-  registryManagementNumber?: string
   /** 수신 사용자 ID */
   loginId?: string
   /** 알림유형 */

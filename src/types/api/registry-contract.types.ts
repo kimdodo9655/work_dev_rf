@@ -147,8 +147,6 @@ export interface CommonParty {
   registrationNumber?: string
   /** 주소 */
   address?: string
-  /** 지분 */
-  share?: string
 }
 
 export interface PartyShareResponse {
@@ -198,14 +196,6 @@ export interface InterimPaymentResponse {
 }
 
 export interface MortgageContractRequest {
-  /** 등기 유형 */
-  registryType?: string
-  /** 등기 원인 */
-  registryCause?: string
-  /** 대출 금액 */
-  loanAmount?: number
-  /** 대면 여부 */
-  isFaceToFace?: boolean
   /** 채권 최고액 */
   maximumCreditAmount?: number
   /** 계약 일자 */
@@ -229,14 +219,6 @@ export interface MortgageContractRequest {
 }
 
 export interface MortgageContractResponse {
-  /** 등기 유형 */
-  registryType?: string
-  /** 등기 원인 */
-  registryCause?: string
-  /** 대출 금액 */
-  loanAmount?: number
-  /** 대면 여부 */
-  isFaceToFace?: boolean
   /** 채권 최고액 */
   maximumCreditAmount?: number
   /** 계약 일자 */
@@ -269,14 +251,6 @@ export interface MortgageContractSaveResponse {
 }
 
 export interface OwnershipContractRequest {
-  /** 등기 유형 */
-  registryType?: string
-  /** 등기 원인 */
-  registryCause?: string
-  /** 매매 금액 */
-  tradeAmount?: number
-  /** 잔금 일자 */
-  balancePaymentDate?: string
   /** 계약 금액 */
   contractAmount?: number
   /** 계약 일자 */
@@ -292,14 +266,6 @@ export interface OwnershipContractRequest {
 }
 
 export interface OwnershipContractResponse {
-  /** 등기 유형 */
-  registryType?: string
-  /** 등기 원인 */
-  registryCause?: string
-  /** 매매 금액 */
-  tradeAmount?: number
-  /** 잔금 일자 */
-  balancePaymentDate?: string
   /** 계약 금액 */
   contractAmount?: number
   /** 계약 일자 */
@@ -315,16 +281,12 @@ export interface OwnershipContractResponse {
 }
 
 export interface OwnershipContractSaveResponse {
-  /** 계약 금액 */
-  contractAmount?: number
   /** 계약 일자 */
   contractDate?: string
   /** 등기 접수 일자 */
   registryReceiptDate?: string
   /** 실거래신고 관리번호 */
   tradeReportManagementNumber?: string
-  /** 등기의 목적 */
-  registrationPurpose?: string
 }
 
 /** 피담보채무 범위 목록 (최대 2건) */
@@ -349,10 +311,6 @@ export interface SecuredDebtScopeResponse {
 }
 
 export interface SurfaceRightContractRequest {
-  /** 등기 유형 */
-  registryType?: string
-  /** 등기 원인 */
-  registryCause?: string
   /** 존속 기간 */
   durationPeriod?: string
   /** 계약 일자 */
@@ -366,10 +324,6 @@ export interface SurfaceRightContractRequest {
 }
 
 export interface SurfaceRightContractResponse {
-  /** 등기 유형 */
-  registryType?: string
-  /** 등기 원인 */
-  registryCause?: string
   /** 존속 기간 */
   durationPeriod?: string
   /** 계약 일자 */

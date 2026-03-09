@@ -5,6 +5,18 @@
   <section class="notice-page">
     <h3>공지사항</h3>
     <p class="meta">전체 {{ totalItems }}건</p>
+    <ul class="category-tabs">
+      <li v-for="tab in categoryTabs" :key="tab.value">
+        <button
+          type="button"
+          class="tab-btn"
+          :class="{ active: selectedCategory === tab.value }"
+          @click="handleCategoryChange(tab.value)"
+        >
+          {{ tab.label }}
+        </button>
+      </li>
+    </ul>
 
     <ul class="notice-list">
       <li v-for="item in notices" :key="item.noticeId">
@@ -34,7 +46,7 @@ import { onMounted, ref, watch } from 'vue'
 
 import { noticeAPI } from '@/api/services/notice'
 import Pagination from '@/components/template/PaginationItem.vue'
-import type { NoticeResponse } from '@/types'
+import type { NoticeResponse, SearchNoticesQuery } from '@/types'
 
 const notices = ref<NoticeResponse[]>([])
 const isLoading = ref(false)
@@ -42,6 +54,14 @@ const errorMessage = ref('')
 const currentPage = ref(1)
 const totalItems = ref(0)
 const pageSize = 10
+const selectedCategory = ref<SearchNoticesQuery['noticeCategory']>('ALL')
+
+const categoryTabs: Array<{ label: string; value: SearchNoticesQuery['noticeCategory'] }> = [
+  { label: '전체', value: 'ALL' },
+  { label: '시스템 개선', value: 'SYSTEM_IMPROVEMENT' },
+  { label: '시스템 점검', value: 'SYSTEM_MAINTENANCE' },
+  { label: '기타', value: 'ETC' }
+]
 
 function unwrap<T>(payload: unknown): T {
   if (payload && typeof payload === 'object' && 'data' in (payload as Record<string, unknown>)) {
@@ -71,7 +91,13 @@ function extractSearchPayload(source: unknown): {
   if (!source || typeof source !== 'object') return empty
 
   const obj = source as Record<string, unknown>
-  const content = Array.isArray(obj.content) ? (obj.content as NoticeResponse[]) : []
+  const content = Array.isArray(obj.content)
+    ? (obj.content as NoticeResponse[])
+    : Array.isArray(obj.noticeList)
+      ? (obj.noticeList as NoticeResponse[])
+      : Array.isArray(obj.items)
+        ? (obj.items as NoticeResponse[])
+        : []
   const totalPages =
     typeof obj.totalPages === 'number'
       ? obj.totalPages
@@ -100,6 +126,7 @@ async function fetchNotices() {
   try {
     const res = await noticeAPI.search({
       searchKyword: '',
+      noticeCategory: selectedCategory.value,
       page: currentPage.value,
       size: pageSize
     })
@@ -123,11 +150,21 @@ async function fetchNotices() {
   }
 }
 
+function handleCategoryChange(category: SearchNoticesQuery['noticeCategory']) {
+  if (selectedCategory.value === category) return
+  selectedCategory.value = category
+}
+
 onMounted(() => {
   fetchNotices()
 })
 
 watch(currentPage, () => {
+  fetchNotices()
+})
+
+watch(selectedCategory, () => {
+  currentPage.value = 1
   fetchNotices()
 })
 </script>
@@ -142,6 +179,31 @@ watch(currentPage, () => {
   h3 {
     font-size: 24px;
     margin-bottom: 16px;
+  }
+
+  .category-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+
+  .tab-btn {
+    height: 34px;
+    padding: 0 14px;
+    border: 1px solid #d9d9d9;
+    border-radius: 17px;
+    background: #fff;
+    color: #666;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .tab-btn.active {
+    border-color: #21adad;
+    background: #21adad;
+    color: #fff;
+    font-weight: 700;
   }
 
   .notice-list {

@@ -12,7 +12,7 @@
  * P08-01
  * GET /api/notices
  */
-export type GetNoticesResponse = NoticeResponse
+export type GetNoticesResponse = NoticeResponse | NoticeResponse[] | NoticeListResponse
 
 /**
  * P08-02
@@ -20,6 +20,7 @@ export type GetNoticesResponse = NoticeResponse
  */
 export interface SearchNoticesQuery {
   searchKyword?: string
+  noticeCategory: 'ALL' | 'SYSTEM_IMPROVEMENT' | 'SYSTEM_MAINTENANCE' | 'ETC'
   page: number
   size: number
 }
@@ -63,7 +64,9 @@ export interface NoticeDetailResponse {
   noticeDate?: string
   viewCount?: number
   prevNoticeId?: number | null
+  prevNoticeTitle?: string | null
   nextNoticeId?: number | null
+  nextNoticeTitle?: string | null
 }
 
 export interface Item {

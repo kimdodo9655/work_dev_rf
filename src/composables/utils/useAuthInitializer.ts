@@ -8,13 +8,11 @@
  * @description 인증 초기화 Composable (유틸리티)
  */
 
-import axios from 'axios'
 import { useRouter } from 'vue-router'
 
-import { API } from '@/api/endpoints'
+import { authAPI } from '@/api/services/auth'
 import { useAuthStore } from '@/stores/auth'
 import type { AuthState, TokenRefreshResponse } from '@/types'
-import { ENV } from '@/utils/env'
 import { logger } from '@/utils/logger'
 import { storage } from '@/utils/storage'
 
@@ -72,11 +70,10 @@ export function useAuthInitializer() {
       }
 
       try {
-        const { data } = await axios.post(`${ENV.API_BASE_URL}${API.AUTH.REFRESH}`, {
+        const response = await authAPI.refresh({
           refreshToken: storedData.refreshToken
         })
-
-        const payload = (data?.data ?? data) as TokenRefreshResponse
+        const payload = unwrapRefreshPayload(response)
 
         if (
           !payload?.accessToken ||
@@ -200,4 +197,21 @@ export function useAuthInitializer() {
     validateAndLoadAuth,
     handleInitialRouting
   }
+}
+function unwrapRefreshPayload(payload: unknown): TokenRefreshResponse {
+  let current: unknown = payload
+
+  if (current && typeof current === 'object' && 'data' in (current as Record<string, unknown>)) {
+    current = (current as { data: unknown }).data
+  }
+  if (
+    current &&
+    typeof current === 'object' &&
+    'result' in (current as Record<string, unknown>) &&
+    (current as Record<string, unknown>).result != null
+  ) {
+    current = (current as { result: unknown }).result
+  }
+
+  return (current ?? {}) as TokenRefreshResponse
 }

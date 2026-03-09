@@ -47,8 +47,6 @@ export type GetDetailedRegistryProgressCaseInquirysResponse = RegistryProgressCa
 
 /** 등기 신청사건 조회 정보 - 부동산 정보 */
 export interface CaseInquiryItem {
-  /** 부동산 소유자 고유ID */
-  progressPropertyOwnerId?: number
   /** 부동산고유번호 */
   propertyUniqueNumber?: string
   /** 부동산구분 */

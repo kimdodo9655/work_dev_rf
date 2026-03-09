@@ -347,12 +347,12 @@ const showTransfer = computed(() => {
 
 const showMortgageLegal = computed(() => {
   const type = basicInfo.value?.progressType
-  return type === 'TYPE_05'
+  return type === 'TYPE_04'
 })
 
 const showTransferLegal = computed(() => {
   const type = basicInfo.value?.progressType
-  return type === 'TYPE_04'
+  return type === 'TYPE_05'
 })
 
 function unwrapData<T>(res: any): T {
@@ -573,13 +573,13 @@ watch([() => basicInfo.value?.progressType, () => props.isOpen], ([progressType,
     fetchTransferInfo()
   }
 
-  // 근저당권설정 법무대리인 정보: TYPE_05
-  if (progressType === 'TYPE_05') {
+  // 근저당권설정 법무대리인 정보: TYPE_04
+  if (progressType === 'TYPE_04') {
     fetchMortgageLegalInfo()
   }
 
-  // 소유권이전 법무대리인 정보: TYPE_04
-  if (progressType === 'TYPE_04') {
+  // 소유권이전 법무대리인 정보: TYPE_05
+  if (progressType === 'TYPE_05') {
     fetchTransferLegalInfo()
   }
 })

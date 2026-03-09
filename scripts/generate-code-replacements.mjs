@@ -47,7 +47,9 @@ const CODE_ENDPOINTS = [
   ['confirmationDocumentTypes', '/api/codes/confirmation-document-types'],
   ['fileBranchDocumentTypes', '/api/codes/file-branch-document-types'],
   ['successCodes', '/api/codes/success-codes'],
-  ['errorCodes', '/api/codes/error-codes']
+  ['errorCodes', '/api/codes/error-codes'],
+  ['workflowNotificationEvent', '/api/codes/workflow-notification-event'],
+  ['noticeCategory', '/api/codes/notice-category']
 ]
 
 function parseDotEnv(content) {

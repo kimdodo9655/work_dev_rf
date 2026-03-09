@@ -47,5 +47,7 @@ export const CODE = {
   CONFIRMATION_DOCUMENT_TYPES: '/api/codes/confirmation-document-types',
   FILE_BRANCH_DOCUMENT_TYPES: '/api/codes/file-branch-document-types',
   SUCCESS_CODES: '/api/codes/success-codes',
-  ERROR_CODES: '/api/codes/error-codes'
+  ERROR_CODES: '/api/codes/error-codes',
+  WORKFLOW_NOTIFICATION_EVENT: '/api/codes/workflow-notification-event',
+  NOTICE_CATEGORY: '/api/codes/notice-category'
 } as const

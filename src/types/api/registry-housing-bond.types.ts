@@ -8,12 +8,7 @@
  * @generated 2025-01-27
  */
 
-import type {
-  BondPropertyItemResponse,
-  BondSectionRequest,
-  HousingBondResponse,
-  ObligorInfo
-} from './common.types'
+import type { BondPropertyItemResponse, HousingBondResponse, ObligorInfo } from './common.types'
 
 /**
  * R02Q-01
@@ -39,25 +34,26 @@ export type GetHousingBondListResponse = RegistryProgressHousingBondListResponse
 
 /**
  * R02Q-02
- * PUT /api/registry/progress/{registryManagementNumber}/housing-bonds/{registryType}
+ * PUT /api/registry/progress/{registryManagementNumber}/housing-bonds
  */
 export interface SaveHousingBondParams {
   /** 등기관리번호 */
   registryManagementNumber: string
-  /** 대상 등기유형 */
-  registryType:
-    | 'OWNERSHIP_TRANSFER'
-    | 'MORTGAGE'
-    | 'SURFACE_RIGHT'
-    | 'CHANGE'
-    | 'CORRECTION'
-    | 'MORTGAGE_CANCELLATION'
-    | 'SURFACE_RIGHT_CANCELLATION'
 }
 
-export type SaveHousingBondRequest = BondSectionRequest
+export type SaveHousingBondRequest = ProgressHousingBondSaveRequest
 
 export type SaveHousingBondResponse = ProgressHousingBondResponse
+
+/** 등기유형별 국민주택채권 저장 요청 */
+export interface ProgressHousingBondSaveRequest {
+  /** 채권 할인율(소수 그대로) */
+  discountRate?: number
+  /** 채권 할인 금액 */
+  bondDiscountAmount?: number
+  /** 국민주택채권 번호 */
+  housingBondNumber?: string
+}
 
 // ==================== Schemas ====================
 
