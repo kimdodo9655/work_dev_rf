@@ -95,25 +95,35 @@ export interface AttachmentReplaceItem {
     | 'RPC'
     | 'RRC'
     | 'TAX'
+    | 'RLT'
     | 'SMP'
     | 'SVC'
     | 'ESC'
-    | 'RRI'
-    | 'LRI'
-    | 'LRC'
+    | 'RRIO'
+    | 'RRIE'
+    | 'LRIO'
+    | 'LRIE'
+    | 'LRCO'
+    | 'LRCE'
     | 'CNF'
     | 'RPS'
     | 'LTP'
     | 'LBK'
     | 'GBK'
     | 'CBK'
-    | 'LPA'
-    | 'RPA'
     | 'CRP'
     | 'CSM'
     | 'ECS'
+    | 'BSC'
+    | 'FRC'
+    | 'RFR'
+    | 'RLS'
+    | 'TRC'
+    | 'DRW'
+    | 'LPA'
+    | 'RPA'
   /** 제출방식 */
-  submissionMethod: 'ELECTRONIC_CREATE' | 'ELECTRONIC_UPLOAD' | 'VISIT_SUBMIT' | 'ADMIN_INFO_LINK'
+  submissionMethod: 'ELECTRONIC' | 'SCAN' | 'VISIT_SUBMIT' | 'ADMIN_INFO_LINK'
   /** 부가정보 (제출방식에 따라 필수) */
   additionalInfo?: string
   /** 통수 (제출방식에 따라 필수) */
@@ -124,10 +134,18 @@ export interface AttachmentReplaceItem {
   referenceMethod?: 'NOT_APPLICABLE' | 'OFFICE_USE' | 'SIMULTANEOUS_SUBMIT' | 'PREVIOUS_ATTACHMENT'
   /** 동의인 */
   name?: string
+  /** 당사자ID */
+  partyId?: number
   /** 관할등기소 */
   jurisdictionRegistryOffice?: string
   /** 임대사업자등록번호 */
   rentalBusinessRegistrationNumber?: string
+  /** 노출 여부 */
+  isExposed?: boolean
+  /** 첨부키 */
+  attachKey?: string
+  /** 액션 */
+  action?: 'ADD' | 'MODIFY' | 'DELETE'
 }
 
 export interface RegistryApplicationAttachmentReplaceRequest {
@@ -135,8 +153,14 @@ export interface RegistryApplicationAttachmentReplaceRequest {
   attachmentItems: AttachmentReplaceItem[]
 }
 
+/** 원용정보 */
+export interface ReferenceMethodItem {
+  /** 원용 파일명 */
+  filename?: string
+}
+
 /** 첨부서면 목록 */
-export interface AttachmentItemProjection {
+export interface AttachmentItem {
   name?: string
   fileName?: string
   attachmentName?:
@@ -149,23 +173,33 @@ export interface AttachmentItemProjection {
     | 'RPC'
     | 'RRC'
     | 'TAX'
+    | 'RLT'
     | 'SMP'
     | 'SVC'
     | 'ESC'
-    | 'RRI'
-    | 'LRI'
-    | 'LRC'
+    | 'RRIO'
+    | 'RRIE'
+    | 'LRIO'
+    | 'LRIE'
+    | 'LRCO'
+    | 'LRCE'
     | 'CNF'
     | 'RPS'
     | 'LTP'
     | 'LBK'
     | 'GBK'
     | 'CBK'
-    | 'LPA'
-    | 'RPA'
     | 'CRP'
     | 'CSM'
     | 'ECS'
+    | 'BSC'
+    | 'FRC'
+    | 'RFR'
+    | 'RLS'
+    | 'TRC'
+    | 'DRW'
+    | 'LPA'
+    | 'RPA'
   registryMethod?: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
   registryType?:
     | 'OWNERSHIP_TRANSFER'
@@ -176,27 +210,30 @@ export interface AttachmentItemProjection {
     | 'MORTGAGE_CANCELLATION'
     | 'SURFACE_RIGHT_CANCELLATION'
   quantity?: number
-  jurisdictionRegistryOffice?: string
-  submissionMethod?: 'ELECTRONIC_CREATE' | 'ELECTRONIC_UPLOAD' | 'VISIT_SUBMIT' | 'ADMIN_INFO_LINK'
-  referenceMethod?: 'NOT_APPLICABLE' | 'OFFICE_USE' | 'SIMULTANEOUS_SUBMIT' | 'PREVIOUS_ATTACHMENT'
-  additionalInfo?: string
   rentalBusinessRegistrationNumber?: string
+  jurisdictionRegistryOffice?: string
+  submissionMethod?: 'ELECTRONIC' | 'SCAN' | 'VISIT_SUBMIT' | 'ADMIN_INFO_LINK'
+  submissionMethodOptions?: string[]
+  referenceMethodOptions?: string[]
+  partyNamesOptions?: string[]
+  jurisdictionRegistryOfficeOptions?: string[]
+  referenceMethod?: ReferenceMethodItem[]
+  additionalInfo?: string
+  isExposed?: boolean
+  attachKey?: string
+  action?: string
 }
 
 /** 첨부서면 정보 조회 */
 export interface RegistryApplicationAttachmentDetailResponse {
   /** 첨부서면 목록 */
-  items?: AttachmentItemProjection[]
+  items?: AttachmentItem[]
   /** 첨부서면 명칭 옵션 목록 */
   fileProgressDocumentTypeOptions?: string[]
   /** 제출방식 옵션 목록 */
   submissionMethodOptions?: string[]
   /** 원용정보 옵션 목록 */
   referenceMethodOptions?: string[]
-  /** 동의인 옵션 목록 */
-  partyNamesOptions?: string[]
-  /** 관할등기소 옵션 목록 */
-  jurisdictionRegistryOfficeOptions?: string[]
 }
 
 export interface ConsentPartyResponse {

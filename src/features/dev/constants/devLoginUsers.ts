@@ -3,6 +3,8 @@
  * 문서 제목: 기능 모듈: dev-login-users
  */
 
+import { UserRoleLevel } from '@/types'
+
 export type DevLoginUser = {
   기관ID: string
   권한값: string
@@ -20,7 +22,7 @@ export type DevLoginUser = {
 export const DEV_LOGIN_USERS: DevLoginUser[] = [
   {
     기관ID: '2',
-    권한값: '80',
+    권한값: String(UserRoleLevel.ORGANIZATION_ADMIN),
     권한명: '기관 관리자',
     기관명: '법무법인 태평양',
     로그인아이디: 'taepyeong_manager',
@@ -33,7 +35,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '1',
-    권한값: '90',
+    권한값: String(UserRoleLevel.ADMIN),
     권한명: '서비스 관리자',
     기관명: '시스템관리 기관',
     로그인아이디: 'manager',
@@ -46,7 +48,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '1',
-    권한값: '100',
+    권한값: String(UserRoleLevel.SUPER_ADMIN),
     권한명: '시스템 관리자',
     기관명: '시스템관리 기관',
     로그인아이디: 'admin',
@@ -59,7 +61,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '2',
-    권한값: '30',
+    권한값: String(UserRoleLevel.USER),
     권한명: '사용자',
     기관명: '법무법인 태평양',
     로그인아이디: 'tae003',
@@ -72,7 +74,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '2',
-    권한값: '30',
+    권한값: String(UserRoleLevel.USER),
     권한명: '사용자',
     기관명: '법무법인 태평양',
     로그인아이디: 'test_pending',
@@ -85,7 +87,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '2',
-    권한값: '30',
+    권한값: String(UserRoleLevel.USER),
     권한명: '사용자',
     기관명: '법무법인 태평양',
     로그인아이디: 'taepyeong_user1',
@@ -98,7 +100,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '2',
-    권한값: '30',
+    권한값: String(UserRoleLevel.USER),
     권한명: '사용자',
     기관명: '법무법인 태평양',
     로그인아이디: 'test_temporary',
@@ -111,7 +113,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '2',
-    권한값: '70',
+    권한값: String(UserRoleLevel.BRANCH_ADMIN),
     권한명: '지점 관리자',
     기관명: '법무법인 태평양',
     로그인아이디: 'taepyeong_busan_manager',
@@ -124,7 +126,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '2',
-    권한값: '30',
+    권한값: String(UserRoleLevel.USER),
     권한명: '사용자',
     기관명: '법무법인 태평양',
     로그인아이디: 'tae002',
@@ -137,7 +139,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '3',
-    권한값: '30',
+    권한값: String(UserRoleLevel.USER),
     권한명: '사용자',
     기관명: '법무법인 광장',
     로그인아이디: 'gwang02',
@@ -150,7 +152,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '4',
-    권한값: '70',
+    권한값: String(UserRoleLevel.BRANCH_ADMIN),
     권한명: '지점 관리자',
     기관명: '법무법인 세종',
     로그인아이디: 'sejong02',
@@ -163,7 +165,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '2',
-    권한값: '30',
+    권한값: String(UserRoleLevel.USER),
     권한명: '사용자',
     기관명: '법무법인 태평양',
     로그인아이디: 'busan02',
@@ -176,7 +178,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '4',
-    권한값: '80',
+    권한값: String(UserRoleLevel.ORGANIZATION_ADMIN),
     권한명: '기관 관리자',
     기관명: '법무법인 세종',
     로그인아이디: 'sejong01',
@@ -189,7 +191,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '3',
-    권한값: '30',
+    권한값: String(UserRoleLevel.USER),
     권한명: '사용자',
     기관명: '법무법인 광장',
     로그인아이디: 'gwang03',
@@ -202,7 +204,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '3',
-    권한값: '30',
+    권한값: String(UserRoleLevel.USER),
     권한명: '사용자',
     기관명: '법무법인 광장',
     로그인아이디: 'gwangjang_user1',
@@ -215,7 +217,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '4',
-    권한값: '30',
+    권한값: String(UserRoleLevel.USER),
     권한명: '사용자',
     기관명: '법무법인 세종',
     로그인아이디: 'sejong03',
@@ -228,7 +230,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '3',
-    권한값: '80',
+    권한값: String(UserRoleLevel.ORGANIZATION_ADMIN),
     권한명: '기관 관리자',
     기관명: '법무법인 광장',
     로그인아이디: 'gwangjang_manager',
@@ -241,7 +243,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '2',
-    권한값: '30',
+    권한값: String(UserRoleLevel.USER),
     권한명: '사용자',
     기관명: '법무법인 태평양',
     로그인아이디: 'busan03',
@@ -254,7 +256,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '6',
-    권한값: '70',
+    권한값: String(UserRoleLevel.BRANCH_ADMIN),
     권한명: '지점 관리자',
     기관명: '이순신 변호사사무소',
     로그인아이디: 'lee_sunsin',
@@ -267,7 +269,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '6',
-    권한값: '30',
+    권한값: String(UserRoleLevel.USER),
     권한명: '사용자',
     기관명: '이순신 변호사사무소',
     로그인아이디: 'sunsin03',
@@ -280,7 +282,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '6',
-    권한값: '30',
+    권한값: String(UserRoleLevel.USER),
     권한명: '사용자',
     기관명: '이순신 변호사사무소',
     로그인아이디: 'sunsin02',
@@ -293,7 +295,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '5',
-    권한값: '30',
+    권한값: String(UserRoleLevel.USER),
     권한명: '사용자',
     기관명: '홍길동 법무사사무소',
     로그인아이디: 'hong02',
@@ -306,7 +308,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '5',
-    권한값: '30',
+    권한값: String(UserRoleLevel.USER),
     권한명: '사용자',
     기관명: '홍길동 법무사사무소',
     로그인아이디: 'hong03',
@@ -319,7 +321,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '5',
-    권한값: '70',
+    권한값: String(UserRoleLevel.BRANCH_ADMIN),
     권한명: '지점 관리자',
     기관명: '홍길동 법무사사무소',
     로그인아이디: 'hong_gildong',
@@ -332,7 +334,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '7',
-    권한값: '80',
+    권한값: String(UserRoleLevel.ORGANIZATION_ADMIN),
     권한명: '기관 관리자',
     기관명: '서울합동법무사사무소',
     로그인아이디: 'haps01',
@@ -345,7 +347,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '5',
-    권한값: '30',
+    권한값: String(UserRoleLevel.USER),
     권한명: '사용자',
     기관명: '홍길동 법무사사무소',
     로그인아이디: 'test_inactive',
@@ -358,7 +360,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '7',
-    권한값: '70',
+    권한값: String(UserRoleLevel.BRANCH_ADMIN),
     권한명: '지점 관리자',
     기관명: '서울합동법무사사무소',
     로그인아이디: 'haps02',
@@ -371,7 +373,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '4',
-    권한값: '30',
+    권한값: String(UserRoleLevel.USER),
     권한명: '사용자',
     기관명: '법무법인 세종',
     로그인아이디: 'sejong04',
@@ -384,7 +386,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '4',
-    권한값: '30',
+    권한값: String(UserRoleLevel.USER),
     권한명: '사용자',
     기관명: '법무법인 세종',
     로그인아이디: 'sejong05',
@@ -397,7 +399,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '7',
-    권한값: '30',
+    권한값: String(UserRoleLevel.USER),
     권한명: '사용자',
     기관명: '서울합동법무사사무소',
     로그인아이디: 'haps04',
@@ -410,7 +412,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '8',
-    권한값: '30',
+    권한값: String(UserRoleLevel.USER),
     권한명: '사용자',
     기관명: '정의 법률사무소',
     로그인아이디: 'justice05',
@@ -423,7 +425,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '7',
-    권한값: '30',
+    권한값: String(UserRoleLevel.USER),
     권한명: '사용자',
     기관명: '서울합동법무사사무소',
     로그인아이디: 'haps03',
@@ -436,7 +438,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '9',
-    권한값: '80',
+    권한값: String(UserRoleLevel.ORGANIZATION_ADMIN),
     권한명: '기관 관리자',
     기관명: '전문부동산 법무지원센터',
     로그인아이디: 'estate01',
@@ -449,7 +451,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '9',
-    권한값: '70',
+    권한값: String(UserRoleLevel.BRANCH_ADMIN),
     권한명: '지점 관리자',
     기관명: '전문부동산 법무지원센터',
     로그인아이디: 'estate02',
@@ -462,7 +464,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '7',
-    권한값: '30',
+    권한값: String(UserRoleLevel.USER),
     권한명: '사용자',
     기관명: '서울합동법무사사무소',
     로그인아이디: 'haps05',
@@ -475,7 +477,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '8',
-    권한값: '30',
+    권한값: String(UserRoleLevel.USER),
     권한명: '사용자',
     기관명: '정의 법률사무소',
     로그인아이디: 'justice03',
@@ -488,7 +490,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '8',
-    권한값: '80',
+    권한값: String(UserRoleLevel.ORGANIZATION_ADMIN),
     권한명: '기관 관리자',
     기관명: '정의 법률사무소',
     로그인아이디: 'justice01',
@@ -501,7 +503,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '8',
-    권한값: '30',
+    권한값: String(UserRoleLevel.USER),
     권한명: '사용자',
     기관명: '정의 법률사무소',
     로그인아이디: 'justice04',
@@ -514,7 +516,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '8',
-    권한값: '70',
+    권한값: String(UserRoleLevel.BRANCH_ADMIN),
     권한명: '지점 관리자',
     기관명: '정의 법률사무소',
     로그인아이디: 'justice02',
@@ -527,7 +529,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '9',
-    권한값: '30',
+    권한값: String(UserRoleLevel.USER),
     권한명: '사용자',
     기관명: '전문부동산 법무지원센터',
     로그인아이디: 'estate05',
@@ -540,7 +542,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '9',
-    권한값: '30',
+    권한값: String(UserRoleLevel.USER),
     권한명: '사용자',
     기관명: '전문부동산 법무지원센터',
     로그인아이디: 'estate03',
@@ -553,7 +555,7 @@ export const DEV_LOGIN_USERS: DevLoginUser[] = [
   },
   {
     기관ID: '9',
-    권한값: '30',
+    권한값: String(UserRoleLevel.USER),
     권한명: '사용자',
     기관명: '전문부동산 법무지원센터',
     로그인아이디: 'estate04',

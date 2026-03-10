@@ -8,7 +8,6 @@ export interface RegistryApplicationForm {
   registryManagementNumber?: string
   dataSource?: 'REQUEST' | 'MANUAL'
   registryType?: string
-  registryTypeLabel?: string
   registryRole?: 'MAIN' | 'LINKED' | string
 }
 

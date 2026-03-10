@@ -75,3 +75,63 @@ test('registration application section composable은 역할별 파일로 분리�
     assert.equal(existsSync(path.join(projectRoot, relativePath)), true, `${relativePath} 누락`)
   })
 })
+
+test('registration page 오케스트레이션 composable이 존재한다', () => {
+  const files = [
+    'src/features/registration/composables/useCaseDetailProcess.ts',
+    'src/features/registration/composables/useCaseStatusList.ts',
+    'src/features/registration/composables/useCaseStatusFilters.ts',
+    'src/features/registration/composables/useCaseStatusCodes.ts',
+    'src/features/registration/composables/useCaseStatusAssignableUsers.ts',
+    'src/features/registration/composables/useCaseStatusListData.ts',
+    'src/features/registration/composables/useCaseStatusAssignment.ts'
+  ]
+
+  files.forEach((relativePath) => {
+    assert.equal(existsSync(path.join(projectRoot, relativePath)), true, `${relativePath} 누락`)
+  })
+})
+
+test('registration modals는 도메인 하위 폴더(application/documents/progress)로 분류한다', () => {
+  const modalsDir = path.join(projectRoot, 'src/features/registration/modals')
+  const rootVueFiles = readdirSync(modalsDir, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith('.vue'))
+    .map((entry) => entry.name)
+
+  assert.deepEqual(rootVueFiles, [], 'modals 루트에 .vue 파일이 남아있습니다.')
+  const requiredSubdirs = ['application', 'documents', 'progress']
+  requiredSubdirs.forEach((subdir) => {
+    const subdirPath = path.join(modalsDir, subdir)
+    assert.equal(existsSync(subdirPath), true, `${subdirPath} 누락`)
+  })
+})
+
+test('registration pages는 route pages와 sections를 분리한다', () => {
+  const pagesDir = path.join(projectRoot, 'src/features/registration/pages')
+  const rootVueFiles = readdirSync(pagesDir, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith('.vue'))
+    .map((entry) => entry.name)
+    .sort()
+
+  assert.deepEqual(rootVueFiles, [
+    'CaseDetailPage.vue',
+    'CaseScheduleMgmtPage.vue',
+    'CaseStatusContainer.vue'
+  ])
+
+  const sectionsDir = path.join(pagesDir, 'sections')
+  assert.equal(existsSync(sectionsDir), true, `${sectionsDir} 누락`)
+
+  const sectionFiles = readdirSync(sectionsDir, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith('.vue'))
+    .map((entry) => entry.name)
+    .sort()
+
+  assert.deepEqual(sectionFiles, [
+    'AccordionSection.vue',
+    'AdminSection.vue',
+    'ApplicationSection.vue',
+    'ProgressSection.vue',
+    'RequestInfoSection.vue'
+  ])
+})

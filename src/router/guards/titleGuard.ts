@@ -6,8 +6,7 @@
 import type { RouteLocationNormalized } from 'vue-router'
 
 import { MESSAGES } from '@/constants/messages'
-
-type AuthState = 'pre-auth' | 'onboarding' | 'auth'
+import type { AuthState } from '@/types'
 
 export function resolvePageTitle(to: RouteLocationNormalized, authState: AuthState): string {
   let pageTitle = (to.meta.title as string | undefined) || '전자등기'

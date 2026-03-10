@@ -11,6 +11,8 @@
  * 생성일: 2025-01-27
  */
 
+import type { RoleLevel } from './common.types'
+
 // ============================================================================
 // 기본 인터페이스
 // ============================================================================
@@ -41,7 +43,7 @@ export interface RoleLevelCode extends Code {
 }
 
 export interface UserRoleLevelResponse {
-  code?: 'SUPER_ADMIN' | 'ADMIN' | 'ORGANIZATION_ADMIN' | 'BRANCH_ADMIN' | 'USER'
+  code?: RoleLevel
   level?: number
   description?: string
 }

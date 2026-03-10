@@ -44,7 +44,7 @@ export interface CorrectionApplicantRepresentativeItem {
 
 /** 계약당사자 옵션 항목 (경정) */
 export interface RegistryApplicationCorrectionPartyItem {
-  id?: number
+  partyId?: number
   progressPartyId?: number
   partyRole?: string
   partyType?: 'DOMESTIC' | 'OVERSEAS_KOREAN' | 'FOREIGNER' | 'CORPORATION'
@@ -105,15 +105,13 @@ export interface CorrectionItem {
 
 /** 등기신청인 정보 (저장용) */
 export interface ApplicantCorrectionReqItem {
-  id: number
+  partyId: number
   progressPartyId: number
 }
 
 /** 경정사항 항목 (저장용) */
 export interface CorrectionReqItem {
   propertyUniqueNumber?: string
-  registryCauseDate?: string
-  correctionType?: string
   correctionItem?: string
   section?: 'GAP' | 'EUL'
   rankNumber?: string

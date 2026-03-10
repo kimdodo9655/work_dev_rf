@@ -9,6 +9,8 @@
  * @generated 2025-01-27
  */
 
+import type { RoleLevelType } from '@/types/store'
+
 // ============================================================================
 // API 공통 응답
 // ============================================================================
@@ -84,7 +86,7 @@ export type EstimateWritingStatus = 'WAITING' | 'COMPLETED' | 'WITHDRAWN'
 export type SelectionStatus = 'WAITING' | 'SELECTED' | 'NOT_SELECTED'
 
 /** 권한 코드 */
-export type RoleLevel = 'SUPER_ADMIN' | 'ADMIN' | 'ORGANIZATION_ADMIN' | 'BRANCH_ADMIN' | 'USER'
+export type RoleLevel = RoleLevelType
 
 /** 당사자 역할 */
 export type PartyRole = 'REGISTRY_OBLIGOR' | 'REGISTRY_OBLIGEE' | 'DEBTOR'
@@ -360,12 +362,8 @@ export interface RepresentativeInfo {
 
 /** 계약 당사자 응답 */
 export interface ContractPartyResponse {
-  /** 등기의무자 목록 */
-  obligors?: ContractPartyDetail[]
-  /** 등기권리자 목록 */
-  obligees?: ContractPartyDetail[]
-  /** 채무자 목록 */
-  debtors?: ContractPartyDetail[]
+  /** 계약당사자 목록 */
+  contractParties?: ContractPartyDetail[]
   /** 진행당사자 선택 옵션 */
   progressPartyOptions?: ProgressPartyOption[]
 }
@@ -392,16 +390,10 @@ export interface ProgressPartyOption {
   address?: string
   /** 상세주소 */
   addressDetail?: string
-  /** 대표자 구분 */
-  representativeType?: 'DOMESTIC' | 'OVERSEAS_KOREAN' | 'FOREIGNER' | 'CORPORATION'
-  /** 대표자 직책 */
-  representativePosition?: string
-  /** 대표자 성명 */
-  representativeName?: string
-  /** 대표자 국적 */
-  representativeNationality?: string
   /** 취급지점 */
   handlingBranch?: string
+  /** 대표자 목록 */
+  representatives?: RepresentativeInfo[]
 }
 
 /** 당사자 항목 요청 (계약 당사자 교체용) */
@@ -472,8 +464,17 @@ export interface TaxInfoRequest {
   registrationLicenseTax?: number
   educationTax?: number
   ruralSpecialTax?: number
+}
+
+/** 번호 필드를 포함한 세금 정보 요청 */
+export interface TaxInfoWithNumbersRequest {
+  paymentStatus: 'PAYMENT' | 'EXEMPTION'
+  exemptionReason?: string
+  acquisitionTax?: number
+  registrationLicenseTax?: number
+  educationTax?: number
+  ruralSpecialTax?: number
   paymentAgency?: string
-  paymentAmount?: number
   taxNumber?: string
   electronicPaymentNumber?: string
 }
@@ -487,19 +488,21 @@ export interface TaxInfoResponse {
   registrationLicenseTax?: number
   educationTax?: number
   ruralSpecialTax?: number
+  totalAmount?: number
+}
+
+/** 진행단위 세금신고 정보 응답 (번호/납부기관 포함) */
+export interface RegistryProgressTaxInfoResponse {
+  paymentStatus?: 'PAYMENT' | 'EXEMPTION'
+  exemptionReason?: string
+  acquisitionTax?: number
+  registrationLicenseTax?: number
+  educationTax?: number
+  ruralSpecialTax?: number
   paymentAgency?: string
-  paymentAmount?: number
   taxNumber?: string
   electronicPaymentNumber?: string
   totalAmount?: number
-  registryType?:
-    | 'OWNERSHIP_TRANSFER'
-    | 'MORTGAGE'
-    | 'SURFACE_RIGHT'
-    | 'CHANGE'
-    | 'CORRECTION'
-    | 'MORTGAGE_CANCELLATION'
-    | 'SURFACE_RIGHT_CANCELLATION'
 }
 
 /** 채권 부동산 항목 (저장 요청용) */

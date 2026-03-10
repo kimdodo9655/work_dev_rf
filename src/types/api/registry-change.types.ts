@@ -44,7 +44,7 @@ export interface ChangeApplicantRepresentativeItem {
 
 /** 계약당사자 옵션 항목 (변경) */
 export interface RegistryApplicationChangePartyItem {
-  id?: number
+  partyId?: number
   progressPartyId?: number
   partyRole?: string
   partyType?: 'DOMESTIC' | 'OVERSEAS_KOREAN' | 'FOREIGNER' | 'CORPORATION'

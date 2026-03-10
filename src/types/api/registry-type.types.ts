@@ -129,9 +129,11 @@ export interface RegistryApplicationFormResponse {
   registryManagementNumber?: string
   dataSource?: 'REQUEST' | 'MANUAL'
   registryType?: string
-  registryTypeLabel?: string
   /** 등기 역할 */
   registryRole?: RegistryApplicationRole
+  registryCause?: string
+  registryMethod?: RegistryMethod
+  adminInfoLinkTime?: string
 }
 
 export interface RegistryApplicationUpdateRequest {

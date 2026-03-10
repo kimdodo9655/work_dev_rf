@@ -70,6 +70,157 @@ export default [
     }
   },
   {
+    files: ['src/features/registration/**/*.{ts,vue}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            '@/features/app/**',
+            '@/features/auth/**',
+            '@/features/main/**',
+            '@/features/my/**',
+            '@/features/estimate/**',
+            '@/features/dev/**'
+          ]
+        }
+      ]
+    }
+  },
+  {
+    files: ['src/features/auth/**/*.{ts,vue}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            '@/features/app/**',
+            '@/features/main/**',
+            '@/features/my/**',
+            '@/features/estimate/**',
+            '@/features/registration/**',
+            '@/features/dev/**',
+            '@/features/doc-templates/**'
+          ]
+        }
+      ]
+    }
+  },
+  {
+    files: ['src/features/main/**/*.{ts,vue}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            '@/features/app/**',
+            '@/features/auth/**',
+            '@/features/my/**',
+            '@/features/estimate/**',
+            '@/features/registration/**',
+            '@/features/dev/**',
+            '@/features/doc-templates/**'
+          ]
+        }
+      ]
+    }
+  },
+  {
+    files: ['src/features/my/**/*.{ts,vue}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            '@/features/app/**',
+            '@/features/auth/**',
+            '@/features/main/**',
+            '@/features/estimate/**',
+            '@/features/registration/**',
+            '@/features/dev/**',
+            '@/features/doc-templates/**'
+          ]
+        }
+      ]
+    }
+  },
+  {
+    files: ['src/features/estimate/**/*.{ts,vue}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            '@/features/app/**',
+            '@/features/auth/**',
+            '@/features/main/**',
+            '@/features/my/**',
+            '@/features/registration/**',
+            '@/features/dev/**',
+            '@/features/doc-templates/**'
+          ]
+        }
+      ]
+    }
+  },
+  {
+    files: ['src/features/shared/**/*.{ts,vue}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            '@/features/app/**',
+            '@/features/auth/**',
+            '@/features/main/**',
+            '@/features/my/**',
+            '@/features/estimate/**',
+            '@/features/registration/**',
+            '@/features/dev/**'
+          ]
+        }
+      ]
+    }
+  },
+  {
+    files: ['src/features/doc-templates/**/*.{ts,vue}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            '@/features/app/**',
+            '@/features/auth/**',
+            '@/features/main/**',
+            '@/features/my/**',
+            '@/features/estimate/**',
+            '@/features/registration/**',
+            '@/features/dev/**'
+          ]
+        }
+      ]
+    }
+  },
+  {
+    files: ['src/features/dev/**/*.{ts,vue}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            '@/features/app/**',
+            '@/features/auth/**',
+            '@/features/main/**',
+            '@/features/my/**',
+            '@/features/estimate/**',
+            '@/features/registration/**',
+            '@/features/shared/**'
+          ]
+        }
+      ]
+    }
+  },
+  {
     files: ['**/*.{ts,mts,tsx,vue}'],
     rules: {
       // TypeScript 규칙 완화

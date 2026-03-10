@@ -47,13 +47,11 @@ export type SaveHousingBondResponse = ProgressHousingBondResponse
 
 /** 등기유형별 국민주택채권 저장 요청 */
 export interface ProgressHousingBondSaveRequest {
-  /** 채권 할인율(소수 그대로) */
-  discountRate?: number
-  /** 채권 할인 금액 */
-  bondDiscountAmount?: number
-  /** 국민주택채권 번호 */
-  housingBondNumber?: string
+  /** 등기유형별 국민주택채권 저장 항목 목록 */
+  items: ProgressHousingBondSaveItem[]
 }
+
+export type ProgressHousingBondSaveItem = Record<string, unknown>
 
 // ==================== Schemas ====================
 

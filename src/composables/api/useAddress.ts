@@ -48,7 +48,7 @@ export function useAddress() {
   }
 
   const searchAddresses = async (keyword: string, cursorId?: number | null) => {
-    if (!keyword || keyword.length < 2) {
+    if (!keyword || keyword.length < 3) {
       logger.warn('[ADDRESS] Keyword too short', { keyword })
       return
     }

@@ -8,7 +8,11 @@
  * @generated 2025-01-27
  */
 
-import type { PropertyInfo, TaxInfoRequest, TaxInfoResponse } from './common.types'
+import type {
+  PropertyInfo,
+  RegistryProgressTaxInfoResponse,
+  TaxInfoWithNumbersRequest
+} from './common.types'
 
 /**
  * R02P-01
@@ -49,8 +53,6 @@ export type ReplaceTaxAgenciesResponse = RegistryProgressTaxAgencyListResponse
 
 /** 세금신고 대행 카드 정보 */
 export interface RegistryProgressTaxAgencyItemResponse {
-  /** 신청서 ID */
-  applicationId?: number
   /** 등기유형 */
   registryType?:
     | 'OWNERSHIP_TRANSFER'
@@ -69,7 +71,7 @@ export interface RegistryProgressTaxAgencyItemResponse {
     | 'APPLICATION_ERROR'
     | 'TERMINATION'
   inputInfo?: RegistryProgressTaxAgencyInputInfoResponse
-  taxInfo?: TaxInfoResponse
+  taxInfo?: RegistryProgressTaxInfoResponse
 }
 
 /** 세금신고 대행 목록 응답 */
@@ -90,7 +92,7 @@ export interface RegistryProgressTaxAgencyReplaceRequest {
 export interface RegistryProgressTaxAgencyReplaceRequestItem {
   /** 신청서 ID */
   applicationId: number
-  tax: TaxInfoRequest
+  tax: TaxInfoWithNumbersRequest
 }
 
 /** 구비서류 정보 */

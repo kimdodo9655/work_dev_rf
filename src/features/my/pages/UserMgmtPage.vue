@@ -68,7 +68,7 @@ import { api } from '@/api/client'
 import SearchInput from '@/components/template/input/SearchInput.vue'
 import SearchSelect from '@/components/template/input/SearchSelect.vue'
 import { useCodes } from '@/composables/api/useCodes'
-import type { SelectOption } from '@/types'
+import type { ApiResponse, SearchUsersQuery, SelectOption, UserResponse } from '@/types'
 import { logger } from '@/utils/logger'
 
 // ============================================================================
@@ -76,49 +76,26 @@ import { logger } from '@/utils/logger'
 // ============================================================================
 type UserStatusLabel = '사용' | '미사용' | '승인대기' | '삭제' | '임시승인'
 
-interface User {
-  rowNumber: number
-  userId: number
-  branchId: number
-  organizationType: string
-  organizationTypeDescription: string
-  organizationTypeCustom: string | null
-  organizationName: string
-  branchName: string
-  loginId: string
-  name: string
-  roleLevel: string
-  roleLevelValue: number
-  roleLevelName: string
-  isEmailVerified: boolean
-  userStatus: string
-  userStatusDescription: string
+type UserSearchPageResponse = {
+  content: UserResponse[]
+  pageable: {
+    pageNumber: number
+    pageSize: number
+    offset: number
+    paged: boolean
+    unpaged: boolean
+  }
+  last: boolean
+  totalElements: number
+  totalPages: number
+  size: number
+  number: number
+  first: boolean
+  numberOfElements: number
+  empty: boolean
 }
 
-interface ApiResponse {
-  status: number
-  code: string
-  title: string
-  message: string
-  data: {
-    content: User[]
-    pageable: {
-      pageNumber: number
-      pageSize: number
-      offset: number
-      paged: boolean
-      unpaged: boolean
-    }
-    last: boolean
-    totalElements: number
-    totalPages: number
-    size: number
-    number: number
-    first: boolean
-    numberOfElements: number
-    empty: boolean
-  }
-}
+type UserSearchApiResponse = ApiResponse<UserSearchPageResponse>
 
 interface SearchParams {
   organizationType?: string
@@ -150,7 +127,7 @@ const { codes, fetchCodesByCategory } = useCodes()
 // ============================================================================
 // State
 // ============================================================================
-const users = ref<User[]>([])
+const users = ref<UserResponse[]>([])
 const loading = ref(false)
 const error = ref<{
   message: string
@@ -274,7 +251,7 @@ const fetchUsers = async () => {
     error.value = null
 
     // 쿼리 파라미터 구성 - page와 size는 필수
-    const params: Record<string, string | number | boolean> = {
+    const params: SearchUsersQuery = {
       page: searchParams.page,
       size: searchParams.size
     }
@@ -284,7 +261,7 @@ const fetchUsers = async () => {
       params.roleLevel = Number(searchParams.roleLevel)
     }
     if (searchParams.userStatus) {
-      params.userStatus = searchParams.userStatus
+      params.userStatus = searchParams.userStatus as SearchUsersQuery['userStatus']
     }
     if (searchParams.keyword?.trim()) {
       params.keyword = searchParams.keyword.trim()
@@ -295,7 +272,7 @@ const fetchUsers = async () => {
 
     logger.info('[사용자 관리] API 요청', { url: '/api/users/search', params })
 
-    const response = await api.get<ApiResponse>('/api/users/search', { params })
+    const response = await api.get<UserSearchApiResponse>('/api/users/search', { params })
 
     logger.info('[사용자 관리] API 응답 성공', {
       totalElements: response.data.data.totalElements,

@@ -8,16 +8,16 @@ import test from 'node:test'
 
 import { isPublicApiRequest } from '../src/api/publicApiMap.ts'
 
-test('openapi-marked auth APIs are treated as public', () => {
+test('OpenAPI에 표시된 auth API는 공개 API로 판단한다', () => {
   assert.equal(isPublicApiRequest('post', '/api/auth/login'), true)
   assert.equal(isPublicApiRequest('POST', '/api/auth/refresh'), true)
 })
 
-test('non-marked APIs are treated as private', () => {
+test('표시되지 않은 API는 비공개 API로 판단한다', () => {
   assert.equal(isPublicApiRequest('GET', '/api/notifications'), false)
 })
 
-test('templated public paths match real ids', () => {
+test('템플릿 공개 경로는 실제 ID 경로와 매칭된다', () => {
   assert.equal(
     isPublicApiRequest('GET', '/api/organizations/10/branches/20/documents/download'),
     true

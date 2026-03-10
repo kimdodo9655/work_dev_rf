@@ -68,24 +68,29 @@
         <!-- 1) 등기 의뢰 정보 -->
         <div data-scroll-id="accordion-REQ">
           <AccordionSection title="등기 의뢰 정보" :is-open="openMap.REQ" @toggle="toggle('REQ')">
-            <RequestInfoSection
-              :registry-management-number="registryManagementNumber"
-              :is-open="openMap.REQ"
-            />
+            <div class="request-section">
+              <RequestInfoSection
+                :registry-management-number="registryManagementNumber"
+                :is-open="openMap.REQ"
+              />
+            </div>
           </AccordionSection>
         </div>
 
         <!-- 2) 등기신청서 정보 등록 -->
         <div data-scroll-id="accordion-APP">
           <AccordionSection
+            class="detail-accordion"
             title="등기신청서 정보 등록"
             :is-open="openMap.APP"
             @toggle="toggle('APP')"
           >
-            <ApplicationSection
-              :registry-management-number="registryManagementNumber"
-              :is-open="openMap.APP"
-            />
+            <div class="application-section">
+              <ApplicationSection
+                :registry-management-number="registryManagementNumber"
+                :is-open="openMap.APP"
+              />
+            </div>
           </AccordionSection>
         </div>
 
@@ -97,6 +102,7 @@
             @toggle="toggle('ADMIN')"
           >
             <AdminSection
+              class="admin-section"
               :registry-management-number="registryManagementNumber"
               :is-open="openMap.ADMIN"
               @loaded="handleAdminLoaded"
@@ -107,14 +113,17 @@
         <!-- 4) 등기 진행 정보 등록 -->
         <div data-scroll-id="accordion-PROG">
           <AccordionSection
+            class="detail-accordion"
             title="등기 진행 정보 등록"
             :is-open="openMap.PROG"
             @toggle="toggle('PROG')"
           >
-            <ProgressSection
-              :registry-management-number="registryManagementNumber"
-              :is-open="openMap.PROG"
-            />
+            <div class="progress-section">
+              <ProgressSection
+                :registry-management-number="registryManagementNumber"
+                :is-open="openMap.PROG"
+              />
+            </div>
           </AccordionSection>
         </div>
       </div>
@@ -123,307 +132,43 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
-import { registryProgressAPI } from '@/api/services/registry'
-import type { AccordionKey } from '@/composables/utils/useAccordionState'
 import { useAccordionState } from '@/composables/utils/useAccordionState'
-import { useApiAlert } from '@/composables/utils/useApiAlert'
-import { useCodeReplacer } from '@/composables/utils/useCodeReplacer'
-import { useDialog } from '@/composables/utils/useDialog'
-import { useErrorHandler } from '@/composables/utils/useErrorHandler'
-import type {
-  ChangeRegistryProgressProcessQuery,
-  ProcessActionResponse,
-  ProcessStepResponse,
-  RegistryProgressProcessResponse
-} from '@/types'
+import { useCaseDetailProcess } from '@/features/registration/composables/useCaseDetailProcess'
 
-import AccordionSection from './AccordionSection.vue'
-import AdminSection from './AdminSection.vue'
-import ApplicationSection from './ApplicationSection.vue'
-import ProgressSection from './ProgressSection.vue'
-import RequestInfoSection from './RequestInfoSection.vue'
+import AccordionSection from './sections/AccordionSection.vue'
+import AdminSection from './sections/AdminSection.vue'
+import ApplicationSection from './sections/ApplicationSection.vue'
+import ProgressSection from './sections/ProgressSection.vue'
+import RequestInfoSection from './sections/RequestInfoSection.vue'
 
 const route = useRoute()
 const registryManagementNumber = computed(() => String(route.params.caseId ?? ''))
-const { getErrorMessage } = useErrorHandler()
-const { extractApiSuccessContent, extractApiErrorContent } = useApiAlert()
-const { findReplacement } = useCodeReplacer()
-const { alert, confirm } = useDialog()
 
 // 아코디언 상태 관리
 const { openMap, toggle } = useAccordionState()
 
 // AdminSection 표시 여부 (데이터가 있을 때만 표시)
 const showAdminSection = ref(false) // 초기에는 숨김 (AdminSection이 데이터 로드 후 알려줌)
-const openedProcessId = ref('')
-const processLoading = ref(false)
-const processErrorMessage = ref('')
-const processData = ref<RegistryProgressProcessResponse | null>(null)
-const isChangingProcess = ref(false)
-
-interface ProcessScrollTarget {
-  accordion: AccordionKey
-  sectionId?: string
-}
-
-const PROCESS_SCROLL_TARGET_MAP: Record<string, ProcessScrollTarget> = {
-  ASSIGN_MANAGER: { accordion: 'REQ' },
-  INSPECT_REGISTRY_INFO: { accordion: 'REQ' },
-  REQUEST_RESUBMISSION: { accordion: 'REQ' },
-  REGISTER_APPLICATION_INFO: { accordion: 'APP' },
-  REQUEST_ADMIN_INFO_CONSENT: { accordion: 'ADMIN' },
-  OBLIGOR_E_SIGNATURE: { accordion: 'PROG', sectionId: 'progress-e-sign' },
-  OBLIGEE_E_SIGNATURE: { accordion: 'PROG', sectionId: 'progress-e-sign' },
-  TAX_DECLARATION_AGENCY: { accordion: 'PROG', sectionId: 'progress-tax-declaration' },
-  PURCHASE_HOUSING_BOND: { accordion: 'PROG', sectionId: 'progress-housing-bond' },
-  REGISTER_LOAN_ACCOUNT: { accordion: 'PROG', sectionId: 'progress-loan-account' },
-  WAITING_LOAN_PAYMENT: { accordion: 'PROG', sectionId: 'progress-loan-account' },
-  LOAN_PAYMENT_COMPLETED: { accordion: 'PROG', sectionId: 'progress-loan-account' },
-  REGISTER_TRANSFER_CERTIFICATE: { accordion: 'PROG', sectionId: 'progress-transfer-certificate' },
-  CREATE_APPLICATION: { accordion: 'PROG', sectionId: 'progress-receipt-info' },
-  INTERNET_REGISTRY_E_SIGNATURE: { accordion: 'PROG', sectionId: 'progress-e-sign-status' },
-  REQUEST_CASE_DELEGATION: { accordion: 'PROG', sectionId: 'progress-receipt-info' },
-  WAITING_CASE_DELEGATION: { accordion: 'PROG', sectionId: 'progress-receipt-info' },
-  CASE_DELEGATION_COMPLETED: { accordion: 'PROG', sectionId: 'progress-case-delegation' },
-  REGISTRY_RECEIVED: { accordion: 'PROG', sectionId: 'progress-receipt-info' },
-  CREATE_COST_STATEMENT: { accordion: 'PROG', sectionId: 'progress-cost-statement' },
-  REGISTER_COMPLETION_DOCUMENTS: {
-    accordion: 'PROG',
-    sectionId: 'progress-completion-doc-register'
-  },
-  SUBMIT_COMPLETION_DOCUMENTS: { accordion: 'PROG', sectionId: 'progress-completion-doc-submit' },
-  REGISTRY_COMPLETED: { accordion: 'REQ' },
-  REGISTRY_CANCELLED: { accordion: 'REQ' }
-}
-
-interface WorkProcessItem {
-  id: string
-  title: string
-  descriptionLines: string[]
-  buttons: WorkProcessActionItem[]
-  isCurrent: boolean
-}
-
-interface WorkProcessActionItem {
-  action?: string
-  nextStatus?: string
-  nextStatusDescription?: string
-  label: string
-}
-
-const processItems = computed<WorkProcessItem[]>(() => {
-  const steps = processData.value?.steps ?? []
-  return steps.map((step, index) => {
-    const actions = step.actions ?? []
-    return {
-      id: step.step || `STEP_${index + 1}`,
-      title: step.stepTitle || step.step || `프로세스 ${index + 1}`,
-      descriptionLines: toDescriptionLines(step),
-      buttons: actions.map((action) => mapAction(action)),
-      isCurrent: Boolean(step.isCurrentStep) || step.step === processData.value?.currentStatus
-    }
-  })
+const {
+  openedProcessId,
+  processLoading,
+  processErrorMessage,
+  processItems,
+  isChangingProcess,
+  toggleProcessItem,
+  handleProcessActionClick
+} = useCaseDetailProcess({
+  registryManagementNumber,
+  openMap,
+  showAdminSection
 })
 
 function handleAdminLoaded(hasData: boolean) {
   showAdminSection.value = hasData
 }
-
-function toggleProcessItem(id: string) {
-  const nextOpenedId = openedProcessId.value === id ? '' : id
-  openedProcessId.value = nextOpenedId
-  if (!nextOpenedId) return
-  void scrollToProcessTarget(nextOpenedId)
-}
-
-function scrollElementWithOffset(element: HTMLElement, topOffset: number) {
-  const y = window.scrollY + element.getBoundingClientRect().top - topOffset
-  window.scrollTo({
-    top: Math.max(0, y),
-    behavior: 'smooth'
-  })
-}
-
-function getHeaderHeight(): number {
-  const fixedHeader = document.querySelector<HTMLElement>('.fixed-area')
-  return fixedHeader?.offsetHeight ?? 0
-}
-
-async function scrollToProcessTarget(statusCode: string, retry = 0): Promise<void> {
-  const target = PROCESS_SCROLL_TARGET_MAP[statusCode]
-  if (!target) return
-
-  if (target.accordion === 'ADMIN' && !showAdminSection.value) {
-    if (retry < 8) {
-      window.setTimeout(() => {
-        void scrollToProcessTarget(statusCode, retry + 1)
-      }, 120)
-    }
-    return
-  }
-
-  if (!openMap.value[target.accordion]) {
-    openMap.value[target.accordion] = true
-  }
-
-  await nextTick()
-  await nextTick()
-
-  const selector = target.sectionId
-    ? `[data-scroll-id="${target.sectionId}"]`
-    : `[data-scroll-id="accordion-${target.accordion}"]`
-  const element = document.querySelector<HTMLElement>(selector)
-  if (!element) {
-    if (retry < 8) {
-      window.setTimeout(() => {
-        void scrollToProcessTarget(statusCode, retry + 1)
-      }, 120)
-    }
-    return
-  }
-
-  const headerHeight = getHeaderHeight()
-  const topOffset = target.accordion === 'REQ' ? headerHeight : headerHeight + 10
-  scrollElementWithOffset(element, topOffset)
-}
-
-function mapAction(action: ProcessActionResponse): WorkProcessActionItem {
-  const replacedLabel =
-    action.actionDescription ||
-    findReplacement(action.action, 'processActions') ||
-    action.action ||
-    '상태 변경'
-  const actionLabel = action.action ? `${action.action} -> ${replacedLabel}` : replacedLabel
-
-  return {
-    action: action.action,
-    nextStatus: action.nextStatus,
-    nextStatusDescription: action.nextStatusDescription,
-    label: actionLabel
-  }
-}
-
-function toDescriptionLines(step: ProcessStepResponse): string[] {
-  const text = step.stepDescription?.trim()
-  if (!text) return ['설명 정보가 없습니다.']
-  return text
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean)
-}
-
-function unwrapProcessData(payload: unknown): RegistryProgressProcessResponse | null {
-  if (!payload || typeof payload !== 'object') return null
-
-  const withData = payload as { data?: unknown; steps?: unknown }
-  if (Array.isArray(withData.steps)) {
-    return payload as RegistryProgressProcessResponse
-  }
-  if (withData.data && typeof withData.data === 'object') {
-    return withData.data as RegistryProgressProcessResponse
-  }
-  return null
-}
-
-function findCurrentStepId(data: RegistryProgressProcessResponse | null): string {
-  if (!data?.steps || data.steps.length === 0) return ''
-  const current =
-    data.steps.find((step) => step.isCurrentStep) ??
-    data.steps.find((step) => step.step === data.currentStatus) ??
-    data.steps[0]
-  return current?.step || ''
-}
-
-async function fetchProcess() {
-  if (!registryManagementNumber.value) {
-    processData.value = null
-    processErrorMessage.value = '등기관리번호가 없습니다.'
-    return
-  }
-
-  processLoading.value = true
-  processErrorMessage.value = ''
-
-  try {
-    const response = await registryProgressAPI.process({
-      registryManagementNumber: registryManagementNumber.value
-    })
-    const data = unwrapProcessData(response)
-    processData.value = data
-    openedProcessId.value = findCurrentStepId(data)
-  } catch (error) {
-    processData.value = null
-    processErrorMessage.value = extractApiErrorContent(
-      error,
-      '업무 프로세스 조회 실패',
-      getErrorMessage(error)
-    ).message
-  } finally {
-    processLoading.value = false
-  }
-}
-
-async function handleProcessActionClick(item: WorkProcessActionItem) {
-  if (isChangingProcess.value) return
-
-  if (!item.nextStatus) {
-    await alert({
-      title: '상태 변경 실패',
-      message: '다음 진행 상태(nextStatus) 정보가 없어 변경할 수 없습니다.'
-    })
-    return
-  }
-
-  const ok = await confirm({
-    title: '진행상태 업데이트',
-    message: `${item.label}를 진행하시겠습니까?`,
-    confirmText: '진행',
-    cancelText: '취소'
-  })
-  if (!ok) return
-
-  isChangingProcess.value = true
-  processErrorMessage.value = ''
-
-  try {
-    const response = await registryProgressAPI.changeProcess(
-      { registryManagementNumber: registryManagementNumber.value },
-      { newStatus: item.nextStatus as ChangeRegistryProgressProcessQuery['newStatus'] }
-    )
-
-    const dialog = extractApiSuccessContent(response, '처리 완료', '진행상태가 업데이트되었습니다.')
-    await alert({
-      title: dialog.title,
-      message: dialog.message
-    })
-
-    await fetchProcess()
-  } catch (error) {
-    const apiError = extractApiErrorContent(error, '처리 실패', getErrorMessage(error))
-    await alert({
-      title: apiError.title,
-      message: apiError.message
-    })
-  } finally {
-    isChangingProcess.value = false
-  }
-}
-
-watch(
-  () => registryManagementNumber.value,
-  (value) => {
-    if (value) {
-      void fetchProcess()
-      return
-    }
-    processData.value = null
-    openedProcessId.value = ''
-  },
-  { immediate: true }
-)
 </script>
 
 <style scoped lang="scss">
@@ -567,5 +312,519 @@ watch(
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+:deep(.accordion .acc-section) {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+:deep(.accordion .acc-header) {
+  width: 100%;
+  height: 44px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 0;
+  background: #fff;
+  cursor: pointer;
+
+  &:hover {
+    background: #eee;
+  }
+}
+
+:deep(.accordion .acc-title) {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+}
+
+:deep(.accordion .acc-icon) {
+  transition: transform 0.15s ease;
+  color: #6b7280;
+}
+
+:deep(.accordion .acc-icon.open) {
+  transform: rotate(180deg);
+}
+
+:deep(.accordion .acc-body) {
+  border-top: 1px solid #ddd;
+  padding: 12px;
+}
+
+:deep(.application-section .application-container) {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+:deep(.application-section .tabs-container) {
+  display: flex;
+  flex-direction: column;
+}
+
+:deep(.application-section .tabs-header) {
+  display: flex;
+  gap: 4px;
+  border-bottom: 2px solid #e5e7eb;
+  background: #fafafa;
+  padding: 8px 8px 0 8px;
+  border-radius: 10px 10px 0 0;
+}
+
+:deep(.application-section .tab-item) {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+  background: transparent;
+  border: none;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #f3f4f6;
+    color: #111827;
+  }
+
+  &.active {
+    color: #3b82f6;
+    background: #fff;
+    border-bottom: 2px solid #3b82f6;
+    font-weight: 600;
+  }
+}
+
+:deep(.application-section .tab-label) {
+  flex: 1;
+}
+
+:deep(.application-section .tab-close-btn) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  font-size: 18px;
+  line-height: 1;
+  color: #9ca3af;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+:deep(.application-section .tab-add-btn) {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #3b82f6;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #dbeafe;
+    border-color: #93c5fd;
+  }
+}
+
+:deep(.application-section .tab-content) {
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  min-height: 200px;
+}
+
+:deep(.application-section .document-detail) {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+:deep(.application-section .info-table-wrapper) {
+  overflow-x: auto;
+}
+
+:deep(.application-section .info-table) {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+
+  thead {
+    background: #f9fafb;
+
+    th {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      color: #6b7280;
+      border-bottom: 1px solid #e5e7eb;
+    }
+  }
+
+  tbody {
+    td {
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #111827;
+      border-bottom: 1px solid #f3f4f6;
+    }
+  }
+}
+
+:deep(.application-section .editable-cell) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+:deep(.application-section .sections-container) {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+:deep(.application-section .sections-title) {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+:deep(.application-section .sections-buttons) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+:deep(.application-section .section-btn) {
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    color: #3b82f6;
+  }
+}
+
+:deep(.application-section .empty-state) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 40px 20px;
+}
+
+:deep(.application-section .modal-overlay) {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+}
+
+:deep(.application-section .modal-container) {
+  width: min(960px, calc(100vw - 32px));
+  max-height: calc(100vh - 40px);
+  overflow: auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2);
+}
+
+:deep(.application-section .modal-header) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+:deep(.application-section .modal-title) {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+}
+
+:deep(.application-section .modal-close) {
+  border: 0;
+  background: transparent;
+  font-size: 24px;
+  line-height: 1;
+  color: #6b7280;
+  cursor: pointer;
+}
+
+:deep(.application-section .modal-body) {
+  padding: 16px;
+}
+
+:deep(.request-section .sub-list),
+:deep(.admin-section .sub-list),
+:deep(.progress-section .sub-list) {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+:deep(.request-section .sub-item),
+:deep(.admin-section .sub-item),
+:deep(.progress-section .sub-item) {
+  padding: 10px 12px;
+  border: 1px solid #f3f4f6;
+  border-radius: 10px;
+  background: #eee;
+  font-size: 13px;
+  color: #111827;
+}
+
+:deep(.request-section .sub-title),
+:deep(.admin-section .sub-title),
+:deep(.progress-section .sub-title) {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #111827;
+}
+
+:deep(.request-section .case-detail),
+:deep(.admin-section .case-detail),
+:deep(.progress-section .case-detail) {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+:deep(.progress-section .caption) {
+  font-size: 12px;
+  color: #4b5563;
+}
+
+:deep(.application-section .muted),
+:deep(.request-section .muted),
+:deep(.admin-section .muted),
+:deep(.progress-section .muted) {
+  color: #6b7280;
+  text-align: center;
+  padding: 10px 0;
+}
+
+:deep(.application-section .error),
+:deep(.request-section .error),
+:deep(.admin-section .error),
+:deep(.progress-section .error) {
+  padding: 12px;
+  border-radius: 10px;
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+  color: #b91c1c;
+  font-size: 13px;
+}
+
+:deep(.admin-section .table-wrapper),
+:deep(.progress-section .table-wrapper) {
+  overflow-x: auto;
+}
+
+:deep(.admin-section .data-table-area),
+:deep(.progress-section .data-table-area) {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+
+  thead {
+    background: #f9fafb;
+
+    th {
+      padding: 12px 8px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      color: #6b7280;
+      border-bottom: 1px solid #e5e7eb;
+      white-space: nowrap;
+    }
+  }
+
+  tbody {
+    tr {
+      border-bottom: 1px solid #f3f4f6;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &:hover {
+        background: #f9fafb;
+      }
+    }
+
+    td {
+      padding: 12px 8px;
+      font-size: 13px;
+      color: #111827;
+      white-space: nowrap;
+    }
+  }
+}
+
+:deep(.progress-section .empty-cell) {
+  text-align: center;
+  color: #6b7280;
+}
+
+:deep(.application-section .edit-btn),
+:deep(.request-section .detail-btn),
+:deep(.admin-section .detail-btn),
+:deep(.progress-section .detail-btn) {
+  padding: 4px 12px;
+  font-size: 12px;
+  color: #3b82f6;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #dbeafe;
+    border-color: #93c5fd;
+  }
+}
+
+:deep(.application-section .add-first-btn) {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  background: #3b82f6;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #2563eb;
+  }
+}
+
+:deep(.request-section .card) {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+:deep(.request-section .row) {
+  display: flex;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f3f4f6;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+:deep(.request-section .label) {
+  width: 140px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+:deep(.request-section .value) {
+  font-size: 13px;
+  color: #111827;
+}
+
+:deep(.progress-section .status-completed) {
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #059669;
+  background: #d1fae5;
+  border-radius: 6px;
+}
+
+:deep(.progress-section .status-waiting) {
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #9ca3af;
+  background: #f3f4f6;
+  border-radius: 6px;
+}
+
+:deep(.progress-section .status-requested) {
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #f59e0b;
+  background: #fef3c7;
+  border-radius: 6px;
+}
+
+:deep(.progress-section .status-rejected) {
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #dc2626;
+  background: #fee2e2;
+  border-radius: 6px;
+}
+
+:deep(.progress-section .status-default) {
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  background: #f3f4f6;
+  border-radius: 6px;
 }
 </style>

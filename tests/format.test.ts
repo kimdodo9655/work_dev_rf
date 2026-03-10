@@ -15,26 +15,26 @@ import {
   formatPhone
 } from '../src/utils/format.ts'
 
-test('formatMessage replaces template variables', () => {
+test('formatMessage는 템플릿 변수를 치환한다', () => {
   assert.equal(formatMessage('전체 {count}건', { count: 12 }), '전체 12건')
 })
 
-test('formatNumber and formatCurrency format ko-KR style', () => {
+test('formatNumber와 formatCurrency는 ko-KR 형식으로 포맷한다', () => {
   assert.equal(formatNumber(1234567), '1,234,567')
   assert.equal(formatCurrency(1234567), '1,234,567원')
 })
 
-test('formatPhone normalizes 10/11 digit phone numbers', () => {
+test('formatPhone은 10/11자리 전화번호를 정규화한다', () => {
   assert.equal(formatPhone('01012345678'), '010-1234-5678')
   assert.equal(formatPhone('0212345678'), '021-234-5678')
 })
 
-test('formatFileSize formats bytes into human readable units', () => {
+test('formatFileSize는 바이트를 읽기 쉬운 단위로 변환한다', () => {
   assert.equal(formatFileSize(0), '0 Bytes')
   assert.equal(formatFileSize(1024), '1 KB')
 })
 
-test('formatPercent formats decimal to percentage string', () => {
+test('formatPercent는 소수를 퍼센트 문자열로 변환한다', () => {
   assert.equal(formatPercent(0.1234), '12%')
   assert.equal(formatPercent(0.1234, 2), '12.34%')
 })
