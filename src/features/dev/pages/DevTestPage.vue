@@ -767,6 +767,7 @@
     <Pagination v-model:current-page="currentPage" :total-items="100" :items-per-page="10" />
 
     <PdfTest />
+    <FixedFormPdfComposer />
   </div>
 </template>
 
@@ -779,6 +780,7 @@ import FloatingInput from '@/components/template/input/FloatingInput.vue'
 import Pagination from '@/components/template/PaginationItem.vue'
 import { useCodes } from '@/composables/api/useCodes'
 import { useDialog } from '@/composables/utils/useDialog'
+import FixedFormPdfComposer from '@/features/dev/components/fixed-form/FixedFormPdfComposer.vue'
 import AddrTest from '@/features/dev/pages/AddrTestPanel.vue'
 import PdfTest from '@/features/dev/pages/PdfTestPanel.vue'
 import RPATest from '@/features/dev/pages/RPATestPanel.vue'
