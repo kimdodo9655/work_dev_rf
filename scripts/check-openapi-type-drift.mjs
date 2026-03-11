@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
-import { cwd, exitCode } from 'node:process'
+import process, { cwd } from 'node:process'
 
 const projectRoot = cwd()
 const openApiPath = path.join(projectRoot, 'src/api/openapi.json')
@@ -152,5 +152,5 @@ try {
   console.error(JSON.stringify(baseline, null, 2))
   console.error('\n[current]')
   console.error(JSON.stringify(current, null, 2))
-  exitCode = 1
+  process.exitCode = 1
 }
