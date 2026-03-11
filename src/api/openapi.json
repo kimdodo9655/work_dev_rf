@@ -201,6 +201,10 @@
     {
       "name": "[Z01] 암호화/복호화",
       "description": "암호화/복호화 관리 API"
+    },
+    {
+      "name": "주소 일변동",
+      "description": "WEB→WAS 내부 배치용 API"
     }
   ],
   "paths": {
@@ -3589,15 +3593,26 @@
             "example": true
           },
           {
-            "name": "numberOfBuyers",
+            "name": "numberOfIndividualBuyers",
             "in": "query",
-            "description": "담보제공자 수",
+            "description": "개인 담보제공자 수",
             "required": false,
             "schema": {
               "type": "integer",
               "format": "int32"
             },
             "example": 1
+          },
+          {
+            "name": "numberOfCorporateBuyers",
+            "in": "query",
+            "description": "법인 담보제공자 수",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "example": 0
           },
           {
             "name": "hasAdditionalBuyerInfo",
@@ -5041,7 +5056,7 @@
       "post": {
         "tags": ["[R02D] 등기진행-등기유형"],
         "summary": "[R02D-02] 등기유형(등기신청서) 추가",
-        "description": "등기관리번호, 등기유형 등 필수 정보를 입력하여 새로운 등기유형(등기신청서)을 추가합니다.",
+        "description": "등기관리번호, 등기유형 등 필수 정보를 입력하여 새로운 등기유형(등기신청서)을 추가합니다.\n메인등기유형과 동일한 유형으로 신규 생성하는 경우, 메인등기 신청서에 연결된 계약당사자(ApplicationParty)를 새 PK로 복제해\n신규 신청서에 자동 연결합니다. ProgressParty는 새로 만들지 않고 기존 ProgressParty를 그대로 참조합니다.\n",
         "operationId": "createRegistryApplication",
         "requestBody": {
           "content": {
@@ -6733,7 +6748,7 @@
       "put": {
         "tags": ["[R02Q] 등기진행-국민주택채권"],
         "summary": "[R02Q-02] 국민주택채권 상세 저장",
-        "description": "등기관리번호 단위로 국민주택채권 할인율·할인액·채권번호를 저장합니다. 대상 등기유형(소유권/근저당)에 동일 값이 저장되며, 요청 바디는 세 필드만 사용합니다.",
+        "description": "등기관리번호 단위로 국민주택채권 할인율·할인액·채권번호를 저장합니다. 요청은 `items[]` 배열(등기유형별 registryType, discountRate, bondDiscountAmount, housingBondNumber) 구조로 받고, 소유권/근저당 대상 유형별로 개별 저장합니다.",
         "operationId": "saveHousingBond",
         "parameters": [
           {
@@ -8993,14 +9008,61 @@
           }
         }
       }
+    },
+    "/internal/address/daily": {
+      "post": {
+        "tags": ["주소 일변동"],
+        "summary": "일변동 반영",
+        "description": "WEB 서버에서 파싱한 주소 일변동 데이터를 수신하여 DB에 반영합니다.",
+        "operationId": "applyDailyChanges",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddressDailyChangeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResultAddressDailyChangeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
       "CancellationCertificateItem": {
-        "required": ["name", "ownerId", "propertyUniqueNumber", "registryCause", "registryType"],
+        "required": [
+          "applicationId",
+          "certificateType",
+          "progressPartyId",
+          "propertyUniqueNumber",
+          "rankNumber",
+          "receiptDate",
+          "receiptNumber",
+          "registryCause",
+          "registryType",
+          "section"
+        ],
         "type": "object",
         "properties": {
+          "applicationId": {
+            "type": "integer",
+            "description": "신청서ID",
+            "format": "int64",
+            "example": 1
+          },
           "registryType": {
             "type": "string",
             "description": "등기유형",
@@ -9015,17 +9077,20 @@
               "SURFACE_RIGHT_CANCELLATION"
             ]
           },
-          "ownerId": {
-            "type": "integer",
-            "description": "부동산소유자아이디",
-            "format": "int64",
-            "example": 1
-          },
           "registryCause": {
-            "minLength": 1,
             "type": "string",
             "description": "등기원인",
-            "example": "설정계약"
+            "example": "설정계약",
+            "enum": [
+              "TRADE",
+              "ESTABLISHMENT_CONTRACT",
+              "ADDRESS_CHANGE",
+              "ROAD_NAME_ADDRESS",
+              "APPLICATION_ERROR",
+              "TERMINATION",
+              "NAME_CHANGE",
+              "REGISTRATION_NUMBER"
+            ]
           },
           "propertyUniqueNumber": {
             "minLength": 1,
@@ -9033,11 +9098,11 @@
             "description": "부동산고유번호",
             "example": "27019537700605"
           },
-          "name": {
-            "minLength": 1,
-            "type": "string",
-            "description": "성명(명칭)",
-            "example": "홍길동"
+          "progressPartyId": {
+            "type": "integer",
+            "description": "진행당사자ID",
+            "format": "int64",
+            "example": 1
           },
           "section": {
             "type": "string",
@@ -9046,6 +9111,7 @@
             "enum": ["GAP", "EUL"]
           },
           "rankNumber": {
+            "minLength": 1,
             "type": "string",
             "description": "순위번호",
             "example": "1"
@@ -9057,6 +9123,7 @@
             "example": "2025-12-08"
           },
           "receiptNumber": {
+            "minLength": 1,
             "type": "string",
             "description": "접수번호",
             "example": "12345"
@@ -9104,6 +9171,23 @@
         },
         "description": "이전/말소 등기권리증 정보 전체 교체 요청"
       },
+      "OwnerOption": {
+        "type": "object",
+        "properties": {
+          "progressPartyId": {
+            "type": "integer",
+            "description": "진행 당사자 ID",
+            "format": "int64",
+            "example": 101
+          },
+          "name": {
+            "type": "string",
+            "description": "성명",
+            "example": "홍길동"
+          }
+        },
+        "description": "소유자 옵션"
+      },
       "RegistryProgressCancellationCertificateResponse": {
         "type": "object",
         "properties": {
@@ -9127,8 +9211,7 @@
             "type": "array",
             "description": "소유자(성명) 옵션 (등록된 소유자)",
             "items": {
-              "type": "string",
-              "description": "소유자(성명) 옵션 (등록된 소유자)"
+              "$ref": "#/components/schemas/OwnerOption"
             }
           },
           "sectionOptions": {
@@ -9163,11 +9246,34 @@
           "name": {
             "type": "string"
           },
+          "applicationId": {
+            "type": "integer",
+            "format": "int64"
+          },
           "registryType": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "OWNERSHIP_TRANSFER",
+              "MORTGAGE",
+              "SURFACE_RIGHT",
+              "CHANGE",
+              "CORRECTION",
+              "MORTGAGE_CANCELLATION",
+              "SURFACE_RIGHT_CANCELLATION"
+            ]
           },
           "registryCause": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "TRADE",
+              "ESTABLISHMENT_CONTRACT",
+              "ADDRESS_CHANGE",
+              "ROAD_NAME_ADDRESS",
+              "APPLICATION_ERROR",
+              "TERMINATION",
+              "NAME_CHANGE",
+              "REGISTRATION_NUMBER"
+            ]
           },
           "propertyUniqueNumber": {
             "type": "string"
@@ -9179,10 +9285,6 @@
             "type": "string",
             "enum": ["GAP", "EUL"]
           },
-          "ownerId": {
-            "type": "integer",
-            "format": "int64"
-          },
           "certificateSerialNumber": {
             "type": "string"
           },
@@ -9192,12 +9294,20 @@
           "certificatePassword": {
             "type": "string"
           },
+          "progressPartyId": {
+            "type": "integer",
+            "format": "int64"
+          },
           "receiptDate": {
             "type": "string",
             "format": "date"
           },
           "receiptNumber": {
             "type": "string"
+          },
+          "ownerId": {
+            "type": "integer",
+            "format": "int64"
           },
           "certificateType": {
             "type": "string",
@@ -10954,24 +11064,6 @@
             "description": "상세주소",
             "example": "테헤란로 123"
           },
-          "representativeType": {
-            "$ref": "#/components/schemas/PartyType"
-          },
-          "representativePosition": {
-            "type": "string",
-            "description": "대표자 직책",
-            "example": "대표이사"
-          },
-          "representativeName": {
-            "type": "string",
-            "description": "대표자 성명",
-            "example": "김대표"
-          },
-          "representativeNationality": {
-            "type": "string",
-            "description": "대표자 국적",
-            "example": "대한민국"
-          },
           "isSameAsDebtor": {
             "type": "boolean",
             "description": "채무자동일여부",
@@ -12315,12 +12407,6 @@
             "description": "동의인",
             "example": "홍길동"
           },
-          "partyId": {
-            "type": "integer",
-            "description": "당사자ID",
-            "format": "int64",
-            "example": 101
-          },
           "jurisdictionRegistryOffice": {
             "type": "string",
             "description": "관할등기소",
@@ -12335,11 +12421,6 @@
             "type": "boolean",
             "description": "노출여부",
             "example": true
-          },
-          "attachKey": {
-            "type": "string",
-            "description": "첨부키",
-            "example": "a1b2c3d4e5f6a7b8"
           },
           "action": {
             "type": "string",
@@ -12499,10 +12580,6 @@
             "type": "boolean",
             "description": "노출여부"
           },
-          "attachKey": {
-            "type": "string",
-            "description": "첨부키"
-          },
           "action": {
             "type": "string",
             "description": "액션"
@@ -12556,6 +12633,216 @@
           }
         },
         "description": "첨부서면 정보 조회"
+      },
+      "AddressDailyChangeRequest": {
+        "required": ["date", "filename", "records"],
+        "type": "object",
+        "properties": {
+          "date": {
+            "minLength": 1,
+            "pattern": "\\d{8}",
+            "type": "string",
+            "description": "처리 일자(YYYYMMDD)",
+            "example": "20260225"
+          },
+          "filename": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string",
+            "description": "원본 파일명",
+            "example": "AlterD.JUSUKR.20260225.TH_SGCO_RNADR_MST.TXT"
+          },
+          "records": {
+            "minItems": 1,
+            "type": "array",
+            "description": "일변동 데이터 레코드 목록",
+            "items": {
+              "$ref": "#/components/schemas/Record"
+            }
+          }
+        },
+        "description": "주소 일변동 배치 요청"
+      },
+      "Record": {
+        "required": ["move_reason_code", "road_addr_mgmt_no"],
+        "type": "object",
+        "properties": {
+          "move_reason_code": {
+            "minLength": 1,
+            "pattern": "31|34|63",
+            "type": "string",
+            "description": "이동 사유 코드 (31=신규, 34=변경, 63=삭제)",
+            "example": "31"
+          },
+          "road_addr_mgmt_no": {
+            "maxLength": 26,
+            "minLength": 0,
+            "type": "string",
+            "description": "도로명주소 관리번호",
+            "example": "1111031500100080001000000"
+          },
+          "road_address": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "도로명 주소",
+            "example": "서울특별시 종로구 세종대로 1"
+          },
+          "jibun_address": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "지번 주소",
+            "example": "서울특별시 종로구 세종로 1-1"
+          },
+          "sido_name": {
+            "maxLength": 40,
+            "minLength": 0,
+            "type": "string",
+            "description": "시도명",
+            "example": "서울특별시"
+          },
+          "sigungu_name": {
+            "maxLength": 40,
+            "minLength": 0,
+            "type": "string",
+            "description": "시군구명",
+            "example": "종로구"
+          },
+          "road_name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "description": "도로명",
+            "example": "세종대로"
+          },
+          "building_main_no": {
+            "minimum": 0,
+            "type": "integer",
+            "description": "건물본번",
+            "format": "int32",
+            "example": 1
+          },
+          "building_sub_no": {
+            "minimum": 0,
+            "type": "integer",
+            "description": "건물부번 (0이면 미표기)",
+            "format": "int32",
+            "example": 0
+          },
+          "underground_flag": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "integer",
+            "description": "지하여부 (1=지하)",
+            "format": "int32",
+            "example": 0
+          },
+          "mountain_flag": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "integer",
+            "description": "산 여부 (1=산)",
+            "format": "int32",
+            "example": 0
+          },
+          "lot_main_no": {
+            "minimum": 0,
+            "type": "integer",
+            "description": "지번 본번",
+            "format": "int32",
+            "example": 123
+          },
+          "lot_sub_no": {
+            "minimum": 0,
+            "type": "integer",
+            "description": "지번 부번 (0이면 미표기)",
+            "format": "int32",
+            "example": 0
+          },
+          "legal_eupmyeondong_name": {
+            "maxLength": 40,
+            "minLength": 0,
+            "type": "string",
+            "description": "법정읍면동명",
+            "example": "사직동"
+          },
+          "legal_ri_name": {
+            "maxLength": 40,
+            "minLength": 0,
+            "type": "string",
+            "description": "법정리명",
+            "example": "사직리"
+          },
+          "admin_dong_name": {
+            "maxLength": 60,
+            "minLength": 0,
+            "type": "string",
+            "description": "행정동명",
+            "example": "청운효자동"
+          },
+          "sigungu_bldg_name": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string",
+            "description": "시군구용건물명",
+            "example": "시청사 본관"
+          },
+          "apt_flag": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "integer",
+            "description": "공동주택여부 (1=공동주택)",
+            "format": "int32",
+            "example": 0
+          }
+        },
+        "description": "일변동 데이터 레코드"
+      },
+      "AddressDailyChangeResponse": {
+        "type": "object",
+        "properties": {
+          "inserted": {
+            "type": "integer",
+            "description": "삽입 건수",
+            "format": "int32",
+            "example": 23
+          },
+          "updated": {
+            "type": "integer",
+            "description": "수정 건수",
+            "format": "int32",
+            "example": 5
+          },
+          "deleted": {
+            "type": "integer",
+            "description": "삭제 건수",
+            "format": "int32",
+            "example": 3
+          }
+        },
+        "description": "주소 일변동 처리 결과"
+      },
+      "ApiResultAddressDailyChangeResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "code": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AddressDailyChangeResponse"
+          }
+        }
       },
       "RegistryTypeForAssign": {
         "type": "string",
@@ -13053,6 +13340,7 @@
         "type": "object",
         "properties": {
           "propertyUniqueNumber": {
+            "minLength": 1,
             "type": "string",
             "description": "부동산 고유번호",
             "example": "12345678901234"
@@ -13432,7 +13720,7 @@
       "RegistryCause": {
         "type": "string",
         "description": "등기원인",
-        "example": "SALE",
+        "example": "TRADE",
         "enum": [
           "TRADE",
           "ESTABLISHMENT_CONTRACT",
@@ -15804,7 +16092,16 @@
           "registryType": {
             "type": "string",
             "description": "등기유형",
-            "example": "근저당권말소"
+            "example": "근저당권말소",
+            "enum": [
+              "OWNERSHIP_TRANSFER",
+              "MORTGAGE",
+              "SURFACE_RIGHT",
+              "CHANGE",
+              "CORRECTION",
+              "MORTGAGE_CANCELLATION",
+              "SURFACE_RIGHT_CANCELLATION"
+            ]
           },
           "propertyUniqueNumber": {
             "type": "string",

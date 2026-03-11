@@ -136,7 +136,6 @@
         <div class="dashboard-card">
           <h4>사건 처리 현황</h4>
 
-          <!-- TODO: 임시영역 -->
           <div class="catbox">
             <!-- <i class="fi fi-sr-cat"></i>
             <p>This area is in a Schrödinger state.</p>
@@ -910,7 +909,6 @@ watch([selectedCity, activeValue], () => {
   }
 }
 
-// TODO: 임시영역
 .catbox {
   // background-color: #eeeeee;
   height: 300px;

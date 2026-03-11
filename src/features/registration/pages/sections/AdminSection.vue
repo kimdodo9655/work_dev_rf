@@ -102,7 +102,7 @@ function getRegistryMethodName(method: string): string {
 }
 
 function handleDetail(item: AdminInfoRequest) {
-  // TODO: 상세 페이지 이동 또는 모달 열기
+  // TODO: 행정정보 요청 상세 화면 또는 상세 모달 연결
   void item
 }
 

@@ -204,11 +204,8 @@ const optionEmailVerification = computed<SelectOption[]>(() => [
   { label: '인증 미완료', value: 'false' }
 ])
 
-// TODO: 실제 API에서 조직명, 지점명 목록을 가져와야 함
-const optionOrganizationName = computed<SelectOption[]>(() => [
-  { label: '전체', value: '' }
-  // 실제로는 API에서 조직 목록을 가져와야 함
-])
+// TODO: 조직명/지점명 옵션을 실제 API 응답으로 교체
+const optionOrganizationName = computed<SelectOption[]>(() => [{ label: '전체', value: '' }])
 
 const optionBranchName = computed<SelectOption[]>(() => [
   { label: '전체', value: '' }

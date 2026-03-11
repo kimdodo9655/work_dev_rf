@@ -19,14 +19,13 @@ export function useBranch() {
   // Mutations
   // ============================================================================
 
-  // TODO: [P02A-03] 지점 수정 : useMutation
   /**
    * 지점 수정 Mutation
    * API: PATCH /api/branches/:branchId
    */
   const updateBranchMutation = useMutation({
     mutationFn: async (/* params */) => {
-      // TODO: branchAPI.update() 호출
+      // TODO: [P02A-03] branchAPI.update() 연결
       throw new Error('Not implemented')
     },
     onSuccess: () => {
@@ -34,14 +33,13 @@ export function useBranch() {
     }
   })
 
-  // TODO: [P02A-04] 지점 등록 : useMutation
   /**
    * 지점 등록 Mutation
    * API: POST /api/branches
    */
   const createBranchMutation = useMutation({
     mutationFn: async (/* params */) => {
-      // TODO: branchAPI.create() 호출
+      // TODO: [P02A-04] branchAPI.create() 연결
       throw new Error('Not implemented')
     },
     onSuccess: () => {
@@ -53,15 +51,13 @@ export function useBranch() {
   // Helper Functions
   // ============================================================================
 
-  // TODO: [P02A-03] 지점 수정 : 헬퍼 함수
   const updateBranch = async (/* params */) => {
-    // TODO: updateBranchMutation.mutateAsync() 호출
+    // TODO: [P02A-03] updateBranchMutation.mutateAsync() 연결
     throw new Error('Not implemented')
   }
 
-  // TODO: [P02A-04] 지점 등록 : 헬퍼 함수
   const createBranch = async (/* params */) => {
-    // TODO: createBranchMutation.mutateAsync() 호출
+    // TODO: [P02A-04] createBranchMutation.mutateAsync() 연결
     throw new Error('Not implemented')
   }
 

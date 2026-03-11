@@ -19,14 +19,13 @@ export function useBranchBank() {
   // Mutations
   // ============================================================================
 
-  // TODO: [P02B-02] 배정 금융기관 수정 : useMutation
   /**
    * 배정 금융기관 수정 Mutation
    * API: PATCH /api/branches/:branchId/assigned-banks
    */
   const updateAssignedBanksMutation = useMutation({
     mutationFn: async (/* params */) => {
-      // TODO: branchBankAPI.update() 호출
+      // TODO: [P02B-02] branchBankAPI.update() 연결
       throw new Error('Not implemented')
     },
     onSuccess: () => {
@@ -38,9 +37,8 @@ export function useBranchBank() {
   // Helper Functions
   // ============================================================================
 
-  // TODO: [P02B-02] 배정 금융기관 수정 : 헬퍼 함수
   const updateAssignedBanks = async (/* params */) => {
-    // TODO: updateAssignedBanksMutation.mutateAsync() 호출
+    // TODO: [P02B-02] updateAssignedBanksMutation.mutateAsync() 연결
     throw new Error('Not implemented')
   }
 

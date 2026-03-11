@@ -404,9 +404,8 @@ function deleteItem(index: number) {
   }
 }
 
-// 비밀번호 사용여부 조회 (추후 구현)
 function handleCheckPassword() {
-  // TODO: API 호출
+  // TODO: 등기권리증 비밀번호 사용여부 조회 API 연결
 }
 
 // 저장

@@ -10,6 +10,7 @@ import { defineConfig } from 'vite'
 
 export default defineConfig(({ mode }) => {
   const shouldAnalyze = mode === 'analyze'
+  const isProdBuild = mode === 'prod'
 
   return {
     plugins: [
@@ -36,6 +37,10 @@ export default defineConfig(({ mode }) => {
       }
     },
     build: {
+      // 규칙:
+      // - prod: 주석 제거 + minify 유지
+      // - local/development/analyze: 비압축 유지
+      minify: isProdBuild ? 'esbuild' : false,
       chunkSizeWarningLimit: 1100,
       rollupOptions: {
         output: {
@@ -50,6 +55,10 @@ export default defineConfig(({ mode }) => {
           }
         }
       }
+    },
+    esbuild: {
+      // legal comment까지 포함해 운영 번들에서는 주석이 남지 않도록 명시
+      legalComments: isProdBuild ? 'none' : 'inline'
     },
     server: {
       port: 8101,
