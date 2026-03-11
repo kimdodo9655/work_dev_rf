@@ -149,8 +149,27 @@ export interface RegistryProgressTaxAgencyTableResponse {
 export interface Row {
   /** 신청서 ID */
   applicationId?: number
+  /** 등기유형 */
+  registryType?:
+    | 'OWNERSHIP_TRANSFER'
+    | 'MORTGAGE'
+    | 'SURFACE_RIGHT'
+    | 'CHANGE'
+    | 'CORRECTION'
+    | 'MORTGAGE_CANCELLATION'
+    | 'SURFACE_RIGHT_CANCELLATION'
   /** 등기유형 명 */
   registryTypeName?: string
+  /** 매입구분 */
+  purchaseType?: 'PURCHASE' | 'DISCOUNT' | 'EXEMPTION'
+  /** 매입대상금액 */
+  purchaseTargetAmount?: number
+  /** 채권매입금액 */
+  bondPurchaseAmount?: number
+  /** 채권할인금액 */
+  bondDiscountAmount?: number
+  /** 국민주택채권번호 */
+  housingBondNumber?: string
   /** 등기원인 */
   registryCause?:
     | 'TRADE'

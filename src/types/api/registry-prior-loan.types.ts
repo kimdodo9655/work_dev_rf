@@ -23,10 +23,20 @@ export type GetSeniorLoanRepaymentsResponse = RegistryProgressSeniorLoanRepaymen
 
 /** 선순위 대출 상환 정보 항목 */
 export interface RegistryProgressSeniorLoanRepaymentItemResponse {
+  /** 부동산고유번호 */
+  propertyUniqueNumber?: string
+  /** 구분 */
+  section?: 'GAP' | 'EUL'
   /** 선순위 설정 금융기관명 */
   rightHolderName?: string
+  /** 선순위 설정 지점명 */
+  rightHolderBranch?: string
   /** 순위번호 */
   rankNumber?: string
+  /** 접수일자 */
+  receiptDate?: string
+  /** 접수번호 */
+  receiptNumber?: string
   /** 채권최고액 */
   maximumCreditAmount?: number
   /** 상환/말소 주체 */

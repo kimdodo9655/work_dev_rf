@@ -78,8 +78,20 @@ export interface HousingBondCase {
     | 'TERMINATION'
   /** 매입대상금액 */
   purchaseTargetAmount?: number
+  /** 매입구분 */
+  purchaseType?: 'PURCHASE' | 'DISCOUNT' | 'EXEMPTION'
   /** 채권매입금액 */
   bondPurchaseAmount?: number
+  /** 면제사유 */
+  exemptionReason?: string
+  /** 채권할인금액 */
+  bondDiscountAmount?: number
+  /** 국민주택채권번호 */
+  housingBondNumber?: string
+  /** 채권할인율 */
+  bondDiscountRate?: number
+  /** 자동작성 가능 여부 */
+  autoGenerationAvailable?: boolean
   housingBond?: HousingBondResponse
   /** 부동산별 국민주택채권 목록 */
   properties?: BondPropertyItemResponse[]

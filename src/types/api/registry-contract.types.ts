@@ -147,6 +147,8 @@ export interface CommonParty {
   registrationNumber?: string
   /** 주소 */
   address?: string
+  /** 지분 */
+  share?: string
 }
 
 export interface PartyShareResponse {
@@ -196,8 +198,14 @@ export interface InterimPaymentResponse {
 }
 
 export interface MortgageContractRequest {
+  /** 등기유형 */
+  registryType?: string
+  /** 등기원인 */
+  registryCause?: string
   /** 채권 최고액 */
   maximumCreditAmount?: number
+  /** 대출금액 */
+  loanAmount?: number
   /** 계약 일자 */
   contractDate?: string
   /** 등기 접수 일자 */
@@ -214,13 +222,36 @@ export interface MortgageContractRequest {
   settlementDate?: string
   /** 철회권 포기 여부 */
   isWithdrawalRightWaived?: boolean
+  /** 대면 여부 */
+  isFaceToFace?: boolean
   /** 철회권 포기 일자 */
   withdrawalRightWaiveDate?: string
 }
 
 export interface MortgageContractResponse {
+  /** 등기유형 */
+  registryType?:
+    | 'OWNERSHIP_TRANSFER'
+    | 'MORTGAGE'
+    | 'SURFACE_RIGHT'
+    | 'CHANGE'
+    | 'CORRECTION'
+    | 'MORTGAGE_CANCELLATION'
+    | 'SURFACE_RIGHT_CANCELLATION'
+  /** 등기원인 */
+  registryCause?:
+    | 'TRADE'
+    | 'ESTABLISHMENT_CONTRACT'
+    | 'ADDRESS_CHANGE'
+    | 'ROAD_NAME_ADDRESS'
+    | 'APPLICATION_ERROR'
+    | 'TERMINATION'
+    | 'NAME_CHANGE'
+    | 'REGISTRATION_NUMBER'
   /** 채권 최고액 */
   maximumCreditAmount?: number
+  /** 대출금액 */
+  loanAmount?: number
   /** 계약 일자 */
   contractDate?: string
   /** 등기 접수 일자 */
@@ -237,6 +268,8 @@ export interface MortgageContractResponse {
   settlementDate?: string
   /** 철회권 포기 여부 */
   isWithdrawalRightWaived?: boolean
+  /** 대면 여부 */
+  isFaceToFace?: boolean
   /** 철회권 포기 일자 */
   withdrawalRightWaiveDate?: string
 }
@@ -251,8 +284,14 @@ export interface MortgageContractSaveResponse {
 }
 
 export interface OwnershipContractRequest {
+  /** 등기유형 */
+  registryType?: string
+  /** 등기원인 */
+  registryCause?: string
   /** 계약 금액 */
   contractAmount?: number
+  /** 매매금액 */
+  tradeAmount?: number
   /** 계약 일자 */
   contractDate?: string
   /** 등기접수 일자 */
@@ -261,13 +300,36 @@ export interface OwnershipContractRequest {
   tradeReportManagementNumber?: string
   /** 실거래신고 접수번호 */
   tradeReportReceiptNumber?: string
+  /** 잔금지급일 */
+  balancePaymentDate?: string
   firstInterim?: InterimPayment
   secondInterim?: InterimPayment
 }
 
 export interface OwnershipContractResponse {
+  /** 등기유형 */
+  registryType?:
+    | 'OWNERSHIP_TRANSFER'
+    | 'MORTGAGE'
+    | 'SURFACE_RIGHT'
+    | 'CHANGE'
+    | 'CORRECTION'
+    | 'MORTGAGE_CANCELLATION'
+    | 'SURFACE_RIGHT_CANCELLATION'
+  /** 등기원인 */
+  registryCause?:
+    | 'TRADE'
+    | 'ESTABLISHMENT_CONTRACT'
+    | 'ADDRESS_CHANGE'
+    | 'ROAD_NAME_ADDRESS'
+    | 'APPLICATION_ERROR'
+    | 'TERMINATION'
+    | 'NAME_CHANGE'
+    | 'REGISTRATION_NUMBER'
   /** 계약 금액 */
   contractAmount?: number
+  /** 매매금액 */
+  tradeAmount?: number
   /** 계약 일자 */
   contractDate?: string
   /** 등기 접수 일자 */
@@ -276,17 +338,23 @@ export interface OwnershipContractResponse {
   tradeReportManagementNumber?: string
   /** 실거래신고 접수번호 */
   tradeReportReceiptNumber?: string
+  /** 잔금지급일 */
+  balancePaymentDate?: string
   firstInterim?: InterimPaymentResponse
   secondInterim?: InterimPaymentResponse
 }
 
 export interface OwnershipContractSaveResponse {
+  /** 계약 금액 */
+  contractAmount?: number
   /** 계약 일자 */
   contractDate?: string
   /** 등기 접수 일자 */
   registryReceiptDate?: string
   /** 실거래신고 관리번호 */
   tradeReportManagementNumber?: string
+  /** 등록 목적 */
+  registrationPurpose?: string
 }
 
 /** 피담보채무 범위 목록 (최대 2건) */
@@ -311,6 +379,10 @@ export interface SecuredDebtScopeResponse {
 }
 
 export interface SurfaceRightContractRequest {
+  /** 등기유형 */
+  registryType?: string
+  /** 등기원인 */
+  registryCause?: string
   /** 존속 기간 */
   durationPeriod?: string
   /** 계약 일자 */
@@ -324,6 +396,25 @@ export interface SurfaceRightContractRequest {
 }
 
 export interface SurfaceRightContractResponse {
+  /** 등기유형 */
+  registryType?:
+    | 'OWNERSHIP_TRANSFER'
+    | 'MORTGAGE'
+    | 'SURFACE_RIGHT'
+    | 'CHANGE'
+    | 'CORRECTION'
+    | 'MORTGAGE_CANCELLATION'
+    | 'SURFACE_RIGHT_CANCELLATION'
+  /** 등기원인 */
+  registryCause?:
+    | 'TRADE'
+    | 'ESTABLISHMENT_CONTRACT'
+    | 'ADDRESS_CHANGE'
+    | 'ROAD_NAME_ADDRESS'
+    | 'APPLICATION_ERROR'
+    | 'TERMINATION'
+    | 'NAME_CHANGE'
+    | 'REGISTRATION_NUMBER'
   /** 존속 기간 */
   durationPeriod?: string
   /** 계약 일자 */

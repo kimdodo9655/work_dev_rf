@@ -181,6 +181,8 @@ export interface HousingBondDetail {
 export interface ReceiptDetailItem {
   /** 영수증ID */
   receiptDocumentId?: number
+  /** 발행일 */
+  creationDate?: string
   /** 등기유형명 */
   registryTypeName?: string
   registryType?: string
@@ -207,6 +209,16 @@ export interface ReceiptDetailItem {
   costTotal?: number
   /** 등기수수료 지급계좌 레이블 (계좌번호 / 금융기관명) */
   depositAccountLabel?: string
+  /** 계좌번호 */
+  depositAccountNumber?: string
+  /** 사업자등록번호 */
+  businessRegistrationNumber?: string
+  /** 사무소 주소 */
+  officeAddress?: string
+  /** 상호명 */
+  businessName?: string
+  /** 대표자 */
+  representative?: string
   /** 전자문서 생성 여부 */
   documentGenerated?: boolean
   /** PDF 파일명 */
@@ -225,6 +237,15 @@ export interface ReceiptDocumentFormResponse {
   receiptDocumentId?: number
   /** 신청서ID */
   applicationId?: number
+  /** 등기유형 */
+  registryType?:
+    | 'OWNERSHIP_TRANSFER'
+    | 'MORTGAGE'
+    | 'SURFACE_RIGHT'
+    | 'CHANGE'
+    | 'CORRECTION'
+    | 'MORTGAGE_CANCELLATION'
+    | 'SURFACE_RIGHT_CANCELLATION'
   /** 등기유형명 */
   registryTypeName?: string
   /** 등기권리자 명칭 */
@@ -266,6 +287,8 @@ export interface ReceiptSaveItem {
 export interface ReceiptSummaryItem {
   /** 영수증ID */
   receiptDocumentId?: number
+  /** 등기유형 */
+  registryType?: string
   /** 등기유형명 */
   registryTypeName?: string
   /** 보수료 소계 */
@@ -296,6 +319,8 @@ export interface TaxSection {
   paymentStatus?: 'PAYMENT' | 'EXEMPTION'
   /** 면제사유 */
   exemptionReason?: string
+  paymentAmount?: number
+  bondPurchaseAmount?: number
   registrationLicenseTax?: number
   educationTax?: number
   ruralSpecialTax?: number

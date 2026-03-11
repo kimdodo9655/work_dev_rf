@@ -9,8 +9,10 @@ export type SearchOption = {
 }
 
 export type AssignableUser = {
-  userId: string | number
+  userId: number
   userName: string
+  hasOwnershipTransfer: boolean
+  hasMortgageRegistration: boolean
 }
 
 export type Row = {

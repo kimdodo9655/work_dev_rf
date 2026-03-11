@@ -104,7 +104,7 @@ export type RegistryApplicationRole = 'MAIN' | 'LINKED'
 export type ActionType = 'ADD' | 'MODIFY' | 'DELETE'
 
 /** 등기 방법 */
-export type RegistryMethod = 'ONLINE' | 'OFFLINE'
+export type RegistryMethod = 'ELECTRONIC' | 'E_FORM' | 'PAPER'
 
 // ============================================================================
 // 공통 엔티티
@@ -158,6 +158,7 @@ export interface PartyItem {
 /** 부동산 정보 */
 export interface PropertyInfo {
   propertyClassification?: string
+  propertyType?: PropertyType
   propertyCount?: number
   propertyAddress?: string
   propertyArea?: number
@@ -169,6 +170,8 @@ export interface ObligorInfo {
   obligorCount?: number
   eSignatureStatus?: string
   certificateStatus?: string
+  obligorEcertificateType?: EcertificateType
+  obligorCertificateType?: CertificateType
   addressChangeCount?: number
 }
 
@@ -449,6 +452,14 @@ export interface FilingFeeRequest {
 /** 등록면허세 응답 */
 export interface FilingFeeResponse {
   applicationId?: number
+  registryType?:
+    | 'OWNERSHIP_TRANSFER'
+    | 'MORTGAGE'
+    | 'SURFACE_RIGHT'
+    | 'CHANGE'
+    | 'CORRECTION'
+    | 'MORTGAGE_CANCELLATION'
+    | 'SURFACE_RIGHT_CANCELLATION'
   paymentStatus?: 'PAYMENT' | 'EXEMPTION'
   exemptionReason?: string
   registryMethod?: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
@@ -509,6 +520,8 @@ export interface RegistryProgressTaxInfoResponse {
 export interface BondPropertyItem {
   /** 부동산 고유번호 */
   propertyId: string
+  /** 부동산고유번호 */
+  propertyUniqueNumber?: string
   request: BondPropertyUpdateRequest
 }
 

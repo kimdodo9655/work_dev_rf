@@ -107,7 +107,11 @@
                   @change.stop="(e) => onAdminSelectChange(r.registryManagementNumber, e)"
                 >
                   <option value="" disabled>미배정</option>
-                  <option v-for="u in assignableUsers" :key="u.userId" :value="String(u.userId)">
+                  <option
+                    v-for="u in getRowAssignableUsers(r.assignedWork)"
+                    :key="u.userId"
+                    :value="String(u.userId)"
+                  >
                     {{ u.userName }}
                   </option>
                 </select>
@@ -158,6 +162,7 @@ import SearchInput from '@/components/template/input/SearchInput.vue'
 import SearchSelect from '@/components/template/input/SearchSelect.vue'
 import Pagination from '@/components/template/PaginationItem.vue'
 import { useCaseStatusList } from '@/features/registration/composables/useCaseStatusList'
+import { getAssignableUsers } from '@/utils/assignable-user'
 
 const router = useRouter()
 const {
@@ -193,6 +198,10 @@ const {
   isUnassigned,
   displayAddress
 } = useCaseStatusList()
+
+function getRowAssignableUsers(assignedWork: string) {
+  return getAssignableUsers(assignedWork, assignableUsers.value)
+}
 
 function goDetail(registryManagementNumber: string) {
   router.push({ name: 'RegistrationDetail', params: { caseId: registryManagementNumber } })

@@ -8,7 +8,7 @@
  * @generated 2025-01-27
  */
 
-import type { BranchPrepaidCardResponse } from './common.types'
+import type { BranchPrepaidCardResponse, BranchRegistryCredentialResponse } from './common.types'
 
 /**
  * R02F-01
@@ -89,6 +89,7 @@ export interface RegistryApplicationPropertyReplaceRequest {
 export interface RegistryApplicationPropertyResponse {
   items?: RegistryApplicationPropertyItemResponse[]
   prepaidCardOptions?: BranchPrepaidCardResponse[]
+  credentialOptions?: BranchRegistryCredentialResponse[]
   /** 접수 등기소 옵션 목록 */
   receiptOfficesOptions?: RegistryReceiptOfficeOption[]
 }

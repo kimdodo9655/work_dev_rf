@@ -274,9 +274,11 @@ export interface CorrectionApplicantInfoResponse {
 }
 
 export interface MortgageFinancialSaveResponse {
+  bondPurchaseType?: 'PURCHASE' | 'DISCOUNT' | 'EXEMPTION'
   bondPurchaseAmount?: number
   bondExemptionReason?: string
   housingBondNumber?: string
+  maximumCreditAmount?: number
   registryType?:
     | 'OWNERSHIP_TRANSFER'
     | 'MORTGAGE'
@@ -287,7 +289,13 @@ export interface MortgageFinancialSaveResponse {
     | 'SURFACE_RIGHT_CANCELLATION'
   taxTotalAmount?: number
   taxPaymentStatus?: 'PAYMENT' | 'EXEMPTION'
+  taxExemptionReason?: string
+  registrationLicenseTax?: number
+  educationTax?: number
+  ruralSpecialTax?: number
   filingFeeAmount?: number
+  filingFeePaymentStatus?: 'PAYMENT' | 'EXEMPTION'
+  filingFeeExemptionReason?: string
   filingFeeRegistryCount?: number
   filingFeeRegistryMethod?: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
   properties?: PropertyBondSummary[]

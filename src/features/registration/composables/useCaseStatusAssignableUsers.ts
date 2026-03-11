@@ -7,6 +7,7 @@ import { type ComputedRef, ref, watch } from 'vue'
 
 import { userAPI } from '@/api/services/user'
 import type { GetAssignableUsersQuery } from '@/types'
+import type { UserAssignableResponse } from '@/types/api/user.types'
 import { UserRoleLevel } from '@/types/store'
 
 import { type AssignableUser, type CaseStatusFilters } from './caseStatus.types'
@@ -59,6 +60,17 @@ export function useCaseStatusAssignableUsers({
     }
   }
 
+  function normalizeAssignableUser(user: UserAssignableResponse): AssignableUser | null {
+    if (typeof user.userId !== 'number' || !user.userName) return null
+
+    return {
+      userId: user.userId,
+      userName: user.userName,
+      hasOwnershipTransfer: Boolean(user.hasOwnershipTransfer),
+      hasMortgageRegistration: Boolean(user.hasMortgageRegistration)
+    }
+  }
+
   async function loadAssignableUsers() {
     assignableLoading.value = true
     assignableError.value = ''
@@ -70,13 +82,17 @@ export function useCaseStatusAssignableUsers({
       const payload = unwrap<any>(response)
       const root = payload?.result ?? payload
 
-      const users: AssignableUser[] = Array.isArray(root)
+      const rawUsers: UserAssignableResponse[] = Array.isArray(root)
         ? root
         : Array.isArray(root?.content)
           ? root.content
           : Array.isArray(root?.items)
             ? root.items
             : []
+
+      const users = rawUsers
+        .map((user) => normalizeAssignableUser(user))
+        .filter((user): user is AssignableUser => user !== null)
 
       assignableUsers.value = users
       ensureUserDefaultManager(users)

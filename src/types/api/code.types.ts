@@ -355,6 +355,8 @@ export type GetNoticeCategoryResponse = Code[]
  * 주로 초기 로딩 시 모든 코드를 한 번에 불러올 때 사용
  */
 export interface CodeResponse {
+  code?: string
+  description?: string
   /** [P06-01] 기관 구분 목록 */
   organizationTypes: Code[]
   /** [P06-02] 기관 상태 목록 */
@@ -452,7 +454,7 @@ export interface CodeResponse {
 /**
  * 공통코드 키 타입
  */
-export type CodeKey = keyof CodeResponse
+export type CodeKey = Exclude<keyof CodeResponse, 'code' | 'description'>
 
 /**
  * 공통코드 맵 타입 (빠른 조회를 위한 Map)

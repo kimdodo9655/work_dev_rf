@@ -93,6 +93,16 @@ export interface ApplicationReceiptListItem {
     | 'CORRECTION'
     | 'MORTGAGE_CANCELLATION'
     | 'SURFACE_RIGHT_CANCELLATION'
+  /** 등기원인 */
+  registryCause?:
+    | 'TRADE'
+    | 'ESTABLISHMENT_CONTRACT'
+    | 'ADDRESS_CHANGE'
+    | 'ROAD_NAME_ADDRESS'
+    | 'APPLICATION_ERROR'
+    | 'TERMINATION'
+    | 'NAME_CHANGE'
+    | 'REGISTRATION_NUMBER'
   /** 등기진행방식 */
   registryMethod?: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
   /** 접수등기소 */

@@ -201,6 +201,8 @@ export interface EtaxRegistrationTaskRequest {
 export interface FullCertificateTaskRequest {
   /** 부동산 고유번호 */
   propertyUniqueNumber: string
+  /** 등기소 인증정보 ID */
+  credentialId?: number
   /** 카드 번호 */
   cardNumber: string
 }
@@ -215,6 +217,8 @@ export interface TaxAutoFillTaskRequest {
 export interface PropertyDescriptionTaskRequest {
   /** 부동산 고유번호 */
   propertyUniqueNumber: string
+  /** 부동산 구분 */
+  propertyType?: 'LAND' | 'BUILDING' | 'COLLECTIVE_BUILDING'
 }
 
 /** 등기신청서 작성 작업 요청 */
@@ -231,6 +235,8 @@ export interface RegistrationCaseQueryTaskRequest {
   propertyUniqueNumber: string
   /** 신청인고유ID */
   progressPartyId: number
+  /** 등기권리자ID */
+  progressPropertyOwnerId?: number
 }
 
 /** 등기필정보 비밀번호 조회 작업 요청 */

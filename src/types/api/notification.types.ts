@@ -73,6 +73,8 @@ export interface NotificationDetailResponse {
   notificationType?: '등기견적' | '등기진행' | '등기완료' | '등기반려'
   /** 등기신청번호 */
   registryRequestNumber?: string
+  /** 등기관리번호 */
+  registryManagementNumber?: string
   /** 알림메세지 내용 */
   message?: string
   /** 발생일시 (yyyy-MM-dd HH:mm:ss) */

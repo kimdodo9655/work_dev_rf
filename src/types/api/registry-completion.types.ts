@@ -11,6 +11,7 @@
 import type {
   ApiResultVoid,
   BranchPrepaidCardResponse,
+  BranchRegistryCredentialResponse,
   DocumentDownloadBase64Response,
   DocumentSaveResponse
 } from './common.types'
@@ -189,6 +190,8 @@ export interface FullCertificateItem {
   propertyAddress?: string
   /** 선불지급수단 옵션 목록 */
   prepaidCardOptions?: BranchPrepaidCardResponse[]
+  /** 등기소 인증정보 옵션 목록 */
+  branchCredentialOptions?: BranchRegistryCredentialResponse[]
   /** 파일경로 (업로드된 경우) */
   fileName?: string
 }

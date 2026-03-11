@@ -254,6 +254,8 @@ export interface ObligeeInfo {
   obligeeCount?: number
   /** 전자서명 상태 */
   eSignatureStatus?: string
+  /** 전자증명서 구분 */
+  obligeeEcertificateType?: 'OWNED' | 'DELEGATED' | 'NONE'
   /** 주택수 */
   houseCount?: number
   /** 세금 감면 유형 */
@@ -274,11 +276,32 @@ export interface PublicChargeDetails {
 /** 등기 기본 정보 */
 export interface RegistryInfo {
   /** 등기유형 */
+  registryType?:
+    | 'OWNERSHIP_TRANSFER'
+    | 'MORTGAGE'
+    | 'SURFACE_RIGHT'
+    | 'CHANGE'
+    | 'CORRECTION'
+    | 'MORTGAGE_CANCELLATION'
+    | 'SURFACE_RIGHT_CANCELLATION'
+  /** 등기원인 */
+  registryCause?:
+    | 'TRADE'
+    | 'ESTABLISHMENT_CONTRACT'
+    | 'ADDRESS_CHANGE'
+    | 'ROAD_NAME_ADDRESS'
+    | 'APPLICATION_ERROR'
+    | 'TERMINATION'
+    | 'NAME_CHANGE'
+    | 'REGISTRATION_NUMBER'
+  /** 등기유형 */
   workTypeDescription?: string
   /** 매매금액 */
   tradeAmount?: number
   /** 잔금일자 */
   balanceDueDate?: string
+  /** 등기방식 */
+  registryMethod?: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
   /** 등기방식 설명 */
   registryMethodDescription?: string
 }
