@@ -74,6 +74,8 @@
 <script setup lang="ts">
 import { onUnmounted, ref } from 'vue'
 
+import { logger } from '@/utils/logger'
+
 // 타입 정의
 interface TestResult {
   data: any
@@ -344,7 +346,7 @@ const executeRPA = async () => {
           startPolling()
         }
       } catch (e) {
-        console.error('데이터 파싱 에러:', e)
+        logger.error('[RPA_TEST_PANEL] Response parse failed', { error: e })
       }
     }
 
@@ -359,7 +361,7 @@ const executeRPA = async () => {
     }
 
     socket.onclose = () => {
-      console.log('웹소켓 연결이 종료되었습니다.')
+      logger.debug('[RPA_TEST_PANEL] WebSocket closed')
     }
   } catch (error) {
     rpaResult.value = {

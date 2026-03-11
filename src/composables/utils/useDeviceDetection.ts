@@ -41,9 +41,9 @@ export const useDeviceDetection = () => {
     const { isMobile, isMacOS } = detectDevice()
 
     if (isMobile) {
-      router.push('/error/mobile')
+      router.push({ name: 'ErrorMobile' })
     } else if (isMacOS) {
-      router.push('/error/mac-os')
+      router.push({ name: 'ErrorMacOS' })
     }
   }
 

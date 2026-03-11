@@ -17,6 +17,7 @@ import type {
   RoleLevelCodeMap,
   SelectOption
 } from '@/types'
+import { extractArrayByKeys } from '@/utils/apiPayload'
 import { logger } from '@/utils/logger'
 
 // ──────────────────────────────────────────────────────
@@ -199,34 +200,19 @@ export function useCodes() {
 
   // ── 내부 헬퍼: API 응답을 배열로 정규화 ───────────
   function toList(payload: unknown): unknown[] {
-    if (Array.isArray(payload)) return payload
-    if (!payload || typeof payload !== 'object') return []
+    return extractArrayByKeys(payload, ['codes', 'items', 'content'])
+  }
 
-    const maybe = payload as Record<string, unknown>
-    if (Array.isArray(maybe.data)) return maybe.data
-    if (Array.isArray(maybe.codes)) return maybe.codes
-    if (Array.isArray(maybe.items)) return maybe.items
-    if (Array.isArray(maybe.content)) return maybe.content
-    if (Array.isArray(maybe.result)) return maybe.result
+  function normalizeCategoryList<K extends CodeKey>(
+    _category: K,
+    payload: unknown
+  ): CodeResponse[K] {
+    const list = toList(payload)
+    return list as CodeResponse[K]
+  }
 
-    const data = maybe.data
-    if (data && typeof data === 'object') {
-      const dataObj = data as Record<string, unknown>
-      if (Array.isArray(dataObj.codes)) return dataObj.codes
-      if (Array.isArray(dataObj.items)) return dataObj.items
-      if (Array.isArray(dataObj.content)) return dataObj.content
-      if (Array.isArray(dataObj.result)) return dataObj.result
-    }
-
-    const nested = maybe.result
-    if (nested && typeof nested === 'object') {
-      const resultObj = nested as Record<string, unknown>
-      if (Array.isArray(resultObj.codes)) return resultObj.codes
-      if (Array.isArray(resultObj.items)) return resultObj.items
-      if (Array.isArray(resultObj.content)) return resultObj.content
-    }
-
-    return []
+  function setCategoryCodes<K extends CodeKey>(category: K, payload: unknown) {
+    codes.value[category] = normalizeCategoryList(category, payload)
   }
 
   // ── 개별 카테고리 fetch ───────────────────────────
@@ -238,7 +224,7 @@ export function useCodes() {
       logger.info('[CODES] Fetching codes by category', { category })
 
       const res = await API_METHOD_MAP[category]()
-      codes.value[category] = toList(res) as any
+      setCategoryCodes(category, res)
 
       logger.info('[CODES] Codes loaded successfully', { category })
       return codes.value[category]
@@ -274,7 +260,7 @@ export function useCodes() {
         if (!entry) return
         const [key] = entry
         if (result.status === 'fulfilled') {
-          codes.value[key] = toList(result.value) as any
+          setCategoryCodes(key, result.value)
           successCount += 1
         } else {
           logger.warn('[CODES] Failed to fetch category', { key, reason: result.reason })

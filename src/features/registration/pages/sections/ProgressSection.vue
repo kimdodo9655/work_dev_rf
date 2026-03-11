@@ -126,6 +126,7 @@ import type {
   ReceiptSummaryItem,
   Row as TaxAgencyRow
 } from '@/types'
+import { extractArrayByKeys, extractRecordByKeys } from '@/utils/apiPayload'
 
 import CaseDelegationCompleteProgressItem from './progress/CaseDelegationCompleteProgressItem.vue'
 import CaseInquiryProgressItem from './progress/CaseInquiryProgressItem.vue'
@@ -162,6 +163,11 @@ interface ESignatureItem {
   verificationResult: string | null
   registryType: string
   documents: any[]
+}
+
+interface CompletionDetailPayload {
+  fullCertificates?: FullCertificateItem[]
+  postCertificates?: PostCertificateItem[]
 }
 
 const props = defineProps<Props>()
@@ -254,12 +260,6 @@ const fullCertificateRows = ref<FullCertificateItem[]>([])
 const postCertificateRows = ref<PostCertificateItem[]>([])
 const completionDetailThrottle = useThrottle(1000)
 
-function unwrapData<T>(res: any): T {
-  if (res?.data && typeof res.data === 'object' && 'data' in res.data) return res.data.data as T
-  if (res && typeof res === 'object' && 'data' in res) return res.data as T
-  return undefined as unknown as T
-}
-
 // 전자서명 상태에 따른 CSS 클래스
 function getSignatureStatusClass(status: string): string {
   const statusMap: Record<string, string> = {
@@ -273,7 +273,7 @@ function getSignatureStatusClass(status: string): string {
 
 function handleDetail(item: ESignatureItem) {
   // TODO: 상세 페이지 이동 또는 모달 열기
-  console.log('전자서명 상세 보기:', item)
+  void item
 }
 
 async function fetchMortgageSignatures() {
@@ -287,13 +287,12 @@ async function fetchMortgageSignatures() {
     mortgageLoading.value = true
     mortgageErrorMessage.value = ''
     try {
-      const res: any = await registrySignatureAPI.getDetail({
+      const res = await registrySignatureAPI.getDetail({
         registryManagementNumber: props.registryManagementNumber,
         registryType: 'MORTGAGE_REGISTRATION'
       })
-      const data = unwrapData<ESignatureItem[]>(res)
-      mortgageList.value = Array.isArray(data) ? data : []
-    } catch (e: any) {
+      mortgageList.value = extractArrayByKeys<ESignatureItem>(res, ['items', 'content'])
+    } catch (e: unknown) {
       mortgageList.value = []
       mortgageErrorMessage.value = getErrorMessage(e)
     } finally {
@@ -315,13 +314,12 @@ async function fetchTransferSignatures() {
     transferLoading.value = true
     transferErrorMessage.value = ''
     try {
-      const res: any = await registrySignatureAPI.getDetail({
+      const res = await registrySignatureAPI.getDetail({
         registryManagementNumber: props.registryManagementNumber,
         registryType: 'OWNERSHIP_TRANSFER'
       })
-      const data = unwrapData<ESignatureItem[]>(res)
-      transferList.value = Array.isArray(data) ? data : []
-    } catch (e: any) {
+      transferList.value = extractArrayByKeys<ESignatureItem>(res, ['items', 'content'])
+    } catch (e: unknown) {
       transferList.value = []
       transferErrorMessage.value = getErrorMessage(e)
     } finally {
@@ -343,12 +341,11 @@ async function fetchTaxAgencyList() {
     taxLoading.value = true
     taxErrorMessage.value = ''
     try {
-      const res: any = await registryTaxReportAPI.getList({
+      const res = await registryTaxReportAPI.getList({
         registryManagementNumber: props.registryManagementNumber
       })
-      const data = unwrapData<{ rows?: TaxAgencyRow[] }>(res)
-      taxRows.value = Array.isArray(data?.rows) ? data.rows : []
-    } catch (e: any) {
+      taxRows.value = extractArrayByKeys<TaxAgencyRow>(res, ['rows', 'items', 'content'])
+    } catch (e: unknown) {
       taxRows.value = []
       taxErrorMessage.value = getErrorMessage(e)
     } finally {
@@ -370,12 +367,15 @@ async function fetchHousingBondList() {
     housingBondLoading.value = true
     housingBondErrorMessage.value = ''
     try {
-      const res: any = await registryHousingBondAPI.getList({
+      const res = await registryHousingBondAPI.getList({
         registryManagementNumber: props.registryManagementNumber
       })
-      const data = unwrapData<{ rows?: HousingBondListRow[] }>(res)
-      housingBondRows.value = Array.isArray(data?.rows) ? data.rows : []
-    } catch (e: any) {
+      housingBondRows.value = extractArrayByKeys<HousingBondListRow>(res, [
+        'rows',
+        'items',
+        'content'
+      ])
+    } catch (e: unknown) {
       housingBondRows.value = []
       housingBondErrorMessage.value = getErrorMessage(e)
     } finally {
@@ -397,12 +397,14 @@ async function fetchLoanAccountList() {
     loanAccountLoading.value = true
     loanAccountErrorMessage.value = ''
     try {
-      const res: any = await registryLoanAccountAPI.getList({
+      const res = await registryLoanAccountAPI.getList({
         registryManagementNumber: props.registryManagementNumber
       })
-      const data = unwrapData<{ items?: LoanPaymentAccountListItem[] }>(res)
-      loanAccountRows.value = Array.isArray(data?.items) ? data.items : []
-    } catch (e: any) {
+      loanAccountRows.value = extractArrayByKeys<LoanPaymentAccountListItem>(res, [
+        'items',
+        'content'
+      ])
+    } catch (e: unknown) {
       loanAccountRows.value = []
       loanAccountErrorMessage.value = getErrorMessage(e)
     } finally {
@@ -424,12 +426,15 @@ async function fetchTransferCertificateList() {
     transferCertificateLoading.value = true
     transferCertificateErrorMessage.value = ''
     try {
-      const res: any = await registryTransferCertificateAPI.getList({
+      const res = await registryTransferCertificateAPI.getList({
         registryManagementNumber: props.registryManagementNumber
       })
-      const data = unwrapData<{ certificates?: CancellationCertificateListItem[] }>(res)
-      transferCertificateRows.value = Array.isArray(data?.certificates) ? data.certificates : []
-    } catch (e: any) {
+      transferCertificateRows.value = extractArrayByKeys<CancellationCertificateListItem>(res, [
+        'certificates',
+        'items',
+        'content'
+      ])
+    } catch (e: unknown) {
       transferCertificateRows.value = []
       transferCertificateErrorMessage.value = getErrorMessage(e)
     } finally {
@@ -451,12 +456,15 @@ async function fetchCaseInquiryList() {
     caseInquiryLoading.value = true
     caseInquiryErrorMessage.value = ''
     try {
-      const res: any = await registryCaseAPI.getList({
+      const res = await registryCaseAPI.getList({
         registryManagementNumber: props.registryManagementNumber
       })
-      const data = unwrapData<{ caseInquiry?: CaseInquiryListItem[] }>(res)
-      caseInquiryRows.value = Array.isArray(data?.caseInquiry) ? data.caseInquiry : []
-    } catch (e: any) {
+      caseInquiryRows.value = extractArrayByKeys<CaseInquiryListItem>(res, [
+        'caseInquiry',
+        'items',
+        'content'
+      ])
+    } catch (e: unknown) {
       caseInquiryRows.value = []
       caseInquiryErrorMessage.value = getErrorMessage(e)
     } finally {
@@ -478,12 +486,15 @@ async function fetchReceiptList() {
     receiptLoading.value = true
     receiptErrorMessage.value = ''
     try {
-      const res: any = await registryReceiptAPI.getList({
+      const res = await registryReceiptAPI.getList({
         registryManagementNumber: props.registryManagementNumber
       })
-      const data = unwrapData<{ applicationReceipt?: ApplicationReceiptListItem[] }>(res)
-      receiptRows.value = Array.isArray(data?.applicationReceipt) ? data.applicationReceipt : []
-    } catch (e: any) {
+      receiptRows.value = extractArrayByKeys<ApplicationReceiptListItem>(res, [
+        'applicationReceipt',
+        'items',
+        'content'
+      ])
+    } catch (e: unknown) {
       receiptRows.value = []
       receiptErrorMessage.value = getErrorMessage(e)
     } finally {
@@ -505,12 +516,15 @@ async function fetchReceiptDocumentList() {
     receiptDocumentLoading.value = true
     receiptDocumentErrorMessage.value = ''
     try {
-      const res: any = await registryReceiptDocumentAPI.getList({
+      const res = await registryReceiptDocumentAPI.getList({
         registryManagementNumber: props.registryManagementNumber
       })
-      const data = unwrapData<{ receipts?: ReceiptSummaryItem[] }>(res)
-      receiptDocumentRows.value = Array.isArray(data?.receipts) ? data.receipts : []
-    } catch (e: any) {
+      receiptDocumentRows.value = extractArrayByKeys<ReceiptSummaryItem>(res, [
+        'receipts',
+        'items',
+        'content'
+      ])
+    } catch (e: unknown) {
       receiptDocumentRows.value = []
       receiptDocumentErrorMessage.value = getErrorMessage(e)
     } finally {
@@ -532,12 +546,15 @@ async function fetchCompletionList() {
     completionListLoading.value = true
     completionListErrorMessage.value = ''
     try {
-      const res: any = await registryCompletionAPI.getList({
+      const res = await registryCompletionAPI.getList({
         registryManagementNumber: props.registryManagementNumber
       })
-      const data = unwrapData<{ completeDocument?: CompleteDocumentListItem[] }>(res)
-      completionListRows.value = Array.isArray(data?.completeDocument) ? data.completeDocument : []
-    } catch (e: any) {
+      completionListRows.value = extractArrayByKeys<CompleteDocumentListItem>(res, [
+        'completeDocument',
+        'items',
+        'content'
+      ])
+    } catch (e: unknown) {
       completionListRows.value = []
       completionListErrorMessage.value = getErrorMessage(e)
     } finally {
@@ -560,16 +577,16 @@ async function fetchCompletionDetail() {
     completionDetailLoading.value = true
     completionDetailErrorMessage.value = ''
     try {
-      const res: any = await registryCompletionAPI.getDetail({
+      const res = await registryCompletionAPI.getDetail({
         registryManagementNumber: props.registryManagementNumber
       })
-      const data = unwrapData<{
-        fullCertificates?: FullCertificateItem[]
-        postCertificates?: PostCertificateItem[]
-      }>(res)
+      const data = extractRecordByKeys<CompletionDetailPayload>(res, [
+        'fullCertificates',
+        'postCertificates'
+      ])
       fullCertificateRows.value = Array.isArray(data?.fullCertificates) ? data.fullCertificates : []
       postCertificateRows.value = Array.isArray(data?.postCertificates) ? data.postCertificates : []
-    } catch (e: any) {
+    } catch (e: unknown) {
       fullCertificateRows.value = []
       postCertificateRows.value = []
       completionDetailErrorMessage.value = getErrorMessage(e)

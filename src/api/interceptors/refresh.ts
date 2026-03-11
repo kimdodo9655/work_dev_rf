@@ -7,6 +7,10 @@ import axios from 'axios'
 
 import { API } from '@/api/endpoints'
 import { useAuthStore } from '@/stores/auth'
+import type { TokenRefreshResponse } from '@/types'
+import { shouldSkipAutoRefreshRequest } from '@/utils/authInterceptorRules'
+import { extractTokenRefreshPayload } from '@/utils/authPayload'
+import { createBrowserBroadcastChannel } from '@/utils/browser'
 import { ENV } from '@/utils/env'
 import { logger } from '@/utils/logger'
 import { storage } from '@/utils/storage'
@@ -15,14 +19,23 @@ let refreshPromise: Promise<void> | null = null
 let lastRefreshTime = 0
 const REFRESH_COOLDOWN = 60 * 10000
 
-const authChannel =
-  typeof window !== 'undefined' ? new BroadcastChannel('auth-refresh-channel') : null
+const authChannel = createBrowserBroadcastChannel('auth-refresh-channel')
+
+type AuthRefreshChannelMessage =
+  | { type: 'REFRESH_FAIL' }
+  | { type: 'REFRESH_SUCCESS'; tokens?: TokenRefreshResponse }
 
 authChannel?.addEventListener('message', (event) => {
-  const { type } = event.data || {}
+  const message = (event.data ?? {}) as AuthRefreshChannelMessage
+  const { type } = message
 
   if (type === 'REFRESH_SUCCESS') {
     lastRefreshTime = Date.now()
+    const syncedTokens = extractTokenRefreshPayload(message.tokens)
+    if (syncedTokens) {
+      storage.updateTokens(syncedTokens)
+      useAuthStore().updateTokens(syncedTokens)
+    }
     logger.info('[AUTH][BC] Refresh success synced from another tab')
   }
 
@@ -32,10 +45,8 @@ authChannel?.addEventListener('message', (event) => {
 })
 
 export function shouldSkipAutoRefresh(url: string | undefined): boolean {
-  if (!url) return true
-
   const skipUrls = [API.AUTH.LOGIN, API.AUTH.LOGOUT, API.AUTH.REFRESH]
-  return skipUrls.some((skipUrl) => url.includes(skipUrl))
+  return shouldSkipAutoRefreshRequest(url, skipUrls)
 }
 
 export async function runRefreshOnce({
@@ -61,13 +72,16 @@ export async function runRefreshOnce({
       logger.info('[REFRESH] Refresh started', { ignoreCooldown })
 
       const { data } = await axios.post(`${ENV.API_BASE_URL}${API.AUTH.REFRESH}`, { refreshToken })
-      const newTokens = data.data
+      const newTokens = extractTokenRefreshPayload(data)
+      if (!newTokens) {
+        throw new Error('Invalid refresh response')
+      }
 
       storage.updateTokens(newTokens)
       useAuthStore().updateTokens(newTokens)
 
       lastRefreshTime = Date.now()
-      authChannel?.postMessage({ type: 'REFRESH_SUCCESS' })
+      authChannel?.postMessage({ type: 'REFRESH_SUCCESS', tokens: newTokens })
       logger.info('[REFRESH] Refresh success')
     } catch (error) {
       authChannel?.postMessage({ type: 'REFRESH_FAIL' })

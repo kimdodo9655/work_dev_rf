@@ -39,13 +39,8 @@ import { bankAPI } from '@/api/services/bank'
 import { useDialog } from '@/composables/utils/useDialog'
 import { useAuthStore } from '@/stores/auth'
 import type { BankResponse } from '@/types'
+import { extractArrayByKeys } from '@/utils/apiPayload'
 import { logger } from '@/utils/logger'
-
-/** axios 응답({data}) / DTO 응답(그 자체) 둘 다 지원 */
-function unwrap<T>(res: any): T {
-  if (res && typeof res === 'object' && 'data' in res) return res.data as T
-  return res as T
-}
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -62,21 +57,7 @@ const { data: bankResponse } = useQuery({
 
 // 금융기관 목록
 const banks = computed<BankResponse[]>(() => {
-  const payload = unwrap<any>(bankResponse.value)
-
-  if (!payload) return []
-
-  // 케이스1) 바로 배열
-  if (Array.isArray(payload)) return payload as BankResponse[]
-
-  // 케이스2) { banks: [] }
-  if (Array.isArray(payload?.banks)) return payload.banks as BankResponse[]
-
-  // 케이스3) { result: { banks: [] } } 같은 래핑
-  if (Array.isArray(payload?.result?.banks)) return payload.result.banks as BankResponse[]
-  if (Array.isArray(payload?.result)) return payload.result as BankResponse[]
-
-  return []
+  return extractArrayByKeys<BankResponse>(bankResponse.value, ['banks'])
 })
 
 // ============================================================================
@@ -130,6 +111,6 @@ const handleConfirmSelection = async () => {
   })
 
   authStore.setBankCode(selectedBank.code)
-  router.push('/dashboard')
+  router.push({ name: 'Dashboard' })
 }
 </script>

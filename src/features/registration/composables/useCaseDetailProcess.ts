@@ -17,6 +17,7 @@ import type {
   ProcessStepResponse,
   RegistryProgressProcessResponse
 } from '@/types'
+import { extractRecordByKeys } from '@/utils/apiPayload'
 
 interface ProcessScrollTarget {
   accordion: AccordionKey
@@ -77,6 +78,7 @@ export function useCaseDetailProcess({
   openMap: Ref<Record<AccordionKey, boolean>>
   showAdminSection: Ref<boolean>
 }) {
+  // 역할: 진행 프로세스 조회 / 액션 실행 / 대상 섹션 스크롤
   const { getErrorMessage } = useErrorHandler()
   const { extractApiSuccessContent, extractApiErrorContent } = useApiAlert()
   const { findReplacement } = useCodeReplacer()
@@ -89,6 +91,7 @@ export function useCaseDetailProcess({
   const isChangingProcess = ref(false)
 
   const processItems = computed<WorkProcessItem[]>(() => {
+    // 기준: API step 목록 -> 화면 표시 모델
     const steps = processData.value?.steps ?? []
     return steps.map((step, index) => {
       const actions = step.actions ?? []
@@ -123,6 +126,7 @@ export function useCaseDetailProcess({
   }
 
   async function scrollToProcessTarget(statusCode: string, retry = 0): Promise<void> {
+    // 규칙: 대상 accordion이 닫혀 있으면 먼저 연다.
     const target = PROCESS_SCROLL_TARGET_MAP[statusCode]
     if (!target) return
 
@@ -147,6 +151,7 @@ export function useCaseDetailProcess({
       : `[data-scroll-id="accordion-${target.accordion}"]`
     const element = document.querySelector<HTMLElement>(selector)
     if (!element) {
+      // 규칙: 비동기 렌더링 구간 고려 / 제한 횟수 재시도
       if (retry < 8) {
         window.setTimeout(() => {
           void scrollToProcessTarget(statusCode, retry + 1)
@@ -185,18 +190,13 @@ export function useCaseDetailProcess({
       .filter(Boolean)
   }
 
-  function unwrapProcessData(payload: unknown): RegistryProgressProcessResponse | null {
-    if (!payload || typeof payload !== 'object') return null
-
-    const withData = payload as { data?: unknown; steps?: unknown }
-    if (Array.isArray(withData.steps)) return payload as RegistryProgressProcessResponse
-    if (withData.data && typeof withData.data === 'object') {
-      return withData.data as RegistryProgressProcessResponse
-    }
-    return null
+  function extractProcessData(payload: unknown): RegistryProgressProcessResponse | null {
+    // 기준: steps 키가 있는 payload만 유효
+    return extractRecordByKeys<RegistryProgressProcessResponse>(payload, ['steps']) ?? null
   }
 
   function findCurrentStepId(data: RegistryProgressProcessResponse | null): string {
+    // 우선순위: isCurrentStep -> currentStatus 일치 -> 첫 번째 step
     if (!data?.steps || data.steps.length === 0) return ''
     const current =
       data.steps.find((step) => step.isCurrentStep) ??
@@ -219,7 +219,7 @@ export function useCaseDetailProcess({
       const response = await registryProgressAPI.process({
         registryManagementNumber: registryManagementNumber.value
       })
-      const data = unwrapProcessData(response)
+      const data = extractProcessData(response)
       processData.value = data
       openedProcessId.value = findCurrentStepId(data)
     } catch (error) {
@@ -235,6 +235,7 @@ export function useCaseDetailProcess({
   }
 
   async function handleProcessActionClick(item: WorkProcessActionItem) {
+    // 규칙: 중복 상태 변경 요청 금지
     if (isChangingProcess.value) return
 
     if (!item.nextStatus) {

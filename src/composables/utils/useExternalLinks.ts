@@ -9,6 +9,7 @@
  */
 
 import { EXTERNAL_LINKS } from '@/constants/externalLinks'
+import { browserLocation, browserWindow } from '@/utils/browser'
 
 export const useExternalLinks = () => {
   // ============================================================================
@@ -20,9 +21,9 @@ export const useExternalLinks = () => {
    */
   const openLink = (url: string, newTab = true) => {
     if (newTab) {
-      window.open(url, '_blank', 'noopener,noreferrer')
+      browserWindow.open(url, '_blank', 'noopener,noreferrer')
     } else {
-      window.location.href = url
+      browserLocation.assign(url)
     }
   }
 

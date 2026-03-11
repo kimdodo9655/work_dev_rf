@@ -19,6 +19,7 @@ import {
   formatPercent,
   formatPhone
 } from '@/utils/format'
+import { logger } from '@/utils/logger'
 
 type MessageParams = Record<string, string | number>
 
@@ -62,7 +63,7 @@ export function useMessage() {
     for (const k of keys) {
       value = value?.[k]
       if (value === undefined) {
-        console.warn(`[useMessage] 메시지를 찾을 수 없습니다: ${key}`)
+        logger.warn('[USE_MESSAGE] Missing message key', { key })
         return key
       }
     }

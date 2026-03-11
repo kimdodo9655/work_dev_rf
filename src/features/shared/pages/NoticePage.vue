@@ -47,6 +47,7 @@ import { onMounted, ref, watch } from 'vue'
 import { noticeAPI } from '@/api/services/notice'
 import Pagination from '@/components/template/PaginationItem.vue'
 import type { NoticeResponse, SearchNoticesQuery } from '@/types'
+import { logger } from '@/utils/logger'
 
 const notices = ref<NoticeResponse[]>([])
 const isLoading = ref(false)
@@ -134,7 +135,7 @@ async function fetchNotices() {
     notices.value = payload.content
     totalItems.value = payload.totalElements
   } catch (error) {
-    console.error('[NOTICE] Failed to fetch notice list', error)
+    logger.error('[NOTICE] Failed to fetch notice list', { error })
     // 검색 API 실패 시 메인 상위 5개 API로 폴백
     try {
       const fallback = await noticeAPI.getList()

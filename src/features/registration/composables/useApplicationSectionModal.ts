@@ -5,11 +5,14 @@
 
 import { computed, type Ref, ref } from 'vue'
 
+import { logger } from '@/utils/logger'
+
 export function useApplicationSectionModal({
   activeApplicationId
 }: {
   activeApplicationId: Ref<number | undefined>
 }) {
+  // 역할: 신청서 섹션 모달 / 등기권리증 모달 상태 분리
   const showCertModal = ref(false)
   const certModalApplicationId = ref<number | null>(null)
   const showSectionModal = ref(false)
@@ -20,7 +23,7 @@ export function useApplicationSectionModal({
   function openCertModal() {
     const appId = activeApplicationId.value
     if (!appId) {
-      console.error('applicationId가 없습니다')
+      logger.warn('[APPLICATION_SECTION_MODAL] Missing applicationId for cert modal')
       return
     }
     certModalApplicationId.value = appId
@@ -35,7 +38,7 @@ export function useApplicationSectionModal({
   function openSectionModal(section: { code?: string; title?: string }) {
     const appId = activeApplicationId.value
     if (!appId) {
-      console.error('applicationId가 없습니다')
+      logger.warn('[APPLICATION_SECTION_MODAL] Missing applicationId for section modal')
       return
     }
     sectionModalApplicationId.value = appId
@@ -52,7 +55,7 @@ export function useApplicationSectionModal({
   }
 
   function handleSectionClick(section: { code?: string; title?: string }) {
-    console.log('섹션 클릭:', section)
+    // 분기: OWNER_CERT_INFO는 전용 모달 사용
     if (section.code === 'OWNER_CERT_INFO') {
       openCertModal()
       return

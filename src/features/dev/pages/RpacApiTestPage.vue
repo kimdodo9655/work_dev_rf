@@ -473,6 +473,9 @@ import { userAPI } from '@/api/services/user'
 import { useDialog } from '@/composables/utils/useDialog'
 import { DEV_LOGIN_USERS } from '@/features/dev/constants/devLoginUsers'
 import { useAuthStore } from '@/stores/auth'
+import { extractArrayByKeys, extractPrimaryPayload } from '@/utils/apiPayload'
+import { extractLoginResponsePayload, extractTokenRefreshPayload } from '@/utils/authPayload'
+import { browserStorage } from '@/utils/browser'
 import { ENV } from '@/utils/env'
 import { storage } from '@/utils/storage'
 
@@ -485,7 +488,7 @@ type EndpointConfig = {
   path: string
   pathParams: string[]
   hasBody: boolean
-  defaultBody: Record<string, any> | null
+  defaultBody: JsonObject | null
   requiredFields: string[]
 }
 
@@ -498,7 +501,58 @@ type RpaHttpResponse = {
   status?: string
   result?: string
   message?: string
-  [key: string]: any
+  [key: string]: unknown
+}
+
+type JsonPrimitive = string | number | boolean | null
+type JsonObject = Record<string, unknown>
+type JsonArray = unknown[]
+type JsonValue = JsonPrimitive | JsonObject | JsonArray
+type RpaHttpResultEntry = {
+  isError?: boolean
+  data: JsonValue
+}
+
+interface DevLoginUser {
+  로그인아이디: string
+  기관명: string
+  기관ID: string
+  사용자ID: string
+  이름: string
+  권한값: string | number
+  권한명: string
+  지점ID: string
+  지점명: string
+  이메일인증?: string
+  상태?: string
+}
+
+function isJsonObject(value: unknown): value is JsonObject {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
+}
+
+function toJsonObject(value: unknown): JsonObject | null {
+  return isJsonObject(value) ? value : null
+}
+
+function getErrorMessage(error: unknown, fallback: string): string {
+  return error instanceof Error ? error.message : fallback
+}
+
+function createErrorPayload(message: string): JsonObject {
+  return { error: message }
+}
+
+function createSkippedPayload(message: string): JsonObject {
+  return { skipped: message }
+}
+
+function extractSettledPayload(result: PromiseSettledResult<unknown>): JsonValue {
+  if (result.status === 'fulfilled') {
+    return (extractPrimaryPayload<JsonValue>(result.value) ?? null) as JsonValue
+  }
+
+  return createErrorPayload(getErrorMessage(result.reason, '조회 실패'))
 }
 
 interface Props {
@@ -511,13 +565,13 @@ const props = withDefaults(defineProps<Props>(), {
   externalBankCode: ''
 })
 
-const LOGIN_USERS = DEV_LOGIN_USERS
+const LOGIN_USERS: DevLoginUser[] = DEV_LOGIN_USERS as DevLoginUser[]
 
 const authStore = useAuthStore()
 const { alert } = useDialog()
 const storageData = ref(storage.get())
 const showLoginModal = ref(false)
-const selectedLoginUser = ref<(typeof LOGIN_USERS)[number] | null>(null)
+const selectedLoginUser = ref<DevLoginUser | null>(null)
 const showUserListDropdown = ref(false)
 const loginId = ref('')
 const password = ref('P@ssw0rd1!')
@@ -680,7 +734,7 @@ const selectedEndpoint = computed(
 
 const pathInputByEndpoint = reactive<Record<string, Record<string, string>>>({})
 const bodyByEndpoint = reactive<Record<string, string>>({})
-const responseByEndpoint = reactive<Record<string, any>>({})
+const responseByEndpoint = reactive<Record<string, JsonValue | null>>({})
 const isLoading = reactive<Record<string, boolean>>({})
 
 for (const ep of endpointConfigs) {
@@ -694,10 +748,10 @@ for (const ep of endpointConfigs) {
   isLoading[ep.id] = false
 }
 
-const registryRows = ref<any[]>([])
-const assignableUsers = ref<any[]>([])
-const basicInfo = ref<any>(null)
-const referenceDetails = ref<Record<string, any>>({})
+const registryRows = ref<unknown[]>([])
+const assignableUsers = ref<unknown[]>([])
+const basicInfo = ref<unknown | null>(null)
+const referenceDetails = ref<Record<string, unknown>>({})
 const taskTokens = ref<string[]>([])
 const selectedRegistryManagementNumber = ref('')
 
@@ -716,7 +770,7 @@ const rpaHttpPostData = ref(`{
   "userId": 1,
   "value": "테스트 데이터"
 }`)
-const rpaHttpResult = ref<Record<string, any>>({})
+const rpaHttpResult = ref<Record<string, RpaHttpResultEntry>>({})
 const rpaHttpLoading = reactive({
   get: false,
   post: false,
@@ -735,7 +789,7 @@ const isLikelyIosClient =
 const useRpaHttpMock = ref(isLikelyIosClient)
 let rpaHttpMockStatusCount = 0
 
-const rpaAutoStatus = ref<Record<string, any> | null>(null)
+const rpaAutoStatus = ref<Record<string, JsonValue> | null>(null)
 let rpaAutoPollingInterval: ReturnType<typeof setInterval> | null = null
 let rpaAutoPollingCount = 0
 let rpaAutoCountdownInterval: ReturnType<typeof setInterval> | null = null
@@ -746,7 +800,7 @@ const rpaAutoLastUpdatedAt = ref('')
 const rpaAutoPollingActive = ref(false)
 
 const groupedLoginUsers = computed(() => {
-  const groups = new Map<string, Array<(typeof LOGIN_USERS)[number]>>()
+  const groups = new Map<string, DevLoginUser[]>()
   LOGIN_USERS.forEach((user) => {
     const key = user.기관명
     const existing = groups.get(key)
@@ -807,6 +861,14 @@ function refreshStorageData() {
   storageData.value = storage.get()
 }
 
+function persistDevBankCode(bankCode: string | null) {
+  if (bankCode) {
+    browserStorage.setItem('local', 'bank_code', bankCode)
+  } else {
+    browserStorage.removeItem('local', 'bank_code')
+  }
+}
+
 function openLoginModal() {
   selectedLoginUser.value = null
   loginId.value = ''
@@ -816,26 +878,28 @@ function openLoginModal() {
 
 async function executeLogin() {
   try {
-    const res: any = await authAPI.login({
+    const res = await authAPI.login({
       loginId: loginId.value,
       password: password.value
-    } as any)
-    const payload = unwrap<any>(res)
-    const data = payload?.result ?? payload
+    })
+    const data = extractLoginResponsePayload(res)
+    if (!data) {
+      throw new Error('Invalid login response')
+    }
     authStore.setAuth(data)
 
     // API Tester와 동일하게 로그인 직후 기본 bankCode 부여
     selectedBankCode.value = 'bankclear'
     authStore.setBankCode('bankclear')
-    localStorage.setItem('bank_code', 'bankclear')
+    persistDevBankCode('bankclear')
 
     await fetchAssignedBanks()
     refreshStorageData()
     showLoginModal.value = false
-  } catch (error: any) {
+  } catch (error: unknown) {
     await alert({
       title: '로그인 실패',
-      message: error?.message ?? '로그인 실패'
+      message: error instanceof Error ? error.message : '로그인 실패'
     })
   }
 }
@@ -850,15 +914,17 @@ async function refreshToken() {
       })
       return
     }
-    const res: any = await authAPI.refresh({ refreshToken: current.refreshToken } as any)
-    const payload = unwrap<any>(res)
-    const data = payload?.result ?? payload
+    const res = await authAPI.refresh({ refreshToken: current.refreshToken })
+    const data = extractTokenRefreshPayload(res)
+    if (!data) {
+      throw new Error('Invalid refresh response')
+    }
     authStore.updateTokens(data)
     refreshStorageData()
-  } catch (error: any) {
+  } catch (error: unknown) {
     await alert({
       title: '토큰 갱신 실패',
-      message: error?.message ?? '토큰 갱신 실패'
+      message: error instanceof Error ? error.message : '토큰 갱신 실패'
     })
   }
 }
@@ -872,35 +938,33 @@ async function handleLogout() {
     authStore.clearAuth()
     assignedBanks.value = []
     selectedBankCode.value = 'bankclear'
-    localStorage.removeItem('bank_code')
+    persistDevBankCode(null)
     refreshStorageData()
   }
 }
 
 async function fetchAssignedBanks() {
   try {
-    const res: any = await userAPI.assignedBanks()
-    const payload = unwrap<any>(res)
-    const data = payload?.result ?? payload
-    const banks = Array.isArray(data) ? data : []
+    const res = await userAPI.assignedBanks()
+    const banks = extractArrayByKeys<AssignedBank>(res, ['items', 'content'])
     assignedBanks.value = banks
     if (banks.length > 0) {
       const bankclearBank = banks.find((bank) => bank.bankCode === 'bankclear')
       selectedBankCode.value = bankclearBank ? 'bankclear' : banks[0]!.bankCode
       authStore.setBankCode(selectedBankCode.value)
-      localStorage.setItem('bank_code', selectedBankCode.value)
+      persistDevBankCode(selectedBankCode.value)
     }
   } catch {
     assignedBanks.value = []
     selectedBankCode.value = 'bankclear'
     authStore.setBankCode('bankclear')
-    localStorage.setItem('bank_code', 'bankclear')
+    persistDevBankCode('bankclear')
   }
 }
 
 function onChangeBankCode() {
   authStore.setBankCode(selectedBankCode.value)
-  localStorage.setItem('bank_code', selectedBankCode.value)
+  persistDevBankCode(selectedBankCode.value)
   refreshStorageData()
 }
 
@@ -915,17 +979,7 @@ function toApiDate(date: Date): string {
   return `${year}${month}${day}`
 }
 
-function unwrap<T>(res: any): T | undefined {
-  if (!res) return undefined
-  if (typeof res === 'object' && 'data' in res) {
-    const data = (res as any).data
-    if (data && typeof data === 'object' && 'data' in data) return (data as any).data as T
-    return data as T
-  }
-  return res as T
-}
-
-function stringify(value: any): string {
+function stringify(value: unknown): string {
   return JSON.stringify(value, null, 2) ?? 'null'
 }
 
@@ -1039,7 +1093,7 @@ function copyAllRequestInfo(endpointId: string) {
   copyToClipboard(info.join('\n'))
 }
 
-function setRpaHttpResult(key: string, data: any, isError = false) {
+function setRpaHttpResult(key: string, data: JsonValue, isError = false) {
   rpaHttpResult.value = {
     ...rpaHttpResult.value,
     [key]: {
@@ -1085,10 +1139,13 @@ async function rpaHttpTestGet() {
       statusText: response.statusText,
       response: data
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     setRpaHttpResult(
       'get',
-      { error: error?.message ?? '요청 실패', tip: 'RPA 프로그램이 실행 중인지 확인하세요.' },
+      {
+        error: getErrorMessage(error, '요청 실패'),
+        tip: 'RPA 프로그램이 실행 중인지 확인하세요.'
+      },
       true
     )
   } finally {
@@ -1128,10 +1185,13 @@ async function rpaHttpTestPost() {
       sent: parsed,
       response: data
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     setRpaHttpResult(
       'post',
-      { error: error?.message ?? '요청 실패', tip: 'JSON 형식 또는 RPA 서버 상태를 확인하세요.' },
+      {
+        error: getErrorMessage(error, '요청 실패'),
+        tip: 'JSON 형식 또는 RPA 서버 상태를 확인하세요.'
+      },
       true
     )
   } finally {
@@ -1163,10 +1223,13 @@ async function rpaHttpGetMacAddress() {
       statusText: response.statusText,
       response: data
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     setRpaHttpResult(
       'mac',
-      { error: error?.message ?? '요청 실패', tip: 'RPA 프로그램이 실행 중인지 확인하세요.' },
+      {
+        error: getErrorMessage(error, '요청 실패'),
+        tip: 'RPA 프로그램이 실행 중인지 확인하세요.'
+      },
       true
     )
   } finally {
@@ -1201,10 +1264,13 @@ async function rpaHttpGetData() {
       statusText: response.statusText,
       response: data
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     setRpaHttpResult(
       'data',
-      { error: error?.message ?? '요청 실패', tip: 'RPA 프로그램이 실행 중인지 확인하세요.' },
+      {
+        error: getErrorMessage(error, '요청 실패'),
+        tip: 'RPA 프로그램이 실행 중인지 확인하세요.'
+      },
       true
     )
   } finally {
@@ -1268,10 +1334,13 @@ async function rpaHttpExecute() {
     rpaHttpSocket.onclose = () => {
       console.log('웹소켓 연결이 종료되었습니다.')
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     setRpaHttpResult(
       'execute',
-      { error: error?.message ?? '요청 실패', tip: '연결 시도 중 오류가 발생했습니다.' },
+      {
+        error: getErrorMessage(error, '요청 실패'),
+        tip: '연결 시도 중 오류가 발생했습니다.'
+      },
       true
     )
   } finally {
@@ -1330,10 +1399,10 @@ async function rpaHttpCheckStatus() {
     if (data.result === 'Y') {
       rpaHttpStopPolling()
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     setRpaHttpResult(
       'status',
-      { error: error?.message ?? '요청 실패', 확인횟수: rpaHttpPollingCount },
+      { error: getErrorMessage(error, '요청 실패'), 확인횟수: rpaHttpPollingCount },
       true
     )
   } finally {
@@ -1428,12 +1497,12 @@ async function checkRpaAutoStatus() {
     if (data.result === 'Y') {
       stopRpaAutoPolling()
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     rpaAutoStatus.value = {
       ...(rpaAutoStatus.value ?? {}),
       statusCheck: {
         count: rpaAutoPollingCount,
-        error: error?.message ?? 'status 조회 실패'
+        error: getErrorMessage(error, 'status 조회 실패')
       }
     }
   }
@@ -1573,26 +1642,27 @@ async function executeRpaAuto(taskToken: string, taskType: string) {
     }, RPA_AUTO_POLL_INTERVAL_SEC * 1000)
     startRpaAutoCountdown()
     await checkRpaAutoStatus()
-  } catch (error: any) {
+  } catch (error: unknown) {
     rpaAutoStatus.value = {
       ...(rpaAutoStatus.value ?? {}),
       executeResponse: {
-        error: error?.message ?? 'execute 실패',
+        error: getErrorMessage(error, 'execute 실패'),
         tip: 'RPA 프로그램이 실행 중인지 확인하세요.'
       }
     }
   }
 }
 
-function extractValuesFromAny(source: any, key: string, bucket: Set<string>) {
+function extractValuesFromAny(source: unknown, key: string, bucket: Set<string>) {
   if (source === null || source === undefined) return
   if (Array.isArray(source)) {
     for (const item of source) extractValuesFromAny(item, key, bucket)
     return
   }
-  if (typeof source !== 'object') return
+  const record = toJsonObject(source)
+  if (!record) return
 
-  for (const [currentKey, currentValue] of Object.entries(source)) {
+  for (const [currentKey, currentValue] of Object.entries(record)) {
     if (
       currentKey === key &&
       (typeof currentValue === 'string' || typeof currentValue === 'number')
@@ -1642,7 +1712,7 @@ async function loadRegistryList() {
     const oneMonthAgo = new Date(today)
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1)
 
-    const res: any = await registryProgressAPI.getList({
+    const res = await registryProgressAPI.getList({
       workType: 'ALL',
       assignedWork: 'ALL',
       registryMethod: 'ALL',
@@ -1654,20 +1724,18 @@ async function loadRegistryList() {
       progressStatus: 'ALL',
       page: 1,
       size: 20
-    } as any)
+    })
 
-    const payload = unwrap<any>(res)
-    const data = payload?.result ?? payload
-    registryRows.value = Array.isArray(data?.content) ? data.content : []
+    registryRows.value = extractArrayByKeys<JsonValue>(res, ['content', 'items'])
 
-    const firstRegistryNo = registryRows.value[0]?.registryManagementNumber
+    const firstRegistryNo = toJsonObject(registryRows.value[0])?.registryManagementNumber
     if (firstRegistryNo && !selectedRegistryManagementNumber.value) {
       selectedRegistryManagementNumber.value = String(firstRegistryNo)
     }
-  } catch (error: any) {
-    responseByEndpoint['__reference_registry'] = {
-      error: error?.message ?? '진행현황 목록 조회 실패'
-    }
+  } catch (error: unknown) {
+    responseByEndpoint.__reference_registry = createErrorPayload(
+      getErrorMessage(error, '진행현황 목록 조회 실패')
+    )
   } finally {
     referenceLoading.registryList = false
   }
@@ -1676,18 +1744,12 @@ async function loadRegistryList() {
 async function loadAssignableUsers() {
   referenceLoading.assignable = true
   try {
-    const res: any = await userAPI.assignable({})
-    const payload = unwrap<any>(res)
-    const data = payload?.result ?? payload
-    assignableUsers.value = Array.isArray(data)
-      ? data
-      : Array.isArray(data?.content)
-        ? data.content
-        : []
-  } catch (error: any) {
-    responseByEndpoint['__reference_assignable'] = {
-      error: error?.message ?? '담당자 목록 조회 실패'
-    }
+    const res = await userAPI.assignable({})
+    assignableUsers.value = extractArrayByKeys<JsonValue>(res, ['content', 'items'])
+  } catch (error: unknown) {
+    responseByEndpoint.__reference_assignable = createErrorPayload(
+      getErrorMessage(error, '담당자 목록 조회 실패')
+    )
   } finally {
     referenceLoading.assignable = false
   }
@@ -1697,13 +1759,12 @@ async function loadBasicInfo() {
   if (!selectedRegistryManagementNumber.value) return
   referenceLoading.basicInfo = true
   try {
-    const res: any = await registryProgressAPI.basicInfo({
+    const res = await registryProgressAPI.basicInfo({
       registryManagementNumber: selectedRegistryManagementNumber.value
-    } as any)
-    const payload = unwrap<any>(res)
-    basicInfo.value = payload?.result ?? payload
-  } catch (error: any) {
-    basicInfo.value = { error: error?.message ?? '기본정보 조회 실패' }
+    })
+    basicInfo.value = extractPrimaryPayload<JsonValue>(res) ?? null
+  } catch (error: unknown) {
+    basicInfo.value = createErrorPayload(getErrorMessage(error, '기본정보 조회 실패'))
   } finally {
     referenceLoading.basicInfo = false
   }
@@ -1724,32 +1785,27 @@ async function loadReferenceBundle(registryManagementNumber: string) {
       transferCertificateList,
       completionDetail
     ] = await Promise.allSettled([
-      registryProgressAPI.loanInfo({ registryManagementNumber } as any),
-      registryProgressAPI.ownershipTransfer({ registryManagementNumber } as any),
-      registryProgressAPI.mortgage({ registryManagementNumber } as any),
-      registryCaseAPI.getDetail({ registryManagementNumber } as any),
-      registryAdminConsentAPI.getDetail({ registryManagementNumber } as any),
-      registryHousingBondAPI.getDetail({ registryManagementNumber } as any),
-      registryTransferCertificateAPI.getDetail({ registryManagementNumber } as any),
-      registryTransferCertificateAPI.getList({ registryManagementNumber } as any),
-      registryCompletionAPI.getDetail({ registryManagementNumber } as any)
+      registryProgressAPI.loanInfo({ registryManagementNumber }),
+      registryProgressAPI.ownershipTransfer({ registryManagementNumber }),
+      registryProgressAPI.mortgage({ registryManagementNumber }),
+      registryCaseAPI.getDetail({ registryManagementNumber }),
+      registryAdminConsentAPI.getDetail({ registryManagementNumber }),
+      registryHousingBondAPI.getDetail({ registryManagementNumber }),
+      registryTransferCertificateAPI.getDetail({ registryManagementNumber }),
+      registryTransferCertificateAPI.getList({ registryManagementNumber }),
+      registryCompletionAPI.getDetail({ registryManagementNumber })
     ])
 
-    const parseSettled = (result: PromiseSettledResult<any>) =>
-      result.status === 'fulfilled'
-        ? (unwrap<any>(result.value)?.result ?? unwrap<any>(result.value))
-        : { error: result.reason?.message ?? '조회 실패' }
-
     const baseDetails = {
-      loanInfo: parseSettled(loanInfo),
-      ownershipTransfer: parseSettled(ownershipTransfer),
-      mortgage: parseSettled(mortgage),
-      caseDetail: parseSettled(caseDetail),
-      adminConsentDetail: parseSettled(adminConsentDetail),
-      housingBondDetail: parseSettled(housingBondDetail),
-      transferCertificateDetail: parseSettled(transferCertificateDetail),
-      transferCertificateList: parseSettled(transferCertificateList),
-      completionDetail: parseSettled(completionDetail)
+      loanInfo: extractSettledPayload(loanInfo),
+      ownershipTransfer: extractSettledPayload(ownershipTransfer),
+      mortgage: extractSettledPayload(mortgage),
+      caseDetail: extractSettledPayload(caseDetail),
+      adminConsentDetail: extractSettledPayload(adminConsentDetail),
+      housingBondDetail: extractSettledPayload(housingBondDetail),
+      transferCertificateDetail: extractSettledPayload(transferCertificateDetail),
+      transferCertificateList: extractSettledPayload(transferCertificateList),
+      completionDetail: extractSettledPayload(completionDetail)
     }
 
     const appIdBucket = new Set<string>()
@@ -1759,28 +1815,28 @@ async function loadReferenceBundle(registryManagementNumber: string) {
       .map((value) => Number(value))
       .find((value) => Number.isFinite(value) && value > 0)
 
-    let certificateDetail: any = { skipped: 'applicationId 없음' }
-    let propertyDetail: any = { skipped: 'applicationId 없음' }
+    let certificateDetail: JsonValue = createSkippedPayload('applicationId 없음')
+    let propertyDetail: JsonValue = createSkippedPayload('applicationId 없음')
     if (applicationId) {
       const [certificateRes, propertyRes] = await Promise.allSettled([
-        registryCertificateAPI.getDetail({ applicationId } as any),
-        registryPropertyAPI.getDetail({ applicationId } as any)
+        registryCertificateAPI.getDetail({ applicationId }),
+        registryPropertyAPI.getDetail({ applicationId })
       ])
-      certificateDetail = parseSettled(certificateRes)
-      propertyDetail = parseSettled(propertyRes)
+      certificateDetail = extractSettledPayload(certificateRes)
+      propertyDetail = extractSettledPayload(propertyRes)
     }
 
-    let prepaidCardList: any = { skipped: 'branchId 없음' }
+    let prepaidCardList: JsonValue = createSkippedPayload('branchId 없음')
     try {
-      const profileRes: any = await userAPI.getProfile()
-      const profile = unwrap<any>(profileRes)?.result ?? unwrap<any>(profileRes)
+      const profileRes = await userAPI.getProfile()
+      const profile = toJsonObject(extractPrimaryPayload<JsonValue>(profileRes))
       const branchId = Number(profile?.branchId)
       if (Number.isFinite(branchId) && branchId > 0) {
-        const prepaidRes: any = await branchPrepaidAPI.getList({ branchId } as any)
-        prepaidCardList = unwrap<any>(prepaidRes)?.result ?? unwrap<any>(prepaidRes)
+        const prepaidRes = await branchPrepaidAPI.getList({ branchId })
+        prepaidCardList = (extractPrimaryPayload<JsonValue>(prepaidRes) ?? null) as JsonValue
       }
-    } catch (error: any) {
-      prepaidCardList = { error: error?.message ?? '조회 실패' }
+    } catch (error: unknown) {
+      prepaidCardList = createErrorPayload(getErrorMessage(error, '조회 실패'))
     }
 
     referenceDetails.value = {
@@ -1799,7 +1855,7 @@ async function ensureReferenceValuesReady() {
     await loadRegistryList()
   }
   if (!selectedRegistryManagementNumber.value) {
-    const firstRegistryNo = registryRows.value[0]?.registryManagementNumber
+    const firstRegistryNo = toJsonObject(registryRows.value[0])?.registryManagementNumber
     if (firstRegistryNo) {
       selectedRegistryManagementNumber.value = String(firstRegistryNo)
     }
@@ -1860,16 +1916,18 @@ async function applyAutoFill(endpointId: string) {
   }
 }
 
-function normalizeAttachmentPayload(raw: any) {
-  if (!raw || typeof raw !== 'object' || !Array.isArray(raw.attachmentItems)) return raw
+function normalizeAttachmentPayload(raw: unknown): unknown {
+  const record = toJsonObject(raw)
+  if (!record || !Array.isArray(record.attachmentItems)) return raw
 
   return {
-    ...raw,
-    attachmentItems: raw.attachmentItems.map((item: any) => {
-      if (!item || typeof item !== 'object') return item
-      const mapped = { ...item }
-      if (mapped.fileName == null && typeof mapped.tempFileName === 'string') {
-        mapped.fileName = mapped.tempFileName
+    ...record,
+    attachmentItems: record.attachmentItems.map((item) => {
+      const entry = toJsonObject(item)
+      if (!entry) return item
+      const mapped = { ...entry }
+      if (mapped.fileName == null && typeof entry.tempFileName === 'string') {
+        mapped.fileName = entry.tempFileName
       }
       delete mapped.tempFileName
       delete mapped.htmlForm
@@ -1897,8 +1955,10 @@ async function callEndpoint(endpointId: string) {
       ? normalizeAttachmentPayload(JSON.parse(bodyByEndpoint[endpointId] || '{}'))
       : undefined
 
-    if ((endpointId === 'RPAC-01' || endpointId === 'RPAC-13') && data) {
-      const cardNumber = String(data.cardNumber ?? '').trim()
+    const dataRecord = toJsonObject(data)
+
+    if ((endpointId === 'RPAC-01' || endpointId === 'RPAC-13') && dataRecord) {
+      const cardNumber = String(dataRecord.cardNumber ?? '').trim()
       if (!cardNumber) {
         throw new Error('cardNumber가 비어있습니다.')
       }
@@ -1907,7 +1967,7 @@ async function callEndpoint(endpointId: string) {
           'cardNumber 형식이 올바르지 않습니다. 영문/숫자/공백/- 만 입력하세요. (예: P6735534 7877)'
         )
       }
-      data.cardNumber = cardNumber
+      dataRecord.cardNumber = cardNumber
     }
 
     const res = await rpaAPI.requestRaw(
@@ -1927,7 +1987,9 @@ async function callEndpoint(endpointId: string) {
     const token = res?.data?.data?.taskToken ?? res?.data?.taskToken
     const responseTaskType = res?.data?.data?.taskType ?? res?.data?.taskType
     const bodyTaskType =
-      typeof data?.taskType === 'string' && data.taskType.trim() ? data.taskType.trim() : null
+      typeof dataRecord?.taskType === 'string' && dataRecord.taskType.trim()
+        ? dataRecord.taskType.trim()
+        : null
     const taskTypeForAuto = responseTaskType || bodyTaskType
     if (token && !taskTokens.value.includes(token)) {
       taskTokens.value.unshift(token)
@@ -1954,13 +2016,15 @@ async function callEndpoint(endpointId: string) {
       rpaAutoStatus.value = null
       stopRpaAutoPolling()
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorRecord = toJsonObject(error)
+    const responseRecord = toJsonObject(errorRecord?.response)
     const elapsed = Date.now() - startedAt
     responseByEndpoint[endpointId] = {
       ok: false,
       elapsedMs: elapsed,
-      message: error?.message ?? '요청 실패',
-      response: error?.response?.data ?? null
+      message: getErrorMessage(error, '요청 실패'),
+      response: responseRecord?.data ?? null
     }
     if (String(endpointId).startsWith('RPAC-')) {
       stopRpaAutoPolling()

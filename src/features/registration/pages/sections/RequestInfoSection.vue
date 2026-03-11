@@ -264,6 +264,7 @@ import type {
   RegistryProgressMortgageResponse,
   RegistryProgressOwnershipTransferResponse
 } from '@/types'
+import { extractPrimaryPayload } from '@/utils/apiPayload'
 
 interface Props {
   registryManagementNumber: string
@@ -355,12 +356,6 @@ const showTransferLegal = computed(() => {
   return type === 'TYPE_05'
 })
 
-function unwrapData<T>(res: any): T {
-  if (res?.data && typeof res.data === 'object' && 'data' in res.data) return res.data.data as T
-  if (res && typeof res === 'object' && 'data' in res) return res.data as T
-  return undefined as unknown as T
-}
-
 async function fetchLoanInfo() {
   if (!props.registryManagementNumber) {
     loanInfo.value = null
@@ -372,14 +367,14 @@ async function fetchLoanInfo() {
     loanLoading.value = true
     loanErrorMessage.value = ''
     try {
-      const res: any = await registryProgressAPI.loanInfo({
+      const res = await registryProgressAPI.loanInfo({
         registryManagementNumber: props.registryManagementNumber
       })
-      const data = unwrapData<RegistryProgressLoanResponse>(res)
+      const data = extractPrimaryPayload<RegistryProgressLoanResponse>(res)
 
       loanInfo.value = data ?? null
       if (!loanInfo.value) loanErrorMessage.value = '대출 금융기관 정보를 불러오지 못했습니다.'
-    } catch (e: any) {
+    } catch (e: unknown) {
       loanInfo.value = null
       loanErrorMessage.value = getErrorMessage(e)
     } finally {
@@ -401,14 +396,14 @@ async function fetchBasicInfo() {
     basicLoading.value = true
     basicErrorMessage.value = ''
     try {
-      const res: any = await registryProgressAPI.basicInfo({
+      const res = await registryProgressAPI.basicInfo({
         registryManagementNumber: props.registryManagementNumber
       })
-      const data = unwrapData<RegistryProgressBasicResponse>(res)
+      const data = extractPrimaryPayload<RegistryProgressBasicResponse>(res)
 
       basicInfo.value = data ?? null
       if (!basicInfo.value) basicErrorMessage.value = '상세 정보를 불러오지 못했습니다.'
-    } catch (e: any) {
+    } catch (e: unknown) {
       basicInfo.value = null
       basicErrorMessage.value = getErrorMessage(e)
     } finally {
@@ -430,15 +425,15 @@ async function fetchMortgageInfo() {
     mortgageLoading.value = true
     mortgageErrorMessage.value = ''
     try {
-      const res: any = await registryProgressAPI.mortgage({
+      const res = await registryProgressAPI.mortgage({
         registryManagementNumber: props.registryManagementNumber
       })
-      const data = unwrapData<RegistryProgressMortgageResponse>(res)
+      const data = extractPrimaryPayload<RegistryProgressMortgageResponse>(res)
 
       mortgageInfo.value = data ?? null
       if (!mortgageInfo.value)
         mortgageErrorMessage.value = '근저당권설정 정보를 불러오지 못했습니다.'
-    } catch (e: any) {
+    } catch (e: unknown) {
       mortgageInfo.value = null
       mortgageErrorMessage.value = getErrorMessage(e)
     } finally {
@@ -460,14 +455,14 @@ async function fetchTransferInfo() {
     transferLoading.value = true
     transferErrorMessage.value = ''
     try {
-      const res: any = await registryProgressAPI.ownershipTransfer({
+      const res = await registryProgressAPI.ownershipTransfer({
         registryManagementNumber: props.registryManagementNumber
       })
-      const data = unwrapData<RegistryProgressOwnershipTransferResponse>(res)
+      const data = extractPrimaryPayload<RegistryProgressOwnershipTransferResponse>(res)
 
       transferInfo.value = data ?? null
       if (!transferInfo.value) transferErrorMessage.value = '소유권이전 정보를 불러오지 못했습니다.'
-    } catch (e: any) {
+    } catch (e: unknown) {
       transferInfo.value = null
       transferErrorMessage.value = getErrorMessage(e)
     } finally {
@@ -489,16 +484,16 @@ async function fetchMortgageLegalInfo() {
     mortgageLegalLoading.value = true
     mortgageLegalErrorMessage.value = ''
     try {
-      const res: any = await registryProgressAPI.legalAgent({
+      const res = await registryProgressAPI.legalAgent({
         registryManagementNumber: props.registryManagementNumber,
         registryType: 'MORTGAGE'
       })
-      const data = unwrapData<RegistryProgressLegalAgentResponse>(res)
+      const data = extractPrimaryPayload<RegistryProgressLegalAgentResponse>(res)
 
       mortgageLegalInfo.value = data ?? null
       if (!mortgageLegalInfo.value)
         mortgageLegalErrorMessage.value = '근저당권설정 법무대리인 정보를 불러오지 못했습니다.'
-    } catch (e: any) {
+    } catch (e: unknown) {
       mortgageLegalInfo.value = null
       mortgageLegalErrorMessage.value = getErrorMessage(e)
     } finally {
@@ -520,16 +515,16 @@ async function fetchTransferLegalInfo() {
     transferLegalLoading.value = true
     transferLegalErrorMessage.value = ''
     try {
-      const res: any = await registryProgressAPI.legalAgent({
+      const res = await registryProgressAPI.legalAgent({
         registryManagementNumber: props.registryManagementNumber,
         registryType: 'OWNERSHIP_TRANSFER'
       })
-      const data = unwrapData<RegistryProgressLegalAgentResponse>(res)
+      const data = extractPrimaryPayload<RegistryProgressLegalAgentResponse>(res)
 
       transferLegalInfo.value = data ?? null
       if (!transferLegalInfo.value)
         transferLegalErrorMessage.value = '소유권이전 법무대리인 정보를 불러오지 못했습니다.'
-    } catch (e: any) {
+    } catch (e: unknown) {
       transferLegalInfo.value = null
       transferLegalErrorMessage.value = getErrorMessage(e)
     } finally {

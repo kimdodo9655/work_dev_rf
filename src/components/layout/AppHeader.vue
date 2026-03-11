@@ -7,7 +7,7 @@
       <header ref="headerRef" class="main-header">
         <nav>
           <!-- 로고 -->
-          <router-link v-if="authStore.authState === 'auth'" to="/">
+          <router-link v-if="authStore.authState === 'auth'" :to="{ name: 'Root' }">
             <img class="logo" src="@/assets/images/logo/bankclear_logo_bk.png" alt="logo" />
           </router-link>
 
@@ -23,9 +23,9 @@
             <li
               v-for="(item, index) in navigationMenuItems"
               :key="index"
-              :class="{ active: isActiveMenu(item.path) }"
+              :class="{ active: isActiveMenu(item) }"
             >
-              <router-link :to="item.path">{{ item.label }}</router-link>
+              <router-link :to="{ name: item.name }">{{ item.label }}</router-link>
             </li>
           </ul>
 
@@ -46,35 +46,35 @@
                 <nav>
                   <ul>
                     <li v-if="canAccessOrgMgmt">
-                      <router-link to="/my/organization" @click="closeMyMenu">
+                      <router-link :to="{ name: 'OrgMgmt' }" @click="closeMyMenu">
                         <i class="fi fi-ss-apartment"></i>
                         {{ locale.pageTitle.my.organization }}
                         <i class="fi fi-rs-angle-circle-right"></i>
                       </router-link>
                     </li>
                     <li v-if="canAccessOrgMgmt">
-                      <router-link to="/my/users" @click="closeMyMenu">
+                      <router-link :to="{ name: 'UserMgmt' }" @click="closeMyMenu">
                         <i class="fi fi-ss-users-alt"></i>
                         {{ locale.pageTitle.my.users }}
                         <i class="fi fi-rs-angle-circle-right"></i>
                       </router-link>
                     </li>
                     <li v-if="!canAccessOrgMgmt">
-                      <router-link to="/my/profile" @click="closeMyMenu">
+                      <router-link :to="{ name: 'MyProfile' }" @click="closeMyMenu">
                         <i class="fi fi-ss-user"></i>
                         {{ locale.pageTitle.my.profile }}
                         <i class="fi fi-rs-angle-circle-right"></i>
                       </router-link>
                     </li>
                     <li>
-                      <router-link to="/bank-select" @click="closeMyMenu">
+                      <router-link :to="{ name: 'BankSelection' }" @click="closeMyMenu">
                         <i class="fi fi-ss-bank"></i>
                         {{ locale.pageTitle.main.bankChange }}
                         <i class="fi fi-rs-angle-circle-right"></i>
                       </router-link>
                     </li>
                     <li>
-                      <router-link to="/notice" @click="closeMyMenu">
+                      <router-link :to="{ name: 'Notice' }" @click="closeMyMenu">
                         <i class="fi fi-ss-exclamation"></i>
                         {{ locale.pageTitle.shared.notice }}
                         <i class="fi fi-rs-angle-circle-right"></i>
@@ -139,7 +139,9 @@ import { useDialog } from '@/composables/utils/useDialog'
 import { MESSAGES } from '@/constants/messages'
 import { useAuthStore } from '@/stores/auth'
 import { UserRoleLevel } from '@/types'
-import { markManualLogoutInProgress } from '@/utils/authValidator'
+import { extractTokenRefreshPayload } from '@/utils/authPayload'
+import { markManualLogoutInProgress } from '@/utils/authSessionFlags'
+import { logger } from '@/utils/logger'
 import { storage } from '@/utils/storage'
 
 const locale = {
@@ -153,12 +155,6 @@ const locale = {
   },
   pageTitle: MESSAGES.pageTitle
 } as const
-
-/** axios 응답({data}) / DTO 응답(그 자체) 둘 다 지원 */
-function unwrap<T>(res: any): T {
-  if (res && typeof res === 'object' && 'data' in res) return res.data as T
-  return res as T
-}
 
 const authStore = useAuthStore()
 const route = useRoute()
@@ -191,22 +187,34 @@ const canAccessOrgMgmt = computed(() => {
 const navigationMenuItems = computed(() => {
   if (authStore.authState === 'auth') {
     return [
-      { path: '/estimate', label: locale.pageTitle.estimate.list },
-      { path: '/registration', label: locale.pageTitle.registration.caseStatus },
-      { path: '/registration/schedule', label: locale.pageTitle.registration.schedule }
+      { name: 'EstimateMgmt', path: '/estimate', label: locale.pageTitle.estimate.list },
+      {
+        name: 'RegistrationStatus',
+        path: '/registration',
+        label: locale.pageTitle.registration.caseStatus
+      },
+      {
+        name: 'RegistrationSchedule',
+        path: '/registration/schedule',
+        label: locale.pageTitle.registration.schedule
+      }
     ]
   }
 
   if (authStore.authState === 'onboarding') {
-    const items: Array<{ path: string; label: string }> = [
-      { path: '/bank-select', label: locale.pageTitle.main.bankSelect }
+    const items: Array<{ name: string; path: string; label: string }> = [
+      { name: 'BankSelection', path: '/bank-select', label: locale.pageTitle.main.bankSelect }
     ]
 
     if (canAccessOrgMgmt.value) {
-      items.push({ path: '/my/organization', label: locale.pageTitle.my.organization })
-      items.push({ path: '/my/users', label: locale.pageTitle.my.users })
+      items.push({
+        name: 'OrgMgmt',
+        path: '/my/organization',
+        label: locale.pageTitle.my.organization
+      })
+      items.push({ name: 'UserMgmt', path: '/my/users', label: locale.pageTitle.my.users })
     } else {
-      items.push({ path: '/my/profile', label: locale.pageTitle.my.profile })
+      items.push({ name: 'MyProfile', path: '/my/profile', label: locale.pageTitle.my.profile })
     }
 
     return items
@@ -295,8 +303,9 @@ const pageTitle = computed(() => {
 // Methods - 메뉴
 // ============================================================================
 
-const isActiveMenu = (menuPath: string) => {
+const isActiveMenu = (item: { path: string }) => {
   const currentPath = route.path
+  const menuPath = item.path
 
   if (currentPath === menuPath) return true
   if (menuPath === '/registration' && currentPath.startsWith('/registration/schedule')) return false
@@ -331,10 +340,10 @@ const handleLogout = async () => {
   try {
     await authAPI.logout()
   } catch (error) {
-    console.error('로그아웃 오류:', error)
+    logger.error('[HEADER] Logout failed', { error })
   } finally {
     authStore.clearAuth()
-    router.push('/auth/login')
+    router.push({ name: 'Login' })
   }
 }
 
@@ -344,12 +353,11 @@ const handleExtendSession = async () => {
     if (!refreshToken) throw new Error('No refresh token')
 
     const res = await authAPI.refresh({ refreshToken })
-    const payload = unwrap<any>(res)
+    const tokenData = extractTokenRefreshPayload(res)
+    if (!tokenData) {
+      throw new Error('Invalid refresh response')
+    }
 
-    // 서버/생성기 차이 방어: payload.result / payload.data / payload 자체
-    const tokenData = payload?.result ?? payload?.data ?? payload
-
-    // updateTokens가 기대하는 형태에 맞게 그대로 전달
     authStore.updateTokens(tokenData)
 
     const dialog = extractApiSuccessContent(res, '세션 연장', '세션이 연장되었습니다.')
@@ -357,9 +365,9 @@ const handleExtendSession = async () => {
       title: dialog.title,
       message: dialog.message
     })
-  } catch (error: any) {
-    console.error('세션 연장 오류:', error)
-    if (error?.message === 'Invalid auth data') return
+  } catch (error: unknown) {
+    logger.error('[HEADER] Session extend failed', { error })
+    if (error instanceof Error && error.message === 'Invalid auth data') return
     const dialog = extractApiErrorContent(error, '세션 연장 실패', '세션 연장에 실패했습니다.')
     await alert({
       title: dialog.title,

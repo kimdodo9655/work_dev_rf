@@ -8,19 +8,7 @@ import { ref } from 'vue'
 import { registryTypeAPI } from '@/api/services/registry'
 import { useThrottle } from '@/composables/utils/useThrottle'
 import type { RegistryApplicationDocument } from '@/features/registration/composables/applicationSection.types'
-
-function unwrapData<T>(res: unknown): T {
-  if (res && typeof res === 'object') {
-    const withData = res as { data?: unknown }
-    if (withData.data && typeof withData.data === 'object' && 'data' in withData.data) {
-      return (withData.data as { data: T }).data
-    }
-    if ('data' in withData) {
-      return withData.data as T
-    }
-  }
-  return undefined as unknown as T
-}
+import { extractPrimaryPayload } from '@/utils/apiPayload'
 
 export function useApplicationSectionDocument({
   getErrorMessage
@@ -39,12 +27,13 @@ export function useApplicationSectionDocument({
       return
     }
 
+    // 규칙: 연속 문서 조회는 throttle로 흡수
     const result = await documentThrottle.execute(async () => {
       documentLoading.value = true
       documentErrorMessage.value = ''
       try {
         const res = await registryTypeAPI.documents({ applicationId })
-        const data = unwrapData<RegistryApplicationDocument>(res)
+        const data = extractPrimaryPayload<RegistryApplicationDocument>(res)
         document.value = data || null
       } catch (e) {
         document.value = null
@@ -58,6 +47,7 @@ export function useApplicationSectionDocument({
   }
 
   function handleActiveApplicationChanged(applicationId?: number) {
+    // 기준: 활성 신청서가 없으면 문서 상태 초기화
     if (applicationId) {
       void fetchDocument(applicationId)
       return

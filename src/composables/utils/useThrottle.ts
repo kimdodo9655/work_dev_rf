@@ -5,6 +5,8 @@
 
 import { ref } from 'vue'
 
+import { logger } from '@/utils/logger'
+
 /**
  * API 연속 호출 방지 composable
  *
@@ -26,13 +28,13 @@ export function useThrottle(cooldown = 1000) {
 
     // 1. 로딩 중이면 무시
     if (isLoading.value) {
-      console.log('⏳ 이미 요청 중입니다.')
+      logger.debug('[THROTTLE] Request ignored because another request is in progress')
       return null
     }
 
     // 2. 마지막 호출 후 cooldown 시간이 지나지 않았으면 무시
     if (now - lastCallTime.value < cooldown) {
-      console.log(`⏱️ ${cooldown}ms 이내 중복 호출 방지`)
+      logger.debug('[THROTTLE] Request ignored by cooldown', { cooldown })
       return null
     }
 

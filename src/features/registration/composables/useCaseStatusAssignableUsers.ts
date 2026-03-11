@@ -6,21 +6,13 @@
 import { type ComputedRef, ref, watch } from 'vue'
 
 import { userAPI } from '@/api/services/user'
+import { useErrorHandler } from '@/composables/utils/useErrorHandler'
 import type { GetAssignableUsersQuery } from '@/types'
 import type { UserAssignableResponse } from '@/types/api/user.types'
 import { UserRoleLevel } from '@/types/store'
+import { extractArrayByKeys } from '@/utils/apiPayload'
 
 import { type AssignableUser, type CaseStatusFilters } from './caseStatus.types'
-
-function unwrap<T>(res: any): T | undefined {
-  if (!res) return undefined
-  if (typeof res === 'object' && 'data' in res) {
-    const data = (res as any).data
-    if (data && typeof data === 'object' && 'data' in data) return (data as any).data as T
-    return data as T
-  }
-  return res as T
-}
 
 export function useCaseStatusAssignableUsers({
   filters,
@@ -31,6 +23,7 @@ export function useCaseStatusAssignableUsers({
   isAssigneeRole: ComputedRef<boolean>
   roleLevelValue: ComputedRef<number>
 }) {
+  const { getErrorMessage } = useErrorHandler()
   const assignableUsers = ref<AssignableUser[]>([])
   const assignableLoading = ref(false)
   const assignableError = ref('')
@@ -78,17 +71,8 @@ export function useCaseStatusAssignableUsers({
       const query: GetAssignableUsersQuery = {}
       if (filters.assignedWork !== 'ALL') query.assignedWork = filters.assignedWork
 
-      const response: any = await userAPI.assignable(query)
-      const payload = unwrap<any>(response)
-      const root = payload?.result ?? payload
-
-      const rawUsers: UserAssignableResponse[] = Array.isArray(root)
-        ? root
-        : Array.isArray(root?.content)
-          ? root.content
-          : Array.isArray(root?.items)
-            ? root.items
-            : []
+      const response = await userAPI.assignable(query)
+      const rawUsers = extractArrayByKeys<UserAssignableResponse>(response, ['content', 'items'])
 
       const users = rawUsers
         .map((user) => normalizeAssignableUser(user))
@@ -96,8 +80,8 @@ export function useCaseStatusAssignableUsers({
 
       assignableUsers.value = users
       ensureUserDefaultManager(users)
-    } catch (error: any) {
-      assignableError.value = error?.message ?? '담당자 목록 로딩 실패'
+    } catch (error) {
+      assignableError.value = getErrorMessage(error)
       assignableUsers.value = []
     } finally {
       assignableLoading.value = false

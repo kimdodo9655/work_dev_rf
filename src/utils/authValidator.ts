@@ -4,6 +4,8 @@
  */
 
 import { useApiAlert } from '@/composables/utils/useApiAlert'
+import { isManualLogoutInProgress } from '@/utils/authSessionFlags'
+import { browserLocation } from '@/utils/browser'
 import { ENV } from '@/utils/env'
 import { logger } from '@/utils/logger'
 import { storage } from '@/utils/storage'
@@ -24,23 +26,7 @@ interface AuthData {
 
 // ✅ 중복 실행 방지 플래그
 let isHandlingInvalidAuth = false
-const MANUAL_LOGOUT_FLAG_KEY = 'manualLogoutInProgress'
 const { showApiError } = useApiAlert()
-
-export function markManualLogoutInProgress() {
-  if (typeof window === 'undefined') return
-  sessionStorage.setItem(MANUAL_LOGOUT_FLAG_KEY, '1')
-}
-
-export function clearManualLogoutInProgress() {
-  if (typeof window === 'undefined') return
-  sessionStorage.removeItem(MANUAL_LOGOUT_FLAG_KEY)
-}
-
-export function isManualLogoutInProgress() {
-  if (typeof window === 'undefined') return false
-  return sessionStorage.getItem(MANUAL_LOGOUT_FLAG_KEY) === '1'
-}
 
 /**
  * 인증 데이터 유효성 검증
@@ -165,14 +151,14 @@ export function handleInvalidAuthState() {
   }
 
   // 이미 로그인 페이지면 중복 처리 방지 (무한 루프 방지)
-  if (window.location.pathname === '/auth/login') {
+  if (browserLocation.getPathname() === '/auth/login') {
     logger.info('[AUTH_VALIDATOR] Already on login page - Skip handling')
     isHandlingInvalidAuth = false
     return
   }
 
   // 이미 인증 관련 페이지면 중복 처리 방지
-  if (window.location.pathname.startsWith('/auth/')) {
+  if (browserLocation.getPathname().startsWith('/auth/')) {
     logger.info('[AUTH_VALIDATOR] Already on auth page - Skip handling')
     isHandlingInvalidAuth = false
     return
@@ -188,7 +174,7 @@ export function handleInvalidAuthState() {
     message: '인증 정보가 올바르지 않습니다. 다시 로그인해주세요.'
   }).finally(() => {
     logger.info('[AUTH_VALIDATOR] Redirecting to login page')
-    window.location.href = '/auth/login'
+    browserLocation.assign('/auth/login')
   })
 
   // 페이지 이동 후 플래그는 자동으로 초기화됨 (새 페이지 로드)

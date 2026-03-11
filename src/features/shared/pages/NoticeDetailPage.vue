@@ -28,6 +28,7 @@ import { useRouter } from 'vue-router'
 
 import { noticeAPI } from '@/api/services/notice'
 import type { NoticeDetailResponse } from '@/types'
+import { logger } from '@/utils/logger'
 
 const route = useRoute()
 const router = useRouter()
@@ -62,7 +63,7 @@ async function fetchNoticeDetail() {
     const response = await noticeAPI.getDetail({ id: noticeId.value })
     detail.value = unwrap<NoticeDetailResponse>(response)
   } catch (error) {
-    console.error('[NOTICE] Failed to fetch notice detail', error)
+    logger.error('[NOTICE] Failed to fetch notice detail', { error })
     detail.value = null
     errorMessage.value = '공지사항 상세를 불러오지 못했습니다.'
   } finally {

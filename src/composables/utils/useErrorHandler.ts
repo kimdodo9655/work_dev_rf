@@ -10,6 +10,7 @@
 
 import { useCodeReplacer } from '@/composables/utils/useCodeReplacer'
 import { isApiError, toApiError } from '@/types'
+import { extractApiErrorMessage } from '@/utils/apiError'
 import { logger } from '@/utils/logger'
 
 /**
@@ -66,8 +67,10 @@ export function useErrorHandler() {
       return findReplacement(error.code, 'errorCodes') ?? replaceText(error.message)
     }
 
-    const apiError = toApiError(error)
-    return findReplacement(apiError.code, 'errorCodes') ?? replaceText(apiError.message)
+    return extractApiErrorMessage(error, '알 수 없는 오류', {
+      findReplacement,
+      replaceText
+    })
   }
 
   /**

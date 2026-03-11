@@ -214,6 +214,8 @@ import { computed, onMounted, ref } from 'vue'
 import { registryCertificateAPI } from '@/api/services/registry'
 import { useApiAlert } from '@/composables/utils/useApiAlert'
 import { useDialog } from '@/composables/utils/useDialog'
+import type { ReplaceApplicationPropertyOwnerCertificateRequest } from '@/types'
+import { extractPrimaryPayload } from '@/utils/apiPayload'
 
 interface Props {
   applicationId: number
@@ -239,7 +241,7 @@ interface CertificateItem {
 interface Options {
   propertyUniqueNumberOptions: Array<{ applicationId?: number; propertyUniqueNumber?: string }>
   ownerOptions: Array<{ partyId?: number; progressPartyId?: number; name?: string }>
-  sectionOptions: string[]
+  sectionOptions: CertificateItem['section'][]
   certificateTypeOptions: string[]
 }
 
@@ -266,12 +268,6 @@ const selectedItem = computed(() => {
   return items.value[selectedIndex.value]
 })
 
-function unwrapData<T>(res: any): T {
-  if (res?.data && typeof res.data === 'object' && 'data' in res.data) return res.data.data as T
-  if (res && typeof res === 'object' && 'data' in res) return res.data as T
-  return undefined as unknown as T
-}
-
 // 등기권리증 구분 이름 변환
 function getCertificateTypeName(type: string): string {
   const typeMap: Record<string, string> = {
@@ -281,6 +277,10 @@ function getCertificateTypeName(type: string): string {
     PRIOR_REGISTRY_LINK: '이전등기연계'
   }
   return typeMap[type] || type
+}
+
+function normalizeSection(value: unknown): CertificateItem['section'] {
+  return value === 'GAP' || value === 'EUL' ? value : ''
 }
 
 // 해당구 한글 변환
@@ -305,20 +305,42 @@ async function fetchData() {
   loading.value = true
   errorMessage.value = ''
   try {
-    const res: any = await registryCertificateAPI.getDetail({
+    const res = await registryCertificateAPI.getDetail({
       applicationId: props.applicationId
     })
-    const data = unwrapData<any>(res)
+    const detail = extractPrimaryPayload<{
+      items?: Array<{
+        propertyUniqueNumber?: string
+        progressPartyId?: number
+        holdingShareDenominator?: number
+        holdingShareNumerator?: number
+        transferShareDenominator?: number
+        transferShareNumerator?: number
+        section?: string
+        rankNumber?: string
+        receiptDate?: string
+        receiptNumber?: string
+        certificateType?: string
+        certificateSerialNumber?: string
+        certificatePasswordSequence?: string
+        certificatePassword?: string
+      }>
+      propertyUniqueNumberOptions?: Options['propertyUniqueNumberOptions']
+      ownerOptions?: Options['ownerOptions']
+      sectionOptions?: string[]
+      certificateTypeOptions?: string[]
+    }>(res)
+    const data = detail ?? {}
 
     // 기존 아이템 로드
-    items.value = (data.items || []).map((item: any) => ({
+    items.value = (data.items || []).map((item) => ({
       propertyUniqueNumber: item.propertyUniqueNumber || '',
       ownerId: item.progressPartyId || 0,
       holdingShareDenominator: item.holdingShareDenominator || 1,
       holdingShareNumerator: item.holdingShareNumerator || 1,
       transferShareDenominator: item.transferShareDenominator || 1,
       transferShareNumerator: item.transferShareNumerator || 1,
-      section: item.section || '',
+      section: normalizeSection(item.section),
       rankNumber: item.rankNumber || '',
       receiptDate: item.receiptDate || '',
       receiptNumber: item.receiptNumber || '',
@@ -331,7 +353,7 @@ async function fetchData() {
     options.value = {
       propertyUniqueNumberOptions: data.propertyUniqueNumberOptions || [],
       ownerOptions: data.ownerOptions || [],
-      sectionOptions: data.sectionOptions || [],
+      sectionOptions: (data.sectionOptions || []).map(normalizeSection),
       certificateTypeOptions: data.certificateTypeOptions || []
     }
 
@@ -339,8 +361,8 @@ async function fetchData() {
     if (items.value.length > 0) {
       selectedIndex.value = 0
     }
-  } catch (e: any) {
-    errorMessage.value = e?.message || '등기권리증 정보 조회 실패'
+  } catch (e: unknown) {
+    errorMessage.value = e instanceof Error ? e.message : '등기권리증 정보 조회 실패'
   } finally {
     loading.value = false
   }
@@ -384,7 +406,6 @@ function deleteItem(index: number) {
 
 // 비밀번호 사용여부 조회 (추후 구현)
 function handleCheckPassword() {
-  console.log('비밀번호 사용여부 조회 - 추후 구현')
   // TODO: API 호출
 }
 
@@ -405,34 +426,35 @@ async function handleSave() {
     }
 
     // items를 API 요청 형태로 변환
-    const certificateItems = items.value.map((item) => {
-      // ownerId는 이미 progressPartyId 값임 (select에서 progressPartyId를 바인딩)
-      return {
-        propertyUniqueNumber: item.propertyUniqueNumber,
-        progressPartyId: item.ownerId, // ownerId에 이미 progressPartyId가 저장되어 있음
-        holdingShareDenominator: item.holdingShareDenominator,
-        holdingShareNumerator: item.holdingShareNumerator,
-        transferShareDenominator: item.transferShareDenominator,
-        transferShareNumerator: item.transferShareNumerator,
-        section: item.section as 'GAP' | 'EUL',
-        rankNumber: item.rankNumber,
-        receiptDate: item.receiptDate,
-        receiptNumber: item.receiptNumber,
-        certificateType: item.certificateType as
-          | 'REGISTRY_CERT_INFO'
-          | 'REGISTRY_CERTIFICATE'
-          | 'CONFIRMATION_DOCUMENT'
-          | 'PRIOR_REGISTRY_LINK',
-        certificateSerialNumber: item.certificateSerialNumber,
-        certificatePasswordSequence: item.certificatePasswordSequence,
-        certificatePassword: item.certificatePassword
-      }
-    })
+    const certificateItems: ReplaceApplicationPropertyOwnerCertificateRequest['certificateItems'] =
+      items.value.map((item) => {
+        // ownerId는 이미 progressPartyId 값임 (select에서 progressPartyId를 바인딩)
+        return {
+          propertyUniqueNumber: item.propertyUniqueNumber,
+          progressPartyId: item.ownerId, // ownerId에 이미 progressPartyId가 저장되어 있음
+          holdingShareDenominator: item.holdingShareDenominator,
+          holdingShareNumerator: item.holdingShareNumerator,
+          transferShareDenominator: item.transferShareDenominator,
+          transferShareNumerator: item.transferShareNumerator,
+          section: item.section as 'GAP' | 'EUL',
+          rankNumber: item.rankNumber,
+          receiptDate: item.receiptDate,
+          receiptNumber: item.receiptNumber,
+          certificateType: item.certificateType as
+            | 'REGISTRY_CERT_INFO'
+            | 'REGISTRY_CERTIFICATE'
+            | 'CONFIRMATION_DOCUMENT'
+            | 'PRIOR_REGISTRY_LINK',
+          certificateSerialNumber: item.certificateSerialNumber,
+          certificatePasswordSequence: item.certificatePasswordSequence,
+          certificatePassword: item.certificatePassword
+        }
+      })
 
     // API 호출 - R02G-02 등기권리증 대체
     const response = await registryCertificateAPI.replace(
       { applicationId: props.applicationId },
-      { certificateItems } as any // 타입 불일치로 as any 필요
+      { certificateItems }
     )
 
     const dialog = extractApiSuccessContent(response, '저장 완료', '저장되었습니다.')
@@ -441,8 +463,8 @@ async function handleSave() {
       message: dialog.message
     })
     emit('close')
-  } catch (e: any) {
-    errorMessage.value = e?.message || '저장 실패'
+  } catch (e: unknown) {
+    errorMessage.value = e instanceof Error ? e.message : '저장 실패'
   } finally {
     loading.value = false
   }

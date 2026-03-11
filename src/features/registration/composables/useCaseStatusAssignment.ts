@@ -65,7 +65,7 @@ export function useCaseStatusAssignment({
     addAssigning(registryManagementNumber)
 
     try {
-      const response: any = await registryProgressAPI.assignManager(
+      const response = await registryProgressAPI.assignManager(
         { registryManagementNumber },
         { managerUserId: Number(managerUserIdToAssign) }
       )
@@ -82,7 +82,7 @@ export function useCaseStatusAssignment({
       if (acknowledged) {
         await refreshList()
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       const dialog = extractApiErrorContent(error, '배정 실패', '업무담당자 배정에 실패했습니다.')
       await alert({
         title: dialog.title,

@@ -50,6 +50,7 @@ import { registryAdminConsentAPI } from '@/api/services/registry'
 import { useCodeReplacer } from '@/composables/utils/useCodeReplacer'
 import { useErrorHandler } from '@/composables/utils/useErrorHandler'
 import { useThrottle } from '@/composables/utils/useThrottle'
+import { extractArrayByKeys } from '@/utils/apiPayload'
 
 interface Props {
   registryManagementNumber: string
@@ -79,12 +80,6 @@ const loading = ref(false)
 const errorMessage = ref('')
 const list = ref<AdminInfoRequest[]>([])
 
-function unwrapData<T>(res: any): T {
-  if (res?.data && typeof res.data === 'object' && 'data' in res.data) return res.data.data as T
-  if (res && typeof res === 'object' && 'data' in res) return res.data as T
-  return undefined as unknown as T
-}
-
 function getRegistryTypeName(type: string): string {
   const replaced = findReplacement(type, 'registryTypes') ?? replaceText(type)
   if (replaced !== type) return `${type} -> ${replaced}`
@@ -108,7 +103,7 @@ function getRegistryMethodName(method: string): string {
 
 function handleDetail(item: AdminInfoRequest) {
   // TODO: 상세 페이지 이동 또는 모달 열기
-  console.log('상세 보기:', item)
+  void item
 }
 
 async function fetchData() {
@@ -123,14 +118,16 @@ async function fetchData() {
     loading.value = true
     errorMessage.value = ''
     try {
-      const res: any = await registryAdminConsentAPI.getList({
+      const res = await registryAdminConsentAPI.getList({
         registryManagementNumber: props.registryManagementNumber
       })
-      const data = unwrapData<{ applicationAdminInfoRequest: AdminInfoRequest[] }>(res)
-
-      list.value = data?.applicationAdminInfoRequest ?? []
+      list.value = extractArrayByKeys<AdminInfoRequest>(res, [
+        'applicationAdminInfoRequest',
+        'items',
+        'content'
+      ])
       emit('loaded', list.value.length > 0)
-    } catch (e: any) {
+    } catch (e: unknown) {
       list.value = []
       errorMessage.value = getErrorMessage(e)
       emit('loaded', false)

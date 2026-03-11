@@ -785,6 +785,7 @@ import AddrTest from '@/features/dev/pages/AddrTestPanel.vue'
 import PdfTest from '@/features/dev/pages/PdfTestPanel.vue'
 import RPATest from '@/features/dev/pages/RPATestPanel.vue'
 import PdfConverter from '@/features/doc-templates/PdfConverter.vue'
+import { logger } from '@/utils/logger'
 
 const PdfViewer = defineAsyncComponent(() => import('@/features/doc-templates/PdfViewer.vue'))
 
@@ -805,9 +806,9 @@ async function handleLoadAllCodes() {
   hasTriedLoad.value = true
   try {
     await fetchAllCodes()
-    console.log('✅ 공통코드 로드 완료!')
+    logger.info('[DEV_TEST] Code load completed')
   } catch (error) {
-    console.error('❌ 공통코드 로드 실패:', error)
+    logger.error('[DEV_TEST] Code load failed', { error })
   }
 }
 
@@ -815,7 +816,7 @@ async function handleLoadAllCodes() {
 function handleClearCodes() {
   clearCache()
   hasTriedLoad.value = false
-  console.log('🗑️ 공통코드 데이터 초기화 완료')
+  logger.info('[DEV_TEST] Code cache cleared')
 }
 
 function openViewerInNewTab(src: string) {
@@ -872,7 +873,7 @@ function copyCode(code: string) {
         showToast.value = false
       }, 2000)
     } else {
-      console.error('❌ 복사 실패')
+      logger.warn('[DEV_TEST] Copy failed')
       toastMessage.value = '복사 실패'
       showToast.value = true
       setTimeout(() => {
@@ -880,7 +881,7 @@ function copyCode(code: string) {
       }, 2000)
     }
   } catch (error) {
-    console.error('❌ 복사 에러:', error)
+    logger.error('[DEV_TEST] Copy error', { error })
     toastMessage.value = '복사 실패'
     showToast.value = true
     setTimeout(() => {
@@ -1073,7 +1074,7 @@ function searchAddress() {
 }
 
 function handleCountryChange(value: string | number | null) {
-  console.log('선택된 국가:', value)
+  logger.debug('[DEV_TEST] Country changed', { value })
 }
 </script>
 

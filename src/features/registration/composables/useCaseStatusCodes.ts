@@ -6,34 +6,14 @@
 import { computed, ref } from 'vue'
 
 import { codeAPI } from '@/api/services/code'
+import { useErrorHandler } from '@/composables/utils/useErrorHandler'
 import type { Code } from '@/types'
+import { extractArrayByKeys } from '@/utils/apiPayload'
 
 import type { SearchOption } from './caseStatus.types'
 
-function unwrap<T>(res: any): T | undefined {
-  if (!res) return undefined
-  if (typeof res === 'object' && 'data' in res) {
-    const data = (res as any).data
-    if (data && typeof data === 'object' && 'data' in data) return (data as any).data as T
-    return data as T
-  }
-  return res as T
-}
-
-function pickCodes(payload: any): Code[] {
-  if (!payload) return []
-  if (Array.isArray(payload)) return payload
-  if (Array.isArray(payload?.codes)) return payload.codes
-  if (Array.isArray(payload?.items)) return payload.items
-  if (Array.isArray(payload?.content)) return payload.content
-  if (Array.isArray(payload?.result)) return payload.result
-  if (Array.isArray(payload?.result?.codes)) return payload.result.codes
-  if (Array.isArray(payload?.result?.items)) return payload.result.items
-  if (Array.isArray(payload?.result?.content)) return payload.result.content
-  return []
-}
-
 export function useCaseStatusCodes() {
+  const { getErrorMessage } = useErrorHandler()
   const workTypes = ref<Code[]>([])
   const assignmentWorks = ref<Code[]>([])
   const registryMethods = ref<Code[]>([])
@@ -74,12 +54,24 @@ export function useCaseStatusCodes() {
           codeAPI.progressStatuses()
         ])
 
-      workTypes.value = pickCodes(unwrap<any>(workTypeRes))
-      assignmentWorks.value = pickCodes(unwrap<any>(assignedWorkRes))
-      registryMethods.value = pickCodes(unwrap<any>(registryMethodRes))
-      progressStatuses.value = pickCodes(unwrap<any>(progressStatusRes))
-    } catch (error: any) {
-      codesError.value = error?.message ?? '코드 목록 로딩 실패'
+      workTypes.value = extractArrayByKeys<Code>(workTypeRes, ['codes', 'items', 'content'])
+      assignmentWorks.value = extractArrayByKeys<Code>(assignedWorkRes, [
+        'codes',
+        'items',
+        'content'
+      ])
+      registryMethods.value = extractArrayByKeys<Code>(registryMethodRes, [
+        'codes',
+        'items',
+        'content'
+      ])
+      progressStatuses.value = extractArrayByKeys<Code>(progressStatusRes, [
+        'codes',
+        'items',
+        'content'
+      ])
+    } catch (error) {
+      codesError.value = getErrorMessage(error)
       workTypes.value = []
       assignmentWorks.value = []
       registryMethods.value = []

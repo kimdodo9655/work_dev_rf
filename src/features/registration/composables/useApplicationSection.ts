@@ -18,6 +18,7 @@ export function useApplicationSection({
   registryManagementNumber: Ref<string>
   isOpen: Ref<boolean>
 }) {
+  // 분기: 개발 환경에서만 PDF 변환기 노출
   const showPdfConverter = import.meta.env.DEV || import.meta.env.VITE_IS_DEV === 'true'
   const pdfConverterComponent = showPdfConverter
     ? defineAsyncComponent(() => import('@/features/doc-templates/PdfConverter.vue'))
@@ -47,6 +48,7 @@ export function useApplicationSection({
   })
 
   const activeApplicationId = computed(() => {
+    // 기준: 현재 활성 탭의 applicationId
     const activeTab = tabs.value[activeTabIndex.value]
     return activeTab?.applicationId
   })
@@ -95,7 +97,7 @@ export function useApplicationSection({
   }
 
   function handleEditRegistryMethod() {
-    console.log('등기방식 수정 - 추후 구현')
+    // 상태: 미구현
   }
 
   return {

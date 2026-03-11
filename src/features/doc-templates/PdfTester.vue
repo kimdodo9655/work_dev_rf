@@ -68,6 +68,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 
+import { logger } from '@/utils/logger'
+
 const A4_WIDTH_MM = 210
 const A4_HEIGHT_MM = 297
 const MM_TO_PX = 3.7795275591 // 96 DPI 기준
@@ -94,7 +96,7 @@ function updateSize() {
 
   if (width > 0) {
     containerWidth.value = width
-    console.log('PdfTester containerWidth:', containerWidth.value)
+    logger.debug('[PDF_TESTER] Container width updated', { width: containerWidth.value })
   } else {
     // 렌더링이 완료되지 않았으면 재시도
     setTimeout(updateSize, 50)

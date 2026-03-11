@@ -6,7 +6,7 @@
 import type { RouteRecordRaw } from 'vue-router'
 
 import { MESSAGES } from '@/constants/messages'
-import { useAuthStore } from '@/stores/auth'
+import { consumeAutoLogoutPageAccess } from '@/utils/authSessionFlags'
 import { logger } from '@/utils/logger'
 
 export const authRoutes: RouteRecordRaw[] = [
@@ -42,14 +42,11 @@ export const authRoutes: RouteRecordRaw[] = [
     name: 'AutoLogout',
     component: () => import('@/features/auth/pages/AutoLogoutPage.vue'),
     beforeEnter: () => {
-      const authStore = useAuthStore()
-
-      if (!authStore.canAccessAutoLogoutPage) {
+      // 규칙: auto-logout 직접 진입 금지
+      if (!consumeAutoLogoutPageAccess()) {
         logger.warn('[ROUTER] Unauthorized auto-logout page access')
         return '/auth/login'
       }
-
-      authStore.canAccessAutoLogoutPage = false
       return true
     },
     meta: {

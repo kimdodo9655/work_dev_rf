@@ -12,7 +12,8 @@ import { useRouter } from 'vue-router'
 
 import { authAPI } from '@/api/services/auth'
 import { useAuthStore } from '@/stores/auth'
-import type { AuthState, TokenRefreshResponse } from '@/types'
+import type { AuthState } from '@/types'
+import { extractTokenRefreshPayload } from '@/utils/authPayload'
 import { logger } from '@/utils/logger'
 import { storage } from '@/utils/storage'
 
@@ -55,7 +56,7 @@ export function useAuthInitializer() {
       return
     }
 
-    // accessToken만 만료되었으면 로컬스토리지 삭제하고 종료
+    // 분기: access 만료 / refresh 유효
     if (!isAccessTokenValid && isRefreshTokenValid) {
       logger.info('[AUTH INIT] Access token expired - Try refresh', {
         accessExpires: storedData.accessExpires,
@@ -73,14 +74,9 @@ export function useAuthInitializer() {
         const response = await authAPI.refresh({
           refreshToken: storedData.refreshToken
         })
-        const payload = unwrapRefreshPayload(response)
+        const payload = extractTokenRefreshPayload(response)
 
-        if (
-          !payload?.accessToken ||
-          !payload?.refreshToken ||
-          payload?.accessTokenExpiresIn == null ||
-          payload?.refreshTokenExpiresIn == null
-        ) {
+        if (!payload) {
           throw new Error('Invalid refresh response')
         }
 
@@ -115,6 +111,7 @@ export function useAuthInitializer() {
    * onboarding 상태에서 허용되는 경로인지 체크
    */
   function isOnboardingAllowedPath(path: string): boolean {
+    // 규칙: onboarding 허용 경로 고정
     const allowedPaths = ['/bank-select', '/my/organization', '/my/users', '/my/profile']
     return allowedPaths.some((allowed) => path.startsWith(allowed))
   }
@@ -123,6 +120,7 @@ export function useAuthInitializer() {
    * 인증 상태에 따라 초기 라우팅 처리
    */
   async function handleInitialRouting(currentPath: string, authState: AuthState) {
+    // 역할: 저장 상태와 현재 URL 동기화
     // 에러 페이지는 라우팅하지 않음
     if (currentPath.startsWith('/error/')) {
       logger.info('[AUTH INIT] Error page - No routing needed')
@@ -134,7 +132,7 @@ export function useAuthInitializer() {
         // 로그인 전: 인증 페이지나 단말기 정보 페이지가 아니면 로그인으로
         if (!currentPath.startsWith('/auth') && currentPath !== '/device-info') {
           logger.warn('[AUTH INIT] Not logged in - Redirect to login')
-          await router.replace('/auth/login')
+          await router.replace({ name: 'Login' })
         }
         break
 
@@ -143,11 +141,11 @@ export function useAuthInitializer() {
         if (currentPath.startsWith('/auth')) {
           // 인증 페이지에 있으면 금융기관 선택으로
           logger.info('[AUTH INIT] Logged in but on auth page - Redirect to bank selection')
-          await router.replace('/bank-select')
+          await router.replace({ name: 'BankSelection' })
         } else if (!isOnboardingAllowedPath(currentPath)) {
           // onboarding 허용 경로가 아니면 금융기관 선택으로
           logger.warn('[AUTH INIT] Not allowed in onboarding state - Redirect to bank selection')
-          await router.replace('/bank-select')
+          await router.replace({ name: 'BankSelection' })
         }
         break
 
@@ -156,11 +154,11 @@ export function useAuthInitializer() {
         if (currentPath.startsWith('/auth') && currentPath !== '/auth/auto-logout') {
           // 인증 페이지에 있으면 대시보드로
           logger.info('[AUTH INIT] Already authenticated - Redirect to dashboard')
-          await router.replace('/dashboard')
+          await router.replace({ name: 'Dashboard' })
         } else if (currentPath === '/device-info') {
           // 이미 로그인했는데 단말기 정보 페이지에 있으면 대시보드로
           logger.info('[AUTH INIT] Already authenticated - Redirect to dashboard from device-info')
-          await router.replace('/dashboard')
+          await router.replace({ name: 'Dashboard' })
         }
         break
     }
@@ -197,21 +195,4 @@ export function useAuthInitializer() {
     validateAndLoadAuth,
     handleInitialRouting
   }
-}
-function unwrapRefreshPayload(payload: unknown): TokenRefreshResponse {
-  let current: unknown = payload
-
-  if (current && typeof current === 'object' && 'data' in (current as Record<string, unknown>)) {
-    current = (current as { data: unknown }).data
-  }
-  if (
-    current &&
-    typeof current === 'object' &&
-    'result' in (current as Record<string, unknown>) &&
-    (current as Record<string, unknown>).result != null
-  ) {
-    current = (current as { result: unknown }).result
-  }
-
-  return (current ?? {}) as TokenRefreshResponse
 }

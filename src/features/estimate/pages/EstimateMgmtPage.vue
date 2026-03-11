@@ -120,6 +120,7 @@ import SearchInput from '@/components/template/input/SearchInput.vue'
 import SearchSelect from '@/components/template/input/SearchSelect.vue'
 import Pagination from '@/components/template/PaginationItem.vue'
 import type { Code, EstimateListItemResponse, GetEstimateListQuery, SelectOption } from '@/types'
+import { logger } from '@/utils/logger'
 
 defineOptions({
   name: 'EstimateMgmtPage'
@@ -330,7 +331,7 @@ async function fetchList() {
     items.value = toList(response)
     totalItems.value = toTotal(response)
   } catch (error) {
-    console.error(error)
+    logger.error('[ESTIMATE_MGMT] Failed to fetch estimate list', { error })
     loadError.value = '견적 목록을 불러오지 못했습니다.'
     items.value = []
     totalItems.value = 0
@@ -359,7 +360,7 @@ onMounted(async () => {
   try {
     await loadCodeOptions()
   } catch (error) {
-    console.error(error)
+    logger.error('[ESTIMATE_MGMT] Failed to load code options', { error })
   }
   await fetchList()
 })

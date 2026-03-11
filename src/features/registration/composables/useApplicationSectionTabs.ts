@@ -10,19 +10,7 @@ import { useApiAlert } from '@/composables/utils/useApiAlert'
 import { useDialog } from '@/composables/utils/useDialog'
 import { useThrottle } from '@/composables/utils/useThrottle'
 import type { RegistryApplicationForm } from '@/features/registration/composables/applicationSection.types'
-
-function unwrapData<T>(res: unknown): T {
-  if (res && typeof res === 'object') {
-    const withData = res as { data?: unknown }
-    if (withData.data && typeof withData.data === 'object' && 'data' in withData.data) {
-      return (withData.data as { data: T }).data
-    }
-    if ('data' in withData) {
-      return withData.data as T
-    }
-  }
-  return undefined as unknown as T
-}
+import { extractArrayByKeys } from '@/utils/apiPayload'
 
 export function useApplicationSectionTabs({
   registryManagementNumber,
@@ -45,6 +33,7 @@ export function useApplicationSectionTabs({
   const { extractApiSuccessContent, extractApiErrorContent } = useApiAlert()
 
   const activeApplicationId = computed(() => {
+    // 기준: 현재 탭의 applicationId
     const activeTab = tabs.value[activeTabIndex.value]
     return activeTab?.applicationId
   })
@@ -56,6 +45,7 @@ export function useApplicationSectionTabs({
       return
     }
 
+    // 규칙: 연속 조회는 throttle로 흡수
     const result = await tabsThrottle.execute(async () => {
       tabsLoading.value = true
       tabsErrorMessage.value = ''
@@ -63,9 +53,7 @@ export function useApplicationSectionTabs({
         const res = await registryTypeAPI.getList({
           registryManagementNumber: registryManagementNumber.value
         })
-        const data = unwrapData<RegistryApplicationForm[]>(res)
-
-        tabs.value = Array.isArray(data) ? data : data ? [data] : []
+        tabs.value = extractArrayByKeys<RegistryApplicationForm>(res, ['items', 'content'])
         if (tabs.value.length > 0 && activeTabIndex.value >= tabs.value.length) {
           activeTabIndex.value = 0
         }
@@ -86,10 +74,11 @@ export function useApplicationSectionTabs({
   }
 
   function handleAddTab() {
-    console.log('탭 추가 기능 - 추후 구현')
+    // 상태: 미구현
   }
 
   function canDeleteTab(tab: RegistryApplicationForm) {
+    // 규칙: MAIN 신청서는 삭제 제외
     return tab.registryRole !== 'MAIN'
   }
 
@@ -98,6 +87,7 @@ export function useApplicationSectionTabs({
   }
 
   function removeTabFromState(applicationId: number) {
+    // 규칙: 삭제 후 active index 재정렬
     const removedIndex = tabs.value.findIndex((item) => item.applicationId === applicationId)
     if (removedIndex < 0) return
 
@@ -174,6 +164,7 @@ export function useApplicationSectionTabs({
   watch(
     () => tabs.value.length,
     (length) => {
+      // 동기화: 활성 applicationId 변경 통지
       if (length > 0) {
         onActiveApplicationChanged(activeApplicationId.value)
       } else {

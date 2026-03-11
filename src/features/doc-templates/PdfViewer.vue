@@ -160,7 +160,62 @@ import {
   watch
 } from 'vue'
 
-let pdfjsLib: any = null
+import { logger } from '@/utils/logger'
+
+type PdfViewport = {
+  width: number
+  height: number
+}
+
+type PdfPageProxy = {
+  rotate?: number
+  getViewport(options: { scale: number; rotation: number }): PdfViewport
+  render(options: {
+    canvasContext: CanvasRenderingContext2D
+    viewport: PdfViewport
+    transform: [number, number, number, number, number, number]
+    annotationMode?: number
+  }): PdfRenderTask
+}
+
+type PdfDocumentProxy = {
+  numPages: number
+  getPage(pageNumber: number): Promise<PdfPageProxy>
+}
+
+type PdfRenderTask = {
+  promise: Promise<void>
+  cancel(): void
+}
+
+type PdfLoadingTask = {
+  promise: Promise<PdfDocumentProxy>
+}
+
+type PdfJsRuntime = {
+  getDocument(options: {
+    url?: string
+    data?: ArrayBuffer
+    disableAutoFetch: boolean
+    disableStream: boolean
+    enableXfa: boolean
+    isEvalSupported: boolean
+    stopAtErrors: boolean
+  }): PdfLoadingTask
+  GlobalWorkerOptions: {
+    workerPort: Worker | null
+  }
+  AnnotationMode?: {
+    DISABLE?: number
+  }
+}
+
+type PdfRenderError = {
+  name?: string
+  message?: string
+}
+
+let pdfjsLib: PdfJsRuntime | null = null
 let pdfWorker: Worker | null = null
 let pdfRuntimePromise: Promise<void> | null = null
 
@@ -173,9 +228,9 @@ async function ensurePdfRuntimeLoaded() {
         import('pdfjs-dist/build/pdf.worker.mjs?worker')
       ])
       const PdfJsWorker = workerModule.default
-      pdfjsLib = lib
+      pdfjsLib = lib as unknown as PdfJsRuntime
       pdfWorker = new PdfJsWorker()
-      ;(pdfjsLib as any).GlobalWorkerOptions.workerPort = pdfWorker
+      pdfjsLib.GlobalWorkerOptions.workerPort = pdfWorker
     })()
   }
   await pdfRuntimePromise
@@ -203,7 +258,7 @@ const appTitle = computed(() => props.appTitle)
 const addressPath = computed(() => props.addressPath)
 
 // ✅ pdfDoc는 Vue Proxy로 감싸지면 private field 깨짐
-const pdfDoc = shallowRef<any>(null)
+const pdfDoc = shallowRef<PdfDocumentProxy | null>(null)
 
 const numPages = ref(0)
 const pageNum = ref(1)
@@ -224,7 +279,7 @@ const pageCanvasMap = reactive(new Map<number, HTMLCanvasElement>())
 const pageWrapMap = reactive(new Map<number, HTMLDivElement>())
 
 // ✅ 🚨 중요: renderTask는 절대 reactive Map에 넣지 말 것 (cancel이 깨짐)
-const pageRenderTaskMap = new Map<number, any>() // non-reactive
+const pageRenderTaskMap = new Map<number, PdfRenderTask>() // non-reactive
 const pageIntersectRatioMap = reactive(new Map<number, number>())
 // ✅ 이미 렌더된 조건 캐시(스케일/회전/dpr)
 const pageRenderKeyMap = new Map<number, string>()
@@ -253,7 +308,7 @@ function clamp(n: number, min: number, max: number) {
 function normalizeRotate(deg: number) {
   return ((deg % 360) + 360) % 360
 }
-function combinedRotation(page: any) {
+function combinedRotation(page: PdfPageProxy) {
   const base = typeof page?.rotate === 'number' ? page.rotate : 0
   return normalizeRotate(base + rotation.value)
 }
@@ -292,7 +347,7 @@ function getViewerSize() {
   return { w: Math.max(0, w), h: Math.max(0, h) }
 }
 
-async function computeScaleForMode(page: any) {
+async function computeScaleForMode(page: PdfPageProxy) {
   const baseViewport = page.getViewport({ scale: 1, rotation: combinedRotation(page) })
   const { w, h } = getViewerSize()
   if (w <= 0 || h <= 0) return zoomPct.value / 100
@@ -335,7 +390,7 @@ function cancelAllRenderTasks() {
     try {
       task.cancel()
     } catch (e) {
-      console.warn('[pdf] render task cancel failed', e)
+      logger.warn('[PDF_VIEWER] Render task cancel failed', { error: e })
     }
   }
   pageRenderTaskMap.clear()
@@ -371,7 +426,11 @@ async function loadPdf() {
 
     await ensurePdfRuntimeLoaded()
 
-    const task = (pdfjsLib as any).getDocument({
+    if (!pdfjsLib) {
+      throw new Error('PDF runtime not loaded')
+    }
+
+    const task = pdfjsLib.getDocument({
       url: hasUrl ? props.src : undefined,
       data: hasData ? props.src : undefined,
       disableAutoFetch: true,
@@ -402,7 +461,7 @@ async function loadPdf() {
     await nextTick()
     await renderAllThumbs({ force: true })
   } catch (e) {
-    console.error('PDF load failed:', e)
+    logger.error('[PDF_VIEWER] PDF load failed', { error: e })
     pdfDoc.value = null
     numPages.value = 0
   }
@@ -432,7 +491,10 @@ async function waitForAllPageCanvases() {
     if (pageCanvasMap.size >= numPages.value) return true
     await nextTick()
   }
-  console.warn('[pdf] pageCanvasMap not ready:', pageCanvasMap.size, '/', numPages.value)
+  logger.warn('[PDF_VIEWER] pageCanvasMap not ready', {
+    canvasCount: pageCanvasMap.size,
+    numPages: numPages.value
+  })
   return false
 }
 
@@ -466,7 +528,7 @@ async function renderPage(pageNumber: number, opts: RenderOpts = {}) {
     try {
       prevTask.cancel()
     } catch (e) {
-      console.debug('[pdf] prev render cancel failed (ignored)', e)
+      logger.debug('[PDF_VIEWER] Previous render cancel failed', { error: e })
     }
     pageRenderTaskMap.delete(pageNumber)
   }
@@ -488,7 +550,7 @@ async function renderPage(pageNumber: number, opts: RenderOpts = {}) {
     canvasContext: ctx,
     viewport,
     transform: [dpr, 0, 0, dpr, 0, 0],
-    annotationMode: (pdfjsLib as any).AnnotationMode?.DISABLE
+    annotationMode: pdfjsLib?.AnnotationMode?.DISABLE
   })
 
   pageRenderTaskMap.set(pageNumber, renderTask)
@@ -496,11 +558,12 @@ async function renderPage(pageNumber: number, opts: RenderOpts = {}) {
   try {
     await renderTask.promise
     pageRenderKeyMap.set(pageNumber, key)
-  } catch (e: any) {
-    const name = e?.name || ''
-    const msg = String(e?.message || '')
+  } catch (e: unknown) {
+    const renderError = e as PdfRenderError
+    const name = renderError?.name || ''
+    const msg = String(renderError?.message || '')
     if (name === 'RenderingCancelledException' || msg.includes('Rendering cancelled')) return
-    console.error('[pdf] render failed:', e)
+    logger.error('[PDF_VIEWER] Page render failed', { error: e, pageNumber })
   } finally {
     if (pageRenderTaskMap.get(pageNumber) === renderTask) {
       pageRenderTaskMap.delete(pageNumber)
@@ -574,18 +637,19 @@ async function renderThumb(pageNumber: number, opts: RenderOpts = {}) {
     canvasContext: ctx,
     viewport,
     transform: [dpr, 0, 0, dpr, 0, 0],
-    annotationMode: (pdfjsLib as any).AnnotationMode?.DISABLE
+    annotationMode: pdfjsLib?.AnnotationMode?.DISABLE
   })
 
   try {
     await task.promise
     // ✅ 썸네일 키는 -pageNumber로 저장(본문 키와 충돌 방지)
     pageRenderKeyMap.set(-pageNumber, key)
-  } catch (e: any) {
-    const name = e?.name || ''
-    const msg = String(e?.message || '')
+  } catch (e: unknown) {
+    const renderError = e as PdfRenderError
+    const name = renderError?.name || ''
+    const msg = String(renderError?.message || '')
     if (name === 'RenderingCancelledException' || msg.includes('Rendering cancelled')) return
-    console.error('[pdf] thumb render failed:', e)
+    logger.error('[PDF_VIEWER] Thumbnail render failed', { error: e, pageNumber })
   }
 }
 
@@ -773,7 +837,7 @@ async function handleDownload() {
     a.remove()
     URL.revokeObjectURL(url)
   } catch (e) {
-    console.error('download failed:', e)
+    logger.error('[PDF_VIEWER] Download failed', { error: e })
   }
 }
 
@@ -796,7 +860,7 @@ function queueRerender(job: () => Promise<void>, opts: QueueOpts = {}) {
       await nextTick()
       await renderAllThumbs({ force: false })
     }
-  })().catch((e) => console.error(e))
+  })().catch((e) => logger.error('[PDF_VIEWER] Rerender queue failed', { error: e }))
 }
 
 function setFitWidth() {

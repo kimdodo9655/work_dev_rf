@@ -155,6 +155,7 @@ import { registryQuoteAPI } from '@/api/services/registry/quote'
 import SearchSelect from '@/components/template/input/SearchSelect.vue'
 import { MESSAGES } from '@/constants/messages'
 import type { Code, EstimateDetailResponse, EstimateInfoResponse, SelectOption } from '@/types'
+import { logger } from '@/utils/logger'
 
 defineOptions({
   name: 'EstimateDetailPage'
@@ -227,7 +228,7 @@ function goBack() {
     router.back()
     return
   }
-  router.push('/estimate')
+  router.push({ name: 'EstimateMgmt' })
 }
 
 async function loadBasicInfo() {
@@ -267,7 +268,7 @@ onMounted(async () => {
       await loadEstimateDetail()
     }
   } catch (error) {
-    console.error(error)
+    logger.error('[ESTIMATE_DETAIL] Failed to load estimate detail', { error })
     loadError.value = '견적 상세 정보를 불러오지 못했습니다.'
   } finally {
     isLoading.value = false

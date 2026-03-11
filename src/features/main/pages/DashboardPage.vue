@@ -31,7 +31,7 @@
           <h4>등기 견적 관리</h4>
           <ul class="dashboard-btn-list">
             <li>
-              <router-link to="/estimate">
+              <router-link :to="{ name: 'EstimateMgmt' }">
                 <p>견적 요청 건수 :</p>
                 <p>
                   <span class="num">{{ estimateSummary.requestCount }}</span>
@@ -42,7 +42,7 @@
               </router-link>
             </li>
             <li>
-              <router-link to="/estimate">
+              <router-link :to="{ name: 'EstimateMgmt' }">
                 <p>견적 작성 건수 :</p>
                 <p>
                   <span class="num">{{ estimateSummary.writtenCount }}</span>
@@ -53,7 +53,7 @@
               </router-link>
             </li>
             <li>
-              <router-link to="/estimate">
+              <router-link :to="{ name: 'EstimateMgmt' }">
                 <p>견적 수임 건수 :</p>
                 <p>
                   <span class="num">{{ estimateSummary.awardedCount }}</span>
@@ -71,7 +71,7 @@
           <h4>나의 등기 진행 현황</h4>
           <ul class="dashboard-btn-list">
             <li>
-              <router-link to="/estimate">
+              <router-link :to="{ name: 'EstimateMgmt' }">
                 <p>업무 배정 건수 :</p>
                 <p>
                   <span class="num">{{ progressSummary.assignedCount }}</span>
@@ -102,7 +102,7 @@
         <div class="dashboard-card card40">
           <h4>
             오늘의 접수 사건
-            <router-link to="/estimate" class="more-link"
+            <router-link :to="{ name: 'EstimateMgmt' }" class="more-link"
               ><i class="fi fi-br-plus-small"></i>더보기</router-link
             >
           </h4>
@@ -112,7 +112,7 @@
               v-for="(item, index) in todayCases"
               :key="`${item.registryManagementNumber}-${index}`"
             >
-              <router-link to="/estimate">
+              <router-link :to="{ name: 'EstimateMgmt' }">
                 <p>
                   [{{ item.registryReceiptDate || '-' }}]
                   {{ item.registryManagementNumber || '-' }} - {{ item.userName || '-' }}
@@ -152,7 +152,7 @@
         <div class="dashboard-card card30">
           <h4>
             공지사항
-            <router-link to="/notice" class="more-link"
+            <router-link :to="{ name: 'Notice' }" class="more-link"
               ><i class="fi fi-br-plus-small"></i>더보기</router-link
             >
           </h4>
@@ -251,6 +251,8 @@ import type {
   SearchRegistryProgressTodayQuery,
   UserAssignableResponse
 } from '@/types'
+import { extractArrayByKeys, extractPrimaryPayload } from '@/utils/apiPayload'
+import { logger } from '@/utils/logger'
 
 import DashboardChart from './DashboardChart.vue'
 
@@ -324,28 +326,8 @@ const loadError = ref<string | null>(null)
 // 내부 유틸
 // ============================================================================
 
-// API 응답이 { data: ... } 구조/바로 데이터 구조 모두 대응
-function unwrapResponse<T>(payload: unknown): T {
-  if (payload && typeof payload === 'object' && 'data' in (payload as Record<string, unknown>)) {
-    return (payload as { data: T }).data
-  }
-  return payload as T
-}
-
 function extractApiRoot<T>(payload: unknown): T {
-  let current: unknown = payload
-
-  if (current && typeof current === 'object' && 'data' in (current as Record<string, unknown>)) {
-    current = (current as { data: unknown }).data
-  }
-  if (current && typeof current === 'object' && 'result' in (current as Record<string, unknown>)) {
-    current = (current as { result: unknown }).result
-  }
-  if (current && typeof current === 'object' && 'data' in (current as Record<string, unknown>)) {
-    current = (current as { data: unknown }).data
-  }
-
-  return (current ?? {}) as T
+  return (extractPrimaryPayload(payload) ?? {}) as T
 }
 
 function toNumberOrZero(value: unknown): number {
@@ -374,6 +356,14 @@ function normalizeEstimateSummary(source: unknown): Required<RegistryEstimateSum
         obj.estimateAwardedCount
     )
   }
+}
+
+function normalizeTodayCases(source: unknown): RegistryProgressTodayResponse[] {
+  const rows = extractArrayByKeys<RegistryProgressTodayResponse>(source, ['content', 'items'])
+  if (rows.length > 0) return rows
+
+  const payload = extractPrimaryPayload<RegistryProgressTodayResponse>(source)
+  return payload ? [payload] : []
 }
 
 function normalizeNoticeList(source: unknown): NoticeResponse[] {
@@ -456,19 +446,7 @@ async function loadAssignableUsers() {
 
   try {
     const response = await userAPI.assignable({})
-    const payload = unwrapResponse<unknown>(response)
-    const root =
-      payload && typeof payload === 'object' && 'result' in (payload as Record<string, unknown>)
-        ? (payload as { result: unknown }).result
-        : payload
-
-    const users: UserAssignableResponse[] = Array.isArray(root)
-      ? root
-      : root && typeof root === 'object' && Array.isArray((root as { content?: unknown[] }).content)
-        ? ((root as { content: UserAssignableResponse[] }).content ?? [])
-        : root && typeof root === 'object' && Array.isArray((root as { items?: unknown[] }).items)
-          ? ((root as { items: UserAssignableResponse[] }).items ?? [])
-          : []
+    const users = extractArrayByKeys<UserAssignableResponse>(response, ['content', 'items'])
 
     cityOptions.value = [
       { label: '전체', value: 'ALL' },
@@ -482,7 +460,7 @@ async function loadAssignableUsers() {
   } catch (error) {
     assignableError.value = '업무 담당자 목록을 불러오지 못했습니다.'
     cityOptions.value = [{ label: '전체', value: 'ALL' }]
-    console.error('[DASHBOARD] Failed to load assignable users', error)
+    logger.error('[DASHBOARD] Failed to load assignable users', { error })
   } finally {
     assignableLoading.value = false
   }
@@ -509,18 +487,16 @@ async function fetchDashboardData() {
 
     const estimateData =
       estimateRes.status === 'fulfilled'
-        ? extractApiRoot<RegistryEstimateSummaryResponse>(unwrapResponse(estimateRes.value))
+        ? extractApiRoot<RegistryEstimateSummaryResponse>(estimateRes.value)
         : ({} as RegistryEstimateSummaryResponse)
 
     const progressData =
       progressRes.status === 'fulfilled'
-        ? extractApiRoot<RegistryProgressSummaryResponse>(unwrapResponse(progressRes.value))
+        ? extractApiRoot<RegistryProgressSummaryResponse>(progressRes.value)
         : ({} as RegistryProgressSummaryResponse)
 
     const todayRoot =
-      todayRes.status === 'fulfilled'
-        ? extractApiRoot<unknown>(unwrapResponse(todayRes.value))
-        : null
+      todayRes.status === 'fulfilled' ? extractApiRoot<unknown>(todayRes.value) : null
 
     const normalizedEstimate = normalizeEstimateSummary(estimateData)
     estimateSummary.requestCount = normalizedEstimate.requestCount
@@ -531,21 +507,10 @@ async function fetchDashboardData() {
     progressSummary.inProgressCount = progressData?.inProgressCount ?? 0
     progressSummary.completedCount = progressData?.completedCount ?? 0
 
-    // today API는 환경별로 단건/배열/content/items 포맷이 달라질 수 있어 모두 수용
-    todayCases.value = Array.isArray(todayRoot)
-      ? (todayRoot as RegistryProgressTodayResponse[])
-      : todayRoot && typeof todayRoot === 'object' && Array.isArray((todayRoot as any).content)
-        ? (((todayRoot as any).content ?? []) as RegistryProgressTodayResponse[])
-        : todayRoot && typeof todayRoot === 'object' && Array.isArray((todayRoot as any).items)
-          ? (((todayRoot as any).items ?? []) as RegistryProgressTodayResponse[])
-          : todayRoot
-            ? [todayRoot as RegistryProgressTodayResponse]
-            : []
+    todayCases.value = normalizeTodayCases(todayRoot)
 
     const noticeRoot =
-      noticeRes.status === 'fulfilled'
-        ? extractApiRoot<unknown>(unwrapResponse(noticeRes.value))
-        : null
+      noticeRes.status === 'fulfilled' ? extractApiRoot<unknown>(noticeRes.value) : null
     notices.value = normalizeNoticeList(noticeRoot).slice(0, 5)
 
     if (
@@ -567,7 +532,7 @@ async function fetchDashboardData() {
     progressSummary.completedCount = 0
     todayCases.value = []
     notices.value = []
-    console.error('[DASHBOARD] Failed to fetch dashboard data', error)
+    logger.error('[DASHBOARD] Failed to fetch dashboard data', { error })
   } finally {
     isLoading.value = false
   }

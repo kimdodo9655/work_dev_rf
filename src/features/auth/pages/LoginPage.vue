@@ -49,7 +49,7 @@
             ></i>
             <p class="remember-login-text" @click="toggleRememberLoginId">아이디 기억하기</p>
 
-            <router-link to="/auth/password-setup">비밀번호 변경</router-link>
+            <router-link :to="{ name: 'PasswordSetup' }">비밀번호 변경</router-link>
           </li>
           <li>
             <input type="submit" :value="button.login" :disabled="isSubmitting" />
@@ -57,7 +57,7 @@
           <li class="line-option">
             <i class="fi fi-rs-exclamation"></i>
             <p>아직 회원이 아니신가요?</p>
-            <router-link to="/auth/signup">회원가입</router-link>
+            <router-link :to="{ name: 'SignUp' }">회원가입</router-link>
           </li>
         </ul>
 
@@ -79,6 +79,7 @@ import { useAuth } from '@/composables/api/useAuth'
 import { useApiAlert } from '@/composables/utils/useApiAlert'
 import { useErrorHandler } from '@/composables/utils/useErrorHandler'
 import { MESSAGES } from '@/constants/messages'
+import { browserStorage } from '@/utils/browser'
 import { ENV } from '@/utils/env'
 import { logger } from '@/utils/logger'
 
@@ -125,10 +126,10 @@ const toggleRememberLoginId = (): void => {
 const saveLoginId = (): void => {
   try {
     if (rememberLoginId.value && loginId.value.trim()) {
-      localStorage.setItem(STORAGE_KEY, loginId.value)
+      browserStorage.setItem('local', STORAGE_KEY, loginId.value)
       logger.info('[LOGIN] Login ID saved to localStorage')
     } else {
-      localStorage.removeItem(STORAGE_KEY)
+      browserStorage.removeItem('local', STORAGE_KEY)
       logger.info('[LOGIN] Login ID removed from localStorage')
     }
   } catch (error) {
@@ -138,7 +139,7 @@ const saveLoginId = (): void => {
 
 const loadSavedLoginId = (): void => {
   try {
-    const savedLoginId = localStorage.getItem(STORAGE_KEY)
+    const savedLoginId = browserStorage.getItem('local', STORAGE_KEY)
     if (savedLoginId) {
       loginId.value = savedLoginId
       rememberLoginId.value = true
@@ -182,7 +183,7 @@ const handleSubmit = async (): Promise<void> => {
         password: password.value
       },
       {
-        redirectTo: '/bank-select',
+        redirectTo: { name: 'BankSelection' },
         onSuccess: async (response) => {
           saveLoginId()
           const dialog = extractApiSuccessContent(

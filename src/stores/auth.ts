@@ -9,11 +9,9 @@ import { computed, ref } from 'vue'
 import type { AuthState } from '@/types'
 import type { TokenRefreshResponse } from '@/types'
 import { UserRoleLevel } from '@/types'
-import {
-  clearManualLogoutInProgress,
-  handleInvalidAuthState,
-  isValidAuthData
-} from '@/utils/authValidator'
+import { clearManualLogoutInProgress, markAutoLogoutPageAccess } from '@/utils/authSessionFlags'
+import { handleInvalidAuthState, isValidAuthData } from '@/utils/authValidator'
+import { browserLocation } from '@/utils/browser'
 import { logger } from '@/utils/logger'
 import { storage } from '@/utils/storage'
 
@@ -40,9 +38,6 @@ export const useAuthStore = defineStore('auth', () => {
 
   // 현재 시간 (타이머에서 매초 업데이트)
   const currentTime = ref(Math.floor(Date.now() / 1000))
-
-  // 자동 로그아웃 페이지 접근 플래그
-  const canAccessAutoLogoutPage = ref(false)
 
   // 타이머 인터벌 ID
   let timerInterval: ReturnType<typeof setInterval> | null = null
@@ -120,7 +115,7 @@ export const useAuthStore = defineStore('auth', () => {
   }) {
     logger.info('[AUTH] 로그인 성공', { loginId: data.loginId, userId: data.userId })
 
-    // storage에 저장
+    // 순서: storage 우선 갱신
     storage.save(data)
     clearManualLogoutInProgress()
 
@@ -136,7 +131,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function updateTokens(data: TokenRefreshResponse) {
-    // ✅ 필수 값 검증 (없으면 예외)
+    // 규칙: refresh 응답 필수값 강검증
     if (
       !data.accessToken ||
       !data.refreshToken ||
@@ -178,7 +173,7 @@ export const useAuthStore = defineStore('auth', () => {
       return
     }
 
-    // ✅ authState 계산 (bankCode 유무로 판단)
+    // 기준: bankCode로 authState 역산
     const computedAuthState = data.bankCode ? 'auth' : 'onboarding'
 
     // ✅ 필수값 검증 (authState 전달)
@@ -277,7 +272,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function handleAutoLogout() {
-    // 이미 로그아웃 처리 중이면 중복 실행 방지
+    // 규칙: auto-logout 중복 실행 금지
     if (isLoggingOut) {
       logger.info('[AUTH] Already logging out - Skip duplicate execution')
       return
@@ -285,15 +280,15 @@ export const useAuthStore = defineStore('auth', () => {
 
     isLoggingOut = true
 
-    // 자동 로그아웃 페이지 접근 허용 플래그 설정
-    canAccessAutoLogoutPage.value = true
+    // 순서: 이동 전 진입 플래그 기록
+    markAutoLogoutPageAccess()
 
     stopTimer()
     clearAuth()
 
     // 현재 페이지가 자동 로그아웃 페이지가 아니면 이동
-    if (window.location.pathname !== '/auth/auto-logout') {
-      window.location.href = '/auth/auto-logout'
+    if (browserLocation.getPathname() !== '/auth/auto-logout') {
+      browserLocation.assign('/auth/auto-logout')
     }
   }
 
@@ -317,8 +312,6 @@ export const useAuthStore = defineStore('auth', () => {
     selectedBankCode,
     accessExpires,
     refreshExpires,
-    canAccessAutoLogoutPage,
-
     // Getters - 로그인 상태
     isLoggedIn,
     isAdmin,

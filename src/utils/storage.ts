@@ -3,6 +3,8 @@
  * 문서 제목: 유틸리티 모듈: storage
  */
 
+import { browserStorage } from './browser.ts'
+
 // localStorage 키 상수
 const KEYS = {
   ACCESS_TOKEN: 'access_token',
@@ -29,13 +31,13 @@ export const storage = {
     userId: number
     roleLevel: number
   }) {
-    localStorage.setItem(KEYS.ACCESS_TOKEN, data.accessToken)
-    localStorage.setItem(KEYS.REFRESH_TOKEN, data.refreshToken)
-    localStorage.setItem(KEYS.ACCESS_EXPIRES, String(data.accessTokenExpiresIn))
-    localStorage.setItem(KEYS.REFRESH_EXPIRES, String(data.refreshTokenExpiresIn))
-    localStorage.setItem(KEYS.LOGIN_ID, data.loginId)
-    localStorage.setItem(KEYS.USER_ID, String(data.userId))
-    localStorage.setItem(KEYS.ROLE_LEVEL, String(data.roleLevel))
+    browserStorage.setItem('local', KEYS.ACCESS_TOKEN, data.accessToken)
+    browserStorage.setItem('local', KEYS.REFRESH_TOKEN, data.refreshToken)
+    browserStorage.setItem('local', KEYS.ACCESS_EXPIRES, String(data.accessTokenExpiresIn))
+    browserStorage.setItem('local', KEYS.REFRESH_EXPIRES, String(data.refreshTokenExpiresIn))
+    browserStorage.setItem('local', KEYS.LOGIN_ID, data.loginId)
+    browserStorage.setItem('local', KEYS.USER_ID, String(data.userId))
+    browserStorage.setItem('local', KEYS.ROLE_LEVEL, String(data.roleLevel))
   },
 
   // 토큰만 업데이트
@@ -45,15 +47,15 @@ export const storage = {
     accessTokenExpiresIn: number
     refreshTokenExpiresIn: number
   }) {
-    localStorage.setItem(KEYS.ACCESS_TOKEN, data.accessToken)
-    localStorage.setItem(KEYS.REFRESH_TOKEN, data.refreshToken)
-    localStorage.setItem(KEYS.ACCESS_EXPIRES, String(data.accessTokenExpiresIn))
-    localStorage.setItem(KEYS.REFRESH_EXPIRES, String(data.refreshTokenExpiresIn))
+    browserStorage.setItem('local', KEYS.ACCESS_TOKEN, data.accessToken)
+    browserStorage.setItem('local', KEYS.REFRESH_TOKEN, data.refreshToken)
+    browserStorage.setItem('local', KEYS.ACCESS_EXPIRES, String(data.accessTokenExpiresIn))
+    browserStorage.setItem('local', KEYS.REFRESH_EXPIRES, String(data.refreshTokenExpiresIn))
   },
 
   // 금융기관 코드 저장
   setBankCode(code: string) {
-    localStorage.setItem(KEYS.BANK_CODE, code)
+    browserStorage.setItem('local', KEYS.BANK_CODE, code)
   },
 
   // ============================================================================
@@ -62,30 +64,30 @@ export const storage = {
 
   get() {
     return {
-      accessToken: localStorage.getItem(KEYS.ACCESS_TOKEN),
-      refreshToken: localStorage.getItem(KEYS.REFRESH_TOKEN),
-      accessExpires: Number(localStorage.getItem(KEYS.ACCESS_EXPIRES)) || 0,
-      refreshExpires: Number(localStorage.getItem(KEYS.REFRESH_EXPIRES)) || 0,
-      loginId: localStorage.getItem(KEYS.LOGIN_ID),
-      userId: Number(localStorage.getItem(KEYS.USER_ID)) || null,
-      roleLevel: Number(localStorage.getItem(KEYS.ROLE_LEVEL)) || null,
-      bankCode: localStorage.getItem(KEYS.BANK_CODE)
+      accessToken: browserStorage.getItem('local', KEYS.ACCESS_TOKEN),
+      refreshToken: browserStorage.getItem('local', KEYS.REFRESH_TOKEN),
+      accessExpires: Number(browserStorage.getItem('local', KEYS.ACCESS_EXPIRES)) || 0,
+      refreshExpires: Number(browserStorage.getItem('local', KEYS.REFRESH_EXPIRES)) || 0,
+      loginId: browserStorage.getItem('local', KEYS.LOGIN_ID),
+      userId: Number(browserStorage.getItem('local', KEYS.USER_ID)) || null,
+      roleLevel: Number(browserStorage.getItem('local', KEYS.ROLE_LEVEL)) || null,
+      bankCode: browserStorage.getItem('local', KEYS.BANK_CODE)
     }
   },
 
   // accessToken만 조회
   getAccessToken() {
-    return localStorage.getItem(KEYS.ACCESS_TOKEN)
+    return browserStorage.getItem('local', KEYS.ACCESS_TOKEN)
   },
 
   // refreshToken만 조회
   getRefreshToken() {
-    return localStorage.getItem(KEYS.REFRESH_TOKEN)
+    return browserStorage.getItem('local', KEYS.REFRESH_TOKEN)
   },
 
   // bankCode만 조회
   getBankCode() {
-    return localStorage.getItem(KEYS.BANK_CODE)
+    return browserStorage.getItem('local', KEYS.BANK_CODE)
   },
 
   // ============================================================================
@@ -93,12 +95,12 @@ export const storage = {
   // ============================================================================
 
   clear() {
-    Object.values(KEYS).forEach((key) => localStorage.removeItem(key))
+    Object.values(KEYS).forEach((key) => browserStorage.removeItem('local', key))
   },
 
   // bankCode만 삭제
   clearBankCode() {
-    localStorage.removeItem(KEYS.BANK_CODE)
+    browserStorage.removeItem('local', KEYS.BANK_CODE)
   },
 
   // ============================================================================

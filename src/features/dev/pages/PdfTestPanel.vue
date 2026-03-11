@@ -257,6 +257,8 @@ import {
   watch
 } from 'vue'
 
+import { logger } from '@/utils/logger'
+
 const PdfViewer = defineAsyncComponent(() => import('@/features/doc-templates/PdfViewer.vue'))
 
 type Mode = 'capture' | 'text' | 'mixed'
@@ -516,7 +518,7 @@ async function uploadToRegisterApi() {
       throw new Error(msg)
     }
 
-    console.log('upload success:', body)
+    logger.info('[PDF_TEST_PANEL] Upload succeeded', { body })
     setStatus('ok', '업로드 성공! (응답은 콘솔 확인)')
   } catch (error) {
     setStatus('err', error instanceof Error ? error.message : '알 수 없는 오류')

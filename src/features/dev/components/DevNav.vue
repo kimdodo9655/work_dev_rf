@@ -213,6 +213,7 @@ import { computed, onBeforeUnmount, onMounted, type Ref, ref, watch } from 'vue'
 
 import { useDialog } from '@/composables/utils/useDialog'
 import { useAuthStore } from '@/stores/auth'
+import { logger } from '@/utils/logger'
 import { storage } from '@/utils/storage'
 
 interface FrameSize {
@@ -344,7 +345,7 @@ const handleStorageChange = (event: StorageEvent) => {
   ]
 
   if (event.key && authKeys.includes(event.key)) {
-    console.log('[DevNav] Storage changed:', event.key)
+    logger.debug('[DEV_NAV] Storage changed', { key: event.key })
     refreshStorageData()
   }
 }
@@ -443,7 +444,7 @@ const copyToken = async (token: string | null) => {
       message: '토큰이 클립보드에 복사되었습니다.'
     })
   } catch (err) {
-    console.error('복사 실패:', err)
+    logger.error('[DEV_NAV] Copy token failed', { error: err })
     await alert({
       title: '복사 실패',
       message: '복사에 실패했습니다.'
@@ -492,7 +493,7 @@ onMounted(() => {
   // Storage 이벤트 리스너 등록 (다른 탭 감지)
   window.addEventListener('storage', handleStorageChange)
 
-  console.log('[DevNav] Mounted - Real-time monitoring enabled')
+  logger.debug('[DEV_NAV] Mounted')
 })
 
 onBeforeUnmount(() => {
@@ -502,7 +503,7 @@ onBeforeUnmount(() => {
   // 폴링 정지
   stopStoragePolling()
 
-  console.log('[DevNav] Unmounted - Monitoring stopped')
+  logger.debug('[DEV_NAV] Unmounted')
 })
 </script>
 

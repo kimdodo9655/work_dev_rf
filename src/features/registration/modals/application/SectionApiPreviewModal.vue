@@ -33,6 +33,7 @@ import {
   registryTypeAPI
 } from '@/api/services/registry'
 import { useErrorHandler } from '@/composables/utils/useErrorHandler'
+import { extractPrimaryPayload } from '@/utils/apiPayload'
 
 interface Props {
   applicationId: number
@@ -47,17 +48,8 @@ const errorMessage = ref('')
 const payload = ref<unknown>(null)
 const apiLabel = ref('-')
 
-function unwrapData<T>(res: unknown): T {
-  if (res && typeof res === 'object') {
-    const withData = res as { data?: unknown }
-    if (withData.data && typeof withData.data === 'object' && 'data' in withData.data) {
-      return (withData.data as { data: T }).data
-    }
-    if ('data' in withData) {
-      return withData.data as T
-    }
-  }
-  return undefined as unknown as T
+function getPreviewPayload(res: unknown): unknown {
+  return extractPrimaryPayload(res)
 }
 
 function normalizeCode(code?: string): string {
@@ -107,7 +99,7 @@ async function fetchSectionData() {
       res = await registryTypeAPI.unifiedForm({ applicationId: props.applicationId })
     }
 
-    payload.value = unwrapData<unknown>(res)
+    payload.value = getPreviewPayload(res)
   } catch (error) {
     payload.value = null
     errorMessage.value = getErrorMessage(error)

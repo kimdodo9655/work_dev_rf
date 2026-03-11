@@ -14,12 +14,18 @@ import { ref } from 'vue'
 import { addressAPI } from '@/api/services/address'
 import { useErrorHandler } from '@/composables/utils/useErrorHandler'
 import type { AddressItem } from '@/types'
+import { extractArrayByKeys, extractRecordByKeys } from '@/utils/apiPayload'
 import { logger } from '@/utils/logger'
 
-/** axios 응답({data}) / DTO 응답(그 자체) 둘 다 지원 */
-function unwrap<T>(res: any): T {
-  if (res && typeof res === 'object' && 'data' in res) return res.data as T
-  return res as T
+interface AddressScrollInfo {
+  hasNext?: boolean
+  nextCursorId?: number | null
+}
+
+interface AddressSearchPayload {
+  items?: AddressItem[]
+  addresses?: AddressItem[]
+  scroll?: AddressScrollInfo
 }
 
 export function useAddress() {
@@ -35,16 +41,17 @@ export function useAddress() {
    * 응답에서 items/scroll을 최대한 유연하게 뽑아내기
    * - 생성기/서버에 따라 { items, scroll } 이거나 { result: { items, scroll } } 등 케이스가 있을 수 있어 방어
    */
-  function pickItemsAndScroll(payload: any): { items: AddressItem[]; scroll?: any } {
-    const root = payload?.result ?? payload
-    const items = (root?.items ?? root?.addresses ?? []) as AddressItem[]
-    const scroll = root?.scroll
-    return { items, scroll }
+  function pickItemsAndScroll(payload: unknown): {
+    items: AddressItem[]
+    scroll?: AddressScrollInfo
+  } {
+    const root = extractRecordByKeys<AddressSearchPayload>(payload, ['scroll'])
+    const items = extractArrayByKeys<AddressItem>(payload, ['items', 'addresses'])
+    return { items, scroll: root?.scroll }
   }
 
-  function pickSuggestions(payload: any): string[] {
-    const root = payload?.result ?? payload
-    return (root?.suggestions ?? root?.items ?? []) as string[]
+  function pickSuggestions(payload: unknown): string[] {
+    return extractArrayByKeys<string>(payload, ['suggestions', 'items'])
   }
 
   const searchAddresses = async (keyword: string, cursorId?: number | null) => {
@@ -61,8 +68,7 @@ export function useAddress() {
         size: 20
       })
 
-      const payload = unwrap<any>(res)
-      const { items, scroll } = pickItemsAndScroll(payload)
+      const { items, scroll } = pickItemsAndScroll(res)
 
       logger.info('[ADDRESS] Search success', {
         keyword,
@@ -101,8 +107,7 @@ export function useAddress() {
         limit: 5
       })
 
-      const payload = unwrap<any>(res)
-      const list = pickSuggestions(payload)
+      const list = pickSuggestions(res)
 
       logger.info('[ADDRESS] Suggestions success', {
         keyword,

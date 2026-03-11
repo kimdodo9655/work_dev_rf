@@ -6,20 +6,18 @@
 import { computed, ref } from 'vue'
 
 import { registryProgressAPI } from '@/api/services/registry'
+import { useErrorHandler } from '@/composables/utils/useErrorHandler'
 import type { SearchRegistryProgresssListQuery } from '@/types'
+import { extractArrayByKeys, extractRecordByKeys } from '@/utils/apiPayload'
 
 import type { CaseStatusFilters, Row } from './caseStatus.types'
 
-function unwrap<T>(res: any): T | undefined {
-  if (!res) return undefined
-  if (typeof res === 'object' && 'data' in res) {
-    const data = (res as any).data
-    if (data && typeof data === 'object' && 'data' in data) return (data as any).data as T
-    return data as T
-  }
-  return res as T
+interface CaseStatusListPayload {
+  content?: Row[]
+  totalElements?: number
 }
 
+// 형식: YYYY-MM-DD -> YYYYMMDD
 function toApiDate(ymd: string) {
   return ymd.replace(/-/g, '')
 }
@@ -38,6 +36,7 @@ function addMonths(base: Date, months: number) {
 }
 
 function clampRangeWithin3Months(start: string, end: string) {
+  // 규칙: 조회 기간 최대 3개월
   const startDate = new Date(start)
   const endDate = new Date(end)
   const maxEnd = addMonths(startDate, 3)
@@ -46,12 +45,17 @@ function clampRangeWithin3Months(start: string, end: string) {
 }
 
 function calcTotalPagesSafe(totalElements: number, pageSize: number) {
+  // 규칙: 최소 1페이지
   const size = Math.max(1, Number(pageSize) || 1)
   const total = Math.max(0, Number(totalElements) || 0)
   return Math.max(1, Math.ceil(total / size))
 }
 
 function resolveManagerUserIdForApi(value: string): string | null {
+  // 의미:
+  // ''  -> 파라미터 생략
+  // ALL -> 전체
+  // -1  -> 미배정
   if (!value) return null
   if (value === 'ALL') return 'ALL'
   if (value === '-1') return '-1'
@@ -65,6 +69,7 @@ export function useCaseStatusListData({
   filters: CaseStatusFilters
   onRowsLoaded?: () => void
 }) {
+  const { getErrorMessage } = useErrorHandler()
   const loading = ref(false)
   const errorMessage = ref('')
   const rows = ref<Row[]>([])
@@ -76,6 +81,7 @@ export function useCaseStatusListData({
   const lastPageIndex = computed(() => Math.max(0, (totalPages.value || 1) - 1))
 
   function buildQuery(nextPage1Base: number): SearchRegistryProgresssListQuery {
+    // 규칙: 날짜 범위는 API 요청 직전에 보정
     const req = clampRangeWithin3Months(
       filters.registryRequestStartDate,
       filters.registryRequestEndDate
@@ -113,29 +119,28 @@ export function useCaseStatusListData({
       if (resetPage) page.value = 0
 
       const query = buildQuery(page.value + 1)
-      const response: any = await registryProgressAPI.getList(query)
-      const payload = unwrap<any>(response)
-      const data = payload?.result ?? payload
+      const response = await registryProgressAPI.getList(query)
+      const data = extractRecordByKeys<CaseStatusListPayload>(response, ['content']) ?? {}
 
-      rows.value = data?.content ?? []
+      rows.value = extractArrayByKeys<Row>(data, ['content'])
       totalElements.value = Number(data?.totalElements ?? 0)
       totalPages.value = calcTotalPagesSafe(totalElements.value, size.value)
 
       if (page.value > lastPageIndex.value) {
+        // 보정: 현재 페이지가 총 페이지 수를 넘으면 마지막 페이지로 재조회
         page.value = lastPageIndex.value
         const query2 = buildQuery(page.value + 1)
-        const response2: any = await registryProgressAPI.getList(query2)
-        const payload2 = unwrap<any>(response2)
-        const data2 = payload2?.result ?? payload2
+        const response2 = await registryProgressAPI.getList(query2)
+        const data2 = extractRecordByKeys<CaseStatusListPayload>(response2, ['content']) ?? {}
 
-        rows.value = data2?.content ?? rows.value
+        rows.value = extractArrayByKeys<Row>(data2, ['content']) || rows.value
         totalElements.value = Number(data2?.totalElements ?? totalElements.value)
         totalPages.value = calcTotalPagesSafe(totalElements.value, size.value)
       }
 
       onRowsLoaded?.()
-    } catch (error: any) {
-      errorMessage.value = error?.message ?? '목록 조회 실패'
+    } catch (error) {
+      errorMessage.value = getErrorMessage(error)
       rows.value = []
       totalElements.value = 0
       totalPages.value = 0
@@ -149,6 +154,7 @@ export function useCaseStatusListData({
   }
 
   function movePage(next: number) {
+    // 규칙: 0 ~ lastPageIndex 범위 고정
     const clamped = Math.min(Math.max(next, 0), lastPageIndex.value)
     if (clamped === page.value) return
     page.value = clamped
@@ -162,6 +168,7 @@ export function useCaseStatusListData({
   })
 
   function onChangePageSize() {
+    // 규칙: page size 상한 50
     const value = Number(size.value)
     if (!Number.isFinite(value) || value <= 0) size.value = 10
     if (size.value > MAX_PAGE_SIZE) size.value = MAX_PAGE_SIZE

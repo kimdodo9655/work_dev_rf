@@ -8,21 +8,95 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { api } from '@/api/client'
 import defaultOpenApiSpec from '@/api/openapi.json'
 import { useDialog } from '@/composables/utils/useDialog'
+import { useErrorHandler } from '@/composables/utils/useErrorHandler'
 import { DEV_LOGIN_USERS } from '@/features/dev/constants/devLoginUsers'
 import RpacApiTestPage from '@/features/dev/pages/RpacApiTestPage.vue'
 import { useAuthStore } from '@/stores/auth'
+import { extractArrayByKeys, toRecord } from '@/utils/apiPayload'
+import { extractLoginResponsePayload, extractTokenRefreshPayload } from '@/utils/authPayload'
+import { browserStorage } from '@/utils/browser'
+import { logger } from '@/utils/logger'
 import { storage } from '@/utils/storage'
 
 // ============================================================================
 // Props
 // ============================================================================
+type JsonPrimitive = string | number | boolean | null
+type JsonObject = Record<string, unknown>
+type JsonArray = unknown[]
+type JsonValue = JsonPrimitive | JsonObject | JsonArray
+
+type OpenApiSchema = {
+  $ref?: string
+  type?: string
+  format?: string
+  description?: string
+  example?: JsonValue
+  default?: JsonValue
+  enum?: JsonValue[]
+  minimum?: number
+  required?: string[]
+  properties?: Record<string, OpenApiSchema>
+  items?: OpenApiSchema
+}
+
+type OpenApiParameterSpec = {
+  name: string
+  in: 'query' | 'path' | 'header' | 'cookie'
+  description?: string
+  required?: boolean
+  schema?: OpenApiSchema
+  example?: JsonValue
+}
+
+type OpenApiRequestBodyContent = {
+  schema?: OpenApiSchema
+  example?: JsonValue
+}
+
+type OpenApiOperation = {
+  summary?: string
+  description?: string
+  tags?: string[]
+  parameters?: OpenApiParameterSpec[]
+  requestBody?: {
+    content?: Record<string, OpenApiRequestBodyContent>
+  }
+}
+
+type OpenApiSpec = {
+  components?: {
+    schemas?: Record<string, OpenApiSchema>
+  }
+  paths?: Record<string, Record<string, OpenApiOperation>>
+}
+
 interface Props {
-  openApiSpec?: any // OpenAPI JSON 스펙 (선택, 기본값: @/api/openapi.json)
+  openApiSpec?: OpenApiSpec // OpenAPI JSON 스펙 (선택, 기본값: @/api/openapi.json)
   apiSpecUrl?: string // OpenAPI JSON URL (선택)
 }
 
+interface DevLoginUser {
+  로그인아이디: string
+  기관명: string
+  기관ID: string
+  사용자ID: string
+  이름: string
+  권한값: string | number
+  권한명: string
+  지점ID: string
+  지점명: string
+  이메일인증?: string
+  상태?: string
+}
+
+type ApiExecutionResult = {
+  status?: number
+  data?: unknown
+}
+
 const props = withDefaults(defineProps<Props>(), {
-  openApiSpec: () => defaultOpenApiSpec,
+  openApiSpec: () => defaultOpenApiSpec as unknown as OpenApiSpec,
   apiSpecUrl: undefined
 })
 
@@ -31,6 +105,7 @@ const props = withDefaults(defineProps<Props>(), {
 // ============================================================================
 const authStore = useAuthStore()
 const { alert, confirm } = useDialog()
+const { getErrorMessage } = useErrorHandler()
 
 // Storage 데이터 (실시간 갱신) - DevNav 방식 그대로
 const storageData = ref(storage.get())
@@ -46,8 +121,8 @@ interface Parameter {
   in: 'query' | 'path' | 'header' | 'cookie'
   description?: string
   required: boolean
-  schema: any
-  example?: any
+  schema: OpenApiSchema
+  example?: JsonValue
 }
 
 interface EndpointInfo {
@@ -58,8 +133,8 @@ interface EndpointInfo {
   description?: string
   tags: string[]
   parameters: Parameter[]
-  requestBodySchema?: any
-  requestBodyExample?: any
+  requestBodySchema?: OpenApiSchema
+  requestBodyExample?: JsonValue
   code: string
   categoryCode: string
 }
@@ -73,7 +148,7 @@ interface CategoryGroup {
 // ✅ Schema 타입 정의
 interface SchemaInfo {
   name: string
-  schema: any
+  schema: OpenApiSchema
 }
 
 // ✅ 할당된 은행 타입 정의
@@ -91,10 +166,10 @@ interface AssignedBank {
 const searchQuery = ref('')
 const selectedEndpoint = ref<EndpointInfo | null>(null)
 const expandedCategories = ref(new Set<string>())
-const pathParams = ref<Record<string, any>>({})
-const queryParams = ref<Record<string, any>>({})
+const pathParams = ref<Record<string, JsonValue>>({})
+const queryParams = ref<Record<string, JsonValue>>({})
 const requestBody = ref('')
-const response = ref<any>(null)
+const response = ref<unknown>(null)
 const isLoading = ref(false)
 const error = ref<string | null>(null)
 const statusCode = ref<number | null>(null)
@@ -106,14 +181,14 @@ const specLoadError = ref<string | null>(null)
 const uploadedFileName = ref<string | null>(null)
 const showUploadModal = ref(false)
 const showLoginModal = ref(false)
-const selectedLoginUser = ref<any>(null)
+const selectedLoginUser = ref<DevLoginUser | null>(null)
 const loginId = ref('')
 const password = ref('P@ssw0rd1!')
 const showUserListDropdown = ref(false)
 
 // ✅ OpenAPI 스펙 전체 저장 ($ref 해석용)
 // eslint-disable-next-line vue/no-dupe-keys
-const openApiSpec = ref<any>(null)
+const openApiSpec = ref<OpenApiSpec | null>(null)
 
 // ✅ 할당된 은행 목록 및 선택된 은행 코드
 const assignedBanks = ref<AssignedBank[]>([])
@@ -131,7 +206,7 @@ const schemas = ref<SchemaInfo[]>([])
 const selectedSchema = ref<SchemaInfo | null>(null)
 const ACTIVE_TAB_STORAGE_KEY = 'api-tester-active-tab'
 
-const savedActiveTab = localStorage.getItem(ACTIVE_TAB_STORAGE_KEY)
+const savedActiveTab = browserStorage.getItem('local', ACTIVE_TAB_STORAGE_KEY)
 if (savedActiveTab === 'apis' || savedActiveTab === 'schemas' || savedActiveTab === 'rpac') {
   activeTab.value = savedActiveTab
 }
@@ -139,13 +214,13 @@ if (savedActiveTab === 'apis' || savedActiveTab === 'schemas' || savedActiveTab 
 // ============================================================================
 // 로그인 사용자 목록
 // ============================================================================
-const LOGIN_USERS = DEV_LOGIN_USERS
+const LOGIN_USERS: DevLoginUser[] = DEV_LOGIN_USERS as DevLoginUser[]
 
 // ============================================================================
 // 로그인 사용자 목록을 기관별로 그룹화
 // ============================================================================
 const groupedLoginUsers = computed(() => {
-  const groups = new Map<string, Array<(typeof LOGIN_USERS)[number]>>()
+  const groups = new Map<string, DevLoginUser[]>()
 
   LOGIN_USERS.forEach((user) => {
     const key = user.기관명
@@ -177,7 +252,7 @@ const groupedLoginUsers = computed(() => {
 
 // ✅ 회원정보 드롭다운용: 기관별 그룹화 + 권한 높은 순서
 const groupedAndSortedUsers = computed(() => {
-  const groups = new Map<string, Array<(typeof LOGIN_USERS)[number]>>()
+  const groups = new Map<string, DevLoginUser[]>()
 
   LOGIN_USERS.forEach((user) => {
     const key = user.기관명
@@ -240,7 +315,7 @@ const schemaProperties = computed(() => {
   const properties = schema.properties || {}
   const required = schema.required || []
 
-  return Object.entries(properties).map(([name, prop]: [string, any]) => ({
+  return Object.entries(properties).map(([name, prop]) => ({
     name,
     type: prop.type || 'object',
     description: prop.description || '',
@@ -315,9 +390,11 @@ watch(
   () => authStore.isLoggedIn,
   async (isLoggedIn) => {
     if (isLoggedIn) {
-      console.log('User logged in, fetching assigned banks...')
+      logger.debug('[API_TESTER] User logged in - fetch assigned banks')
       await fetchAssignedBanks()
-      console.log('Assigned banks loaded:', assignedBanks.value)
+      logger.debug('[API_TESTER] Assigned banks loaded', {
+        count: assignedBanks.value.length
+      })
     } else {
       // 로그아웃 시 초기화
       assignedBanks.value = []
@@ -335,7 +412,7 @@ watch(selectedLoginUser, (user) => {
 
 // ✅ 탭 변경 시 검색어 초기화
 watch(activeTab, (tab) => {
-  localStorage.setItem(ACTIVE_TAB_STORAGE_KEY, tab)
+  browserStorage.setItem('local', ACTIVE_TAB_STORAGE_KEY, tab)
   searchQuery.value = ''
 })
 
@@ -349,7 +426,7 @@ const BASE_URLS = {
 }
 
 // localStorage에서 저장된 설정 불러오기
-const savedBaseUrlMode = localStorage.getItem('api-tester-base-url-mode') as
+const savedBaseUrlMode = browserStorage.getItem('local', 'api-tester-base-url-mode') as
   | 'production'
   | 'local'
   | null
@@ -395,6 +472,14 @@ const authAPIWithBaseUrl = computed(() => {
   }
 })
 
+function persistDevBankCode(bankCode: string | null) {
+  if (bankCode) {
+    browserStorage.setItem('local', 'bank_code', bankCode)
+  } else {
+    browserStorage.removeItem('local', 'bank_code')
+  }
+}
+
 // ============================================================================
 // Auth 관련 함수들 (useAuth 패턴 참고)
 // ============================================================================
@@ -410,43 +495,33 @@ const fetchAssignedBanks = async () => {
       }
     })
 
-    console.log('===== Assigned Banks Response =====')
-    console.log('Response:', response)
-    console.log('Response data:', response.data)
-    console.log('==================================')
-
-    const banks = response.data?.data || []
+    const banks = extractArrayByKeys<AssignedBank>(response, ['items', 'content', 'data'])
     assignedBanks.value = banks
-
-    console.log('Assigned banks count:', banks.length)
-    console.log('Banks:', banks)
+    logger.debug('[API_TESTER] Assigned banks fetched', { count: banks.length })
 
     // 기본값 설정: bankclear가 있으면 선택, 없으면 첫 번째 은행 선택
     if (banks.length > 0) {
       const bankclearBank = banks.find((bank: AssignedBank) => bank.bankCode === 'bankclear')
-      selectedBankCode.value = bankclearBank ? 'bankclear' : banks[0].bankCode
-
-      console.log('Selected bank code:', selectedBankCode.value)
+      selectedBankCode.value = bankclearBank ? 'bankclear' : (banks[0]?.bankCode ?? 'bankclear')
 
       // ✅ authStore에 저장 (내부에서 storage 처리)
       authStore.setBankCode(selectedBankCode.value)
 
       // ✅ localStorage에도 직접 저장 (보험)
-      localStorage.setItem('bank_code', selectedBankCode.value)
+      persistDevBankCode(selectedBankCode.value)
 
       refreshStorageData()
     }
 
     return banks
-  } catch (err: any) {
-    console.error('[Fetch Assigned Banks] Failed:', err)
-    console.error('Error response:', err.response)
+  } catch (err: unknown) {
+    logger.error('[API_TESTER] Fetch assigned banks failed', { error: err })
     // 에러가 나도 기본값 유지
     selectedBankCode.value = 'bankclear'
     authStore.setBankCode('bankclear')
 
     // ✅ localStorage에도 직접 저장 (보험)
-    localStorage.setItem('bank_code', 'bankclear')
+    persistDevBankCode('bankclear')
 
     refreshStorageData()
     return []
@@ -455,13 +530,13 @@ const fetchAssignedBanks = async () => {
 
 // ✅ 은행 선택 변경 핸들러
 const handleBankCodeChange = () => {
-  console.log('Bank code changed to:', selectedBankCode.value)
+  logger.debug('[API_TESTER] Bank code changed', { bankCode: selectedBankCode.value })
 
   // ✅ authStore에 저장 (내부에서 storage 처리)
   authStore.setBankCode(selectedBankCode.value)
 
   // ✅ localStorage에도 직접 저장 (보험)
-  localStorage.setItem('bank_code', selectedBankCode.value)
+  persistDevBankCode(selectedBankCode.value)
 
   refreshStorageData()
 }
@@ -469,8 +544,9 @@ const handleBankCodeChange = () => {
 const refreshToken = async () => {
   try {
     const currentStorage = storage.get()
-    console.log('===== Refresh Token =====')
-    console.log('Current storage:', currentStorage)
+    logger.debug('[API_TESTER] Refresh token requested', {
+      hasRefreshToken: Boolean(currentStorage.refreshToken)
+    })
 
     const { refreshToken } = currentStorage
     if (!refreshToken) {
@@ -484,33 +560,26 @@ const refreshToken = async () => {
     // mutationFn: API 호출
     const response = await authAPIWithBaseUrl.value.refresh({ refreshToken })
 
-    console.log('Refresh response:', response)
-    console.log('response.data:', response.data)
-    console.log('response.data.data:', response.data?.data)
-
     // onSuccess: 성공 처리
-    const newTokens = response.data.data || response.data
+    const newTokens = extractTokenRefreshPayload(response)
+    if (!newTokens) {
+      throw new Error('Invalid refresh response')
+    }
 
-    console.log('New tokens:', newTokens)
-
-    storage.updateTokens(newTokens)
     authStore.updateTokens(newTokens)
     refreshStorageData()
-
-    console.log('After refresh, storage:', storage.get())
-    console.log('========================')
+    logger.info('[API_TESTER] Token refresh succeeded')
 
     await alert({
       title: '토큰 갱신 성공',
       message: '토큰이 갱신되었습니다.'
     })
-  } catch (err: any) {
+  } catch (err: unknown) {
     // onError: 에러 처리
-    console.error('[Token Refresh] Failed:', err)
-    console.error('Error response:', err.response)
+    logger.error('[API_TESTER] Token refresh failed', { error: err })
     await alert({
       title: '토큰 갱신 실패',
-      message: `토큰 갱신 실패: ${err.response?.data?.message || err.message}`
+      message: `토큰 갱신 실패: ${getErrorMessage(err)}`
     })
   }
 }
@@ -534,20 +603,19 @@ const handleLogout = async () => {
     return
   }
 
-  console.log('===== Logout Started =====')
-  console.log('Before logout, storage:', storage.get())
-  console.log('Before logout, authStore.isLoggedIn:', authStore.isLoggedIn)
+  logger.info('[API_TESTER] Logout started', {
+    isLoggedIn: authStore.isLoggedIn
+  })
 
   try {
     // mutationFn: API 호출
     await authAPIWithBaseUrl.value.logout()
-    console.log('Logout API call successful')
-  } catch (err: any) {
+    logger.info('[API_TESTER] Logout API succeeded')
+  } catch (err: unknown) {
     // onError: 에러 로그
-    console.error('[Logout] API call failed:', err)
+    logger.error('[API_TESTER] Logout API failed', { error: err })
   } finally {
     // onSettled: 성공/실패 무관하게 실행
-    console.log('Calling authStore.clearAuth()')
     authStore.clearAuth()
 
     // ✅ 은행 목록 초기화
@@ -555,14 +623,10 @@ const handleLogout = async () => {
     selectedBankCode.value = 'bankclear'
 
     // ✅ localStorage에서도 bank_code 제거
-    localStorage.removeItem('bank_code')
+    persistDevBankCode(null)
 
-    console.log('Calling refreshStorageData()')
     refreshStorageData()
-
-    console.log('After logout, storage:', storage.get())
-    console.log('After logout, authStore.isLoggedIn:', authStore.isLoggedIn)
-    console.log('========================')
+    logger.info('[API_TESTER] Logout completed')
   }
 }
 
@@ -590,19 +654,13 @@ const executeLogin = async () => {
       password: password.value
     })
 
-    // ✅ 디버깅: 응답 구조 확인
-    console.log('===== Login Response =====')
-    console.log('Full response:', response)
-    console.log('response.data:', response.data)
-    console.log('response.data.data:', response.data?.data)
-    console.log('========================')
-
     // onSuccess: 로그인 성공 처리
     // authAPI.login의 응답 구조에 맞춰 수정
     // ApiResponse<LoginData> 구조: { data: LoginData }
-    const loginData = response.data.data || response.data
-
-    console.log('Setting auth with:', loginData)
+    const loginData = extractLoginResponsePayload(response)
+    if (!loginData) {
+      throw new Error('Invalid login response')
+    }
 
     // 1. 스토어에 인증 정보 저장
     authStore.setAuth(loginData)
@@ -610,7 +668,7 @@ const executeLogin = async () => {
     // 2. 로그인 직후 bank_code 기본값 즉시 세팅 (헤더 공백 구간 방지)
     selectedBankCode.value = 'bankclear'
     authStore.setBankCode('bankclear')
-    localStorage.setItem('bank_code', 'bankclear')
+    persistDevBankCode('bankclear')
 
     // 3. 은행 목록 즉시 조회 (watch에도 있지만, 초기 헤더 보장을 위해 선실행)
     await fetchAssignedBanks()
@@ -618,9 +676,7 @@ const executeLogin = async () => {
     // 4. UI 초기화
     refreshStorageData()
 
-    // ✅ 디버깅: 저장 후 스토리지 확인
-    console.log('After setAuth, storage:', storage.get())
-    console.log('After setAuth, authStore.isLoggedIn:', authStore.isLoggedIn)
+    logger.info('[API_TESTER] Login succeeded', { loginId: loginData.loginId })
 
     showLoginModal.value = false
     selectedLoginUser.value = null
@@ -631,13 +687,12 @@ const executeLogin = async () => {
       title: '로그인 성공',
       message: '로그인 성공!'
     })
-  } catch (err: any) {
+  } catch (err: unknown) {
     // onError: 로그인 실패 처리
-    console.error('[Login] Failed:', err)
-    console.error('Error response:', err.response)
+    logger.error('[API_TESTER] Login failed', { error: err })
     await alert({
       title: '로그인 실패',
-      message: `로그인 실패: ${err.response?.data?.message || err.message}`
+      message: `로그인 실패: ${getErrorMessage(err)}`
     })
   }
 }
@@ -663,9 +718,9 @@ const handleBaseUrlChange = async (newMode: 'production' | 'local') => {
     try {
       // mutationFn: 변경 전 BASE URL로 로그아웃 요청
       await authAPIWithBaseUrl.value.logout()
-    } catch (err: any) {
+    } catch (err: unknown) {
       // onError: 에러 로그
-      console.error('[Logout before BASE URL change] API call failed:', err)
+      logger.error('[API_TESTER] Logout before base URL change failed', { error: err })
     } finally {
       // onSettled: 성공/실패 무관하게 store 정리
       authStore.clearAuth()
@@ -675,7 +730,7 @@ const handleBaseUrlChange = async (newMode: 'production' | 'local') => {
       selectedBankCode.value = 'bankclear'
 
       // ✅ localStorage에서도 bank_code 제거
-      localStorage.removeItem('bank_code')
+      persistDevBankCode(null)
 
       refreshStorageData()
     }
@@ -683,7 +738,7 @@ const handleBaseUrlChange = async (newMode: 'production' | 'local') => {
 
   // BASE URL 변경 및 저장
   baseUrlMode.value = newMode
-  localStorage.setItem('api-tester-base-url-mode', newMode)
+  browserStorage.setItem('local', 'api-tester-base-url-mode', newMode)
 }
 
 // ============================================================================
@@ -715,8 +770,8 @@ const handleFileUpload = async (event: Event) => {
       expandedCategories.value.clear()
       expandedCategories.value.add(categories.value[0].name)
     }
-  } catch (err: any) {
-    specLoadError.value = `파일 파싱 실패: ${err.message}`
+  } catch (err: unknown) {
+    specLoadError.value = `파일 파싱 실패: ${getErrorMessage(err)}`
   } finally {
     isLoadingSpec.value = false
     // input 초기화
@@ -751,36 +806,43 @@ const loadOpenApiSpec = async () => {
       categories.value = parseOpenApiSpec(spec)
       return
     }
-  } catch (err: any) {
-    specLoadError.value = err.message || 'OpenAPI 스펙을 로드하는데 실패했습니다.'
+  } catch (err: unknown) {
+    specLoadError.value =
+      err instanceof Error ? err.message : 'OpenAPI 스펙을 로드하는데 실패했습니다.'
   } finally {
     isLoadingSpec.value = false
   }
+}
+
+function toPathReplacement(value: JsonValue | undefined, paramName: string): string {
+  if (value == null || value === '') return `:${paramName}`
+  return String(value)
 }
 
 // ============================================================================
 // OpenAPI JSON 파싱
 // ============================================================================
 // $ref를 실제 스키마로 해석하는 헬퍼 함수
-const resolveRef = (ref: string, spec: any): any => {
+const resolveRef = (ref: string, spec: OpenApiSpec): OpenApiSchema | null => {
   if (!ref || !ref.startsWith('#/')) return null
 
   // "#/components/schemas/SomeName" -> ["components", "schemas", "SomeName"]
   const parts = ref.replace('#/', '').split('/')
 
-  let result = spec
+  let result: unknown = spec
   for (const part of parts) {
-    if (result && typeof result === 'object') {
-      result = result[part]
+    const record = toRecord(result)
+    if (record) {
+      result = record[part]
     } else {
       return null
     }
   }
 
-  return result
+  return toRecord(result) as OpenApiSchema | null
 }
 
-const parseOpenApiSpec = (spec: any) => {
+const parseOpenApiSpec = (spec: OpenApiSpec) => {
   // ✅ OpenAPI 스펙 저장 ($ref 해석을 위해)
   openApiSpec.value = spec
 
@@ -789,7 +851,7 @@ const parseOpenApiSpec = (spec: any) => {
   schemas.value = Object.entries(componentsSchemas)
     .map(([name, schema]) => ({
       name,
-      schema: schema as any
+      schema
     }))
     .sort((a, b) => a.name.localeCompare(b.name))
 
@@ -797,8 +859,8 @@ const parseOpenApiSpec = (spec: any) => {
 
   if (!spec.paths) return []
 
-  Object.entries(spec.paths).forEach(([path, pathItem]: [string, any]) => {
-    Object.entries(pathItem).forEach(([method, operation]: [string, any]) => {
+  Object.entries(spec.paths).forEach(([path, pathItem]) => {
+    Object.entries(pathItem).forEach(([method, operation]) => {
       if (typeof operation !== 'object') return
 
       const summary = operation.summary || ''
@@ -806,11 +868,11 @@ const parseOpenApiSpec = (spec: any) => {
 
       // [R01-01][GET] 형식에서 코드 추출
       const codeMatch = summary.match(/\[([^\]]+)\]/)
-      const code = codeMatch ? codeMatch[1] : ''
+      const code = codeMatch?.[1] ?? ''
       const categoryCode = code.split('-')[0] || ''
 
       // 파라미터 정보 추출
-      const parameters: Parameter[] = (operation.parameters || []).map((param: any) => ({
+      const parameters: Parameter[] = (operation.parameters || []).map((param) => ({
         name: param.name,
         in: param.in,
         description: param.description,
@@ -820,8 +882,8 @@ const parseOpenApiSpec = (spec: any) => {
       }))
 
       // Request Body 정보 추출 (✅ $ref 해석 추가)
-      let requestBodySchema: any = null
-      let requestBodyExample: any = null
+      let requestBodySchema: OpenApiSchema | undefined
+      let requestBodyExample: JsonValue | undefined
       if (operation.requestBody?.content) {
         // application/json 또는 application/json;charset=UTF-8 찾기
         const contentType = Object.keys(operation.requestBody.content).find((key) =>
@@ -830,14 +892,15 @@ const parseOpenApiSpec = (spec: any) => {
 
         if (contentType) {
           const content = operation.requestBody.content[contentType]
+          if (!content) return
           let schema = content.schema
 
           // ✅ $ref가 있으면 해석
           if (schema?.$ref) {
-            schema = resolveRef(schema.$ref, spec)
+            schema = resolveRef(schema.$ref, spec) ?? undefined
           }
 
-          requestBodySchema = schema
+          requestBodySchema = schema ?? undefined
           requestBodyExample = content.example || schema?.example
         }
       }
@@ -882,7 +945,7 @@ const theme = ref<'dark' | 'light'>('light')
 
 const toggleTheme = () => {
   theme.value = theme.value === 'dark' ? 'light' : 'dark'
-  localStorage.setItem('api-tester-theme', theme.value)
+  browserStorage.setItem('local', 'api-tester-theme', theme.value)
 }
 
 // ============================================================================
@@ -929,7 +992,7 @@ const requestBodyFields = computed(() => {
 
   const required = schema.required || []
 
-  return Object.entries(schema.properties).map(([key, propSchema]: [string, any]) => {
+  return Object.entries(schema.properties).map(([key, propSchema]) => {
     let typeDisplay = propSchema.type || 'string'
 
     // array 타입이면 items 정보도 표시
@@ -964,7 +1027,7 @@ const buildUrl = computed((): string => {
   // Path 파라미터 치환
   pathParameters.value.forEach((param) => {
     const value = pathParams.value[param.name]
-    url = url.replace(`{${param.name}}`, value || `:${param.name}`)
+    url = url.replace(`{${param.name}}`, toPathReplacement(value, param.name))
   })
 
   // BASE URL이 있으면 앞에 추가 (UI 표시용)
@@ -995,14 +1058,14 @@ const selectEndpoint = (endpoint: EndpointInfo) => {
   // Path 파라미터 초기화
   pathParams.value = {}
   pathParameters.value.forEach((param) => {
-    pathParams.value[param.name] = param.example || getDefaultValue(param.schema)
+    pathParams.value[param.name] = param.example ?? getDefaultValue(param.schema)
   })
 
   // Query 파라미터 초기화
   queryParams.value = {}
   queryParameters.value.forEach((param) => {
     if (param.required) {
-      queryParams.value[param.name] = param.example || getDefaultValue(param.schema)
+      queryParams.value[param.name] = param.example ?? getDefaultValue(param.schema)
     }
   })
 
@@ -1026,7 +1089,7 @@ const selectSchema = (schema: SchemaInfo) => {
 // ============================================================================
 // 스키마에서 기본값 생성 (재귀적으로 처리)
 // ============================================================================
-const getDefaultValue = (schema: any): any => {
+const getDefaultValue = (schema: OpenApiSchema): JsonValue => {
   if (schema.example !== undefined) return schema.example
   if (schema.default !== undefined) return schema.default
 
@@ -1036,7 +1099,7 @@ const getDefaultValue = (schema: any): any => {
       if (schema.format === 'date-time') return '2024-01-01T00:00:00Z'
       if (schema.format === 'email') return 'example@example.com'
       // enum이 있으면 첫 번째 값 사용
-      if (schema.enum && schema.enum.length > 0) return schema.enum[0]
+      if (schema.enum && schema.enum.length > 0) return schema.enum[0] ?? 'string'
       return 'string'
     case 'integer':
     case 'number':
@@ -1050,7 +1113,7 @@ const getDefaultValue = (schema: any): any => {
 
         // items에 $ref가 있으면 해석
         if (itemSchema.$ref && openApiSpec.value) {
-          itemSchema = resolveRef(itemSchema.$ref, openApiSpec.value)
+          itemSchema = resolveRef(itemSchema.$ref, openApiSpec.value) ?? itemSchema
         }
 
         // itemSchema로 예시 객체 생성
@@ -1072,16 +1135,16 @@ const getDefaultValue = (schema: any): any => {
 }
 
 // 재귀적으로 스키마에서 예시 객체 생성
-const generateExampleFromSchemaRecursive = (schema: any): any => {
+const generateExampleFromSchemaRecursive = (schema: OpenApiSchema): JsonValue => {
   if (schema.example !== undefined) return schema.example
 
   if (schema.type === 'object' && schema.properties) {
-    const obj: any = {}
-    Object.entries(schema.properties).forEach(([key, propSchema]: [string, any]) => {
+    const obj: JsonObject = {}
+    Object.entries(schema.properties).forEach(([key, propSchema]) => {
       // $ref 해석
       let resolvedSchema = propSchema
       if (propSchema.$ref && openApiSpec.value) {
-        resolvedSchema = resolveRef(propSchema.$ref, openApiSpec.value)
+        resolvedSchema = resolveRef(propSchema.$ref, openApiSpec.value) ?? propSchema
       }
 
       obj[key] = getDefaultValue(resolvedSchema)
@@ -1093,7 +1156,7 @@ const generateExampleFromSchemaRecursive = (schema: any): any => {
 }
 
 // 스키마에서 예시 JSON 생성
-const generateExampleFromSchema = (schema: any): string => {
+const generateExampleFromSchema = (schema: OpenApiSchema): string => {
   if (schema.example) {
     return JSON.stringify(schema.example, null, 2)
   }
@@ -1112,16 +1175,18 @@ const generateExampleFromSchema = (schema: any): string => {
   return '{\n  \n}'
 }
 
-function normalizeAttachmentPayload(raw: any) {
-  if (!raw || typeof raw !== 'object' || !Array.isArray(raw.attachmentItems)) return raw
+function normalizeAttachmentPayload(raw: unknown): unknown {
+  const record = toRecord(raw)
+  if (!record || !Array.isArray(record.attachmentItems)) return raw
 
   return {
-    ...raw,
-    attachmentItems: raw.attachmentItems.map((item: any) => {
-      if (!item || typeof item !== 'object') return item
+    ...record,
+    attachmentItems: record.attachmentItems.map((item) => {
+      const entry = toRecord(item)
+      if (!entry) return item
       const mapped = { ...item }
-      if (mapped.fileName == null && typeof mapped.tempFileName === 'string') {
-        mapped.fileName = mapped.tempFileName
+      if (mapped.fileName == null && typeof entry.tempFileName === 'string') {
+        mapped.fileName = entry.tempFileName
       }
       delete mapped.tempFileName
       delete mapped.htmlForm
@@ -1145,7 +1210,7 @@ const executeRequest = async () => {
     let url = selectedEndpoint.value.path
     pathParameters.value.forEach((param) => {
       const value = pathParams.value[param.name]
-      url = url.replace(`{${param.name}}`, value || `:${param.name}`)
+      url = url.replace(`{${param.name}}`, toPathReplacement(value, param.name))
     })
 
     const method = selectedEndpoint.value.method.toLowerCase()
@@ -1165,7 +1230,7 @@ const executeRequest = async () => {
       }
     }
 
-    let result: any
+    let result: ApiExecutionResult | undefined
     const client = apiClient.value // 동적 클라이언트 사용
     const requestData = requestBody.value.trim()
       ? normalizeAttachmentPayload(JSON.parse(requestBody.value))
@@ -1184,13 +1249,16 @@ const executeRequest = async () => {
     }
 
     requestTime.value = Date.now() - startTime
-    statusCode.value = result?.status || 200
-    response.value = result?.data || result
-  } catch (err: any) {
+    statusCode.value = result?.status ?? 200
+    response.value = result?.data ?? result ?? null
+  } catch (err: unknown) {
+    const errorRecord = toRecord(err)
+    const responseRecord = toRecord(errorRecord?.response)
+    const responseData = responseRecord?.data
     requestTime.value = Date.now() - startTime
-    statusCode.value = err.response?.status || 500
-    error.value = err.response?.data?.message || err.message || '요청 실패'
-    response.value = err.response?.data
+    statusCode.value = typeof responseRecord?.status === 'number' ? responseRecord.status : 500
+    error.value = (toRecord(responseData)?.message as string | undefined) || getErrorMessage(err)
+    response.value = responseData
   } finally {
     isLoading.value = false
   }
@@ -1240,11 +1308,11 @@ const copyToClipboard = (text: string) => {
     if (success) {
       showToastMessage('복사되었습니다! 📋')
     } else {
-      console.error('[CLIPBOARD] 복사 실패')
+      logger.warn('[API_TESTER] Clipboard copy failed')
       showToastMessage('복사에 실패했습니다')
     }
   } catch (err) {
-    console.error('[CLIPBOARD] 복사 에러:', err)
+    logger.error('[API_TESTER] Clipboard copy error', { error: err })
     showToastMessage('복사에 실패했습니다')
   }
 }
@@ -1355,7 +1423,7 @@ const toggleUserListDropdown = () => {
 // ============================================================================
 onMounted(async () => {
   // 저장된 테마 불러오기
-  const savedTheme = localStorage.getItem('api-tester-theme') as 'dark' | 'light' | null
+  const savedTheme = browserStorage.getItem('local', 'api-tester-theme') as 'dark' | 'light' | null
   if (savedTheme) {
     theme.value = savedTheme
   }
@@ -1376,7 +1444,7 @@ onMounted(async () => {
 
   // ✅ 이미 로그인된 상태라면 은행 목록 가져오기
   if (authStore.isLoggedIn) {
-    console.log('Already logged in, fetching assigned banks...')
+    logger.debug('[API_TESTER] Already logged in - fetch assigned banks')
     await fetchAssignedBanks()
   }
 
@@ -1856,7 +1924,9 @@ watch(
                       <input
                         v-model="pathParams[param.name]"
                         type="text"
-                        :placeholder="param.example || `Enter ${param.name}`"
+                        :placeholder="
+                          param.example == null ? `Enter ${param.name}` : String(param.example)
+                        "
                         class="param-input"
                       />
                     </div>
@@ -1885,7 +1955,9 @@ watch(
                             ? 'number'
                             : 'text'
                         "
-                        :placeholder="param.example || `Enter ${param.name}`"
+                        :placeholder="
+                          param.example == null ? `Enter ${param.name}` : String(param.example)
+                        "
                         :required="param.required"
                         class="param-input"
                       />
