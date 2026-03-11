@@ -82,7 +82,7 @@
             <td>{{ r.rowNum }}</td>
             <td>{{ r.registryRequestNumber }}</td>
             <td>{{ r.workType }}</td>
-            <td>{{ r.assignedWork }}</td>
+            <td>{{ displayAssignedWork(r.assignedWork) }}</td>
             <td>{{ r.registryMethod }}</td>
             <td class="address-cell">{{ displayAddress(r.propertyAddress) }}</td>
             <td>{{ r.registryRequestDate }}</td>
@@ -162,7 +162,7 @@ import SearchInput from '@/components/template/input/SearchInput.vue'
 import SearchSelect from '@/components/template/input/SearchSelect.vue'
 import Pagination from '@/components/template/PaginationItem.vue'
 import { useCaseStatusList } from '@/features/registration/composables/useCaseStatusList'
-import { getAssignableUsers } from '@/utils/assignable-user'
+import { getAssignableUsers, toAssignedWorkDescription } from '@/utils/assignable-user'
 
 const router = useRouter()
 const {
@@ -201,6 +201,10 @@ const {
 
 function getRowAssignableUsers(assignedWork: string) {
   return getAssignableUsers(assignedWork, assignableUsers.value)
+}
+
+function displayAssignedWork(assignedWork: string) {
+  return toAssignedWorkDescription(assignedWork) ?? assignedWork
 }
 
 function goDetail(registryManagementNumber: string) {

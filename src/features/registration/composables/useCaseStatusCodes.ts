@@ -29,7 +29,7 @@ export function useCaseStatusCodes() {
 
   const assignedWorkOptions = computed<SearchOption[]>(() => [
     { label: '전체', value: 'ALL' },
-    ...assignmentWorks.value.map((code) => ({ label: code.description, value: code.description }))
+    ...assignmentWorks.value.map((code) => ({ label: code.description, value: code.code }))
   ])
 
   const registryMethodOptions = computed<SearchOption[]>(() => [

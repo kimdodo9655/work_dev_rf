@@ -34,11 +34,11 @@
           </div>
           <div class="row">
             <span class="label">연락처</span>
-            <span class="value">{{ loanInfo?.managerPhone ?? '-' }}</span>
+            <span class="value">{{ displayPhone(loanInfo?.managerPhone) }}</span>
           </div>
           <div class="row">
             <span class="label">등록일시</span>
-            <span class="value">{{ loanInfo?.createdAt ?? '-' }}</span>
+            <span class="value">{{ displayDateTime(loanInfo?.createdAt) }}</span>
           </div>
           <div class="row">
             <span class="label">메시지</span>
@@ -143,7 +143,7 @@
           </div>
           <div class="row">
             <span class="label">지상권 여부</span>
-            <span class="value">{{ mortgageInfo.surfaceRightYn ?? '-' }}</span>
+            <span class="value">{{ displaySurfaceRight(mortgageInfo.surfaceRightYn) }}</span>
           </div>
           <div class="row">
             <span class="label">지상권 존속기간</span>
@@ -188,7 +188,7 @@
           </div>
           <div class="row">
             <span class="label">견적서 선정일시</span>
-            <span class="value">{{ transferInfo.selectedAt ?? '-' }}</span>
+            <span class="value">{{ displayDateTime(transferInfo?.selectedAt) }}</span>
           </div>
         </div>
       </section>
@@ -215,7 +215,7 @@
           </div>
           <div class="row">
             <span class="label">담당자 직통번호</span>
-            <span class="value">{{ mortgageLegalInfo.directPhoneNumber ?? '-' }}</span>
+            <span class="value">{{ displayPhone(mortgageLegalInfo.directPhoneNumber) }}</span>
           </div>
         </div>
       </section>
@@ -242,7 +242,7 @@
           </div>
           <div class="row">
             <span class="label">담당자 직통번호</span>
-            <span class="value">{{ transferLegalInfo.directPhoneNumber ?? '-' }}</span>
+            <span class="value">{{ displayPhone(transferLegalInfo.directPhoneNumber) }}</span>
           </div>
         </div>
       </section>
@@ -265,6 +265,7 @@ import type {
   RegistryProgressOwnershipTransferResponse
 } from '@/types'
 import { extractPrimaryPayload } from '@/utils/apiPayload'
+import { formatDateTimeSeconds, formatPhone } from '@/utils/format'
 
 interface Props {
   registryManagementNumber: string
@@ -291,6 +292,25 @@ function displayCode(value?: string | null, category?: string): string {
 
 function displayText(value?: string | null): string {
   return value ? replaceText(value) : '-'
+}
+
+function displayDateTime(value?: string | null): string {
+  return value ? formatDateTimeSeconds(value) : '-'
+}
+
+function displayPhone(value?: string | null): string {
+  return value ? formatPhone(value) : '-'
+}
+
+function displaySurfaceRight(value?: string | boolean | null): string {
+  if (value == null) return '-'
+  if (typeof value === 'boolean') return value ? '있음' : '없음'
+
+  const normalized = value.trim().toUpperCase()
+  if (['TRUE', 'Y', 'O'].includes(normalized)) return '있음'
+  if (['FALSE', 'N', 'X'].includes(normalized)) return '없음'
+
+  return value
 }
 
 // 대출 금융기관 정보

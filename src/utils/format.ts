@@ -120,3 +120,23 @@ export const formatFileSize = (bytes: number): string => {
 export const formatPercent = (value: number, decimals: number = 0): string => {
   return `${(value * 100).toFixed(decimals)}%`
 }
+
+/**
+ * ISO 날짜/시간 문자열을 YYYY-MM-DD HH:mm:ss 형식으로 포맷
+ * @param value - ISO 날짜/시간 문자열
+ * @returns 포맷된 문자열 또는 원본 값
+ */
+export const formatDateTimeSeconds = (value: string): string => {
+  const trimmed = value.trim()
+  if (!trimmed) return value
+
+  const match = trimmed.match(
+    /^(\d{4}-\d{2}-\d{2})[T\s](\d{2}:\d{2}:\d{2})(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?$/
+  )
+
+  if (match) {
+    return `${match[1]} ${match[2]}`
+  }
+
+  return value
+}

@@ -198,6 +198,13 @@ const selectedBankCode = ref<string>('bankclear') // 기본값 'bankclear'
 const toastMessage = ref<string>('')
 const showToast = ref<boolean>(false)
 
+const BLOCKED_TEST_ENDPOINTS = new Set([
+  'POST /internal/address/daily',
+  'POST /api/admin/crypto/encrypt',
+  'POST /api/admin/crypto/decrypt',
+  'POST /api/admin/crypto/hash'
+])
+
 // ============================================================================
 // ✅ 새로운 상태: 탭 및 Schemas
 // ============================================================================
@@ -985,6 +992,13 @@ const hasRequestBody = computed(() => {
   return selectedEndpoint.value?.requestBodySchema != null
 })
 
+const isExecutionBlocked = computed(() => {
+  if (!selectedEndpoint.value) return false
+  return BLOCKED_TEST_ENDPOINTS.has(
+    `${selectedEndpoint.value.method} ${selectedEndpoint.value.path}`
+  )
+})
+
 // Request Body 필드 정보 추출
 const requestBodyFields = computed(() => {
   const schema = selectedEndpoint.value?.requestBodySchema
@@ -1197,6 +1211,15 @@ function normalizeAttachmentPayload(raw: unknown): unknown {
 
 const executeRequest = async () => {
   if (!selectedEndpoint.value) return
+
+  if (isExecutionBlocked.value) {
+    await alert({
+      title: '실행 비활성화',
+      message:
+        '이 API는 프론트 일반 기능에서 사용하지 않는 관리/운영용 항목이라 API Tester에서 실행할 수 없습니다.'
+    })
+    return
+  }
 
   isLoading.value = true
   error.value = null
@@ -1900,6 +1923,9 @@ watch(
                 </div>
                 <p v-if="selectedEndpoint.description" class="detail-description">
                   {{ selectedEndpoint.description }}
+                </p>
+                <p v-if="isExecutionBlocked" class="detail-warning">
+                  운영/데이터 관리용 API라 API Tester에서 실행이 비활성화되어 있습니다.
                 </p>
               </div>
 
@@ -3317,6 +3343,17 @@ watch(
   font-size: 1rem;
   color: var(--text-secondary);
   line-height: 1.6;
+}
+
+.detail-warning {
+  margin-top: 0.75rem;
+  padding: 0.75rem 0.875rem;
+  border: 1px solid rgba(255, 184, 108, 0.35);
+  border-radius: 8px;
+  background: rgba(255, 184, 108, 0.12);
+  color: #d29922;
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 
 /* Parameters */

@@ -11,6 +11,7 @@ import type { GetAssignableUsersQuery } from '@/types'
 import type { UserAssignableResponse } from '@/types/api/user.types'
 import { UserRoleLevel } from '@/types/store'
 import { extractArrayByKeys } from '@/utils/apiPayload'
+import { toAssignedWorkDescription } from '@/utils/assignable-user'
 
 import { type AssignableUser, type CaseStatusFilters } from './caseStatus.types'
 
@@ -69,7 +70,10 @@ export function useCaseStatusAssignableUsers({
     assignableError.value = ''
     try {
       const query: GetAssignableUsersQuery = {}
-      if (filters.assignedWork !== 'ALL') query.assignedWork = filters.assignedWork
+      const assignedWork = toAssignedWorkDescription(filters.assignedWork)
+      if (assignedWork && assignedWork !== 'ALL') {
+        query.assignedWork = assignedWork
+      }
 
       const response = await userAPI.assignable(query)
       const rawUsers = extractArrayByKeys<UserAssignableResponse>(response, ['content', 'items'])

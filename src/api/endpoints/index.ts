@@ -15,7 +15,6 @@ import {
   BRANCH_REGISTRY
 } from '@/api/endpoints/branch'
 import { CODE } from '@/api/endpoints/code'
-import { CRYPTO } from '@/api/endpoints/crypto'
 import { NOTICE } from '@/api/endpoints/notice'
 import { NOTIFICATION } from '@/api/endpoints/notification'
 import { ORGANIZATION } from '@/api/endpoints/organization'
@@ -95,6 +94,5 @@ export const API = {
   REGISTRY_COMPLETION,
   REGISTRY_PROGRESS_DOCUMENT,
   REGISTRY_SCHEDULE,
-  RPA,
-  CRYPTO
+  RPA
 } as const

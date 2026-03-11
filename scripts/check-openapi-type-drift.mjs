@@ -7,6 +7,15 @@ const projectRoot = cwd()
 const openApiPath = path.join(projectRoot, 'src/api/openapi.json')
 const typeDir = path.join(projectRoot, 'src/types/api')
 const baselinePath = path.join(projectRoot, 'scripts/openapi-type-drift-baseline.json')
+const IGNORED_SCHEMA_NAMES = new Set([
+  'AddressDailyChangeRequest',
+  'AddressDailyChangeResponse',
+  'ApiResultAddressDailyChangeResponse',
+  'ApiResultCryptoResponse',
+  'CryptoRequest',
+  'CryptoResponse',
+  'Record'
+])
 
 function readJson(filePath) {
   return JSON.parse(readFileSync(filePath, 'utf8'))
@@ -94,6 +103,7 @@ function createDriftReport() {
   }
 
   for (const [schemaName, schema] of Object.entries(schemas)) {
+    if (IGNORED_SCHEMA_NAMES.has(schemaName)) continue
     if (!schema || typeof schema !== 'object' || !schema.properties) continue
 
     const declaration = interfaceMap.get(schemaName)
@@ -104,7 +114,9 @@ function createDriftReport() {
       continue
     }
 
-    const missingProps = Object.keys(schema.properties).filter((prop) => !declaration.props.has(prop))
+    const missingProps = Object.keys(schema.properties).filter(
+      (prop) => !declaration.props.has(prop)
+    )
     if (missingProps.length > 0) {
       report.missingProperties.push({
         schema: schemaName,

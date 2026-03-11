@@ -51,6 +51,8 @@ export type GetDetailedProgressCancellationCertificatesResponse =
 
 /** 말소 등기권리증 정보 전체 교체 요청 */
 export interface CancellationCertificateItem {
+  /** 신청서ID */
+  applicationId: number
   /** 등기유형 */
   registryType:
     | 'OWNERSHIP_TRANSFER'
@@ -60,8 +62,8 @@ export interface CancellationCertificateItem {
     | 'CORRECTION'
     | 'MORTGAGE_CANCELLATION'
     | 'SURFACE_RIGHT_CANCELLATION'
-  /** 부동산소유자아이디 */
-  ownerId: number
+  /** 진행당사자ID */
+  progressPartyId: number
   /** 등기원인 */
   registryCause: string
   /** 부동산고유번호 */
@@ -129,13 +131,21 @@ export interface RegistryProgressCancellationCertificateResponse {
   /** 부동산 고유번호 옵션 */
   propertyUniqueNumberOptions?: string[]
   /** 소유자(성명) 옵션 (등록된 소유자) */
-  ownerOptions?: string[]
+  ownerOptions?: OwnerOption[]
   /** 해당구 옵션 (Enum) */
   sectionOptions?: string[]
   /** 등기권리증 구분 옵션 (Enum) */
   certificateTypeOptions?: string[]
   /** 등기권리증 목록 */
   items?: TransferCancellationCertificateResponse[]
+}
+
+/** 소유자 옵션 */
+export interface OwnerOption {
+  /** 진행 당사자 ID */
+  progressPartyId?: number
+  /** 성명 */
+  name?: string
 }
 
 /** 이전/말소 등기권리증 정보 응답 */

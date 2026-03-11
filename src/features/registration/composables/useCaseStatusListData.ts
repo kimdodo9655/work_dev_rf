@@ -9,6 +9,7 @@ import { registryProgressAPI } from '@/api/services/registry'
 import { useErrorHandler } from '@/composables/utils/useErrorHandler'
 import type { SearchRegistryProgresssListQuery } from '@/types'
 import { extractArrayByKeys, extractRecordByKeys } from '@/utils/apiPayload'
+import { toAssignedWorkDescription } from '@/utils/assignable-user'
 
 import type { CaseStatusFilters, Row } from './caseStatus.types'
 
@@ -92,9 +93,10 @@ export function useCaseStatusListData({
     )
 
     const managerUserId = resolveManagerUserIdForApi(filters.managerUserId)
+    const assignedWork = toAssignedWorkDescription(filters.assignedWork) ?? 'ALL'
     const query: any = {
       workType: filters.workType,
-      assignedWork: filters.assignedWork,
+      assignedWork,
       registryMethod: filters.registryMethod,
       progressStatus: filters.progressStatus,
       registryRequestStartDate: toApiDate(req.start),
