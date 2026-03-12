@@ -3,7 +3,7 @@
  * 문서 제목: 기능 모듈: use-application-section
  */
 
-import { computed, defineAsyncComponent, type Ref } from 'vue'
+import { computed, type Ref } from 'vue'
 
 import { useCodeReplacer } from '@/composables/utils/useCodeReplacer'
 import { useErrorHandler } from '@/composables/utils/useErrorHandler'
@@ -18,12 +18,6 @@ export function useApplicationSection({
   registryManagementNumber: Ref<string>
   isOpen: Ref<boolean>
 }) {
-  // 분기: 개발 환경에서만 PDF 변환기 노출
-  const showPdfConverter = import.meta.env.DEV || import.meta.env.VITE_IS_DEV === 'true'
-  const pdfConverterComponent = showPdfConverter
-    ? defineAsyncComponent(() => import('@/features/doc-templates/PdfConverter.vue'))
-    : null
-
   const { formatCodeLabel, formatTextLabel } = useCodeReplacer()
   const { getErrorMessage } = useErrorHandler()
 
@@ -101,6 +95,7 @@ export function useApplicationSection({
     displayRegistryMethod,
     displayRegistryType,
     formatTextLabel,
+    activeApplicationId,
     document,
     documentErrorMessage,
     documentLoading,
@@ -109,7 +104,6 @@ export function useApplicationSection({
     handleEditRegistryMethod,
     handleSectionClick,
     isDeletingTab,
-    pdfConverterComponent,
     selectTab,
     showCertModal,
     showSectionModal,

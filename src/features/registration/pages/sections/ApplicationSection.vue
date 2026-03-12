@@ -75,8 +75,11 @@
             </div>
           </div>
 
-          <!-- 신청서 양식 (개발 환경 전용) -->
-          <component :is="pdfConverterComponent" v-if="pdfConverterComponent" />
+          <ApplicationPaperPreview
+            v-if="activeApplicationId"
+            :application-id="activeApplicationId"
+            :document="document"
+          />
         </div>
       </div>
     </div>
@@ -114,6 +117,7 @@
 <script setup lang="ts">
 import { toRef } from 'vue'
 
+import ApplicationPaperPreview from '@/features/registration/components/ApplicationPaperPreview.vue'
 import { useApplicationSection } from '@/features/registration/composables/useApplicationSection'
 import CaseCertInfoRegModal from '@/features/registration/modals/application/CaseCertInfoRegModal.vue'
 import SectionApiPreviewModal from '@/features/registration/modals/application/SectionApiPreviewModal.vue'
@@ -138,6 +142,7 @@ const {
   displayRegistryMethod,
   displayRegistryType,
   formatTextLabel,
+  activeApplicationId,
   document,
   documentErrorMessage,
   documentLoading,
@@ -146,7 +151,6 @@ const {
   handleEditRegistryMethod,
   handleSectionClick,
   isDeletingTab,
-  pdfConverterComponent,
   selectTab,
   showCertModal,
   showSectionModal,
