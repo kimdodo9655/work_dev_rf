@@ -23,12 +23,12 @@
               <td colspan="6" class="empty-cell">조회된 목록이 없습니다.</td>
             </tr>
             <tr v-for="(row, idx) in rows" :key="`cert-${idx}-${row.propertyUniqueNumber ?? idx}`">
-              <td>{{ displayCode(row.registryType, 'registryTypes') }}</td>
+              <td>{{ codeLabel(row.registryType, 'registryTypes') }}</td>
               <td>{{ row.propertyUniqueNumber ?? '-' }}</td>
               <td>{{ row.name ?? '-' }}</td>
               <td>{{ row.receiptDate ?? '-' }}</td>
               <td>{{ row.receiptNumber ?? '-' }}</td>
-              <td>{{ displayCode(row.certificateType, 'certificateTypes') }}</td>
+              <td>{{ codeLabel(row.certificateType, 'certificateTypes') }}</td>
             </tr>
           </tbody>
         </table>
@@ -44,7 +44,7 @@ interface Props {
   rows: CancellationCertificateListItem[]
   loading: boolean
   errorMessage: string
-  displayCode: (value?: string | null, category?: string) => string
+  codeLabel: (value?: string | null, category?: string) => string
 }
 
 defineProps<Props>()

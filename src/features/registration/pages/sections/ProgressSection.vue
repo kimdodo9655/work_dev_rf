@@ -8,7 +8,7 @@
       :list="mortgageList"
       :loading="mortgageLoading"
       :error-message="mortgageErrorMessage"
-      :display-code="displayCode"
+      :code-label="formatCodeLabel"
       :get-signature-status-class="getSignatureStatusClass"
       :on-detail="handleDetail"
     />
@@ -17,7 +17,7 @@
       :rows="taxRows"
       :loading="taxLoading"
       :error-message="taxErrorMessage"
-      :display-code="displayCode"
+      :code-label="formatCodeLabel"
       :format-number="formatNumber"
     />
 
@@ -25,7 +25,7 @@
       :rows="housingBondRows"
       :loading="housingBondLoading"
       :error-message="housingBondErrorMessage"
-      :display-code="displayCode"
+      :code-label="formatCodeLabel"
       :format-number="formatNumber"
     />
 
@@ -40,14 +40,14 @@
       :rows="transferCertificateRows"
       :loading="transferCertificateLoading"
       :error-message="transferCertificateErrorMessage"
-      :display-code="displayCode"
+      :code-label="formatCodeLabel"
     />
 
     <CaseInquiryProgressItem
       :rows="caseInquiryRows"
       :loading="caseInquiryLoading"
       :error-message="caseInquiryErrorMessage"
-      :display-code="displayCode"
+      :code-label="formatCodeLabel"
     />
 
     <OwnershipTransferInfoProgressItem />
@@ -56,7 +56,7 @@
       :rows="receiptRows"
       :loading="receiptLoading"
       :error-message="receiptErrorMessage"
-      :display-code="displayCode"
+      :code-label="formatCodeLabel"
     />
 
     <ReceiptDelegationRequestProgressItem />
@@ -66,7 +66,7 @@
       :list="transferList"
       :loading="transferLoading"
       :error-message="transferErrorMessage"
-      :display-code="displayCode"
+      :code-label="formatCodeLabel"
       :get-signature-status-class="getSignatureStatusClass"
       :on-detail="handleDetail"
     />
@@ -84,7 +84,7 @@
       :rows="completionListRows"
       :loading="completionListLoading"
       :error-message="completionListErrorMessage"
-      :display-code="displayCode"
+      :code-label="formatCodeLabel"
     />
 
     <CompletionDocumentSubmitGuideProgressItem
@@ -92,7 +92,7 @@
       :post-certificate-rows="postCertificateRows"
       :loading="completionDetailLoading"
       :error-message="completionDetailErrorMessage"
-      :display-code="displayCode"
+      :code-label="formatCodeLabel"
     />
   </ul>
 </template>
@@ -171,22 +171,8 @@ interface CompletionDetailPayload {
 }
 
 const props = defineProps<Props>()
-const { findOriginalCode, findReplacement, replaceText } = useCodeReplacer()
+const { formatCodeLabel } = useCodeReplacer()
 const { getErrorMessage } = useErrorHandler()
-
-function displayCode(value?: string | null, category?: string): string {
-  if (!value) return '-'
-  const original = String(value)
-  const directReplaced = category ? findReplacement(original, category) : replaceText(original)
-  if (directReplaced && directReplaced !== original) return `${original} -> ${directReplaced}`
-
-  if (category) {
-    const inferredCode = findOriginalCode(original, category)
-    if (inferredCode) return `${inferredCode} -> ${original}`
-  }
-
-  return original
-}
 
 function formatNumber(value?: number | null): string {
   if (typeof value !== 'number') return '-'

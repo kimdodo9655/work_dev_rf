@@ -63,7 +63,6 @@
 
           <!-- 섹션 버튼들 -->
           <div v-if="document.sections && document.sections.length > 0" class="sections-container">
-            <div class="sections-title">등기신청서 섹션</div>
             <div class="sections-buttons">
               <button
                 v-for="section in document.sections"
@@ -71,7 +70,7 @@
                 class="section-btn"
                 @click="handleSectionClick(section)"
               >
-                {{ displayText(section.title) }}
+                {{ formatTextLabel(section.title) }}
               </button>
             </div>
           </div>
@@ -138,7 +137,7 @@ const {
   displayRegistryCause,
   displayRegistryMethod,
   displayRegistryType,
-  displayText,
+  formatTextLabel,
   document,
   documentErrorMessage,
   documentLoading,

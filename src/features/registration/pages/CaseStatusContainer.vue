@@ -56,19 +56,32 @@
 
     <div class="table-wrap">
       <table class="data-table">
+        <colgroup>
+          <col style="width: 5%" />
+          <col style="width: 12%" />
+          <col style="width: 8%" />
+          <col style="width: 8%" />
+          <col style="width: 8%" />
+          <col />
+          <col style="width: 7%" />
+          <col style="width: 7%" />
+          <col style="width: 8%" />
+          <col style="width: 10%" />
+          <col style="width: 4%" />
+        </colgroup>
         <thead>
           <tr>
-            <th style="width: 80px">번호</th>
-            <th style="width: 200px">등기신청번호</th>
-            <th style="width: 140px">업무구분</th>
-            <th style="width: 160px">배정업무</th>
-            <th style="width: 120px">등기방식</th>
+            <th>번호</th>
+            <th>등기신청번호</th>
+            <th>업무구분</th>
+            <th>배정업무</th>
+            <th>등기방식</th>
             <th>부동산주소</th>
-            <th style="width: 130px">의뢰일자</th>
-            <th style="width: 130px">접수일자</th>
-            <th style="width: 160px">담당자</th>
-            <th style="width: 140px">진행상태</th>
-            <th style="width: 90px">상세</th>
+            <th>의뢰일자</th>
+            <th>접수일자</th>
+            <th>담당자</th>
+            <th>진행상태</th>
+            <th>상세</th>
           </tr>
         </thead>
         <tbody>
@@ -81,9 +94,9 @@
           <tr v-for="r in rows" v-else :key="r.registryManagementNumber" class="row">
             <td>{{ r.rowNum }}</td>
             <td>{{ r.registryRequestNumber }}</td>
-            <td>{{ r.workType }}</td>
-            <td>{{ displayAssignedWork(r.assignedWork) }}</td>
-            <td>{{ r.registryMethod }}</td>
+            <td class="cell-wrap">{{ formatCodeLabel(r.workType, 'workTypes') }}</td>
+            <td class="cell-wrap">{{ displayAssignedWork(r.assignedWork) }}</td>
+            <td class="cell-wrap">{{ formatCodeLabel(r.registryMethod, 'registryMethods') }}</td>
             <td class="address-cell">{{ displayAddress(r.propertyAddress) }}</td>
             <td>{{ r.registryRequestDate }}</td>
             <td>{{ r.registryReceiptDate }}</td>
@@ -120,7 +133,7 @@
                 {{ r.managerUserName }}
               </template>
             </td>
-            <td>{{ r.progressStatus }}</td>
+            <td class="cell-wrap">{{ formatCodeLabel(r.progressStatus, 'progressStatuses') }}</td>
             <td>
               <button
                 class="detail-btn"
@@ -161,10 +174,12 @@ import SearchDateRangePicker from '@/components/template/input/SearchDateRangePi
 import SearchInput from '@/components/template/input/SearchInput.vue'
 import SearchSelect from '@/components/template/input/SearchSelect.vue'
 import Pagination from '@/components/template/PaginationItem.vue'
+import { useCodeReplacer } from '@/composables/utils/useCodeReplacer'
 import { useCaseStatusList } from '@/features/registration/composables/useCaseStatusList'
 import { getAssignableUsers, toAssignedWorkDescription } from '@/utils/assignable-user'
 
 const router = useRouter()
+const { formatCodeLabel } = useCodeReplacer()
 const {
   userId,
   isAssigneeRole,
@@ -204,7 +219,7 @@ function getRowAssignableUsers(assignedWork: string) {
 }
 
 function displayAssignedWork(assignedWork: string) {
-  return toAssignedWorkDescription(assignedWork) ?? assignedWork
+  return toAssignedWorkDescription(assignedWork) ?? formatCodeLabel(assignedWork, 'assignedWorks')
 }
 
 function goDetail(registryManagementNumber: string) {

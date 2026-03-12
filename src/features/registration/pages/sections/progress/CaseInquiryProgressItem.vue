@@ -27,7 +27,7 @@
               <td>
                 {{
                   row.registryTypes?.length
-                    ? row.registryTypes.map((type) => displayCode(type, 'registryTypes')).join(', ')
+                    ? row.registryTypes.map((type) => codeLabel(type, 'registryTypes')).join(', ')
                     : '-'
                 }}
               </td>
@@ -46,7 +46,7 @@ interface Props {
   rows: CaseInquiryListItem[]
   loading: boolean
   errorMessage: string
-  displayCode: (value?: string | null, category?: string) => string
+  codeLabel: (value?: string | null, category?: string) => string
 }
 
 defineProps<Props>()

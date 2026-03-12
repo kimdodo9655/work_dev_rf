@@ -761,6 +761,16 @@ function handleAdminLoaded(hasData: boolean) {
   padding: 12px;
 }
 
+:deep(.request-section .card.two-column-card) {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 24px;
+}
+
+:deep(.request-section .card.two-column-card .column) {
+  min-width: 0;
+}
+
 :deep(.request-section .row) {
   display: flex;
   gap: 10px;
@@ -781,6 +791,13 @@ function handleAdminLoaded(hasData: boolean) {
 :deep(.request-section .value) {
   font-size: 13px;
   color: #111827;
+}
+
+@media (max-width: 768px) {
+  :deep(.request-section .card.two-column-card) {
+    grid-template-columns: 1fr;
+    column-gap: 0;
+  }
 }
 
 :deep(.progress-section .status-completed) {

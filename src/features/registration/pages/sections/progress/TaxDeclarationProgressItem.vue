@@ -23,8 +23,8 @@
               <td colspan="6" class="empty-cell">조회된 목록이 없습니다.</td>
             </tr>
             <tr v-for="(row, idx) in rows" :key="`tax-${idx}-${row.applicationId ?? idx}`">
-              <td>{{ displayCode(row.registryTypeName, 'registryTypes') }}</td>
-              <td>{{ displayCode(row.registryCause, 'registryCauses') }}</td>
+              <td>{{ codeLabel(row.registryTypeName, 'registryTypes') }}</td>
+              <td>{{ codeLabel(row.registryCause, 'registryCauses') }}</td>
               <td>{{ row.paymentStatusName ?? '-' }}</td>
               <td>{{ formatNumber(row.paymentAmount) }}</td>
               <td>{{ row.taxNumber ?? '-' }}</td>
@@ -44,7 +44,7 @@ interface Props {
   rows: TaxAgencyRow[]
   loading: boolean
   errorMessage: string
-  displayCode: (value?: string | null, category?: string) => string
+  codeLabel: (value?: string | null, category?: string) => string
   formatNumber: (value?: number | null) => string
 }
 

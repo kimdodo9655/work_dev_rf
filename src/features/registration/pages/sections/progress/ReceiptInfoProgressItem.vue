@@ -23,8 +23,8 @@
               <td colspan="6" class="empty-cell">조회된 목록이 없습니다.</td>
             </tr>
             <tr v-for="(row, idx) in rows" :key="`receipt-${idx}-${row.creationNumber ?? idx}`">
-              <td>{{ displayCode(row.registryType, 'registryTypes') }}</td>
-              <td>{{ displayCode(row.registryMethod, 'registryMethods') }}</td>
+              <td>{{ codeLabel(row.registryType, 'registryTypes') }}</td>
+              <td>{{ codeLabel(row.registryMethod, 'registryMethods') }}</td>
               <td>{{ row.registryReceiptOffice ?? '-' }}</td>
               <td>{{ row.creationNumber ?? '-' }}</td>
               <td>{{ row.receiptDate ?? '-' }}</td>
@@ -44,7 +44,7 @@ interface Props {
   rows: ApplicationReceiptListItem[]
   loading: boolean
   errorMessage: string
-  displayCode: (value?: string | null, category?: string) => string
+  codeLabel: (value?: string | null, category?: string) => string
 }
 
 defineProps<Props>()

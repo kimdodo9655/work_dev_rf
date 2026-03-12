@@ -33,6 +33,16 @@
       📊
     </button>
 
+    <button
+      class="floating-button code-button"
+      :class="{ active: showCodeDebug }"
+      @click="toggleCodeDebug"
+      aria-label="코드 치환값 보기"
+      :title="showCodeDebug ? '코드 치환값 보기 끄기' : '코드 치환값 보기 켜기'"
+    >
+      🏷️
+    </button>
+
     <!-- 인증 상태 모니터 -->
     <transition name="slide-up">
       <div v-if="isAuthMonitorOpen" class="auth-monitor">
@@ -166,7 +176,7 @@
         <div class="frame-container" :style="frameStyle">
           <div class="frame-info">{{ currentFrameSize.width }} × {{ currentFrameSize.height }}</div>
           <iframe
-            :src="$route.fullPath"
+            :src="currentRoute.fullPath"
             class="frame-content"
             :title="`${currentFrameSize.name} 프레임`"
           />
@@ -188,7 +198,7 @@
               <li v-for="route in category.routes" :key="route.path">
                 <router-link
                   :to="route.path"
-                  :class="{ active: $route.path === route.path }"
+                  :class="{ active: currentRoute.path === route.path }"
                   @click="closeNav"
                 >
                   <span class="route-title">{{ route.title }}</span>
@@ -210,7 +220,9 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, type Ref, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 
+import { useCodeReplacer } from '@/composables/utils/useCodeReplacer'
 import { useDialog } from '@/composables/utils/useDialog'
 import { useAuthStore } from '@/stores/auth'
 import { logger } from '@/utils/logger'
@@ -225,6 +237,8 @@ interface FrameSize {
 // Auth Store
 const authStore = useAuthStore()
 const { alert } = useDialog()
+const { showCodeDebug, toggleCodeDebug } = useCodeReplacer()
+const currentRoute = useRoute()
 
 // Storage 데이터 (실시간 갱신)
 const storageData = ref(storage.get())
@@ -565,9 +579,22 @@ onBeforeUnmount(() => {
   background-color: #10b981;
 }
 
+.code-button {
+  bottom: 230px;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+}
+
+.code-button:hover {
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6);
+}
+
+.code-button.active {
+  background-color: #d97706;
+}
+
 .auth-monitor {
   position: fixed;
-  bottom: 230px;
+  bottom: 300px;
   right: 20px;
   width: 400px;
   max-height: 70vh;

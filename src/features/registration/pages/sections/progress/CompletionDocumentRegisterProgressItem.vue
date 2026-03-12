@@ -27,7 +27,7 @@
             >
               <td>{{ row.documentName ?? '-' }}</td>
               <td>{{ row.propertyUniqueNumber ?? '-' }}</td>
-              <td>{{ displayCode(row.registryType, 'registryTypes') }}</td>
+              <td>{{ codeLabel(row.registryType, 'registryTypes') }}</td>
               <td>{{ row.obligeeName ?? '-' }}</td>
               <td>{{ row.filePath ?? '-' }}</td>
             </tr>
@@ -45,7 +45,7 @@ interface Props {
   rows: CompleteDocumentListItem[]
   loading: boolean
   errorMessage: string
-  displayCode: (value?: string | null, category?: string) => string
+  codeLabel: (value?: string | null, category?: string) => string
 }
 
 defineProps<Props>()

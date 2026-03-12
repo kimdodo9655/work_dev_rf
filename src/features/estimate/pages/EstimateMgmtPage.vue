@@ -89,9 +89,9 @@
           <td>{{ item.plotCount ?? '-' }}</td>
           <td>{{ formatDate(item.requestDate) }}</td>
           <td>{{ formatDate(item.receiptDate) }}</td>
-          <td>{{ getCodeLabel(quoteProgressCodeMap, item.progressStatus) }}</td>
-          <td>{{ getCodeLabel(writingStatusCodeMap, item.writingStatus) }}</td>
-          <td>{{ getCodeLabel(selectionStatusCodeMap, item.selectionStatus) }}</td>
+          <td>{{ formatCodeLabel(item.progressStatus, 'quoteProgressStatuses') }}</td>
+          <td>{{ formatCodeLabel(item.writingStatus, 'estimateWritingStatuses') }}</td>
+          <td>{{ formatCodeLabel(item.selectionStatus, 'estimateSelectionStatuses') }}</td>
           <td>
             <button class="detail-btn" type="button" @click="moveDetail(item)">
               <i class="fi fi-sr-angle-circle-right"></i>
@@ -119,6 +119,7 @@ import SearchDateRangePicker from '@/components/template/input/SearchDateRangePi
 import SearchInput from '@/components/template/input/SearchInput.vue'
 import SearchSelect from '@/components/template/input/SearchSelect.vue'
 import Pagination from '@/components/template/PaginationItem.vue'
+import { useCodeReplacer } from '@/composables/utils/useCodeReplacer'
 import type { Code, EstimateListItemResponse, GetEstimateListQuery, SelectOption } from '@/types'
 import { logger } from '@/utils/logger'
 
@@ -140,6 +141,7 @@ interface ListRoot {
 }
 
 const router = useRouter()
+const { formatCodeLabel } = useCodeReplacer()
 
 const pageSize = 10
 const currentPage = ref(1)
@@ -197,18 +199,6 @@ const selectionStatusOptions = computed<SelectOption[]>(() => [
   { label: '전체', value: '' },
   ...selectionStatusCodes.value.map((code) => ({ label: code.description, value: code.code }))
 ])
-
-const quoteProgressCodeMap = computed(() => {
-  return new Map(quoteProgressStatusCodes.value.map((code) => [code.code, code.description]))
-})
-
-const writingStatusCodeMap = computed(() => {
-  return new Map(writingStatusCodes.value.map((code) => [code.code, code.description]))
-})
-
-const selectionStatusCodeMap = computed(() => {
-  return new Map(selectionStatusCodes.value.map((code) => [code.code, code.description]))
-})
 
 function unwrapData<T>(payload: unknown): T {
   if (payload && typeof payload === 'object' && 'data' in (payload as Record<string, unknown>)) {
@@ -274,11 +264,6 @@ function buildQuery(): GetEstimateListQuery {
     page: currentPage.value,
     size: pageSize
   }
-}
-
-function getCodeLabel(codeMap: Map<string, string>, code?: string): string {
-  if (!code) return '-'
-  return codeMap.get(code) ?? code
 }
 
 function formatCurrency(amount?: number): string {

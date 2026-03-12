@@ -72,7 +72,7 @@ const props = defineProps<Props>()
 const emit = defineEmits<{
   loaded: [hasData: boolean]
 }>()
-const { findOriginalCode, findReplacement, replaceText } = useCodeReplacer()
+const { formatCodeLabel } = useCodeReplacer()
 const { getErrorMessage } = useErrorHandler()
 
 const throttle = useThrottle(1000)
@@ -81,24 +81,15 @@ const errorMessage = ref('')
 const list = ref<AdminInfoRequest[]>([])
 
 function getRegistryTypeName(type: string): string {
-  const replaced = findReplacement(type, 'registryTypes') ?? replaceText(type)
-  if (replaced !== type) return `${type} -> ${replaced}`
-  const inferredCode = findOriginalCode(type, 'registryTypes')
-  return inferredCode ? `${inferredCode} -> ${type}` : type
+  return formatCodeLabel(type, 'registryTypes')
 }
 
 function getRegistryCauseName(cause: string): string {
-  const replaced = findReplacement(cause, 'registryCauses') ?? replaceText(cause)
-  if (replaced !== cause) return `${cause} -> ${replaced}`
-  const inferredCode = findOriginalCode(cause, 'registryCauses')
-  return inferredCode ? `${inferredCode} -> ${cause}` : cause
+  return formatCodeLabel(cause, 'registryCauses')
 }
 
 function getRegistryMethodName(method: string): string {
-  const replaced = findReplacement(method, 'registryMethods') ?? replaceText(method)
-  if (replaced !== method) return `${method} -> ${replaced}`
-  const inferredCode = findOriginalCode(method, 'registryMethods')
-  return inferredCode ? `${inferredCode} -> ${method}` : method
+  return formatCodeLabel(method, 'registryMethods')
 }
 
 function handleDetail(item: AdminInfoRequest) {

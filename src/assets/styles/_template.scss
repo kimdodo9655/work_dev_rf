@@ -1283,6 +1283,7 @@
   width: 100%;
   border-collapse: collapse;
   background-color: #fff;
+  table-layout: fixed;
 
   thead {
     tr {
@@ -1311,6 +1312,11 @@
         text-align: center;
         font-size: 12px;
         border-bottom: 2px solid #dddddd;
+
+        &.cell-wrap {
+          white-space: normal;
+          overflow-wrap: anywhere;
+        }
 
         .detail-btn {
           cursor: pointer;

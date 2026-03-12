@@ -3647,6 +3647,38 @@
             "example": 0
           },
           {
+            "name": "numberOfIndividualSellers",
+            "in": "query",
+            "description": "개인 매도자 수",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "example": 1
+          },
+          {
+            "name": "numberOfCorporateSellers",
+            "in": "query",
+            "description": "법인 매도자 수",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "example": 0
+          },
+          {
+            "name": "hasAdditionalSellerInfo",
+            "in": "query",
+            "description": "매도자 추가 정보 생성 여부",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "example": false
+          },
+          {
             "name": "hasScopeOfSecuredDebt",
             "in": "query",
             "description": "피담보채무의범위 포함 여부",
@@ -5350,7 +5382,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/OwnershipContractResponse"
+                  "$ref": "#/components/schemas/OwnershipContractViewResponse"
                 }
               }
             }
@@ -6022,7 +6054,9 @@
               "enum": [
                 "LST",
                 "POA",
+                "POAP",
                 "SGN",
+                "SGNP",
                 "CRT",
                 "CNT",
                 "RFC",
@@ -6030,22 +6064,32 @@
                 "RRC",
                 "TAX",
                 "RLT",
+                "RLTP",
                 "SMP",
+                "SMPP",
                 "SVC",
+                "SVCO",
                 "ESC",
+                "ESCO",
                 "RRIO",
                 "RRIE",
+                "RRI",
                 "LRIO",
                 "LRIE",
+                "LRI",
                 "LRCO",
                 "LRCE",
+                "LRC",
                 "CNF",
+                "CNFO",
                 "RPS",
                 "LTP",
                 "LBK",
                 "GBK",
                 "CBK",
                 "CRP",
+                "CRPO",
+                "CRPE",
                 "CSM",
                 "ECS",
                 "BSC",
@@ -6053,6 +6097,7 @@
                 "RFR",
                 "RLS",
                 "TRC",
+                "TRCP",
                 "DRW",
                 "LPA",
                 "RPA"
@@ -6068,6 +6113,117 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/AttachmentFormDocumentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/registry/applications/{applicationId}/attachments/uploadTmp": {
+      "put": {
+        "tags": ["[R02J] 등기진행-첨부서면"],
+        "summary": "[R02J-05] 첨부서면 문서 임시 업로드",
+        "description": "파일명에 해당하는 첨부서면 데이터를 조회합니다.",
+        "operationId": "uploadTmpApplicationAttachmentData",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "description": "신청서ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          },
+          {
+            "name": "fileProgressDocumentType",
+            "in": "query",
+            "description": "파일명 코드",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "LST",
+                "POA",
+                "POAP",
+                "SGN",
+                "SGNP",
+                "CRT",
+                "CNT",
+                "RFC",
+                "RPC",
+                "RRC",
+                "TAX",
+                "RLT",
+                "RLTP",
+                "SMP",
+                "SMPP",
+                "SVC",
+                "SVCO",
+                "ESC",
+                "ESCO",
+                "RRIO",
+                "RRIE",
+                "RRI",
+                "LRIO",
+                "LRIE",
+                "LRI",
+                "LRCO",
+                "LRCE",
+                "LRC",
+                "CNF",
+                "CNFO",
+                "RPS",
+                "LTP",
+                "LBK",
+                "GBK",
+                "CBK",
+                "CRP",
+                "CRPO",
+                "CRPE",
+                "CSM",
+                "ECS",
+                "BSC",
+                "FRC",
+                "RFR",
+                "RLS",
+                "TRC",
+                "TRCP",
+                "DRW",
+                "LPA",
+                "RPA"
+              ]
+            },
+            "example": "POA"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": ["file"],
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "description": "업로드할 파일",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "등기진행 문서 임시 업로드 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentUploadResponse"
                 }
               }
             }
@@ -7099,9 +7255,9 @@
       },
       "put": {
         "tags": ["[R02S] 등기진행-이전/말소권리증"],
-        "summary": "[R02S-02] 이전/말소등기권리증 대체",
-        "description": "등기관리번호에 해당하는 이전/말소권리증 정보를 모두 삭제하고 새로운 데이터로 대체합니다.",
-        "operationId": "replaceProgressCancellationCertificates",
+        "summary": "[R02S-02] 이전/말소등기권리증 수정",
+        "description": "등기관리번호에 해당하는 이전/말소권리증의 수정 가능한 항목을 업데이트합니다.",
+        "operationId": "updateProgressCancellationCertificates",
         "parameters": [
           {
             "name": "registryManagementNumber",
@@ -7126,7 +7282,7 @@
         },
         "responses": {
           "200": {
-            "description": "이전/말소권리증 정보 대체 성공",
+            "description": "이전/말소권리증 정보 수정 성공",
             "content": {
               "*/*": {
                 "schema": {
@@ -9043,90 +9199,14 @@
   "components": {
     "schemas": {
       "CancellationCertificateItem": {
-        "required": [
-          "applicationId",
-          "certificateType",
-          "progressPartyId",
-          "propertyUniqueNumber",
-          "rankNumber",
-          "receiptDate",
-          "receiptNumber",
-          "registryCause",
-          "registryType",
-          "section"
-        ],
+        "required": ["certificateType", "progressPropertyOwnerId"],
         "type": "object",
         "properties": {
-          "applicationId": {
+          "progressPropertyOwnerId": {
             "type": "integer",
-            "description": "신청서ID",
+            "description": "진행 부동산 소유자ID",
             "format": "int64",
             "example": 1
-          },
-          "registryType": {
-            "type": "string",
-            "description": "등기유형",
-            "example": "OWNERSHIP_TRANSFER",
-            "enum": [
-              "OWNERSHIP_TRANSFER",
-              "MORTGAGE",
-              "SURFACE_RIGHT",
-              "CHANGE",
-              "CORRECTION",
-              "MORTGAGE_CANCELLATION",
-              "SURFACE_RIGHT_CANCELLATION"
-            ]
-          },
-          "registryCause": {
-            "type": "string",
-            "description": "등기원인",
-            "example": "설정계약",
-            "enum": [
-              "TRADE",
-              "ESTABLISHMENT_CONTRACT",
-              "ADDRESS_CHANGE",
-              "ROAD_NAME_ADDRESS",
-              "APPLICATION_ERROR",
-              "TERMINATION",
-              "NAME_CHANGE",
-              "REGISTRATION_NUMBER"
-            ]
-          },
-          "propertyUniqueNumber": {
-            "minLength": 1,
-            "type": "string",
-            "description": "부동산고유번호",
-            "example": "27019537700605"
-          },
-          "progressPartyId": {
-            "type": "integer",
-            "description": "진행당사자ID",
-            "format": "int64",
-            "example": 1
-          },
-          "section": {
-            "type": "string",
-            "description": "해당구 (갑구/을구)",
-            "example": "GAP",
-            "enum": ["GAP", "EUL"]
-          },
-          "rankNumber": {
-            "minLength": 1,
-            "type": "string",
-            "description": "순위번호",
-            "example": "1"
-          },
-          "receiptDate": {
-            "type": "string",
-            "description": "접수일자",
-            "format": "date",
-            "example": "2025-12-08"
-          },
-          "receiptNumber": {
-            "minLength": 1,
-            "type": "string",
-            "description": "접수번호",
-            "example": "12345"
           },
           "certificateType": {
             "type": "string",
@@ -9144,6 +9224,18 @@
             "description": "일련번호",
             "example": "A1B224135BCF"
           },
+          "confirmationDocumentType": {
+            "type": "string",
+            "description": "본인확인정보 구분",
+            "example": "RESIDENT_REGISTRATION",
+            "enum": [
+              "RESIDENT_REGISTRATION",
+              "DRIVER_LICENSE",
+              "PASSPORT",
+              "FOREIGN_REGISTRATION",
+              "DOMESTIC_RESIDENCE_REPORT"
+            ]
+          },
           "certificatePasswordSequence": {
             "type": "string",
             "description": "비밀번호일련번호",
@@ -9153,9 +9245,14 @@
             "type": "string",
             "description": "비밀번호",
             "example": "12345"
+          },
+          "specialNote": {
+            "type": "string",
+            "description": "특이사항",
+            "example": "특이사항입니다"
           }
         },
-        "description": "말소 등기권리증 정보 전체 교체 요청"
+        "description": "말소 등기권리증 정보 수정 요청"
       },
       "RegistryProgressCancellationCertificateRequest": {
         "required": ["cancellationCertificateItems"],
@@ -9169,59 +9266,11 @@
             }
           }
         },
-        "description": "이전/말소 등기권리증 정보 전체 교체 요청"
-      },
-      "OwnerOption": {
-        "type": "object",
-        "properties": {
-          "progressPartyId": {
-            "type": "integer",
-            "description": "진행 당사자 ID",
-            "format": "int64",
-            "example": 101
-          },
-          "name": {
-            "type": "string",
-            "description": "성명",
-            "example": "홍길동"
-          }
-        },
-        "description": "소유자 옵션"
+        "description": "이전/말소 등기권리증 정보 수정 요청"
       },
       "RegistryProgressCancellationCertificateResponse": {
         "type": "object",
         "properties": {
-          "registryTypeOptions": {
-            "type": "array",
-            "description": "등기유형 옵션",
-            "items": {
-              "type": "string",
-              "description": "등기유형 옵션"
-            }
-          },
-          "propertyUniqueNumberOptions": {
-            "type": "array",
-            "description": "부동산 고유번호 옵션",
-            "items": {
-              "type": "string",
-              "description": "부동산 고유번호 옵션"
-            }
-          },
-          "ownerOptions": {
-            "type": "array",
-            "description": "소유자(성명) 옵션 (등록된 소유자)",
-            "items": {
-              "$ref": "#/components/schemas/OwnerOption"
-            }
-          },
-          "sectionOptions": {
-            "type": "array",
-            "description": "해당구 옵션 (Enum)",
-            "items": {
-              "type": "string",
-              "description": "해당구 옵션 (Enum)"
-            }
-          },
           "certificateTypeOptions": {
             "type": "array",
             "description": "등기권리증 구분 옵션 (Enum)",
@@ -9235,6 +9284,14 @@
             "description": "등기권리증 목록",
             "items": {
               "$ref": "#/components/schemas/TransferCancellationCertificateProjection"
+            }
+          },
+          "identityDocumentOptions": {
+            "type": "array",
+            "description": "본인확인정보 구분 옵션 (Enum)",
+            "items": {
+              "type": "string",
+              "description": "본인확인정보 구분 옵션 (Enum)"
             }
           }
         },
@@ -9285,6 +9342,10 @@
             "type": "string",
             "enum": ["GAP", "EUL"]
           },
+          "progressPropertyOwnerId": {
+            "type": "integer",
+            "format": "int64"
+          },
           "certificateSerialNumber": {
             "type": "string"
           },
@@ -9320,6 +9381,19 @@
           },
           "isUseCertificatePassword": {
             "type": "boolean"
+          },
+          "specialNote": {
+            "type": "string"
+          },
+          "confirmationDocumentType": {
+            "type": "string",
+            "enum": [
+              "RESIDENT_REGISTRATION",
+              "DRIVER_LICENSE",
+              "PASSPORT",
+              "FOREIGN_REGISTRATION",
+              "DOMESTIC_RESIDENCE_REPORT"
+            ]
           }
         },
         "description": "등기권리증 목록"
@@ -11344,12 +11418,6 @@
             "format": "date",
             "example": "2025-05-21"
           },
-          "registryReceiptDate": {
-            "type": "string",
-            "description": "등기접수 일자",
-            "format": "date",
-            "example": "2025-06-25"
-          },
           "tradeReportManagementNumber": {
             "type": "string",
             "description": "실거래신고 관리번호",
@@ -11780,7 +11848,6 @@
             "example": "2025-12-08"
           },
           "receiptNumber": {
-            "minLength": 1,
             "type": "string",
             "description": "접수번호",
             "example": "12345"
@@ -12338,7 +12405,9 @@
             "enum": [
               "LST",
               "POA",
+              "POAP",
               "SGN",
+              "SGNP",
               "CRT",
               "CNT",
               "RFC",
@@ -12346,22 +12415,32 @@
               "RRC",
               "TAX",
               "RLT",
+              "RLTP",
               "SMP",
+              "SMPP",
               "SVC",
+              "SVCO",
               "ESC",
+              "ESCO",
               "RRIO",
               "RRIE",
+              "RRI",
               "LRIO",
               "LRIE",
+              "LRI",
               "LRCO",
               "LRCE",
+              "LRC",
               "CNF",
+              "CNFO",
               "RPS",
               "LTP",
               "LBK",
               "GBK",
               "CBK",
               "CRP",
+              "CRPO",
+              "CRPE",
               "CSM",
               "ECS",
               "BSC",
@@ -12369,6 +12448,7 @@
               "RFR",
               "RLS",
               "TRC",
+              "TRCP",
               "DRW",
               "LPA",
               "RPA"
@@ -12461,7 +12541,9 @@
             "enum": [
               "LST",
               "POA",
+              "POAP",
               "SGN",
+              "SGNP",
               "CRT",
               "CNT",
               "RFC",
@@ -12469,22 +12551,32 @@
               "RRC",
               "TAX",
               "RLT",
+              "RLTP",
               "SMP",
+              "SMPP",
               "SVC",
+              "SVCO",
               "ESC",
+              "ESCO",
               "RRIO",
               "RRIE",
+              "RRI",
               "LRIO",
               "LRIE",
+              "LRI",
               "LRCO",
               "LRCE",
+              "LRC",
               "CNF",
+              "CNFO",
               "RPS",
               "LTP",
               "LBK",
               "GBK",
               "CBK",
               "CRP",
+              "CRPO",
+              "CRPE",
               "CSM",
               "ECS",
               "BSC",
@@ -12492,6 +12584,7 @@
               "RFR",
               "RLS",
               "TRC",
+              "TRCP",
               "DRW",
               "LPA",
               "RPA"
@@ -12633,6 +12726,33 @@
           }
         },
         "description": "첨부서면 정보 조회"
+      },
+      "DocumentUploadResponse": {
+        "type": "object",
+        "properties": {
+          "tempFileName": {
+            "type": "string",
+            "description": "임시 파일명 (문서 저장 시 사용)",
+            "example": "BRN_000_000_BLF.temp-20241205143022-a1b2c3d4.pdf"
+          },
+          "filePath": {
+            "type": "string",
+            "description": "임시 파일 경로",
+            "example": "/mnt/files/organizations/000/000/BRN_000_000_BLF.temp-20241205143022-a1b2c3d4.pdf"
+          },
+          "fileSize": {
+            "type": "integer",
+            "description": "파일 크기 (bytes)",
+            "format": "int64",
+            "example": 1024000
+          },
+          "uploadedAt": {
+            "type": "string",
+            "description": "업로드 시각",
+            "format": "date-time"
+          }
+        },
+        "description": "문서 임시 업로드 응답"
       },
       "AddressDailyChangeRequest": {
         "required": ["date", "filename", "records"],
@@ -13482,33 +13602,6 @@
           }
         },
         "description": "문서 저장 요청 정보"
-      },
-      "DocumentUploadResponse": {
-        "type": "object",
-        "properties": {
-          "tempFileName": {
-            "type": "string",
-            "description": "임시 파일명 (문서 저장 시 사용)",
-            "example": "BRN_000_000_BLF.temp-20241205143022-a1b2c3d4.pdf"
-          },
-          "filePath": {
-            "type": "string",
-            "description": "임시 파일 경로",
-            "example": "/mnt/files/organizations/000/000/BRN_000_000_BLF.temp-20241205143022-a1b2c3d4.pdf"
-          },
-          "fileSize": {
-            "type": "integer",
-            "description": "파일 크기 (bytes)",
-            "format": "int64",
-            "example": 1024000
-          },
-          "uploadedAt": {
-            "type": "string",
-            "description": "업로드 시각",
-            "format": "date-time"
-          }
-        },
-        "description": "문서 임시 업로드 응답"
       },
       "ApiResultDocumentSaveResponse": {
         "type": "object",
@@ -16991,6 +17084,11 @@
             "description": "담당자전화번호",
             "example": "010-1234-5678"
           },
+          "managerExtension": {
+            "type": "string",
+            "description": "담당자내선번호",
+            "example": "123"
+          },
           "createdAt": {
             "type": "string",
             "description": "등기의뢰일자",
@@ -17015,9 +17113,17 @@
             "type": "string",
             "description": "법무대리인 담당자명"
           },
-          "directPhoneNumber": {
+          "managerPosition": {
             "type": "string",
-            "description": "법무대리인 담당자 직통번호"
+            "description": "법무대리인 담당자 직책"
+          },
+          "managerPhone": {
+            "type": "string",
+            "description": "법무대리인 담당자 전화번호"
+          },
+          "managerExtension": {
+            "type": "string",
+            "description": "법무대리인 담당자 내선번호"
           }
         },
         "description": "법무대리인 정보"
@@ -18269,10 +18375,6 @@
       "TaxBaseSection": {
         "type": "object",
         "properties": {
-          "totalTaxBaseAmount": {
-            "type": "number",
-            "description": "과세표준액 합계"
-          },
           "properties": {
             "type": "array",
             "description": "부동산별 과세표준액 목록",
@@ -18577,10 +18679,6 @@
           "ruralSpecialTax": {
             "type": "number",
             "description": "농어촌특별세"
-          },
-          "totalAmount": {
-            "type": "number",
-            "description": "합계"
           }
         },
         "description": "세금신고 정보 응답"
@@ -18912,7 +19010,7 @@
         },
         "description": "2차 중도금 정보"
       },
-      "OwnershipContractResponse": {
+      "OwnershipContractViewResponse": {
         "type": "object",
         "properties": {
           "registryType": {
@@ -18958,11 +19056,6 @@
           "contractDate": {
             "type": "string",
             "description": "계약 일자",
-            "format": "date"
-          },
-          "registryReceiptDate": {
-            "type": "string",
-            "description": "등기 접수 일자",
             "format": "date"
           },
           "tradeReportManagementNumber": {

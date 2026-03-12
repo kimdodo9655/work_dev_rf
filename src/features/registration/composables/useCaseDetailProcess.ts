@@ -81,7 +81,7 @@ export function useCaseDetailProcess({
   // 역할: 진행 프로세스 조회 / 액션 실행 / 대상 섹션 스크롤
   const { getErrorMessage } = useErrorHandler()
   const { extractApiSuccessContent, extractApiErrorContent } = useApiAlert()
-  const { findReplacement } = useCodeReplacer()
+  const { formatCodeLabel } = useCodeReplacer()
   const { alert, confirm } = useDialog()
 
   const openedProcessId = ref('')
@@ -166,18 +166,15 @@ export function useCaseDetailProcess({
   }
 
   function mapAction(action: ProcessActionResponse): WorkProcessActionItem {
-    const replacedLabel =
-      action.actionDescription ||
-      findReplacement(action.action, 'processActions') ||
-      action.action ||
-      '상태 변경'
-    const actionLabel = action.action ? `${action.action} -> ${replacedLabel}` : replacedLabel
+    const actionLabel = action.actionDescription
+      ? formatCodeLabel(action.actionDescription, 'processActions')
+      : formatCodeLabel(action.action, 'processActions')
 
     return {
       action: action.action,
       nextStatus: action.nextStatus,
       nextStatusDescription: action.nextStatusDescription,
-      label: actionLabel
+      label: actionLabel || '상태 변경'
     }
   }
 

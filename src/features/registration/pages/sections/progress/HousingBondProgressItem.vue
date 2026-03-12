@@ -23,7 +23,7 @@
               <td colspan="6" class="empty-cell">조회된 목록이 없습니다.</td>
             </tr>
             <tr v-for="(row, idx) in rows" :key="`bond-${idx}-${row.applicationId ?? idx}`">
-              <td>{{ displayCode(row.registryType, 'registryTypes') }}</td>
+              <td>{{ codeLabel(row.registryType, 'registryTypes') }}</td>
               <td>{{ row.purchaseType ?? '-' }}</td>
               <td>{{ formatNumber(row.purchaseTargetAmount) }}</td>
               <td>{{ formatNumber(row.bondPurchaseAmount) }}</td>
@@ -44,7 +44,7 @@ interface Props {
   rows: HousingBondListRow[]
   loading: boolean
   errorMessage: string
-  displayCode: (value?: string | null, category?: string) => string
+  codeLabel: (value?: string | null, category?: string) => string
   formatNumber: (value?: number | null) => string
 }
 

@@ -9,6 +9,7 @@ import '@/api/client'
 import { createApp } from 'vue'
 
 import App from '@/App.vue'
+import { setupCodeFormatter } from '@/plugins/codeFormatter'
 import { setupVueQuery } from '@/plugins/vueQuery'
 import router from '@/router'
 import pinia from '@/stores'
@@ -21,6 +22,7 @@ const app = createApp(App)
 app.use(pinia)
 app.use(router)
 setupVueQuery(app)
+setupCodeFormatter(app)
 
 // 전역 에러 핸들러
 app.config.errorHandler = (err, _instance, info) => {

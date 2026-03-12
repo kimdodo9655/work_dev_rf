@@ -24,7 +24,7 @@ export function useApplicationSection({
     ? defineAsyncComponent(() => import('@/features/doc-templates/PdfConverter.vue'))
     : null
 
-  const { findOriginalCode, findReplacement, replaceText } = useCodeReplacer()
+  const { formatCodeLabel, formatTextLabel } = useCodeReplacer()
   const { getErrorMessage } = useErrorHandler()
 
   const { document, documentErrorMessage, documentLoading, handleActiveApplicationChanged } =
@@ -67,33 +67,20 @@ export function useApplicationSection({
     activeApplicationId
   })
 
-  function displayCode(value: string | undefined, category: string): string {
-    if (!value) return '-'
-    const original = String(value)
-    const replaced = findReplacement(original, category) ?? replaceText(original)
-    if (replaced !== original) return `${original} -> ${replaced}`
-    const inferredCode = findOriginalCode(original, category)
-    return inferredCode ? `${inferredCode} -> ${original}` : original
-  }
-
-  function displayText(value?: string): string {
-    return value ? replaceText(value) : '-'
-  }
-
   function displayRegistryType(value?: string): string {
-    return displayCode(value, 'registryTypes')
+    return formatCodeLabel(value, 'registryTypes')
   }
 
   function displayRegistryCause(value?: string): string {
-    return displayCode(value, 'registryCauses')
+    return formatCodeLabel(value, 'registryCauses')
   }
 
   function displayRegistryMethod(value?: string): string {
-    return displayCode(value, 'registryMethods')
+    return formatCodeLabel(value, 'registryMethods')
   }
 
   function displayAdminInfoLinkTime(value?: string): string {
-    return displayCode(value, 'adminInfoLinkTime')
+    return formatCodeLabel(value, 'adminInfoLinkTime')
   }
 
   function handleEditRegistryMethod() {
@@ -113,7 +100,7 @@ export function useApplicationSection({
     displayRegistryCause,
     displayRegistryMethod,
     displayRegistryType,
-    displayText,
+    formatTextLabel,
     document,
     documentErrorMessage,
     documentLoading,

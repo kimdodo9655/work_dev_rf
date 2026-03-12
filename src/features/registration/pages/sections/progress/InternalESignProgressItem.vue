@@ -21,14 +21,14 @@
           </thead>
           <tbody>
             <tr v-for="item in list" :key="item.eSignatureId">
-              <td>{{ displayCode(item.partyRole, 'partyRoles') }}</td>
+              <td>{{ codeLabel(item.partyRole, 'partyRoles') }}</td>
               <td>{{ item.name }}</td>
-              <td>{{ displayCode(item.signatureMethod, 'eSignatureMethods') }}</td>
+              <td>{{ codeLabel(item.signatureMethod, 'eSignatureMethods') }}</td>
               <td>{{ item.signatureRequestedAt ?? '-' }}</td>
               <td>{{ item.signatureCompletedAt ?? '-' }}</td>
               <td>
                 <span :class="getSignatureStatusClass(item.signatureStatus)">
-                  {{ displayCode(item.signatureStatus, 'eSignatureStatuses') }}
+                  {{ codeLabel(item.signatureStatus, 'eSignatureStatuses') }}
                 </span>
               </td>
               <td>
@@ -64,7 +64,7 @@ interface Props {
   list: ESignatureItem[]
   loading: boolean
   errorMessage: string
-  displayCode: (value?: string | null, category?: string) => string
+  codeLabel: (value?: string | null, category?: string) => string
   getSignatureStatusClass: (status: string) => string
   onDetail: (item: ESignatureItem) => void
 }
