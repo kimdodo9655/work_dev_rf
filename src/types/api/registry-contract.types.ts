@@ -43,7 +43,7 @@ export interface GetOwnershipContractParams {
   applicationId: number
 }
 
-export type GetOwnershipContractResponse = OwnershipContractResponse
+export type GetOwnershipContractResponse = OwnershipContractViewResponse
 
 /**
  * R02E-04
@@ -343,6 +343,8 @@ export interface OwnershipContractResponse {
   firstInterim?: InterimPaymentResponse
   secondInterim?: InterimPaymentResponse
 }
+
+export type OwnershipContractViewResponse = OwnershipContractResponse
 
 export interface OwnershipContractSaveResponse {
   /** 계약 금액 */

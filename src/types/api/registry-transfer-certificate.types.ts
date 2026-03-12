@@ -49,47 +49,31 @@ export type GetDetailedProgressCancellationCertificatesResponse =
 
 // ==================== Schemas ====================
 
-/** 말소 등기권리증 정보 전체 교체 요청 */
+/** 말소 등기권리증 정보 수정 요청 */
 export interface CancellationCertificateItem {
-  /** 신청서ID */
-  applicationId: number
-  /** 등기유형 */
-  registryType:
-    | 'OWNERSHIP_TRANSFER'
-    | 'MORTGAGE'
-    | 'SURFACE_RIGHT'
-    | 'CHANGE'
-    | 'CORRECTION'
-    | 'MORTGAGE_CANCELLATION'
-    | 'SURFACE_RIGHT_CANCELLATION'
-  /** 진행당사자ID */
-  progressPartyId: number
-  /** 등기원인 */
-  registryCause: string
-  /** 부동산고유번호 */
-  propertyUniqueNumber: string
-  /** 성명(명칭) */
-  name: string
-  /** 해당구 (갑구/을구) */
-  section?: 'GAP' | 'EUL'
-  /** 순위번호 */
-  rankNumber?: string
-  /** 접수일자 */
-  receiptDate?: string
-  /** 접수번호 */
-  receiptNumber?: string
+  /** 진행 부동산 소유자ID */
+  progressPropertyOwnerId: number
   /** 등기권리증 구분 */
-  certificateType?:
+  certificateType:
     | 'REGISTRY_CERT_INFO'
     | 'REGISTRY_CERTIFICATE'
     | 'CONFIRMATION_DOCUMENT'
     | 'PRIOR_REGISTRY_LINK'
   /** 일련번호 */
   certificateSerialNumber?: string
+  /** 본인확인정보 구분 */
+  confirmationDocumentType?:
+    | 'RESIDENT_REGISTRATION'
+    | 'DRIVER_LICENSE'
+    | 'PASSPORT'
+    | 'FOREIGN_REGISTRATION'
+    | 'DOMESTIC_RESIDENCE_REPORT'
   /** 비밀번호일련번호 */
   certificatePasswordSequence?: string
   /** 비밀번호 */
   certificatePassword?: string
+  /** 특이사항 */
+  specialNote?: string
 }
 
 /** 이전/말소 등기권리증 목록 조회 */
@@ -118,7 +102,7 @@ export interface RegistryProgressCancellationCertificateListResponse {
   certificates?: CancellationCertificateListItem[]
 }
 
-/** 이전/말소 등기권리증 정보 전체 교체 요청 */
+/** 이전/말소 등기권리증 정보 수정 요청 */
 export interface RegistryProgressCancellationCertificateRequest {
   /** 이전/말소 등기권리증 정보 목록 */
   cancellationCertificateItems: CancellationCertificateItem[]
@@ -126,26 +110,12 @@ export interface RegistryProgressCancellationCertificateRequest {
 
 /** 이전/말소 등기권리증 정보 조회 */
 export interface RegistryProgressCancellationCertificateResponse {
-  /** 등기유형 옵션 */
-  registryTypeOptions?: string[]
-  /** 부동산 고유번호 옵션 */
-  propertyUniqueNumberOptions?: string[]
-  /** 소유자(성명) 옵션 (등록된 소유자) */
-  ownerOptions?: OwnerOption[]
-  /** 해당구 옵션 (Enum) */
-  sectionOptions?: string[]
   /** 등기권리증 구분 옵션 (Enum) */
   certificateTypeOptions?: string[]
+  /** 본인확인정보 구분 옵션 (Enum) */
+  identityDocumentOptions?: string[]
   /** 등기권리증 목록 */
   items?: TransferCancellationCertificateResponse[]
-}
-
-/** 소유자 옵션 */
-export interface OwnerOption {
-  /** 진행 당사자 ID */
-  progressPartyId?: number
-  /** 성명 */
-  name?: string
 }
 
 /** 이전/말소 등기권리증 정보 응답 */

@@ -8,7 +8,58 @@
  * @generated 2025-01-27
  */
 
-import type { DocumentDownloadBase64Response } from './common.types'
+import type { DocumentDownloadBase64Response, DocumentUploadResponse } from './common.types'
+
+export type AttachmentFileProgressDocumentType =
+  | 'LST'
+  | 'POA'
+  | 'POAP'
+  | 'SGN'
+  | 'SGNP'
+  | 'CRT'
+  | 'CNT'
+  | 'RFC'
+  | 'RPC'
+  | 'RRC'
+  | 'TAX'
+  | 'RLT'
+  | 'RLTP'
+  | 'SMP'
+  | 'SMPP'
+  | 'SVC'
+  | 'SVCO'
+  | 'ESC'
+  | 'ESCO'
+  | 'RRIO'
+  | 'RRIE'
+  | 'RRI'
+  | 'LRIO'
+  | 'LRIE'
+  | 'LRI'
+  | 'LRCO'
+  | 'LRCE'
+  | 'LRC'
+  | 'CNF'
+  | 'CNFO'
+  | 'RPS'
+  | 'LTP'
+  | 'LBK'
+  | 'GBK'
+  | 'CBK'
+  | 'CRP'
+  | 'CRPO'
+  | 'CRPE'
+  | 'CSM'
+  | 'ECS'
+  | 'BSC'
+  | 'FRC'
+  | 'RFR'
+  | 'RLS'
+  | 'TRC'
+  | 'TRCP'
+  | 'DRW'
+  | 'LPA'
+  | 'RPA'
 
 /**
  * R02J-01
@@ -71,7 +122,7 @@ export type ViewRegistryApplicationAttachmentResponse = DocumentDownloadBase64Re
  * GET /api/registry/applications/{applicationId}/attachments/docInfo
  */
 export interface GetApplicationAttachmentDataQuery {
-  fileProgressDocumentType: string
+  fileProgressDocumentType: AttachmentFileProgressDocumentType
 }
 
 export interface GetApplicationAttachmentDataParams {
@@ -80,48 +131,33 @@ export interface GetApplicationAttachmentDataParams {
 
 export type GetApplicationAttachmentDataResponse = AttachmentFormDocumentResponse
 
+/**
+ * R02J-05
+ * PUT /api/registry/applications/{applicationId}/attachments/uploadTmp
+ */
+export interface UploadTmpApplicationAttachmentDataQuery {
+  /** 파일명 코드 */
+  fileProgressDocumentType: AttachmentFileProgressDocumentType
+}
+
+export interface UploadTmpApplicationAttachmentDataParams {
+  /** 신청서ID */
+  applicationId: number
+}
+
+export interface UploadTmpApplicationAttachmentDataRequest {
+  /** 업로드할 파일 */
+  file: string
+}
+
+export type UploadTmpApplicationAttachmentDataResponse = DocumentUploadResponse
+
 // ==================== Schemas ====================
 
 /** 첨부서면 정보 목록 */
 export interface AttachmentReplaceItem {
   /** 첨부서면명칭 */
-  attachmentName:
-    | 'LST'
-    | 'POA'
-    | 'SGN'
-    | 'CRT'
-    | 'CNT'
-    | 'RFC'
-    | 'RPC'
-    | 'RRC'
-    | 'TAX'
-    | 'RLT'
-    | 'SMP'
-    | 'SVC'
-    | 'ESC'
-    | 'RRIO'
-    | 'RRIE'
-    | 'LRIO'
-    | 'LRIE'
-    | 'LRCO'
-    | 'LRCE'
-    | 'CNF'
-    | 'RPS'
-    | 'LTP'
-    | 'LBK'
-    | 'GBK'
-    | 'CBK'
-    | 'CRP'
-    | 'CSM'
-    | 'ECS'
-    | 'BSC'
-    | 'FRC'
-    | 'RFR'
-    | 'RLS'
-    | 'TRC'
-    | 'DRW'
-    | 'LPA'
-    | 'RPA'
+  attachmentName: AttachmentFileProgressDocumentType
   /** 제출방식 */
   submissionMethod: 'ELECTRONIC' | 'SCAN' | 'VISIT_SUBMIT' | 'ADMIN_INFO_LINK'
   /** 부가정보 (제출방식에 따라 필수) */
@@ -163,43 +199,7 @@ export interface ReferenceMethodItem {
 export interface AttachmentItem {
   name?: string
   fileName?: string
-  attachmentName?:
-    | 'LST'
-    | 'POA'
-    | 'SGN'
-    | 'CRT'
-    | 'CNT'
-    | 'RFC'
-    | 'RPC'
-    | 'RRC'
-    | 'TAX'
-    | 'RLT'
-    | 'SMP'
-    | 'SVC'
-    | 'ESC'
-    | 'RRIO'
-    | 'RRIE'
-    | 'LRIO'
-    | 'LRIE'
-    | 'LRCO'
-    | 'LRCE'
-    | 'CNF'
-    | 'RPS'
-    | 'LTP'
-    | 'LBK'
-    | 'GBK'
-    | 'CBK'
-    | 'CRP'
-    | 'CSM'
-    | 'ECS'
-    | 'BSC'
-    | 'FRC'
-    | 'RFR'
-    | 'RLS'
-    | 'TRC'
-    | 'DRW'
-    | 'LPA'
-    | 'RPA'
+  attachmentName?: AttachmentFileProgressDocumentType
   registryMethod?: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
   registryType?:
     | 'OWNERSHIP_TRANSFER'

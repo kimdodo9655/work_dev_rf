@@ -133,7 +133,9 @@ export const REGISTRY_ATTACHMENT = {
   PREVIEW: (applicationId: string | number) =>
     `/api/registry/applications/${applicationId}/attachments/preview`,
   DOC_INFO: (applicationId: string | number) =>
-    `/api/registry/applications/${applicationId}/attachments/docInfo`
+    `/api/registry/applications/${applicationId}/attachments/docInfo`,
+  UPLOAD_TMP: (applicationId: string | number) =>
+    `/api/registry/applications/${applicationId}/attachments/uploadTmp`
 } as const
 
 export const REGISTRY_CHANGE = {

@@ -15,6 +15,7 @@ import type {
   GetProgressCancellationCertificatesParams,
   GetProgressCancellationCertificatesResponse,
   ReplaceProgressCancellationCertificatesParams,
+  ReplaceProgressCancellationCertificatesRequest,
   ReplaceProgressCancellationCertificatesResponse
 } from '@/types'
 
@@ -28,12 +29,16 @@ export const registryTransferCertificateAPI = {
     )
   },
 
-  async replace(params: ReplaceProgressCancellationCertificatesParams) {
+  async replace(
+    params: ReplaceProgressCancellationCertificatesParams,
+    data: ReplaceProgressCancellationCertificatesRequest
+  ) {
     // --------------------------------------------------
-    // [R02S-02][PUT - /api/registry/progress/{registryManagementNumber}/transfer-cancellation-certificates] 이전/말소등기권리증 대체
+    // [R02S-02][PUT - /api/registry/progress/{registryManagementNumber}/transfer-cancellation-certificates] 이전/말소등기권리증 수정
     // --------------------------------------------------
     return apiHelpers.put<ReplaceProgressCancellationCertificatesResponse>(
-      API.REGISTRY_TRANSFER_CERTIFICATE.REPLACE(params.registryManagementNumber)
+      API.REGISTRY_TRANSFER_CERTIFICATE.REPLACE(params.registryManagementNumber),
+      data
     )
   },
 

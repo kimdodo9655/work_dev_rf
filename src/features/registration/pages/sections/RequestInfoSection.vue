@@ -41,7 +41,9 @@
             </div>
             <div class="row">
               <span class="label">연락처</span>
-              <span class="value">{{ displayPhone(loanInfo?.managerPhone) }}</span>
+              <span class="value">{{
+                displayPhoneWithExtension(loanInfo?.managerPhone, loanInfo?.managerExtension)
+              }}</span>
             </div>
             <div class="row">
               <span class="label">메시지</span>
@@ -238,8 +240,17 @@
             <span class="value">{{ mortgageLegalInfo.managerName ?? '-' }}</span>
           </div>
           <div class="row">
-            <span class="label">담당자 직통번호</span>
-            <span class="value">{{ displayPhone(mortgageLegalInfo.directPhoneNumber) }}</span>
+            <span class="label">담당자 직책</span>
+            <span class="value">{{ mortgageLegalInfo.managerPosition ?? '-' }}</span>
+          </div>
+          <div class="row">
+            <span class="label">담당자 전화번호</span>
+            <span class="value">{{
+              displayPhoneWithExtension(
+                mortgageLegalInfo.managerPhone,
+                mortgageLegalInfo.managerExtension
+              )
+            }}</span>
           </div>
         </div>
       </section>
@@ -265,8 +276,17 @@
             <span class="value">{{ transferLegalInfo.managerName ?? '-' }}</span>
           </div>
           <div class="row">
-            <span class="label">담당자 직통번호</span>
-            <span class="value">{{ displayPhone(transferLegalInfo.directPhoneNumber) }}</span>
+            <span class="label">담당자 직책</span>
+            <span class="value">{{ transferLegalInfo.managerPosition ?? '-' }}</span>
+          </div>
+          <div class="row">
+            <span class="label">담당자 전화번호</span>
+            <span class="value">{{
+              displayPhoneWithExtension(
+                transferLegalInfo.managerPhone,
+                transferLegalInfo.managerExtension
+              )
+            }}</span>
           </div>
         </div>
       </section>
@@ -304,8 +324,14 @@ function displayDateTime(value?: string | null): string {
   return value ? formatDateTimeSeconds(value) : '-'
 }
 
-function displayPhone(value?: string | null): string {
-  return value ? formatPhone(value) : '-'
+function displayPhoneWithExtension(phone?: string | null, extension?: string | null): string {
+  const formattedPhone = phone ? formatPhone(phone) : ''
+  const trimmedExtension = extension?.trim() ?? ''
+
+  if (!formattedPhone) return '-'
+  if (!trimmedExtension) return formattedPhone
+
+  return `${formattedPhone} (${trimmedExtension})`
 }
 
 function displaySurfaceRight(value?: string | boolean | null): string {

@@ -292,8 +292,12 @@ export interface RegistryProgressLegalAgentResponse {
   legalAgentName?: string
   /** 법무대리인 담당자명 */
   managerName?: string
-  /** 법무대리인 담당자 직통번호 */
-  directPhoneNumber?: string
+  /** 법무대리인 담당자 직책 */
+  managerPosition?: string
+  /** 법무대리인 담당자 전화번호 */
+  managerPhone?: string
+  /** 법무대리인 담당자 내선번호 */
+  managerExtension?: string
 }
 
 /** 등기 진행 현황 대출 금융기관 정보 조회 */
@@ -310,6 +314,8 @@ export interface RegistryProgressLoanResponse {
   managerPosition?: string
   /** 담당자전화번호 */
   managerPhone?: string
+  /** 담당자내선번호 */
+  managerExtension?: string
   /** 등기의뢰일자 */
   createdAt?: string
   /** 담당자전달사항 */

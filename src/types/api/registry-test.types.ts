@@ -81,12 +81,18 @@ export interface CreateRegistryTypeComboTestDataQuery {
   numberOfBuyersAsDebtors?: number
   /** 담보제공자와 무관한 채무자 수 */
   numberOfIndependentDebtors?: number
+  /** 개인 매도자 수 */
+  numberOfIndividualSellers?: number
+  /** 법인 매도자 수 */
+  numberOfCorporateSellers?: number
+  /** 매도자 추가 정보 생성 여부 */
+  hasAdditionalSellerInfo?: boolean
   /** 피담보채무의범위 포함 여부 */
   hasScopeOfSecuredDebt?: boolean
-  /** 등기권리증 정보 생성 여부 */
-  hasRegistryRightCertificate?: boolean
   /** 소유자 정보 포함 여부 */
   hasPropertyOwnerInfo?: boolean
+  /** 등기권리증 정보 생성 여부 */
+  hasRegistryRightCertificate?: boolean
   /** 부동산 권리 포함 여부 */
   hasPropertyRights?: boolean
 }

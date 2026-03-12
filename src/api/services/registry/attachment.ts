@@ -7,7 +7,7 @@
 // [R02J] 첨부
 // --------------------------------------------------
 
-import { apiHelpers } from '@/api/client'
+import { api, apiHelpers } from '@/api/client'
 import { API } from '@/api/endpoints'
 import type {
   DownloadApplicationAttachmentParams,
@@ -21,10 +21,20 @@ import type {
   ReplaceApplicationAttachmentsParams,
   ReplaceApplicationAttachmentsRequest,
   ReplaceApplicationAttachmentsResponse,
+  UploadTmpApplicationAttachmentDataParams,
+  UploadTmpApplicationAttachmentDataQuery,
+  UploadTmpApplicationAttachmentDataRequest,
+  UploadTmpApplicationAttachmentDataResponse,
   ViewRegistryApplicationAttachmentParams,
   ViewRegistryApplicationAttachmentQuery,
   ViewRegistryApplicationAttachmentResponse
 } from '@/types'
+
+type UploadTmpApplicationAttachmentDataInput = UploadTmpApplicationAttachmentDataParams &
+  UploadTmpApplicationAttachmentDataQuery &
+  Omit<UploadTmpApplicationAttachmentDataRequest, 'file'> & {
+    file: File
+  }
 
 export const registryAttachmentAPI = {
   async getDetail(params: GetDetailedApplicationAttachmentParams) {
@@ -86,5 +96,20 @@ export const registryAttachmentAPI = {
       API.REGISTRY_ATTACHMENT.DOC_INFO(params.applicationId),
       query
     )
+  },
+
+  async uploadTmp(input: UploadTmpApplicationAttachmentDataInput) {
+    // --------------------------------------------------
+    // [R02J-05][PUT - /api/registry/applications/{applicationId}/attachments/uploadTmp] 첨부서면 문서 임시 업로드
+    // --------------------------------------------------
+    const { applicationId, fileProgressDocumentType, file } = input
+    const formData = new FormData()
+    formData.append('file', file)
+    const response = await api.put<UploadTmpApplicationAttachmentDataResponse>(
+      `${API.REGISTRY_ATTACHMENT.UPLOAD_TMP(applicationId)}?fileProgressDocumentType=${fileProgressDocumentType}`,
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    )
+    return response.data
   }
 }
