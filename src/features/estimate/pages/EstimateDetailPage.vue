@@ -17,7 +17,7 @@
           <tbody>
             <tr>
               <th>등기유형</th>
-              <td>{{ info.registryInfo?.workTypeDescription || '-' }}</td>
+              <td>{{ formatCodeLabel(info.registryInfo?.registryType, 'registryTypes') }}</td>
               <th>매매금액</th>
               <td>{{ formatCurrency(info.registryInfo?.tradeAmount) }}</td>
             </tr>
@@ -25,7 +25,7 @@
               <th>잔금일자</th>
               <td>{{ formatDate(info.registryInfo?.balanceDueDate) }}</td>
               <th>등기방식(요청)</th>
-              <td>{{ info.registryInfo?.registryMethodDescription || '-' }}</td>
+              <td>{{ formatCodeLabel(info.registryInfo?.registryMethod, 'registryMethods') }}</td>
             </tr>
             <tr>
               <th>부동산 주소</th>
@@ -33,7 +33,7 @@
             </tr>
             <tr>
               <th>부동산 구분</th>
-              <td>{{ info.propertyInfo?.propertyClassification || '-' }}</td>
+              <td>{{ formatCodeLabel(info.propertyInfo?.propertyType, 'propertyTypes') }}</td>
               <th>필지수</th>
               <td>{{ info.propertyInfo?.propertyCount ?? '-' }}</td>
             </tr>

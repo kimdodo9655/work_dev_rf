@@ -170,16 +170,12 @@ export interface AttachmentReplaceItem {
   referenceMethod?: 'NOT_APPLICABLE' | 'OFFICE_USE' | 'SIMULTANEOUS_SUBMIT' | 'PREVIOUS_ATTACHMENT'
   /** 동의인 */
   name?: string
-  /** 당사자ID */
-  partyId?: number
   /** 관할등기소 */
   jurisdictionRegistryOffice?: string
   /** 임대사업자등록번호 */
   rentalBusinessRegistrationNumber?: string
   /** 노출 여부 */
   isExposed?: boolean
-  /** 첨부키 */
-  attachKey?: string
   /** 액션 */
   action?: 'ADD' | 'MODIFY' | 'DELETE'
 }
@@ -220,7 +216,6 @@ export interface AttachmentItem {
   referenceMethod?: ReferenceMethodItem[]
   additionalInfo?: string
   isExposed?: boolean
-  attachKey?: string
   action?: string
 }
 

@@ -12,7 +12,6 @@
             <tr>
               <th>등기유형</th>
               <th>등기원인</th>
-              <th>납부상태</th>
               <th>납부금액</th>
               <th>납세번호</th>
               <th>전자납부번호</th>
@@ -20,14 +19,11 @@
           </thead>
           <tbody>
             <tr v-if="rows.length === 0">
-              <td colspan="6" class="empty-cell">조회된 목록이 없습니다.</td>
+              <td colspan="5" class="empty-cell">조회된 목록이 없습니다.</td>
             </tr>
             <tr v-for="(row, idx) in rows" :key="`tax-${idx}-${row.applicationId ?? idx}`">
               <td>{{ codeLabel(row.registryTypeName || row.registryType, 'registryTypes') }}</td>
               <td>{{ codeLabel(row.registryCause, 'registryCauses') }}</td>
-              <td>
-                {{ codeLabel(row.paymentStatusName || row.paymentStatus, 'paymentStatuses') }}
-              </td>
               <td>{{ formatNumber(row.paymentAmount) }}</td>
               <td>{{ row.taxNumber ?? '-' }}</td>
               <td>{{ row.electronicPaymentNumber ?? '-' }}</td>
@@ -40,10 +36,18 @@
 </template>
 
 <script setup lang="ts">
-import type { Row as TaxAgencyRow } from '@/types'
+interface TaxAgencyListRow {
+  applicationId?: number
+  registryType?: string
+  registryTypeName?: string
+  registryCause?: string
+  paymentAmount?: number
+  taxNumber?: string | null
+  electronicPaymentNumber?: string | null
+}
 
 interface Props {
-  rows: TaxAgencyRow[]
+  rows: TaxAgencyListRow[]
   loading: boolean
   errorMessage: string
   codeLabel: (value?: string | null, category?: string) => string

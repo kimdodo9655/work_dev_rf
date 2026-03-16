@@ -225,16 +225,12 @@ export interface PropertyDescriptionTaskRequest {
 export interface RegistrationApplicationTaskRequest {
   /** 신청서 ID */
   applicationId: number
-  /** 부동산 ID */
-  propertyId: number
 }
 
 /** 등기 신청사건 조회 작업 요청 */
 export interface RegistrationCaseQueryTaskRequest {
   /** 부동산 고유번호 */
   propertyUniqueNumber: string
-  /** 신청인고유ID */
-  progressPartyId: number
   /** 등기권리자ID */
   progressPropertyOwnerId?: number
 }

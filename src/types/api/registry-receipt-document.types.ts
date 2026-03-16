@@ -183,8 +183,6 @@ export interface ReceiptDetailItem {
   receiptDocumentId?: number
   /** 발행일 */
   creationDate?: string
-  /** 등기유형명 */
-  registryTypeName?: string
   registryType?: string
   registryObligeeName?: string
   registryCause?: string
@@ -199,12 +197,6 @@ export interface ReceiptDetailItem {
   fee?: FeeDetail
   tax?: TaxDetail
   housingBond?: HousingBondDetail
-  /** 보수료 소계 */
-  feeSubtotal?: number
-  /** 공과금 소계 */
-  taxSubtotal?: number
-  /** 채권 할인금액 */
-  bondDiscountAmount?: number
   /** 등기비용 합계 */
   costTotal?: number
   /** 등기수수료 지급계좌 레이블 (계좌번호 / 금융기관명) */
@@ -246,8 +238,6 @@ export interface ReceiptDocumentFormResponse {
     | 'CORRECTION'
     | 'MORTGAGE_CANCELLATION'
     | 'SURFACE_RIGHT_CANCELLATION'
-  /** 등기유형명 */
-  registryTypeName?: string
   /** 등기권리자 명칭 */
   registryObligeeName?: string
   /** 발행일 */
@@ -313,8 +303,6 @@ export interface SummaryTotals {
 
 /** 공과금 정보 */
 export interface TaxSection {
-  /** 납부여부 */
-  paymentStatus?: 'PAYMENT' | 'EXEMPTION'
   /** 면제사유 */
   exemptionReason?: string
   paymentAmount?: number
@@ -322,8 +310,6 @@ export interface TaxSection {
   registrationLicenseTax?: number
   educationTax?: number
   ruralSpecialTax?: number
-  /** 합계 */
-  totalAmount?: number
 }
 
 /** 의뢰 업무별 추가 정보 */

@@ -8,7 +8,7 @@
  * @generated 2025-01-27
  */
 
-import type { BondPropertyItemResponse, HousingBondResponse, ObligorInfo } from './common.types'
+import type { ObligorInfo } from './common.types'
 
 /**
  * R02Q-01
@@ -57,8 +57,6 @@ export type ProgressHousingBondSaveItem = Record<string, unknown>
 
 /** 등기유형별 국민주택채권 정보 */
 export interface HousingBondCase {
-  /** 신청서 ID */
-  applicationId?: number
   /** 등기유형 */
   registryType?:
     | 'OWNERSHIP_TRANSFER'
@@ -92,9 +90,6 @@ export interface HousingBondCase {
   bondDiscountRate?: number
   /** 자동작성 가능 여부 */
   autoGenerationAvailable?: boolean
-  housingBond?: HousingBondResponse
-  /** 부동산별 국민주택채권 목록 */
-  properties?: BondPropertyItemResponse[]
   /** 등기의무자 정보 */
   obligors?: ObligorInfo[]
 }
@@ -103,8 +98,6 @@ export interface HousingBondCase {
 export interface ProgressHousingBondResponse {
   /** 등기관리번호 */
   registryManagementNumber?: string
-  /** 국민주택채권 자동작성 가능 여부 */
-  autoGenerationAvailable?: boolean
   /** 등기유형별 국민주택채권 목록 */
   cases?: HousingBondCase[]
 }

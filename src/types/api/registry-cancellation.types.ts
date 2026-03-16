@@ -116,14 +116,10 @@ export interface RegistryApplicationCancellationReplaceRequest {
 
 /** 선순위 대출 상환 정보 */
 export interface RegistryApplicationCancellationSeniorLoanResponse {
-  /** 선순위대출 ID */
-  seniorLoanId?: number
   /** 부동산 고유번호 */
   propertyUniqueNumber?: string
   /** 해당구 */
   section?: 'GAP' | 'EUL'
-  /** 해당구 한글명 */
-  sectionDescription?: string
   /** 순위번호 */
   rankNumber?: string
   /** 설정 금융기관 */

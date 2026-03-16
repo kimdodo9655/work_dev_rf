@@ -139,7 +139,6 @@ export interface UserItem {
 export interface BranchAssignedBankItem {
   registryType?: RegistryTypeForAssign
   bankCode?: string
-  bankName?: string
 }
 
 /** 사용자 배정 금융기관 항목 */
@@ -157,7 +156,6 @@ export interface PartyItem {
 
 /** 부동산 정보 */
 export interface PropertyInfo {
-  propertyClassification?: string
   propertyType?: PropertyType
   propertyCount?: number
   propertyAddress?: string
@@ -168,8 +166,6 @@ export interface PropertyInfo {
 /** 채무자 정보 */
 export interface ObligorInfo {
   obligorCount?: number
-  eSignatureStatus?: string
-  certificateStatus?: string
   obligorEcertificateType?: EcertificateType
   obligorCertificateType?: CertificateType
   addressChangeCount?: number
@@ -298,16 +294,10 @@ export interface ContractPartyDetail {
   progressPartyId?: number
   /** 신청인 역할 */
   partyRole?: 'REGISTRY_OBLIGOR' | 'REGISTRY_OBLIGEE' | 'DEBTOR'
-  /** 신청인 역할명 */
-  partyRoleName?: string
   /** 당사자 구분 */
   partyType?: 'DOMESTIC' | 'OVERSEAS_KOREAN' | 'FOREIGNER' | 'CORPORATION'
-  /** 당사자 구분명 */
-  partyTypeName?: string
   /** 소유형태 */
   ownershipType?: 'SOLE' | 'CO_OWNERSHIP' | 'JOINT_OWNERSHIP'
-  /** 소유형태명 */
-  ownershipTypeName?: string
   /** 성명/법인명 */
   name?: string
   /** 주민등록번호/사업자등록번호 */
@@ -322,14 +312,6 @@ export interface ContractPartyDetail {
   address?: string
   /** 상세주소 */
   addressDetail?: string
-  /** 대표자 구분 */
-  representativeType?: 'DOMESTIC' | 'OVERSEAS_KOREAN' | 'FOREIGNER' | 'CORPORATION'
-  /** 대표자 직책 */
-  representativePosition?: string
-  /** 대표자 성명 */
-  representativeName?: string
-  /** 대표자 국적 */
-  representativeNationality?: string
   /** 채무자와 동일 여부 */
   isSameAsDebtor?: boolean
   /** 이전 지분 분모 */
@@ -413,10 +395,6 @@ export interface RegistryApplicationPartyItem {
   email?: string
   address?: string
   addressDetail?: string
-  representativeType?: 'DOMESTIC' | 'OVERSEAS_KOREAN' | 'FOREIGNER' | 'CORPORATION'
-  representativePosition?: string
-  representativeName?: string
-  representativeNationality?: string
   representatives?: RepresentativeItem[]
   isSameAsDebtor?: boolean
   ownershipType?: 'SOLE' | 'CO_OWNERSHIP' | 'JOINT_OWNERSHIP'
@@ -441,8 +419,6 @@ export interface FilingFeeRequest {
   paymentStatus: 'PAYMENT' | 'EXEMPTION'
   /** 면제사유 */
   exemptionReason?: string
-  /** 등기방식 */
-  registryMethod: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
   /** 등기건수 */
   registryCount?: number
   /** 수수료 */
@@ -499,7 +475,6 @@ export interface TaxInfoResponse {
   registrationLicenseTax?: number
   educationTax?: number
   ruralSpecialTax?: number
-  totalAmount?: number
 }
 
 /** 진행단위 세금신고 정보 응답 (번호/납부기관 포함) */
@@ -518,8 +493,6 @@ export interface RegistryProgressTaxInfoResponse {
 
 /** 채권 부동산 항목 (저장 요청용) */
 export interface BondPropertyItem {
-  /** 부동산 고유번호 */
-  propertyId: string
   /** 부동산고유번호 */
   propertyUniqueNumber?: string
   request: BondPropertyUpdateRequest

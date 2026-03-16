@@ -43,14 +43,10 @@ export type GetNoticeDetailResponse = NoticeDetailResponse
 export interface NoticeResponse {
   /** 공지사항 일련번호 */
   noticeId?: number
-  bankName?: string
-  category?: string
-  isImportant?: boolean
   /** 공지사항 제목 */
   title?: string
   /** 공지사항 생성일자 */
   noticeDate?: string
-  isNew?: boolean
 }
 
 export interface NoticeDetailResponse {

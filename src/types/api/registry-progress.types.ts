@@ -225,16 +225,10 @@ export interface RegistryProgressProcessResponse {
   registryManagementNumber?: string
   /** 등기 진행 유형 */
   progressType?: string
-  /** 등기 진행 유형 설명 */
-  progressTypeDescription?: string
   /** 등기 방식 */
   registryMethod?: string
-  /** 등기 방식 설명 */
-  registryMethodDescription?: string
   /** 현재 진행 상태 */
   currentStatus?: string
-  /** 현재 진행 상태 설명 */
-  currentStatusDescription?: string
   /** 단계 목록 */
   steps?: ProcessStepResponse[]
 }

@@ -123,8 +123,7 @@ import type {
   HousingBondListRow,
   LoanPaymentAccountListItem,
   PostCertificateItem,
-  ReceiptSummaryItem,
-  Row as TaxAgencyRow
+  ReceiptSummaryItem
 } from '@/types'
 import { extractArrayByKeys, extractRecordByKeys } from '@/utils/apiPayload'
 
@@ -170,6 +169,16 @@ interface CompletionDetailPayload {
   postCertificates?: PostCertificateItem[]
 }
 
+interface TaxAgencyListRow {
+  applicationId?: number
+  registryType?: string
+  registryTypeName?: string
+  registryCause?: string
+  paymentAmount?: number
+  taxNumber?: string | null
+  electronicPaymentNumber?: string | null
+}
+
 const props = defineProps<Props>()
 const { formatCodeLabel } = useCodeReplacer()
 const { getErrorMessage } = useErrorHandler()
@@ -194,7 +203,7 @@ const transferThrottle = useThrottle(1000)
 // 세금신고 대행 목록
 const taxLoading = ref(false)
 const taxErrorMessage = ref('')
-const taxRows = ref<TaxAgencyRow[]>([])
+const taxRows = ref<TaxAgencyListRow[]>([])
 const taxThrottle = useThrottle(1000)
 
 // 국민주택채권 목록
@@ -330,7 +339,7 @@ async function fetchTaxAgencyList() {
       const res = await registryTaxReportAPI.getList({
         registryManagementNumber: props.registryManagementNumber
       })
-      taxRows.value = extractArrayByKeys<TaxAgencyRow>(res, ['rows', 'items', 'content'])
+      taxRows.value = extractArrayByKeys<TaxAgencyListRow>(res, ['rows', 'items', 'content'])
     } catch (e: unknown) {
       taxRows.value = []
       taxErrorMessage.value = getErrorMessage(e)

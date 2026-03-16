@@ -108,7 +108,6 @@ export interface ApplicantChangeReqItem {
 
 /** 변경사항 항목 (저장용) */
 export interface ChangeReqItem {
-  changeId?: number
   propertyUniqueNumber: string
   changeType: string
   section: 'GAP' | 'EUL'

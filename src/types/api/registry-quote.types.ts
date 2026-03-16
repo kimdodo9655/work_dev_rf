@@ -252,8 +252,6 @@ export interface LegalAgentInfo {
 export interface ObligeeInfo {
   /** 등기권리자 수 */
   obligeeCount?: number
-  /** 전자서명 상태 */
-  eSignatureStatus?: string
   /** 전자증명서 구분 */
   obligeeEcertificateType?: 'OWNED' | 'DELEGATED' | 'NONE'
   /** 주택수 */
@@ -294,14 +292,10 @@ export interface RegistryInfo {
     | 'TERMINATION'
     | 'NAME_CHANGE'
     | 'REGISTRATION_NUMBER'
-  /** 등기유형 */
-  workTypeDescription?: string
   /** 매매금액 */
   tradeAmount?: number
   /** 잔금일자 */
   balanceDueDate?: string
   /** 등기방식 */
   registryMethod?: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
-  /** 등기방식 설명 */
-  registryMethodDescription?: string
 }

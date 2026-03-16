@@ -68,14 +68,6 @@ export interface RegistryApplicationPropertyItemResponse {
   propertyDescription?: string
   /** 지상권 여부 */
   isSurfaceRight?: boolean
-  /** 설정등기방식 */
-  establishmentRegistryMethod?: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
-  /** 설정관할등기소 */
-  establishmentJurisdictionOffice?: string
-  /** 이전등기방식 */
-  transferRegistryMethod?: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
-  /** 이전관할등기소 */
-  transferJurisdictionOffice?: string
 }
 
 /** 부동산 정보 전체 교체 요청 */

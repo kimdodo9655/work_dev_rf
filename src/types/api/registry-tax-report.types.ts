@@ -139,16 +139,12 @@ export interface RegistryProgressTaxAgencyInputInfoResponse {
 
 /** 세금신고 대행 작업 프로세스 테이블 응답 */
 export interface RegistryProgressTaxAgencyTableResponse {
-  /** 등기관리번호 */
-  registryManagementNumber?: string
   /** 세금신고 대행 테이블 행 목록 */
   rows?: Row[]
 }
 
 /** 세금신고 대행 테이블 행 정보 */
 export interface Row {
-  /** 신청서 ID */
-  applicationId?: number
   /** 등기유형 */
   registryType?:
     | 'OWNERSHIP_TRANSFER'
@@ -158,8 +154,6 @@ export interface Row {
     | 'CORRECTION'
     | 'MORTGAGE_CANCELLATION'
     | 'SURFACE_RIGHT_CANCELLATION'
-  /** 등기유형 명 */
-  registryTypeName?: string
   /** 매입구분 */
   purchaseType?: 'PURCHASE' | 'DISCOUNT' | 'EXEMPTION'
   /** 매입대상금액 */
@@ -170,22 +164,4 @@ export interface Row {
   bondDiscountAmount?: number
   /** 국민주택채권번호 */
   housingBondNumber?: string
-  /** 등기원인 */
-  registryCause?:
-    | 'TRADE'
-    | 'ESTABLISHMENT_CONTRACT'
-    | 'ADDRESS_CHANGE'
-    | 'ROAD_NAME_ADDRESS'
-    | 'APPLICATION_ERROR'
-    | 'TERMINATION'
-  /** 납부 상태 명 */
-  paymentStatusName?: string
-  /** 납부 상태 */
-  paymentStatus?: 'PAYMENT' | 'EXEMPTION'
-  /** 납부 금액 */
-  paymentAmount?: number
-  /** 납세 번호 */
-  taxNumber?: string
-  /** 전자납부 번호 */
-  electronicPaymentNumber?: string
 }

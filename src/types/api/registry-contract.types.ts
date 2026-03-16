@@ -181,10 +181,6 @@ export interface RegistryCertificateFormResponse {
 }
 
 export interface ContractPartyReplaceResponse {
-  /** 등기의무자 목록 */
-  obligors?: CommonParty[]
-  /** 등기권리자 목록 */
-  obligees?: CommonParty[]
   /** 채무자 목록 */
   debtors?: DebtorInfo[]
   shareDescription?: string
@@ -304,8 +300,6 @@ export interface OwnershipContractRequest {
   tradeAmount?: number
   /** 계약 일자 */
   contractDate?: string
-  /** 등기접수 일자 */
-  registryReceiptDate?: string
   /** 실거래신고 관리번호 */
   tradeReportManagementNumber?: string
   /** 실거래신고 접수번호 */

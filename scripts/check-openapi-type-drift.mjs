@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import process, { cwd } from 'node:process'
+import ts from 'typescript'
 
 const projectRoot = cwd()
 const openApiPath = path.join(projectRoot, 'src/api/openapi.json')
@@ -12,6 +13,7 @@ const IGNORED_SCHEMA_NAMES = new Set([
   'AddressDailyChangeResponse',
   'ApiResultAddressDailyChangeResponse',
   'ApiResultCryptoResponse',
+  'CodeResponse',
   'CryptoRequest',
   'CryptoResponse',
   'Record'
@@ -31,21 +33,26 @@ function walkTypeFiles(dirPath) {
 function collectDeclarations(source) {
   const interfaces = new Map()
   const typeAliases = new Set()
+  const sourceFile = ts.createSourceFile('types.ts', source, ts.ScriptTarget.Latest, true)
 
-  for (const match of source.matchAll(/export\s+interface\s+(\w+)\s*\{([\s\S]*?)\n\}/g)) {
-    const [, name, body] = match
-    const props = []
+  for (const statement of sourceFile.statements) {
+    if (
+      ts.isInterfaceDeclaration(statement) &&
+      statement.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword)
+    ) {
+      const props = statement.members
+        .filter((member) => ts.isPropertySignature(member) && member.name)
+        .map((member) => member.name.getText(sourceFile).replace(/^['"]|['"]$/g, ''))
 
-    for (const line of body.split('\n')) {
-      const propMatch = line.match(/^\s*([A-Za-z0-9_]+)\??:/)
-      if (propMatch) props.push(propMatch[1])
+      interfaces.set(statement.name.text, new Set(props))
     }
 
-    interfaces.set(name, new Set(props))
-  }
-
-  for (const match of source.matchAll(/export\s+type\s+(\w+)\s*=/g)) {
-    typeAliases.add(match[1])
+    if (
+      ts.isTypeAliasDeclaration(statement) &&
+      statement.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword)
+    ) {
+      typeAliases.add(statement.name.text)
+    }
   }
 
   return { interfaces, typeAliases }
@@ -88,6 +95,18 @@ function normalizeReport(report) {
           a.schema.localeCompare(b.schema) ||
           a.file.localeCompare(b.file) ||
           a.properties.join(',').localeCompare(b.properties.join(','))
+      ),
+    extraProperties: [...report.extraProperties]
+      .map((item) => ({
+        schema: item.schema,
+        file: item.file,
+        properties: [...item.properties].sort()
+      }))
+      .sort(
+        (a, b) =>
+          a.schema.localeCompare(b.schema) ||
+          a.file.localeCompare(b.file) ||
+          a.properties.join(',').localeCompare(b.properties.join(','))
       )
   }
 }
@@ -99,7 +118,8 @@ function createDriftReport() {
 
   const report = {
     missingTypeDeclarations: [],
-    missingProperties: []
+    missingProperties: [],
+    extraProperties: []
   }
 
   for (const [schemaName, schema] of Object.entries(schemas)) {
@@ -117,11 +137,21 @@ function createDriftReport() {
     const missingProps = Object.keys(schema.properties).filter(
       (prop) => !declaration.props.has(prop)
     )
+    const extraProps = [...declaration.props].filter((prop) => !(prop in schema.properties))
+
     if (missingProps.length > 0) {
       report.missingProperties.push({
         schema: schemaName,
         file: declaration.file,
         properties: missingProps
+      })
+    }
+
+    if (extraProps.length > 0) {
+      report.extraProperties.push({
+        schema: schemaName,
+        file: declaration.file,
+        properties: extraProps
       })
     }
   }
@@ -130,7 +160,11 @@ function createDriftReport() {
 }
 
 function printReport(report) {
-  if (report.missingTypeDeclarations.length === 0 && report.missingProperties.length === 0) {
+  if (
+    report.missingTypeDeclarations.length === 0 &&
+    report.missingProperties.length === 0 &&
+    report.extraProperties.length === 0
+  ) {
     console.log('OpenAPI type drift: clean')
     return
   }
@@ -147,6 +181,13 @@ function printReport(report) {
   if (report.missingProperties.length > 0) {
     console.error('\n[missing properties]')
     for (const item of report.missingProperties) {
+      console.error(`- ${item.schema} (${item.file}): ${item.properties.join(', ')}`)
+    }
+  }
+
+  if (report.extraProperties.length > 0) {
+    console.error('\n[extra properties]')
+    for (const item of report.extraProperties) {
       console.error(`- ${item.schema} (${item.file}): ${item.properties.join(', ')}`)
     }
   }

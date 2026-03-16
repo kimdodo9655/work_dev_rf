@@ -155,14 +155,6 @@ export interface LoanPaymentAccountDetailResponse {
   /** 지급 계좌 목록 */
   paymentItems?: LoanPaymentAccountItem[]
   costSummary?: LoanPaymentAccountCostSummary
-  /** 선순위 대출 옵션 */
-  priorLoanOptions?: LoanPaymentAccountPriorLoanOption[]
-  /** 허용 지급구분 목록 */
-  paymentTypeOptions?: string[]
-  /** 지급구분별 허용 지급주체 */
-  paymentSubjectOptions?: Record<string, string[]>
-  /** 법무대리인 지급계좌 옵션 */
-  branchPaymentAccountOptions?: LoanPaymentAccountBranchAccountOption[]
 }
 
 /** 지급계좌 행 */

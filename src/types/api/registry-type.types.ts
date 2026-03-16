@@ -17,7 +17,6 @@ import type {
   SurfaceRightContractSaveResponse
 } from './registry-contract.types'
 import type { TaxSection } from './registry-receipt-document.types'
-import type { RegistryProgressTaxAgencyListResponse } from './registry-tax-report.types'
 
 /**
  * R02D-02
@@ -149,14 +148,6 @@ export interface ApplicationCancellationFormResponse {
 
 /** 등기신청서 - 등기필정보 */
 export interface ApplicationCertificateFormResponse {
-  /** 부동산 고유번호 */
-  propertyUniqueNumber?: string
-  /** 성명(명칭) */
-  ownerName?: string
-  /** 일련번호 */
-  certificateSerialNumber?: string
-  /** 비밀번호 (순번 2자리 + 비밀번호조합) */
-  certificatePassword?: string
   /** 등기권리증 지분정보 목록 */
   shares?: CertificateShareResponse[]
   /** 등기필정보목록 */
@@ -206,7 +197,6 @@ export interface UnifiedApplicationFormResponse {
   surfaceRightContract?: SurfaceRightContractSaveResponse
   mortgageFinancial?: MortgageFinancialSaveResponse
   taxPopup?: TaxPopupSaveResponse
-  taxAgency?: RegistryProgressTaxAgencyListResponse
   cancellation?: ApplicationCancellationFormResponse
   attachments?: AttachedDocumentResponse[]
   properties?: ApplicationPropertyFormResponse[]
@@ -288,7 +278,6 @@ export interface MortgageFinancialSaveResponse {
     | 'MORTGAGE_CANCELLATION'
     | 'SURFACE_RIGHT_CANCELLATION'
   taxTotalAmount?: number
-  taxPaymentStatus?: 'PAYMENT' | 'EXEMPTION'
   taxExemptionReason?: string
   registrationLicenseTax?: number
   educationTax?: number
@@ -298,7 +287,6 @@ export interface MortgageFinancialSaveResponse {
   filingFeeExemptionReason?: string
   filingFeeRegistryCount?: number
   filingFeeRegistryMethod?: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
-  properties?: PropertyBondSummary[]
 }
 
 export interface PropertyBondSummary {

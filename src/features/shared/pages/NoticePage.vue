@@ -46,10 +46,10 @@ import { onMounted, ref, watch } from 'vue'
 
 import { noticeAPI } from '@/api/services/notice'
 import Pagination from '@/components/template/PaginationItem.vue'
-import type { NoticeResponse, SearchNoticesQuery } from '@/types'
+import type { Item as NoticeListItem, NoticeResponse, SearchNoticesQuery } from '@/types'
 import { logger } from '@/utils/logger'
 
-const notices = ref<NoticeResponse[]>([])
+const notices = ref<NoticeListItem[]>([])
 const isLoading = ref(false)
 const errorMessage = ref('')
 const currentPage = ref(1)
@@ -71,20 +71,20 @@ function unwrap<T>(payload: unknown): T {
   return payload as T
 }
 
-function normalizeNoticeList(source: unknown): NoticeResponse[] {
-  if (Array.isArray(source)) return source as NoticeResponse[]
+function normalizeNoticeList(source: unknown): NoticeListItem[] {
+  if (Array.isArray(source)) return source as NoticeListItem[]
   if (source && typeof source === 'object') {
     const obj = source as Record<string, unknown>
-    if (Array.isArray(obj.content)) return obj.content as NoticeResponse[]
-    if (Array.isArray(obj.noticeList)) return obj.noticeList as NoticeResponse[]
-    if (Array.isArray(obj.items)) return obj.items as NoticeResponse[]
-    if ('noticeId' in obj || 'title' in obj) return [obj as NoticeResponse]
+    if (Array.isArray(obj.content)) return obj.content as NoticeListItem[]
+    if (Array.isArray(obj.noticeList)) return obj.noticeList as NoticeListItem[]
+    if (Array.isArray(obj.items)) return obj.items as NoticeListItem[]
+    if ('noticeId' in obj || 'title' in obj) return [obj as NoticeListItem]
   }
   return []
 }
 
 function extractSearchPayload(source: unknown): {
-  content: NoticeResponse[]
+  content: NoticeListItem[]
   totalPages: number
   totalElements: number
 } {
@@ -93,11 +93,11 @@ function extractSearchPayload(source: unknown): {
 
   const obj = source as Record<string, unknown>
   const content = Array.isArray(obj.content)
-    ? (obj.content as NoticeResponse[])
+    ? (obj.content as NoticeListItem[])
     : Array.isArray(obj.noticeList)
-      ? (obj.noticeList as NoticeResponse[])
+      ? (obj.noticeList as NoticeListItem[])
       : Array.isArray(obj.items)
-        ? (obj.items as NoticeResponse[])
+        ? (obj.items as NoticeListItem[])
         : []
   const totalPages =
     typeof obj.totalPages === 'number'
@@ -116,8 +116,8 @@ function extractSearchPayload(source: unknown): {
   return { content, totalPages, totalElements }
 }
 
-function isImportantNotice(item: NoticeResponse): boolean {
-  if (item.isImportant === true) return true
+function isImportantNotice(item: NoticeListItem | NoticeResponse): boolean {
+  if ('isImportant' in item && item.isImportant === true) return true
   return (item.title ?? '').includes('[중요]')
 }
 
