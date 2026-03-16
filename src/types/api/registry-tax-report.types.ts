@@ -180,6 +180,8 @@ export interface Row {
     | 'TERMINATION'
   /** 납부 상태 명 */
   paymentStatusName?: string
+  /** 납부 상태 */
+  paymentStatus?: 'PAYMENT' | 'EXEMPTION'
   /** 납부 금액 */
   paymentAmount?: number
   /** 납세 번호 */

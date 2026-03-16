@@ -23,9 +23,11 @@
               <td colspan="6" class="empty-cell">조회된 목록이 없습니다.</td>
             </tr>
             <tr v-for="(row, idx) in rows" :key="`tax-${idx}-${row.applicationId ?? idx}`">
-              <td>{{ codeLabel(row.registryTypeName, 'registryTypes') }}</td>
+              <td>{{ codeLabel(row.registryTypeName || row.registryType, 'registryTypes') }}</td>
               <td>{{ codeLabel(row.registryCause, 'registryCauses') }}</td>
-              <td>{{ codeLabel(row.paymentStatusName, 'paymentStatuses') }}</td>
+              <td>
+                {{ codeLabel(row.paymentStatusName || row.paymentStatus, 'paymentStatuses') }}
+              </td>
               <td>{{ formatNumber(row.paymentAmount) }}</td>
               <td>{{ row.taxNumber ?? '-' }}</td>
               <td>{{ row.electronicPaymentNumber ?? '-' }}</td>

@@ -128,28 +128,19 @@
             <div class="row">
               <span class="label">등기 유형</span>
               <span class="value">{{
-                formatCodeLabel(
-                  mortgageInfo.registryTypeName || mortgageInfo.registryType,
-                  'registryTypes'
-                )
+                formatCodeLabel(mortgageInfo.registryType, 'registryTypes')
               }}</span>
             </div>
             <div class="row">
               <span class="label">등기 원인</span>
               <span class="value">{{
-                formatCodeLabel(
-                  mortgageInfo.registryCauseName || mortgageInfo.registryCause,
-                  'registryCauses'
-                )
+                formatCodeLabel(mortgageInfo.registryCause, 'registryCauses')
               }}</span>
             </div>
             <div class="row">
               <span class="label">등기 방식</span>
               <span class="value">{{
-                formatCodeLabel(
-                  mortgageInfo.registryMethodName || mortgageInfo.registryMethod,
-                  'registryMethods'
-                )
+                formatCodeLabel(mortgageInfo.registryMethod, 'registryMethods')
               }}</span>
             </div>
           </div>
@@ -170,6 +161,7 @@
             </div>
           </div>
         </div>
+        <div v-else class="muted">조회된 정보가 없습니다.</div>
       </section>
     </li>
 
@@ -217,6 +209,7 @@
             </div>
           </div>
         </div>
+        <div v-else class="muted">조회된 정보가 없습니다.</div>
       </section>
     </li>
 
@@ -253,6 +246,7 @@
             }}</span>
           </div>
         </div>
+        <div v-else class="muted">조회된 정보가 없습니다.</div>
       </section>
     </li>
 
@@ -289,6 +283,7 @@
             }}</span>
           </div>
         </div>
+        <div v-else class="muted">조회된 정보가 없습니다.</div>
       </section>
     </li>
   </ul>
@@ -399,13 +394,11 @@ const showTransfer = computed(() => {
 })
 
 const showMortgageLegal = computed(() => {
-  const type = basicInfo.value?.progressType
-  return type === 'TYPE_04'
+  return showMortgage.value
 })
 
 const showTransferLegal = computed(() => {
-  const type = basicInfo.value?.progressType
-  return type === 'TYPE_05'
+  return showTransfer.value
 })
 
 async function fetchLoanInfo() {
@@ -620,13 +613,19 @@ watch([() => basicInfo.value?.progressType, () => props.isOpen], ([progressType,
     fetchTransferInfo()
   }
 
-  // 근저당권설정 법무대리인 정보: TYPE_04
-  if (progressType === 'TYPE_04') {
+  // 근저당권설정 법무대리인 정보: 근저당권설정 정보가 있는 유형
+  if (
+    progressType === 'TYPE_01' ||
+    progressType === 'TYPE_02' ||
+    progressType === 'TYPE_04' ||
+    progressType === 'TYPE_05' ||
+    progressType === 'TYPE_07'
+  ) {
     fetchMortgageLegalInfo()
   }
 
-  // 소유권이전 법무대리인 정보: TYPE_05
-  if (progressType === 'TYPE_05') {
+  // 소유권이전 법무대리인 정보: 소유권이전 정보가 있는 유형
+  if (progressType === 'TYPE_04' || progressType === 'TYPE_07') {
     fetchTransferLegalInfo()
   }
 })

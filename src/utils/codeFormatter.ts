@@ -13,6 +13,27 @@ type ReplacementDocument = Record<string, ReplacementCategoryMap>
 
 const replacements = replacementsJson as ReplacementDocument
 const CODE_DEBUG_STORAGE_KEY = 'dev-code-replacement-debug-enabled'
+const CATEGORY_ALIASES: Record<string, string> = {
+  registryType: 'registryTypes',
+  registryCause: 'registryCauses',
+  registryMethod: 'registryMethods',
+  propertyType: 'propertyTypes',
+  section: 'sections',
+  certificateType: 'certificateTypes',
+  workType: 'workTypes',
+  paymentStatus: 'paymentStatuses',
+  progressStatus: 'progressStatuses',
+  progressType: 'progressTypes',
+  partyType: 'partyTypes',
+  partyRole: 'partyRoles',
+  ownershipType: 'ownershipTypes',
+  actionType: 'actionTypes',
+  dataSource: 'dataSources',
+  userStatus: 'userStatuses',
+  purchaseType: 'bondPurchaseTypes',
+  bondPurchaseType: 'bondPurchaseTypes',
+  notificationEvent: 'workflowNotificationEvent'
+}
 
 const globalReplacementMap = new Map<string, string>()
 const globalReverseReplacementMap = new Map<string, string>()
@@ -67,6 +88,26 @@ function findInCategory(category: string, key: string): string | undefined {
   return categoryMap[key]
 }
 
+function resolveCategory(category?: string): string | undefined {
+  if (!category) return undefined
+
+  if (replacements[category]) return category
+
+  const normalized = category.replace(/(Name|Description)$/u, '')
+  if (replacements[normalized]) return normalized
+
+  const alias = CATEGORY_ALIASES[normalized]
+  if (alias && replacements[alias]) return alias
+
+  const candidates = [
+    `${normalized}s`,
+    normalized.endsWith('y') ? `${normalized.slice(0, -1)}ies` : '',
+    normalized.endsWith('Status') ? `${normalized}es` : ''
+  ].filter(Boolean)
+
+  return candidates.find((candidate) => replacements[candidate]) || alias
+}
+
 export function findReplacement(raw: unknown, category?: string): string | undefined {
   initializeCodeFormatter()
 
@@ -76,7 +117,8 @@ export function findReplacement(raw: unknown, category?: string): string | undef
   if (!value) return undefined
 
   if (category) {
-    const fromCategory = findInCategory(category, value)
+    const resolvedCategory = resolveCategory(category)
+    const fromCategory = resolvedCategory ? findInCategory(resolvedCategory, value) : undefined
     if (fromCategory) return fromCategory
   }
 
@@ -105,7 +147,7 @@ export function findOriginalCode(label: unknown, category?: string): string | un
   if (!value) return undefined
 
   if (category) {
-    const reverseCategoryMap = categoryReverseMaps.get(category)
+    const reverseCategoryMap = categoryReverseMaps.get(resolveCategory(category) ?? category)
     const fromCategory = reverseCategoryMap?.get(value)
     if (fromCategory) return fromCategory
   }

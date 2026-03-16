@@ -324,22 +324,16 @@ export interface RegistryProgressLoanResponse {
 
 /** 근저당권설정 정보 */
 export interface RegistryProgressMortgageResponse {
-  /** 등기 유형 코드 */
-  registryType?: string
   /** 등기 유형 */
-  registryTypeName?: string
-  /** 등기 원인 코드 */
-  registryCause?: string
+  registryType?: string
   /** 등기 원인 */
-  registryCauseName?: string
+  registryCause?: string
   /** 채권최고액 */
   maximumCreditAmount?: number
-  /** 등기 방식 코드 */
-  registryMethod?: string
   /** 등기 방식 */
-  registryMethodName?: string
-  /** 지상권 여부 (O/X) */
-  surfaceRightYn?: string
+  registryMethod?: string
+  /** 지상권 여부 */
+  surfaceRightYn?: boolean
   /** 지상권 존속기간 */
   durationPeriod?: string
 }
