@@ -28,7 +28,7 @@
                 :key="`full-cert-${idx}-${row.propertyUniqueNumber ?? idx}`"
               >
                 <td>{{ row.propertyUniqueNumber ?? '-' }}</td>
-                <td>{{ row.propertyType ?? '-' }}</td>
+                <td>{{ codeLabel(row.propertyType, 'propertyTypes') }}</td>
                 <td>{{ row.jurisdictionRegistryOffice ?? '-' }}</td>
                 <td>{{ row.propertyAddress ?? '-' }}</td>
                 <td>{{ row.fileName ?? '-' }}</td>

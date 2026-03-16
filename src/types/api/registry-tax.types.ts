@@ -63,8 +63,8 @@ export interface TaxPopupResponse {
 
 /** 과세표준 정보 */
 export interface TaxBaseSection {
-  /** 과세표준 합계 */
-  totalTaxBaseAmount?: number
+  /** 과세표준액 합계 */
+  taxBaseAmount?: number
   /** 부동산별 과세표준 항목 */
   properties?: TaxBaseItem[]
 }
@@ -75,6 +75,8 @@ export interface TaxBaseItem {
   propertyUniqueNumber?: string
   /** 부동산 주소 */
   propertyAddress?: string
+  /** 부동산 구분 */
+  propertyType?: 'LAND' | 'BUILDING' | 'COLLECTIVE_BUILDING'
   /** 공시지가 */
   officialLandPrice?: number
   /** 면적 */

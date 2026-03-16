@@ -118,7 +118,7 @@
                 <td>실비변상</td>
                 <td>{{ formatCurrency(detail.feeDetails?.actualCost) }}</td>
                 <td>등기 진행 방식</td>
-                <td>{{ detail.registryMethod || '-' }}</td>
+                <td>{{ formatCodeLabel(detail.registryMethod, 'registryMethods') }}</td>
               </tr>
               <tr>
                 <td>확인서면</td>
@@ -153,6 +153,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { codeAPI } from '@/api/services/code'
 import { registryQuoteAPI } from '@/api/services/registry/quote'
 import SearchSelect from '@/components/template/input/SearchSelect.vue'
+import { useCodeReplacer } from '@/composables/utils/useCodeReplacer'
 import { MESSAGES } from '@/constants/messages'
 import type { Code, EstimateDetailResponse, EstimateInfoResponse, SelectOption } from '@/types'
 import { logger } from '@/utils/logger'
@@ -163,6 +164,7 @@ defineOptions({
 
 const route = useRoute()
 const router = useRouter()
+const { formatCodeLabel } = useCodeReplacer()
 
 const isLoading = ref(false)
 const loadError = ref('')

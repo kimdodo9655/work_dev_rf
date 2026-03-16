@@ -289,8 +289,6 @@ export interface ReceiptSummaryItem {
   receiptDocumentId?: number
   /** 등기유형 */
   registryType?: string
-  /** 등기유형명 */
-  registryTypeName?: string
   /** 보수료 소계 */
   feeSubtotal?: number
   /** 채권할인금액 */

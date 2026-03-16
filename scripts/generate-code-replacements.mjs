@@ -2,55 +2,137 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 const workspaceRoot = process.cwd()
-
-const CODE_ENDPOINTS = [
-  ['organizationTypes', '/api/codes/organization-types'],
-  ['organizationStatuses', '/api/codes/organization-statuses'],
-  ['qualifiedTypes', '/api/codes/qualified-types'],
-  ['branchStatuses', '/api/codes/branch-statuses'],
-  ['userRoleLevels', '/api/codes/user-role-levels'],
-  ['registryTypes', '/api/codes/registry-types'],
-  ['registryCauses', '/api/codes/registry-causes'],
-  ['partyTypes', '/api/codes/party-types'],
-  ['propertyTypes', '/api/codes/property-types'],
-  ['sections', '/api/codes/sections'],
-  ['registryMethods', '/api/codes/registry-methods'],
-  ['securedDebtScopeTypes', '/api/codes/secured-debt-scope-types'],
-  ['certificateTypes', '/api/codes/certificate-types'],
-  ['workTypes', '/api/codes/work-types'],
-  ['paymentStatuses', '/api/codes/payment-statuses'],
-  ['adminInfoLinkTime', '/api/codes/admin-info-link-times'],
-  ['userStatuses', '/api/codes/user-statuses'],
-  ['assignedWorks', '/api/codes/assigned-works'],
-  ['progressStatuses', '/api/codes/progress-statuses'],
-  ['quoteProgressStatuses', '/api/codes/quote-progress-statuses'],
-  ['estimateWritingStatuses', '/api/codes/estimate-writing-statuses'],
-  ['estimateSelectionStatuses', '/api/codes/estimate-selection-statuses'],
-  ['progressTypes', '/api/codes/progress-types'],
-  ['partyRoles', '/api/codes/party-roles'],
-  ['partyRolesForRequest', '/api/codes/party-roles-for-request'],
-  ['registryTypesForAssign', '/api/codes/registry-types-for-assign'],
-  ['actionTypes', '/api/codes/action-types'],
-  ['bondPurchaseTypes', '/api/codes/bond-purchase-types'],
-  ['correctionTypes', '/api/codes/correction-types'],
-  ['dataSources', '/api/codes/data-sources'],
-  ['eSignatureMethods', '/api/codes/e-signature-methods'],
-  ['eSignatureStatuses', '/api/codes/e-signature-statuses'],
-  ['fileProgressDocumentTypes', '/api/codes/file-progress-document-types'],
-  ['fileRegistryTypes', '/api/codes/file-registry-types'],
-  ['fileRequestDocumentTypes', '/api/codes/file-request-document-types'],
-  ['ownershipTypes', '/api/codes/ownership-types'],
-  ['processActions', '/api/codes/process-actions'],
-  ['propertyBuildTypes', '/api/codes/property-build-types'],
-  ['rpaUserTaskStatuses', '/api/codes/rpa-user-task-statuses'],
-  ['rpaUserTaskTypes', '/api/codes/rpa-user-task-types'],
-  ['confirmationDocumentTypes', '/api/codes/confirmation-document-types'],
-  ['fileBranchDocumentTypes', '/api/codes/file-branch-document-types'],
-  ['successCodes', '/api/codes/success-codes'],
-  ['errorCodes', '/api/codes/error-codes'],
-  ['workflowNotificationEvent', '/api/codes/workflow-notification-event'],
-  ['noticeCategory', '/api/codes/notice-category']
+const OPENAPI_PATH = path.join(workspaceRoot, 'src/api/openapi.json')
+const CODE_TYPES_PATH = path.join(workspaceRoot, 'src/types/api/code.types.ts')
+const CODE_ENDPOINT_KEY_OVERRIDES = {
+  '/api/codes/admin-info-link-times': 'adminInfoLinkTime',
+  '/api/codes/assigned-works': 'assignedWorks'
+}
+const CODE_ENDPOINT_ORDER = [
+  'organizationTypes',
+  'organizationStatuses',
+  'qualifiedTypes',
+  'branchStatuses',
+  'userRoleLevels',
+  'registryTypes',
+  'registryCauses',
+  'partyTypes',
+  'propertyTypes',
+  'sections',
+  'registryMethods',
+  'securedDebtScopeTypes',
+  'certificateTypes',
+  'workTypes',
+  'paymentStatuses',
+  'adminInfoLinkTime',
+  'userStatuses',
+  'assignedWorks',
+  'progressStatuses',
+  'quoteProgressStatuses',
+  'estimateWritingStatuses',
+  'estimateSelectionStatuses',
+  'progressTypes',
+  'partyRoles',
+  'partyRolesForRequest',
+  'registryTypesForAssign',
+  'actionTypes',
+  'bondPurchaseTypes',
+  'correctionTypes',
+  'dataSources',
+  'eSignatureMethods',
+  'eSignatureStatuses',
+  'fileProgressDocumentTypes',
+  'fileRegistryTypes',
+  'fileRequestDocumentTypes',
+  'ownershipTypes',
+  'processActions',
+  'propertyBuildTypes',
+  'rpaUserTaskStatuses',
+  'rpaUserTaskTypes',
+  'confirmationDocumentTypes',
+  'fileBranchDocumentTypes',
+  'successCodes',
+  'errorCodes',
+  'workflowNotificationEvent',
+  'noticeCategory'
 ]
+
+function kebabToCamel(value) {
+  return value.replace(/-([a-z])/g, (_, char) => char.toUpperCase())
+}
+
+function getCodeCategoryKey(endpoint) {
+  return CODE_ENDPOINT_KEY_OVERRIDES[endpoint] || kebabToCamel(endpoint.split('/').at(-1) ?? '')
+}
+
+function getCodeEndpoints() {
+  const openapi = JSON.parse(fs.readFileSync(OPENAPI_PATH, 'utf-8'))
+  const discovered = Object.entries(openapi.paths)
+    .filter(([endpoint, methods]) => endpoint.startsWith('/api/codes/') && methods?.get)
+    .map(([endpoint]) => [getCodeCategoryKey(endpoint), endpoint])
+
+  const discoveredKeys = new Set(discovered.map(([category]) => category))
+  const missingOrderKeys = discovered
+    .map(([category]) => category)
+    .filter((category) => !CODE_ENDPOINT_ORDER.includes(category))
+  const extraOrderKeys = CODE_ENDPOINT_ORDER.filter((category) => !discoveredKeys.has(category))
+
+  if (missingOrderKeys.length > 0 || extraOrderKeys.length > 0) {
+    throw new Error(
+      [
+        'OpenAPI 공통코드 엔드포인트와 CODE_ENDPOINT_ORDER가 일치하지 않습니다.',
+        missingOrderKeys.length > 0 ? `- missingOrderKeys: ${missingOrderKeys.join(', ')}` : '',
+        extraOrderKeys.length > 0 ? `- extraOrderKeys: ${extraOrderKeys.join(', ')}` : ''
+      ]
+        .filter(Boolean)
+        .join('\n')
+    )
+  }
+
+  const endpointMap = new Map(discovered)
+
+  return CODE_ENDPOINT_ORDER.map((category) => {
+    const endpoint = endpointMap.get(category)
+    if (!endpoint) {
+      throw new Error(`공통코드 엔드포인트를 찾을 수 없습니다: ${category}`)
+    }
+
+    return [category, endpoint]
+  })
+}
+
+function getCodeResponseKeys() {
+  const source = fs.readFileSync(CODE_TYPES_PATH, 'utf-8')
+  const match = source.match(/export interface CodeResponse \{([\s\S]*?)\n\}/)
+
+  if (!match) {
+    throw new Error('code.types.ts 에서 CodeResponse 인터페이스를 찾을 수 없습니다.')
+  }
+
+  return [...match[1].matchAll(/^\s*([A-Za-z0-9_]+):\s/gm)]
+    .map((item) => item[1])
+    .filter((key) => key !== 'code' && key !== 'description')
+}
+
+function validateCodeResponseKeys(codeEndpoints) {
+  const endpointKeys = codeEndpoints.map(([category]) => category)
+  const codeResponseKeys = getCodeResponseKeys()
+
+  const missingInCodeTypes = endpointKeys.filter((key) => !codeResponseKeys.includes(key))
+  const extraInCodeTypes = codeResponseKeys.filter((key) => !endpointKeys.includes(key))
+
+  if (missingInCodeTypes.length > 0 || extraInCodeTypes.length > 0) {
+    throw new Error(
+      [
+        'OpenAPI 공통코드 키와 CodeResponse 인터페이스가 일치하지 않습니다.',
+        missingInCodeTypes.length > 0 ? `- missingInCodeTypes: ${missingInCodeTypes.join(', ')}` : '',
+        extraInCodeTypes.length > 0 ? `- extraInCodeTypes: ${extraInCodeTypes.join(', ')}` : ''
+      ]
+        .filter(Boolean)
+        .join('\n')
+    )
+  }
+}
 
 function parseDotEnv(content) {
   const result = {}
@@ -178,6 +260,8 @@ async function fetchJson(url, headers, timeoutMs) {
 }
 
 async function main() {
+  const codeEndpoints = getCodeEndpoints()
+  validateCodeResponseKeys(codeEndpoints)
   const env = loadEnv()
 
   const baseUrl = normalizeBaseUrl(
@@ -214,7 +298,7 @@ async function main() {
   const failures = []
 
   const settled = await Promise.allSettled(
-    CODE_ENDPOINTS.map(async ([category, endpoint]) => {
+    codeEndpoints.map(async ([category, endpoint]) => {
       const url = `${baseUrl}${endpoint}`
       const payload = await fetchJson(url, headers, timeoutMs)
       const list = extractList(payload)
@@ -229,7 +313,7 @@ async function main() {
   )
 
   settled.forEach((result, index) => {
-    const [category, endpoint] = CODE_ENDPOINTS[index]
+    const [category, endpoint] = codeEndpoints[index]
     if (result.status === 'rejected') {
       replacementMap[category] = {}
       failures.push({ category, endpoint, reason: describeError(result.reason) })
@@ -244,7 +328,7 @@ async function main() {
 
   console.log(`Generated ${path.relative(workspaceRoot, outputPath)}`)
   console.log(`- baseUrl: ${baseUrl}`)
-  console.log(`- categories: ${CODE_ENDPOINTS.length}`)
+  console.log(`- categories: ${codeEndpoints.length}`)
   console.log(`- success: ${successCount}`)
   console.log(`- failed: ${failureCount}`)
 

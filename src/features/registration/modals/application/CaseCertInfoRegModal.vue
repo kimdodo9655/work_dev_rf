@@ -76,7 +76,7 @@
                   <option :value="undefined">선택하세요</option>
                   <option
                     v-for="option in options.ownerOptions"
-                    :key="option.partyId"
+                    :key="option.progressPartyId"
                     :value="option.progressPartyId"
                   >
                     {{ option.name }}
@@ -213,6 +213,7 @@ import { computed, onMounted, ref } from 'vue'
 
 import { registryCertificateAPI } from '@/api/services/registry'
 import { useApiAlert } from '@/composables/utils/useApiAlert'
+import { useCodeReplacer } from '@/composables/utils/useCodeReplacer'
 import { useDialog } from '@/composables/utils/useDialog'
 import type { ReplaceApplicationPropertyOwnerCertificateRequest } from '@/types'
 import { extractPrimaryPayload } from '@/utils/apiPayload'
@@ -239,8 +240,8 @@ interface CertificateItem {
 }
 
 interface Options {
-  propertyUniqueNumberOptions: Array<{ applicationId?: number; propertyUniqueNumber?: string }>
-  ownerOptions: Array<{ partyId?: number; progressPartyId?: number; name?: string }>
+  propertyUniqueNumberOptions: Array<{ propertyUniqueNumber?: string }>
+  ownerOptions: Array<{ progressPartyId?: number; name?: string }>
   sectionOptions: CertificateItem['section'][]
   certificateTypeOptions: string[]
 }
@@ -251,6 +252,7 @@ const emit = defineEmits<{
 }>()
 const { alert } = useDialog()
 const { extractApiSuccessContent } = useApiAlert()
+const { formatCodeLabel } = useCodeReplacer()
 
 const loading = ref(false)
 const errorMessage = ref('')
@@ -270,13 +272,7 @@ const selectedItem = computed(() => {
 
 // 등기권리증 구분 이름 변환
 function getCertificateTypeName(type: string): string {
-  const typeMap: Record<string, string> = {
-    REGISTRY_CERT_INFO: '등기필정보',
-    REGISTRY_CERTIFICATE: '등기필증',
-    CONFIRMATION_DOCUMENT: '확인문서',
-    PRIOR_REGISTRY_LINK: '이전등기연계'
-  }
-  return typeMap[type] || type
+  return formatCodeLabel(type, 'certificateTypes')
 }
 
 function normalizeSection(value: unknown): CertificateItem['section'] {
@@ -285,11 +281,7 @@ function normalizeSection(value: unknown): CertificateItem['section'] {
 
 // 해당구 한글 변환
 function getSectionName(section: string): string {
-  const sectionMap: Record<string, string> = {
-    GAP: '갑구',
-    EUL: '을구'
-  }
-  return sectionMap[section] || section
+  return formatCodeLabel(section, 'sections')
 }
 
 // 소유자 이름 조회

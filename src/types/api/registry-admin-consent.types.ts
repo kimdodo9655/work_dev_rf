@@ -53,24 +53,12 @@ export type GetDetailedApplicationAdminInfoRequestsResponse =
 export interface AdminInfoRequestItem {
   /** 신청서ID */
   applicationId: number
-  /** 자격자ID */
-  qualifiedId: number
   /** 작성년도 */
   creationYear: string
   /** 작성번호 */
   creationNumber: string
-  /** 행정정보연계시점 */
-  adminInfoLinkTime: 'BEFORE_SUBMISSION' | 'AFTER_SUBMISSION'
   /** 작성ID */
   creationId: string
-  /** 접수일자 */
-  receiptDate: string
-  /** 접수번호 */
-  receiptNumber: string
-  /** 작성원인 */
-  creationCause: string
-  /** 접수등기소 */
-  receiptOffice: string
 }
 
 /** 행정정보사전동의요구서 목록 상세 정보 */

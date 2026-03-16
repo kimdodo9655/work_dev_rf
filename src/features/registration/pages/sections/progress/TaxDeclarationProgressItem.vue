@@ -25,7 +25,7 @@
             <tr v-for="(row, idx) in rows" :key="`tax-${idx}-${row.applicationId ?? idx}`">
               <td>{{ codeLabel(row.registryTypeName, 'registryTypes') }}</td>
               <td>{{ codeLabel(row.registryCause, 'registryCauses') }}</td>
-              <td>{{ row.paymentStatusName ?? '-' }}</td>
+              <td>{{ codeLabel(row.paymentStatusName, 'paymentStatuses') }}</td>
               <td>{{ formatNumber(row.paymentAmount) }}</td>
               <td>{{ row.taxNumber ?? '-' }}</td>
               <td>{{ row.electronicPaymentNumber ?? '-' }}</td>

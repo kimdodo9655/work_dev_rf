@@ -22,7 +22,7 @@
             </tr>
             <tr v-for="(row, idx) in rows" :key="`case-${idx}-${row.propertyUniqueNumber ?? idx}`">
               <td>{{ row.propertyUniqueNumber ?? '-' }}</td>
-              <td>{{ row.propertyType ?? '-' }}</td>
+              <td>{{ codeLabel(row.propertyType, 'propertyTypes') }}</td>
               <td>{{ row.propertyAddress ?? '-' }}</td>
               <td>
                 {{

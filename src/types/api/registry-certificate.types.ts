@@ -39,8 +39,6 @@ export type ReplaceApplicationPropertyOwnerCertificateResponse =
 
 /** 당사자(의무자) 옵션 */
 export interface PartyOption {
-  /** 당사자ID */
-  partyId?: number
   /** 진행 계약 당사자ID */
   progressPartyId?: number
   /** 성명 */
@@ -137,8 +135,6 @@ export interface PropertyOwnerCertificateItemResponse {
 
 /** 부동산고유번호 옵션 */
 export interface PropertyUniqueNumberOption {
-  /** 신청서ID */
-  applicationId?: number
   /** 부동산고유번호 */
   propertyUniqueNumber?: string
 }

@@ -24,7 +24,7 @@
             </tr>
             <tr v-for="(row, idx) in rows" :key="`bond-${idx}-${row.applicationId ?? idx}`">
               <td>{{ codeLabel(row.registryType, 'registryTypes') }}</td>
-              <td>{{ row.purchaseType ?? '-' }}</td>
+              <td>{{ codeLabel(row.purchaseType, 'bondPurchaseTypes') }}</td>
               <td>{{ formatNumber(row.purchaseTargetAmount) }}</td>
               <td>{{ formatNumber(row.bondPurchaseAmount) }}</td>
               <td>{{ row.bondDiscountAmount ?? '-' }}</td>

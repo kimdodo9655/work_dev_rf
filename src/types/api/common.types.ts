@@ -541,7 +541,7 @@ export interface BondPropertyItemResponse {
 /** 채권 부동산 수정 요청 */
 export interface BondPropertyUpdateRequest {
   /** 국민주택채권 매입 구분 */
-  bondPurchaseType: PurchaseType
+  bondPurchaseType?: PurchaseType
   /** 감면 사유 */
   bondExemptionReason?: string
   /** 채권 매입 금액 */

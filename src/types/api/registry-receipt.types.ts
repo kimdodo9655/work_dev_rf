@@ -51,6 +51,8 @@ export type GetDetailedApplicationReceiptsResponse = RegistryApplicationReceiptR
 export interface ApplicationReceiptItem {
   /** 신청서ID */
   applicationId?: number
+  /** 자격자ID */
+  qualifiedId?: number
   /** 등기유형 */
   registryType?:
     | 'OWNERSHIP_TRANSFER'

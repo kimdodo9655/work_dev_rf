@@ -151,11 +151,21 @@ export interface CommonParty {
   share?: string
 }
 
+export interface DebtorInfo {
+  /** 성명 */
+  name?: string
+  /** 주소 */
+  address?: string
+  /** 상세주소 */
+  addressDetail?: string
+}
+
 export interface PartyShareResponse {
   progressPartyId?: number
   name?: string
   registrationNumber?: string
   address?: string
+  addressDetail?: string
   share?: string
   holdingShare?: string
   transferShare?: string
@@ -176,7 +186,7 @@ export interface ContractPartyReplaceResponse {
   /** 등기권리자 목록 */
   obligees?: CommonParty[]
   /** 채무자 목록 */
-  debtors?: CommonParty[]
+  debtors?: DebtorInfo[]
   shareDescription?: string
   obligorsWithShare?: PartyShareResponse[]
   obligeesWithShare?: PartyShareResponse[]

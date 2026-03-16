@@ -67,6 +67,7 @@ export interface ChangeApplicantItem {
   name?: string
   registrationNumber?: string
   contact?: string
+  handlingBranch?: string
   nationality?: string
   representatives?: ChangeApplicantRepresentativeItem[]
   address?: string

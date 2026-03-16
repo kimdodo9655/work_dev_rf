@@ -25,7 +25,7 @@
               v-for="(row, idx) in rows"
               :key="`receipt-doc-${idx}-${row.receiptDocumentId ?? idx}`"
             >
-              <td>{{ row.registryTypeName ?? '-' }}</td>
+              <td>{{ formatCodeLabel(row.registryType, 'registryTypes') }}</td>
               <td>{{ formatNumber(row.feeSubtotal) }}</td>
               <td>{{ formatNumber(row.bondDiscountAmount) }}</td>
               <td>{{ formatNumber(row.costTotal) }}</td>
@@ -39,6 +39,7 @@
 </template>
 
 <script setup lang="ts">
+import { useCodeReplacer } from '@/composables/utils/useCodeReplacer'
 import type { ReceiptSummaryItem } from '@/types'
 
 interface Props {
@@ -49,4 +50,5 @@ interface Props {
 }
 
 defineProps<Props>()
+const { formatCodeLabel } = useCodeReplacer()
 </script>
