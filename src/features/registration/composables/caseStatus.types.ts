@@ -8,6 +8,7 @@ export type SearchOption = {
   value: string | number
 }
 
+// 담당자 select와 배정 API 모두에서 재사용하는 최소 사용자 모델.
 export type AssignableUser = {
   userId: number
   userName: string
@@ -15,6 +16,7 @@ export type AssignableUser = {
   hasMortgageRegistration: boolean
 }
 
+// 목록 테이블이 기대하는 표시용 행 모델.
 export type Row = {
   rowNum: number
   registryRequestNumber: string
@@ -29,6 +31,7 @@ export type Row = {
   progressStatus: string
 }
 
+// 검색 form과 API 요청 변환 로직이 공유하는 원본 필터 상태.
 export type CaseStatusFilters = {
   workType: string
   assignedWork: string

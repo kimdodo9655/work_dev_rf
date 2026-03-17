@@ -21,6 +21,7 @@ function toYMD(date: Date) {
 
 function addMonths(base: Date, months: number) {
   const date = new Date(base)
+  // Date#setMonth가 말일을 넘길 수 있으므로, 기본 범위 계산은 현재 화면 기준의 상대 월 이동만 맡긴다.
   date.setMonth(date.getMonth() + months)
   return date
 }
@@ -31,6 +32,7 @@ export function useCaseStatusFilters() {
   const roleLevelValue = computed(() => roleLevel.value ?? 0)
   const userId = computed(() => authStore.userId)
 
+  // 사용자 권한에 따라 "본인 배정만 가능"인지 "전체 배정 관리 가능"인지 UI가 갈린다.
   const isAssigneeRole = computed(() => roleLevelValue.value === UserRoleLevel.USER)
   const isManagerRole = computed(() => roleLevelValue.value > UserRoleLevel.USER)
 
@@ -64,6 +66,7 @@ export function useCaseStatusFilters() {
       endDate: filters.registryRequestEndDate || null
     }),
     set: (value: { startDate: string | null; endDate: string | null }) => {
+      // DateRangePicker가 null을 돌려줄 수 있어도 검색 기본 범위는 항상 유지한다.
       filters.registryRequestStartDate = value.startDate ?? defaultRequestStart
       filters.registryRequestEndDate = value.endDate ?? defaultRequestEnd
     }
@@ -75,6 +78,7 @@ export function useCaseStatusFilters() {
       endDate: filters.registryReceiptEndDate || null
     }),
     set: (value: { startDate: string | null; endDate: string | null }) => {
+      // 접수일도 동일한 정책으로 복구해 빈 날짜 상태의 API 호출을 막는다.
       filters.registryReceiptStartDate = value.startDate ?? defaultReceiptStart
       filters.registryReceiptEndDate = value.endDate ?? defaultReceiptEnd
     }
@@ -88,6 +92,7 @@ export function useCaseStatusFilters() {
   })
 
   const managerOptions = computed<SearchOption[]>(() => {
+    // 담당자 권한 사용자는 본인 배정 케이스만 보므로 "전체" 옵션을 숨긴다.
     const base = isAssigneeRole.value ? [] : ([{ label: '전체', value: 'ALL' }] as SearchOption[])
     return [
       ...base,
@@ -101,12 +106,15 @@ export function useCaseStatusFilters() {
 
   function displayAddress(value?: string | null): string {
     if (!value) return '-'
-    return value
-      .replace(/&nbsp;/gi, ' ')
-      .replace(/&#160;/gi, ' ')
-      .replace(/&#xA0;/gi, ' ')
-      .replace(/\u00A0/g, ' ')
-      .trim()
+    return (
+      value
+        // API/HTML 렌더링 과정에서 섞인 non-breaking space를 일반 공백으로 정규화한다.
+        .replace(/&nbsp;/gi, ' ')
+        .replace(/&#160;/gi, ' ')
+        .replace(/&#xA0;/gi, ' ')
+        .replace(/\u00A0/g, ' ')
+        .trim()
+    )
   }
 
   return {

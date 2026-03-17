@@ -116,11 +116,12 @@ import { useCodes } from '@/composables/api/useCodes'
 import { useApiAlert } from '@/composables/utils/useApiAlert'
 import { useDialog } from '@/composables/utils/useDialog'
 import type { RegistryApplicationForm } from '@/features/registration/composables/applicationSection.types'
-import type { RegistryApplicationCreateRequest } from '@/types'
+import type { ProgressType, RegistryApplicationCreateRequest } from '@/types'
 
 interface Props {
   registryManagementNumber: string
   existingForms: RegistryApplicationForm[]
+  progressType?: ProgressType
   mode?: 'add' | 'edit'
   applicationId?: number
   initialValues?: {
@@ -188,6 +189,35 @@ const ALLOWED_REGISTRY_TYPES: RegistryTypeValue[] = [
   'SURFACE_RIGHT_CANCELLATION'
 ]
 
+const PROGRESS_TYPE_REGISTRY_TYPES: Record<ProgressType, RegistryTypeValue[]> = {
+  TYPE_01: ['MORTGAGE', 'SURFACE_RIGHT', 'CHANGE', 'CORRECTION'],
+  TYPE_02: [
+    'MORTGAGE',
+    'SURFACE_RIGHT',
+    'CHANGE',
+    'CORRECTION',
+    'MORTGAGE_CANCELLATION',
+    'SURFACE_RIGHT_CANCELLATION'
+  ],
+  TYPE_04: [
+    'OWNERSHIP_TRANSFER',
+    'CHANGE',
+    'CORRECTION',
+    'MORTGAGE_CANCELLATION',
+    'SURFACE_RIGHT_CANCELLATION'
+  ],
+  TYPE_05: ['MORTGAGE', 'SURFACE_RIGHT', 'CHANGE', 'CORRECTION'],
+  TYPE_07: [
+    'OWNERSHIP_TRANSFER',
+    'MORTGAGE',
+    'SURFACE_RIGHT',
+    'CHANGE',
+    'CORRECTION',
+    'MORTGAGE_CANCELLATION',
+    'SURFACE_RIGHT_CANCELLATION'
+  ]
+}
+
 const REGISTRY_CAUSE_MAP: Record<RegistryTypeValue, RegistryCauseValue[]> = {
   OWNERSHIP_TRANSFER: ['TRADE'],
   MORTGAGE: ['ESTABLISHMENT_CONTRACT'],
@@ -205,10 +235,16 @@ const EXTRA_METHOD_REGISTRY_TYPES: RegistryTypeValue[] = [
 ]
 
 const isElectronicMethod = computed(() => form.registryMethod === 'ELECTRONIC')
+const availableRegistryTypes = computed(
+  () => props.progressType && PROGRESS_TYPE_REGISTRY_TYPES[props.progressType]
+)
 
 const registryTypeOptions = computed(() =>
-  getCodeOptions('registryTypes').filter((option) =>
-    ALLOWED_REGISTRY_TYPES.includes(String(option.value) as RegistryTypeValue)
+  getCodeOptions('registryTypes').filter(
+    (option) =>
+      ALLOWED_REGISTRY_TYPES.includes(String(option.value) as RegistryTypeValue) &&
+      (!availableRegistryTypes.value ||
+        availableRegistryTypes.value.includes(String(option.value) as RegistryTypeValue))
   )
 )
 

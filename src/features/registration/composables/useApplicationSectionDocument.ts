@@ -35,6 +35,7 @@ export function useApplicationSectionDocument({
 
     try {
       const res = await registryTypeAPI.documents({ applicationId })
+      // 탭 전환 중 늦게 도착한 이전 응답이 현재 문서를 덮어쓰지 않도록 요청 토큰을 비교한다.
       if (
         requestToken !== currentRequestToken.value ||
         lastRequestedApplicationId.value !== applicationId
@@ -45,6 +46,7 @@ export function useApplicationSectionDocument({
       const data = extractPrimaryPayload<RegistryApplicationDocument>(res)
       document.value = data || null
     } catch (e) {
+      // 실패 역시 현재 활성 신청서에 대한 요청일 때만 화면 상태에 반영한다.
       if (
         requestToken !== currentRequestToken.value ||
         lastRequestedApplicationId.value !== applicationId
@@ -55,6 +57,7 @@ export function useApplicationSectionDocument({
       document.value = null
       documentErrorMessage.value = getErrorMessage(e)
     } finally {
+      // 최신 요청이 끝난 경우에만 로딩을 종료해 탭 연속 전환 시 깜빡임을 줄인다.
       if (requestToken === currentRequestToken.value) {
         documentLoading.value = false
       }

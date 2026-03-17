@@ -31,6 +31,7 @@ export function setupRequestInterceptor(api: AxiosInstance) {
     const isPublic = isPublicApiRequest(config.method, config.url)
     logger.debug('[REQ]', { url: config.url, method: config.method, isPublic })
 
+    // 로그인 전에도 호출 가능한 공개 API는 인증 상태 검증 없이 통과시킨다.
     if (isPublic) {
       return config
     }
@@ -47,11 +48,13 @@ export function setupRequestInterceptor(api: AxiosInstance) {
 
     const accessToken = storage.getAccessToken()
     if (accessToken && config.headers) {
+      // 요청 시점의 최신 access token을 헤더에 주입한다.
       config.headers.Authorization = `Bearer ${accessToken}`
     }
 
     const bankCode = storage.getBankCode()
     if (bankCode && config.headers) {
+      // 금융기관 컨텍스트가 필요한 API는 헤더 기반으로 현재 선택 지점을 구분한다.
       config.headers['X-Bank-Code'] = bankCode
     }
 
@@ -60,6 +63,7 @@ export function setupRequestInterceptor(api: AxiosInstance) {
     const shouldAttemptAutoRefresh =
       remainingSeconds > 0 && remainingSeconds <= AUTO_REFRESH_THRESHOLD_SECONDS
 
+    // 만료 직전에는 요청 실패를 기다리지 않고 백그라운드에서 선제 refresh를 시도한다.
     if (!shouldSkipAutoRefresh(config.url) && bankCode && shouldAttemptAutoRefresh) {
       runRefreshOnce({ ignoreCooldown: false }).catch((err) => {
         logger.warn('[AUTO_REFRESH] Background refresh failed', { error: err })

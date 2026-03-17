@@ -22,6 +22,7 @@ export function useCaseStatusCodes() {
   const codesLoading = ref(false)
   const codesError = ref('')
 
+  // 각 select는 동일한 "전체" 옵션 정책을 먼저 붙이고 서버 코드 목록을 뒤에 이어 붙인다.
   const workTypeOptions = computed<SearchOption[]>(() => [
     { label: '전체', value: 'ALL' },
     ...workTypes.value.map((code) => ({ label: code.description, value: code.code }))
@@ -46,6 +47,7 @@ export function useCaseStatusCodes() {
     codesLoading.value = true
     codesError.value = ''
     try {
+      // 검색 필터의 코드표는 서로 독립적이므로 병렬 조회해 초기 진입 시간을 줄인다.
       const [workTypeRes, assignedWorkRes, registryMethodRes, progressStatusRes] =
         await Promise.all([
           codeAPI.workTypes(),
@@ -54,6 +56,7 @@ export function useCaseStatusCodes() {
           codeAPI.progressStatuses()
         ])
 
+      // 엔드포인트마다 payload 키가 달라도 공통 추출 유틸로 흡수한다.
       workTypes.value = extractArrayByKeys<Code>(workTypeRes, ['codes', 'items', 'content'])
       assignmentWorks.value = extractArrayByKeys<Code>(assignedWorkRes, [
         'codes',
@@ -71,6 +74,7 @@ export function useCaseStatusCodes() {
         'content'
       ])
     } catch (error) {
+      // 코드표 일부만 남으면 필터 조합이 어긋날 수 있어 실패 시 전부 초기화한다.
       codesError.value = getErrorMessage(error)
       workTypes.value = []
       assignmentWorks.value = []

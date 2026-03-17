@@ -69,6 +69,7 @@ function normalizeApiPayload(
     } | null
     if (!target) continue
 
+    // code 치환 결과가 있으면 title/message보다 우선 적용해 서버 문구 편차를 줄인다.
     const byCode = deps.findReplacement(target.code, category)
 
     if (typeof target.title === 'string') {
@@ -177,6 +178,7 @@ export function createResponseInterceptorHandlers(deps: ResponseInterceptorDeps)
       return new Promise((resolve, reject) => {
         failedQueue.push({ resolve, reject })
       }).then((token) => {
+        // 선행 refresh가 끝난 뒤 동일한 토큰으로 원래 요청만 다시 보낸다.
         if (originalRequest.headers) {
           originalRequest.headers.Authorization = `Bearer ${token}`
         }

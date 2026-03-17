@@ -30,6 +30,7 @@ authChannel?.addEventListener('message', (event) => {
   const { type } = message
 
   if (type === 'REFRESH_SUCCESS') {
+    // 다른 탭에서 갱신된 토큰을 즉시 반영해 같은 브라우저 세션 내 중복 refresh를 줄인다.
     lastRefreshTime = Date.now()
     const syncedTokens = extractTokenRefreshPayload(message.tokens)
     if (syncedTokens) {
@@ -54,6 +55,7 @@ export async function runRefreshOnce({
 }: { ignoreCooldown?: boolean } = {}) {
   const now = Date.now()
 
+  // 백그라운드 자동 refresh가 짧은 시간에 연속 발동하는 것을 막는다.
   if (!ignoreCooldown && now - lastRefreshTime < REFRESH_COOLDOWN) {
     logger.debug('[REFRESH] Skipped by cooldown', {
       timeSinceLastRefresh: Math.floor((now - lastRefreshTime) / 1000),
@@ -62,6 +64,7 @@ export async function runRefreshOnce({
     return
   }
 
+  // 이미 진행 중인 refresh가 있으면 같은 Promise를 재사용해 단일 비행(single-flight)을 유지한다.
   if (refreshPromise) return refreshPromise
 
   refreshPromise = (async () => {
@@ -74,6 +77,7 @@ export async function runRefreshOnce({
       const { data } = await axios.post(`${ENV.API_BASE_URL}${API.AUTH.REFRESH}`, { refreshToken })
       const newTokens = extractTokenRefreshPayload(data)
       if (!newTokens) {
+        // 응답 구조가 맞지 않으면 기존 토큰을 덮어쓰지 않고 실패로 처리한다.
         throw new Error('Invalid refresh response')
       }
 

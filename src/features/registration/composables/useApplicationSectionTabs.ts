@@ -58,6 +58,7 @@ export function useApplicationSectionTabs({
         })
         tabs.value = extractArrayByKeys<RegistryApplicationForm>(res, ['items', 'content'])
         if (tabs.value.length > 0) {
+          // 추가 직후에는 마지막 탭으로, 일반 재조회에서는 기존 선택을 가능한 범위에서 유지한다.
           if (options?.selectLast) {
             activeTabIndex.value = tabs.value.length - 1
           } else if (activeTabIndex.value >= tabs.value.length) {
@@ -96,6 +97,7 @@ export function useApplicationSectionTabs({
 
   function showSuccessToast(message: string) {
     successToastMessage.value = message
+    // 새 토스트가 뜨면 이전 타이머를 지워 연속 저장 시 메시지가 즉시 사라지지 않게 한다.
     if (toastTimer) clearTimeout(toastTimer)
     toastTimer = setTimeout(() => {
       successToastMessage.value = ''
@@ -126,6 +128,7 @@ export function useApplicationSectionTabs({
       return
     }
 
+    // 앞쪽 탭이 삭제되면 실제로 같은 탭을 보고 있더라도 index는 한 칸 당겨져야 한다.
     if (activeTabIndex.value > removedIndex) {
       activeTabIndex.value -= 1
     }
@@ -181,6 +184,7 @@ export function useApplicationSectionTabs({
     () => registryManagementNumber.value,
     (newVal) => {
       if (newVal) {
+        // 사건 번호가 바뀌면 완전히 다른 신청서 집합이므로 탭 목록을 즉시 다시 읽어온다.
         fetchTabs()
       }
     },
@@ -203,6 +207,7 @@ export function useApplicationSectionTabs({
     () => isOpen.value,
     (opened) => {
       if (opened && registryManagementNumber.value) {
+        // 아코디언 재오픈 시 서버 상태가 바뀌었을 수 있어 탭 목록을 다시 동기화한다.
         fetchTabs()
       }
     }

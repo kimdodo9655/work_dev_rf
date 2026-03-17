@@ -30,6 +30,7 @@ export function getApiPayloadCandidates(input: unknown): unknown[] {
     const record = toRecord(current)
     if (!record) continue
 
+    // API 응답이 data/result로 여러 번 감싸지는 경우를 평탄화해서 순회한다.
     for (const key of NESTED_PAYLOAD_KEYS) {
       if (key in record) {
         queue.push(record[key])
@@ -44,6 +45,7 @@ export function findApiPayload<T>(
   input: unknown,
   predicate: (candidate: unknown) => candidate is T
 ): T | undefined {
+  // 가장 바깥쪽에서 먼저 찾기 때문에 "실제 payload"와 "래퍼 객체"가 모두 조건을 만족할 때 우선순위가 안정적이다.
   return getApiPayloadCandidates(input).find(predicate)
 }
 
@@ -88,6 +90,7 @@ export function extractRecordByKeys<T extends object>(
   return findApiPayload(input, (candidate): candidate is T => {
     const record = toRecord(candidate)
     if (!record) return false
+    // 키 존재 여부만 검사해 OpenAPI 응답 래핑 차이와 일부 선택 필드를 함께 허용한다.
     return requiredKeys.every((key) => key in record)
   })
 }

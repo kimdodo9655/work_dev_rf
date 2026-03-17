@@ -30,6 +30,7 @@ export function useCaseStatusAssignableUsers({
   const assignableError = ref('')
 
   function isUnassigned(name: string) {
+    // 목록 응답과 셀 표시값에서 "미배정"을 동일한 빈 선택 상태로 취급한다.
     return name === '미배정' || !name
   }
 
@@ -45,6 +46,7 @@ export function useCaseStatusAssignableUsers({
     if (!firstUser) return
 
     const firstId = String(firstUser.userId)
+    // 담당자 권한 사용자는 사실상 자기 자신만 선택 가능하므로 기본값을 첫 사용자로 고정한다.
     if (
       !filters.managerUserId ||
       filters.managerUserId === 'ALL' ||
@@ -55,6 +57,7 @@ export function useCaseStatusAssignableUsers({
   }
 
   function normalizeAssignableUser(user: UserAssignableResponse): AssignableUser | null {
+    // 화면에서 바로 쓸 수 있는 최소 필드만 남기고 불완전한 응답 항목은 버린다.
     if (typeof user.userId !== 'number' || !user.userName) return null
 
     return {
@@ -71,6 +74,7 @@ export function useCaseStatusAssignableUsers({
     try {
       const query: GetAssignableUsersQuery = {}
       const assignedWork = toAssignedWorkDescription(filters.assignedWork)
+      // 담당업무 필터는 화면 코드값이 아니라 백엔드 설명값 기준으로 조회한다.
       if (assignedWork && assignedWork !== 'ALL') {
         query.assignedWork = assignedWork
       }
@@ -95,6 +99,7 @@ export function useCaseStatusAssignableUsers({
   watch(
     () => filters.assignedWork,
     async () => {
+      // 담당업무가 바뀌면 담당자 선택값도 다시 정렬해야 하므로 기본값부터 초기화한다.
       filters.managerUserId = isAssigneeRole.value ? '' : 'ALL'
       await loadAssignableUsers()
     }
@@ -104,6 +109,7 @@ export function useCaseStatusAssignableUsers({
     () => roleLevelValue.value,
     async (level) => {
       if (level === UserRoleLevel.USER) {
+        // 권한이 일반 담당자로 내려오면 "내 업무만" 보는 기본 조건을 즉시 맞춘다.
         if (!assignableUsers.value.length) {
           await loadAssignableUsers()
         } else {

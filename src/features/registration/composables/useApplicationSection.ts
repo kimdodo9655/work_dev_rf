@@ -3,13 +3,16 @@
  * 문서 제목: 기능 모듈: use-application-section
  */
 
-import { computed, type Ref, ref } from 'vue'
+import { computed, type Ref, ref, watch } from 'vue'
 
+import { registryProgressAPI } from '@/api/services/registry'
 import { useCodeReplacer } from '@/composables/utils/useCodeReplacer'
 import { useErrorHandler } from '@/composables/utils/useErrorHandler'
 import { useApplicationSectionDocument } from '@/features/registration/composables/useApplicationSectionDocument'
 import { useApplicationSectionModal } from '@/features/registration/composables/useApplicationSectionModal'
 import { useApplicationSectionTabs } from '@/features/registration/composables/useApplicationSectionTabs'
+import type { ProgressType } from '@/types'
+import { extractPrimaryPayload } from '@/utils/apiPayload'
 
 export function useApplicationSection({
   registryManagementNumber,
@@ -20,6 +23,7 @@ export function useApplicationSection({
 }) {
   const { formatCodeLabel, formatTextLabel } = useCodeReplacer()
   const { getErrorMessage } = useErrorHandler()
+  const progressType = ref<ProgressType | undefined>()
 
   const {
     document,
@@ -57,6 +61,23 @@ export function useApplicationSection({
   })
 
   const showEditModal = ref(false)
+
+  async function fetchBasicInfo() {
+    if (!registryManagementNumber.value) {
+      progressType.value = undefined
+      return
+    }
+
+    try {
+      const res = await registryProgressAPI.basicInfo({
+        registryManagementNumber: registryManagementNumber.value
+      })
+      const data = extractPrimaryPayload<{ progressType?: ProgressType }>(res)
+      progressType.value = data?.progressType
+    } catch {
+      progressType.value = undefined
+    }
+  }
 
   const {
     activeSectionCode,
@@ -107,6 +128,28 @@ export function useApplicationSection({
     await fetchDocument(activeApplicationId.value)
   }
 
+  watch(
+    () => registryManagementNumber.value,
+    (newValue) => {
+      if (!newValue) {
+        progressType.value = undefined
+        return
+      }
+
+      void fetchBasicInfo()
+    },
+    { immediate: true }
+  )
+
+  watch(
+    () => isOpen.value,
+    (opened) => {
+      if (opened && registryManagementNumber.value) {
+        void fetchBasicInfo()
+      }
+    }
+  )
+
   return {
     activeTabIndex,
     canDeleteTab,
@@ -134,6 +177,7 @@ export function useApplicationSection({
     handleEditRegistryMethod,
     handleSectionClick,
     isDeletingTab,
+    progressType,
     selectTab,
     showAddModal,
     showCertModal,

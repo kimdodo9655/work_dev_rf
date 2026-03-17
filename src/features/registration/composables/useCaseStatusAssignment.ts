@@ -50,6 +50,7 @@ export function useCaseStatusAssignment({
     for (const row of rows.value) {
       const currentSelected = findUserIdByName(row.managerUserName)
       const existing = next.get(row.registryManagementNumber)
+      // 이미 사용자가 select를 바꿔둔 행은 유지하고, 새로 들어온 목록만 서버 기준값으로 채운다.
       if (!existing) next.set(row.registryManagementNumber, currentSelected)
       else next.set(row.registryManagementNumber, existing)
     }
@@ -61,6 +62,7 @@ export function useCaseStatusAssignment({
     registryManagementNumber: string,
     managerUserIdToAssign: number | string
   ) {
+    // 같은 행에서 중복 클릭이 들어와도 배정 API는 한 번만 호출한다.
     if (assigningSet.value.has(registryManagementNumber)) return
     addAssigning(registryManagementNumber)
 
@@ -122,6 +124,7 @@ export function useCaseStatusAssignment({
       const row = rows.value.find(
         (item) => item.registryManagementNumber === registryManagementNumber
       )
+      // 확인창에서 취소하면 목록 원본 값으로 되돌려 select UI와 실제 서버 상태를 다시 맞춘다.
       const rollback = row ? findUserIdByName(row.managerUserName) : ''
       const next = new Map(rowSelectedManager.value)
       next.set(registryManagementNumber, rollback)
@@ -144,6 +147,7 @@ export function useCaseStatusAssignment({
   watch(
     rows,
     () => {
+      // 목록 재조회 이후에도 각 행의 select 기본값이 끊기지 않도록 동기화한다.
       hydrateRowSelectedManager()
     },
     { immediate: true }

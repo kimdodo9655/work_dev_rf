@@ -10,6 +10,7 @@ import { useCaseStatusFilters } from './useCaseStatusFilters'
 import { useCaseStatusListData } from './useCaseStatusListData'
 
 export function useCaseStatusList() {
+  // 필터, 목록 조회, 담당자 배정을 분리해 두고 여기서 화면 단위로 조합한다.
   const filtersModel = useCaseStatusFilters()
 
   const listModel = useCaseStatusListData({
@@ -26,6 +27,7 @@ export function useCaseStatusList() {
   })
 
   onMounted(async () => {
+    // 코드성 데이터와 담당자 후보를 먼저 맞춘 뒤 첫 목록 조회를 실행해야 select/필터가 일관된다.
     await filtersModel.loadCodes()
     await filtersModel.loadAssignableUsers()
     await listModel.fetchList(true)

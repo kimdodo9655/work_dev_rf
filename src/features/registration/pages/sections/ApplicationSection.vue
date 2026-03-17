@@ -123,6 +123,7 @@
     v-if="showAddModal"
     :registry-management-number="registryManagementNumber"
     :existing-forms="tabs"
+    :progress-type="progressType"
     @close="closeAddModal"
     @saved="handleAddSaved"
   />
@@ -133,6 +134,7 @@
     :application-id="activeApplicationId"
     :registry-management-number="registryManagementNumber"
     :existing-forms="tabs"
+    :progress-type="progressType"
     :initial-values="{
       registryType: document.registryType,
       registryCause: document.registryCause,
@@ -186,6 +188,7 @@ const {
   handleEditRegistryMethod,
   handleSectionClick,
   isDeletingTab,
+  progressType,
   selectTab,
   showAddModal,
   showCertModal,
