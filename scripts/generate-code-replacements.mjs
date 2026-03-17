@@ -224,6 +224,10 @@ function toReplacementEntry(category, item) {
   return [code, value]
 }
 
+function compareEntriesByCode(a, b) {
+  return a[0].localeCompare(b[0])
+}
+
 function describeError(error) {
   if (!error) return 'Unknown error'
   if (typeof error === 'string') return error
@@ -294,7 +298,7 @@ async function main() {
   if (accessToken) headers.Authorization = `Bearer ${accessToken}`
   if (bankCode) headers['X-Bank-Code'] = bankCode
 
-  const replacementMap = {}
+  const replacementEntriesByCategory = new Map()
   const failures = []
 
   const settled = await Promise.allSettled(
@@ -306,8 +310,9 @@ async function main() {
       const entries = list
         .map((item) => toReplacementEntry(category, item))
         .filter((entry) => Array.isArray(entry) && entry[0])
+        .sort(compareEntriesByCode)
 
-      replacementMap[category] = Object.fromEntries(entries)
+      replacementEntriesByCategory.set(category, entries)
       return { category, count: entries.length }
     })
   )
@@ -315,10 +320,17 @@ async function main() {
   settled.forEach((result, index) => {
     const [category, endpoint] = codeEndpoints[index]
     if (result.status === 'rejected') {
-      replacementMap[category] = {}
+      replacementEntriesByCategory.set(category, [])
       failures.push({ category, endpoint, reason: describeError(result.reason) })
     }
   })
+
+  const replacementMap = Object.fromEntries(
+    codeEndpoints.map(([category]) => [
+      category,
+      Object.fromEntries(replacementEntriesByCategory.get(category) || [])
+    ])
+  )
 
   fs.mkdirSync(path.dirname(outputPath), { recursive: true })
   fs.writeFileSync(outputPath, `${JSON.stringify(replacementMap, null, 2)}\n`, 'utf-8')
