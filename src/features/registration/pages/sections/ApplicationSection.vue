@@ -161,6 +161,7 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+// 화면 로직은 composable에 위임하고, 이 컴포넌트는 표시와 모달 연결만 담당한다.
 const {
   activeTabIndex,
   activeSectionCode,

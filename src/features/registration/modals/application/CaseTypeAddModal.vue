@@ -179,6 +179,7 @@ const form = reactive({
   adminInfoLinkTime: ''
 })
 
+// 기획에서 허용한 등기유형만 모달 선택지로 노출한다.
 const ALLOWED_REGISTRY_TYPES: RegistryTypeValue[] = [
   'OWNERSHIP_TRANSFER',
   'MORTGAGE',
@@ -243,6 +244,7 @@ const registryTypeOptions = computed(() =>
   getCodeOptions('registryTypes').filter(
     (option) =>
       ALLOWED_REGISTRY_TYPES.includes(String(option.value) as RegistryTypeValue) &&
+      // 진행유형별 허용 범위를 함께 적용해 사건과 무관한 등기유형은 처음부터 숨긴다.
       (!availableRegistryTypes.value ||
         availableRegistryTypes.value.includes(String(option.value) as RegistryTypeValue))
   )
@@ -268,10 +270,12 @@ const registryMethodOptions = computed(() => {
   let filtered = allOptions.filter((option) => {
     const value = String(option.value)
     if (DEFAULT_REGISTRY_METHODS.includes(value as RegistryMethodValue)) return true
+    // 말소 계열은 추가 방식 코드가 열릴 수 있어 기본 방식 외 옵션을 허용한다.
     return isExtraMethodType
   })
 
   if (form.registryCause === 'NAME_CHANGE' || form.registryCause === 'REGISTRATION_NUMBER') {
+    // 성명/등록번호 변경은 전자등기 미지원이라 ELECTRONIC을 숨긴다.
     filtered = filtered.filter((option) => String(option.value) !== 'ELECTRONIC')
   }
 
@@ -297,6 +301,7 @@ function emitClose() {
 function applyInitialValues() {
   if (!props.initialValues) return
 
+  // 수정 모달에서는 서버 값을 한 번에 주입하되, watch 연쇄 반응은 hydration 구간에서 막는다.
   isHydrating.value = true
   form.registryType = props.initialValues.registryType ?? ''
   form.registryCause = props.initialValues.registryCause ?? ''
@@ -317,12 +322,14 @@ function resetRegistryMethodIfInvalid() {
     return
   }
 
+  // 상위 조건(유형/원인) 변경으로 더 이상 허용되지 않는 값은 즉시 비운다.
   form.registryMethod = ''
 }
 
 function handleRegistryMethodChange() {
   registryMethodTouched.value = true
   if (!isElectronicMethod.value) {
+    // 전자등기가 아니면 행정정보 연계시점은 의미가 없으므로 함께 초기화한다.
     form.adminInfoLinkTime = ''
   }
 }
@@ -366,6 +373,7 @@ watch(
 
     const allowedCauses = registryCauseOptions.value.map((option) => String(option.value))
     if (allowedCauses.length === 1) {
+      // 등기유형에 원인이 하나뿐이면 사용자가 다시 고르지 않도록 자동 선택한다.
       form.registryCause = allowedCauses[0] ?? ''
     } else if (!allowedCauses.includes(form.registryCause)) {
       form.registryCause = ''
@@ -381,6 +389,7 @@ watch(
   () => {
     if (isHydrating.value) return
 
+    // 원인이 바뀌면 가능한 등기방식도 달라질 수 있어 touched 상태와 연계시점을 모두 초기화한다.
     registryMethodTouched.value = false
     resetRegistryMethodIfInvalid()
     form.adminInfoLinkTime = ''
@@ -402,6 +411,7 @@ async function loadCodes() {
   codeLoadError.value = ''
 
   try {
+    // 모달 내 네 개의 select는 모두 코드표 의존성이 있어 진입 시 병렬로 미리 불러온다.
     await Promise.all([
       fetchCodesByCategory('registryTypes'),
       fetchCodesByCategory('registryCauses'),
@@ -450,6 +460,7 @@ async function confirmDuplicateRegistryTypeIfNeeded() {
 async function handleSave() {
   if (!(await validateRequiredFields())) return
   if (!isEditMode.value) {
+    // 추가 모드에서만 동일 등기유형 존재 여부를 사전 확인한다.
     await confirmDuplicateRegistryTypeIfNeeded()
   }
 
@@ -469,6 +480,7 @@ async function handleSave() {
         return
       }
 
+      // 수정 모드는 등기유형/원인은 고정하고 등기방식과 연계시점만 갱신한다.
       await registryTypeAPI.update(
         { applicationId: props.applicationId },
         {
@@ -477,6 +489,7 @@ async function handleSave() {
         }
       )
     } else {
+      // 추가 모드는 새 신청서 생성에 필요한 전체 조합을 전송한다.
       const payload = {
         registryManagementNumber: props.registryManagementNumber,
         registryType: form.registryType as RegistryTypeValue,

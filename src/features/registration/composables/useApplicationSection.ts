@@ -21,6 +21,7 @@ export function useApplicationSection({
   registryManagementNumber: Ref<string>
   isOpen: Ref<boolean>
 }) {
+  // 신청서 섹션에서 필요한 탭/문서/모달 상태를 한곳에 묶는 화면 단위 orchestrator다.
   const { formatCodeLabel, formatTextLabel } = useCodeReplacer()
   const { getErrorMessage } = useErrorHandler()
   const progressType = ref<ProgressType | undefined>()
@@ -72,6 +73,7 @@ export function useApplicationSection({
       const res = await registryProgressAPI.basicInfo({
         registryManagementNumber: registryManagementNumber.value
       })
+      // 추가 가능한 등기유형은 사건 진행유형(progressType)에 따라 달라져 먼저 읽어 둔다.
       const data = extractPrimaryPayload<{ progressType?: ProgressType }>(res)
       progressType.value = data?.progressType
     } catch {
@@ -114,6 +116,7 @@ export function useApplicationSection({
   }
 
   function handleEditRegistryMethod() {
+    // 수정 모드는 기존 신청서의 등기방식/연계시점만 바꾸므로 문서가 로드된 상태에서만 연다.
     if (!activeApplicationId.value || !document.value) return
     showEditModal.value = true
   }
@@ -125,6 +128,7 @@ export function useApplicationSection({
     }
 
     showEditModal.value = false
+    // 수정 저장 후에는 현재 활성 신청서 문서를 다시 읽어 표와 미리보기를 함께 동기화한다.
     await fetchDocument(activeApplicationId.value)
   }
 
@@ -136,6 +140,7 @@ export function useApplicationSection({
         return
       }
 
+      // 사건 번호가 바뀌면 신청서 추가 가능 조건도 달라지므로 기본 정보를 재조회한다.
       void fetchBasicInfo()
     },
     { immediate: true }
@@ -145,6 +150,7 @@ export function useApplicationSection({
     () => isOpen.value,
     (opened) => {
       if (opened && registryManagementNumber.value) {
+        // 섹션이 다시 열릴 때 백엔드 진행유형이 바뀌었을 수 있어 최신값으로 맞춘다.
         void fetchBasicInfo()
       }
     }
