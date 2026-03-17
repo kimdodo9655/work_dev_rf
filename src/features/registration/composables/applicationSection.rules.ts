@@ -161,8 +161,14 @@ export function shouldRequireAdminInfoLinkTime(registryMethod?: string): boolean
   return registryMethod === 'ELECTRONIC'
 }
 
+const FIXED_AFTER_SUBMISSION_REGISTRY_TYPES: RegistryTypeValue[] = [
+  'OWNERSHIP_TRANSFER',
+  'CHANGE',
+  'CORRECTION'
+]
+
 /**
- * Type 04 / Type 07의 소유권이전 등기는 행정정보 연계시점을 신청서 작성 이후로 고정한다.
+ * Type 04 / Type 07의 일부 등기는 행정정보 연계시점을 신청서 작성 이후로 고정한다.
  */
 export function getFixedAdminInfoLinkTime(options: {
   progressType?: ProgressType
@@ -172,8 +178,9 @@ export function getFixedAdminInfoLinkTime(options: {
   const { progressType, registryType, registryMethod } = options
 
   if (!shouldRequireAdminInfoLinkTime(registryMethod)) return null
-  if (registryType !== 'OWNERSHIP_TRANSFER') return null
   if (progressType !== 'TYPE_04' && progressType !== 'TYPE_07') return null
+  if (!FIXED_AFTER_SUBMISSION_REGISTRY_TYPES.includes(registryType as RegistryTypeValue))
+    return null
 
   return 'AFTER_SUBMISSION'
 }
