@@ -45,7 +45,8 @@ export type RegistryCauseValue =
   | 'TERMINATION'
 
 /** 신청서 모달에서 사용하는 등기방식 코드 집합. */
-export type RegistryMethodValue = 'ELECTRONIC' | 'E_FORM' | 'PAPER'
+export type RegistryMethodValue = 'ELECTRONIC' | 'E_FORM' | 'PAPER' | 'BANK_REQUEST'
+export type AdminInfoLinkTimeValue = 'BEFORE_SUBMISSION' | 'AFTER_SUBMISSION'
 
 /**
  * 진행유형 필터를 적용하기 전, 화면에서 허용하는 전체 등기유형 목록.
@@ -141,9 +142,9 @@ export function getAllowedRegistryMethods(options: {
   const allowsExtraMethod = EXTRA_METHOD_REGISTRY_TYPES.includes(registryType as RegistryTypeValue)
   let methods = [...DEFAULT_REGISTRY_METHODS]
 
-  // 현재 타입 체계에는 추가 방식 코드가 없지만, 향후 코드표가 늘어나도 허용 여부 판단은 여기서만 하게 만든다.
+  // 말소 계열은 상환 은행 의뢰 방식을 추가로 허용한다.
   if (allowsExtraMethod) {
-    methods = [...methods]
+    methods = [...methods, 'BANK_REQUEST']
   }
 
   // 성명/등록번호 변경은 전자등기 불가.
@@ -158,6 +159,23 @@ export function getAllowedRegistryMethods(options: {
 export function shouldRequireAdminInfoLinkTime(registryMethod?: string): boolean {
   // 행정정보 연계시점은 전자등기에서만 의미가 있다.
   return registryMethod === 'ELECTRONIC'
+}
+
+/**
+ * Type 04 / Type 07의 소유권이전 등기는 행정정보 연계시점을 신청서 작성 이후로 고정한다.
+ */
+export function getFixedAdminInfoLinkTime(options: {
+  progressType?: ProgressType
+  registryType?: string
+  registryMethod?: string
+}): AdminInfoLinkTimeValue | null {
+  const { progressType, registryType, registryMethod } = options
+
+  if (!shouldRequireAdminInfoLinkTime(registryMethod)) return null
+  if (registryType !== 'OWNERSHIP_TRANSFER') return null
+  if (progressType !== 'TYPE_04' && progressType !== 'TYPE_07') return null
+
+  return 'AFTER_SUBMISSION'
 }
 
 /** 메인 신청서(MAIN)를 제외한 탭만 삭제 가능하다. */

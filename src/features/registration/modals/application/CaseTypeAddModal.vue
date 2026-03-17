@@ -75,7 +75,7 @@
               <select
                 v-model="form.adminInfoLinkTime"
                 class="form-select"
-                :disabled="!isElectronicMethod || isSaving"
+                :disabled="isAdminInfoLinkTimeDisabled"
               >
                 <option value="">선택하세요</option>
                 <option
@@ -116,9 +116,11 @@ import { useCodes } from '@/composables/api/useCodes'
 import { useApiAlert } from '@/composables/utils/useApiAlert'
 import { useDialog } from '@/composables/utils/useDialog'
 import {
+  type AdminInfoLinkTimeValue,
   getAllowedRegistryCauses,
   getAllowedRegistryMethods,
   getAllowedRegistryTypes,
+  getFixedAdminInfoLinkTime,
   type RegistryCauseValue,
   type RegistryMethodValue,
   type RegistryTypeValue,
@@ -146,8 +148,6 @@ interface Emits {
   (e: 'saved', payload: { registryType: string }): void
 }
 
-type AdminInfoLinkTimeValue = 'BEFORE_SUBMISSION' | 'AFTER_SUBMISSION'
-
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
@@ -169,6 +169,16 @@ const form = reactive({
 })
 
 const isElectronicMethod = computed(() => shouldRequireAdminInfoLinkTime(form.registryMethod))
+const fixedAdminInfoLinkTime = computed(() =>
+  getFixedAdminInfoLinkTime({
+    progressType: props.progressType,
+    registryType: form.registryType,
+    registryMethod: form.registryMethod
+  })
+)
+const isAdminInfoLinkTimeDisabled = computed(
+  () => !isElectronicMethod.value || !!fixedAdminInfoLinkTime.value || isSaving.value
+)
 const availableRegistryTypes = computed(() => getAllowedRegistryTypes(props.progressType))
 
 const registryTypeOptions = computed(() =>
@@ -246,6 +256,17 @@ function resetRegistryMethodIfInvalid() {
 
 function handleRegistryMethodChange() {
   registryMethodTouched.value = true
+  syncAdminInfoLinkTime()
+}
+
+function syncAdminInfoLinkTime() {
+  const fixedValue = fixedAdminInfoLinkTime.value
+
+  if (fixedValue) {
+    form.adminInfoLinkTime = fixedValue
+    return
+  }
+
   if (!isElectronicMethod.value) {
     // 전자등기가 아니면 행정정보 연계시점은 의미가 없으므로 함께 초기화한다.
     form.adminInfoLinkTime = ''
@@ -269,6 +290,7 @@ watch(
     form.registryCause = registryCause == null ? '' : String(registryCause)
     form.registryMethod = registryMethod == null ? '' : String(registryMethod)
     form.adminInfoLinkTime = adminInfoLinkTime == null ? '' : String(adminInfoLinkTime)
+    syncAdminInfoLinkTime()
     registryMethodTouched.value = !!registryMethod
     isHydrating.value = false
   },
@@ -298,7 +320,7 @@ watch(
     }
     registryMethodTouched.value = false
     form.registryMethod = ''
-    form.adminInfoLinkTime = ''
+    syncAdminInfoLinkTime()
   }
 )
 
@@ -310,7 +332,7 @@ watch(
     // 원인이 바뀌면 가능한 등기방식도 달라질 수 있어 touched 상태와 연계시점을 모두 초기화한다.
     registryMethodTouched.value = false
     resetRegistryMethodIfInvalid()
-    form.adminInfoLinkTime = ''
+    syncAdminInfoLinkTime()
   }
 )
 
@@ -318,10 +340,7 @@ watch(
   () => form.registryMethod,
   () => {
     if (isHydrating.value) return
-
-    if (!isElectronicMethod.value) {
-      form.adminInfoLinkTime = ''
-    }
+    syncAdminInfoLinkTime()
   }
 )
 

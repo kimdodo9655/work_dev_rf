@@ -104,7 +104,7 @@ export type RegistryApplicationRole = 'MAIN' | 'LINKED'
 export type ActionType = 'ADD' | 'MODIFY' | 'DELETE'
 
 /** 등기 방법 */
-export type RegistryMethod = 'ELECTRONIC' | 'E_FORM' | 'PAPER'
+export type RegistryMethod = 'ELECTRONIC' | 'E_FORM' | 'PAPER' | 'BANK_REQUEST'
 
 // ============================================================================
 // 공통 엔티티
