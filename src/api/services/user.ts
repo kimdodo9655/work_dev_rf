@@ -9,6 +9,7 @@
 
 import { apiHelpers } from '@/api/client'
 import { API } from '@/api/endpoints'
+import type { AssignableUser } from '@/features/registration/composables/caseStatus.types'
 import type {
   ApproveUserParams,
   ApproveUserResponse,
@@ -34,6 +35,20 @@ import type {
   VerifyEmailResponse
 } from '@/types'
 import type { GetAssignedBanks_1Response } from '@/types/api'
+import type { UserAssignableResponse } from '@/types/api/user.types'
+import { extractArrayByKeys } from '@/utils/apiPayload'
+
+function normalizeAssignableUser(user: UserAssignableResponse): AssignableUser | null {
+  // 등록 목록 화면이 쓰는 최소 필드로 정규화해 composable 중복 변환을 줄인다.
+  if (typeof user.userId !== 'number' || !user.userName) return null
+
+  return {
+    userId: user.userId,
+    userName: user.userName,
+    hasOwnershipTransfer: Boolean(user.hasOwnershipTransfer),
+    hasMortgageRegistration: Boolean(user.hasMortgageRegistration)
+  }
+}
 
 export const userAPI = {
   async getProfile() {
@@ -90,6 +105,14 @@ export const userAPI = {
     // [P03-08][GET - /api/users/assignable] 업무배정 가능 담당자 목록 조회
     // --------------------------------------------------
     return apiHelpers.get<GetAssignableUsersResponse>(API.USER.ASSIGNABLE, query)
+  },
+
+  async getAssignableUsers(query: GetAssignableUsersQuery): Promise<AssignableUser[]> {
+    // users API 응답 래핑(content/items)과 불완전 DTO 제거를 service에서 처리한다.
+    const response = await this.assignable(query)
+    return extractArrayByKeys<UserAssignableResponse>(response, ['content', 'items'])
+      .map((user) => normalizeAssignableUser(user))
+      .filter((user): user is AssignableUser => user !== null)
   },
 
   async assignedBanks() {

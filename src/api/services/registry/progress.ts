@@ -32,6 +32,12 @@ import type {
   SearchRegistryProgresssListQuery,
   SearchRegistryProgresssListResponse
 } from '@/types'
+import { extractRecordByKeys } from '@/utils/apiPayload'
+
+type RegistryProgressListPage<T> = {
+  content: T[]
+  totalElements: number
+}
 
 export const registryProgressAPI = {
   async getList(query: SearchRegistryProgresssListQuery) {
@@ -39,6 +45,20 @@ export const registryProgressAPI = {
     // [R02B-01][GET - /api/registry/progress] 진행현황 목록 조회
     // --------------------------------------------------
     return apiHelpers.get<SearchRegistryProgresssListResponse>(API.REGISTRY_PROGRESS.LIST, query)
+  },
+
+  async getListPage<T extends object = Record<string, unknown>>(
+    query: SearchRegistryProgresssListQuery
+  ): Promise<RegistryProgressListPage<T>> {
+    // 진행현황 목록은 화면에서 가장 자주 쓰는 content/totalElements만 서비스에서 먼저 정규화한다.
+    const response = await this.getList(query)
+    const payload =
+      extractRecordByKeys<{ content?: T[]; totalElements?: number }>(response, ['content']) ?? {}
+
+    return {
+      content: Array.isArray(payload.content) ? payload.content : [],
+      totalElements: Number(payload.totalElements ?? 0)
+    }
   },
 
   async basicInfo(params: GetRegistryProgressBasicInfoParams) {

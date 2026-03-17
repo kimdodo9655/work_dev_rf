@@ -9,8 +9,8 @@ import { registryTypeAPI } from '@/api/services/registry'
 import { useApiAlert } from '@/composables/utils/useApiAlert'
 import { useDialog } from '@/composables/utils/useDialog'
 import { useThrottle } from '@/composables/utils/useThrottle'
+import { canDeleteApplicationTab } from '@/features/registration/composables/applicationSection.rules'
 import type { RegistryApplicationForm } from '@/features/registration/composables/applicationSection.types'
-import { extractArrayByKeys } from '@/utils/apiPayload'
 
 export function useApplicationSectionTabs({
   registryManagementNumber,
@@ -53,10 +53,11 @@ export function useApplicationSectionTabs({
       tabsLoading.value = true
       tabsErrorMessage.value = ''
       try {
-        const res = await registryTypeAPI.getList({
+        const res = await registryTypeAPI.getTabs({
           registryManagementNumber: registryManagementNumber.value
         })
-        tabs.value = extractArrayByKeys<RegistryApplicationForm>(res, ['items', 'content'])
+        // service가 이미 payload 정규화를 끝낸 목록만 돌려주므로 화면은 tabs 배열만 신경 쓴다.
+        tabs.value = res
         if (tabs.value.length > 0) {
           // 추가 직후에는 마지막 탭으로, 일반 재조회에서는 기존 선택을 가능한 범위에서 유지한다.
           if (options?.selectLast) {
@@ -106,8 +107,8 @@ export function useApplicationSectionTabs({
   }
 
   function canDeleteTab(tab: RegistryApplicationForm) {
-    // 규칙: MAIN 신청서는 삭제 제외
-    return tab.registryRole !== 'MAIN'
+    // 삭제 정책은 별도 규칙 함수에 두어 화면과 모달이 같은 기준을 공유하게 한다.
+    return canDeleteApplicationTab(tab.registryRole)
   }
 
   function isDeletingTab(tab: RegistryApplicationForm) {

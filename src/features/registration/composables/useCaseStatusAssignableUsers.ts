@@ -8,9 +8,7 @@ import { type ComputedRef, ref, watch } from 'vue'
 import { userAPI } from '@/api/services/user'
 import { useErrorHandler } from '@/composables/utils/useErrorHandler'
 import type { GetAssignableUsersQuery } from '@/types'
-import type { UserAssignableResponse } from '@/types/api/user.types'
 import { UserRoleLevel } from '@/types/store'
-import { extractArrayByKeys } from '@/utils/apiPayload'
 import { toAssignedWorkDescription } from '@/utils/assignable-user'
 
 import { type AssignableUser, type CaseStatusFilters } from './caseStatus.types'
@@ -56,18 +54,6 @@ export function useCaseStatusAssignableUsers({
     }
   }
 
-  function normalizeAssignableUser(user: UserAssignableResponse): AssignableUser | null {
-    // 화면에서 바로 쓸 수 있는 최소 필드만 남기고 불완전한 응답 항목은 버린다.
-    if (typeof user.userId !== 'number' || !user.userName) return null
-
-    return {
-      userId: user.userId,
-      userName: user.userName,
-      hasOwnershipTransfer: Boolean(user.hasOwnershipTransfer),
-      hasMortgageRegistration: Boolean(user.hasMortgageRegistration)
-    }
-  }
-
   async function loadAssignableUsers() {
     assignableLoading.value = true
     assignableError.value = ''
@@ -79,13 +65,8 @@ export function useCaseStatusAssignableUsers({
         query.assignedWork = assignedWork
       }
 
-      const response = await userAPI.assignable(query)
-      const rawUsers = extractArrayByKeys<UserAssignableResponse>(response, ['content', 'items'])
-
-      const users = rawUsers
-        .map((user) => normalizeAssignableUser(user))
-        .filter((user): user is AssignableUser => user !== null)
-
+      // 서비스에서 바로 화면용 최소 모델을 반환받아 composable은 필터/기본값 처리만 담당한다.
+      const users = await userAPI.getAssignableUsers(query)
       assignableUsers.value = users
       ensureUserDefaultManager(users)
     } catch (error) {

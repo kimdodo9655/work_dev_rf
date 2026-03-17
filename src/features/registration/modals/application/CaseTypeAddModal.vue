@@ -115,6 +115,15 @@ import { registryTypeAPI } from '@/api/services/registry'
 import { useCodes } from '@/composables/api/useCodes'
 import { useApiAlert } from '@/composables/utils/useApiAlert'
 import { useDialog } from '@/composables/utils/useDialog'
+import {
+  getAllowedRegistryCauses,
+  getAllowedRegistryMethods,
+  getAllowedRegistryTypes,
+  type RegistryCauseValue,
+  type RegistryMethodValue,
+  type RegistryTypeValue,
+  shouldRequireAdminInfoLinkTime
+} from '@/features/registration/composables/applicationSection.rules'
 import type { RegistryApplicationForm } from '@/features/registration/composables/applicationSection.types'
 import type { ProgressType, RegistryApplicationCreateRequest } from '@/types'
 
@@ -137,26 +146,6 @@ interface Emits {
   (e: 'saved', payload: { registryType: string }): void
 }
 
-type RegistryTypeValue =
-  | 'OWNERSHIP_TRANSFER'
-  | 'MORTGAGE'
-  | 'SURFACE_RIGHT'
-  | 'CHANGE'
-  | 'CORRECTION'
-  | 'MORTGAGE_CANCELLATION'
-  | 'SURFACE_RIGHT_CANCELLATION'
-
-type RegistryCauseValue =
-  | 'TRADE'
-  | 'ESTABLISHMENT_CONTRACT'
-  | 'ADDRESS_CHANGE'
-  | 'ROAD_NAME_ADDRESS'
-  | 'NAME_CHANGE'
-  | 'REGISTRATION_NUMBER'
-  | 'APPLICATION_ERROR'
-  | 'TERMINATION'
-
-type RegistryMethodValue = 'ELECTRONIC' | 'E_FORM' | 'PAPER'
 type AdminInfoLinkTimeValue = 'BEFORE_SUBMISSION' | 'AFTER_SUBMISSION'
 
 const props = defineProps<Props>()
@@ -179,82 +168,21 @@ const form = reactive({
   adminInfoLinkTime: ''
 })
 
-// 기획에서 허용한 등기유형만 모달 선택지로 노출한다.
-const ALLOWED_REGISTRY_TYPES: RegistryTypeValue[] = [
-  'OWNERSHIP_TRANSFER',
-  'MORTGAGE',
-  'SURFACE_RIGHT',
-  'CHANGE',
-  'CORRECTION',
-  'MORTGAGE_CANCELLATION',
-  'SURFACE_RIGHT_CANCELLATION'
-]
-
-const PROGRESS_TYPE_REGISTRY_TYPES: Record<ProgressType, RegistryTypeValue[]> = {
-  TYPE_01: ['MORTGAGE', 'SURFACE_RIGHT', 'CHANGE', 'CORRECTION'],
-  TYPE_02: [
-    'MORTGAGE',
-    'SURFACE_RIGHT',
-    'CHANGE',
-    'CORRECTION',
-    'MORTGAGE_CANCELLATION',
-    'SURFACE_RIGHT_CANCELLATION'
-  ],
-  TYPE_04: [
-    'OWNERSHIP_TRANSFER',
-    'CHANGE',
-    'CORRECTION',
-    'MORTGAGE_CANCELLATION',
-    'SURFACE_RIGHT_CANCELLATION'
-  ],
-  TYPE_05: ['MORTGAGE', 'SURFACE_RIGHT', 'CHANGE', 'CORRECTION'],
-  TYPE_07: [
-    'OWNERSHIP_TRANSFER',
-    'MORTGAGE',
-    'SURFACE_RIGHT',
-    'CHANGE',
-    'CORRECTION',
-    'MORTGAGE_CANCELLATION',
-    'SURFACE_RIGHT_CANCELLATION'
-  ]
-}
-
-const REGISTRY_CAUSE_MAP: Record<RegistryTypeValue, RegistryCauseValue[]> = {
-  OWNERSHIP_TRANSFER: ['TRADE'],
-  MORTGAGE: ['ESTABLISHMENT_CONTRACT'],
-  SURFACE_RIGHT: ['ESTABLISHMENT_CONTRACT'],
-  CHANGE: ['ADDRESS_CHANGE', 'ROAD_NAME_ADDRESS', 'NAME_CHANGE', 'REGISTRATION_NUMBER'],
-  CORRECTION: ['APPLICATION_ERROR'],
-  MORTGAGE_CANCELLATION: ['TERMINATION'],
-  SURFACE_RIGHT_CANCELLATION: ['TERMINATION']
-}
-
-const DEFAULT_REGISTRY_METHODS: RegistryMethodValue[] = ['ELECTRONIC', 'E_FORM', 'PAPER']
-const EXTRA_METHOD_REGISTRY_TYPES: RegistryTypeValue[] = [
-  'MORTGAGE_CANCELLATION',
-  'SURFACE_RIGHT_CANCELLATION'
-]
-
-const isElectronicMethod = computed(() => form.registryMethod === 'ELECTRONIC')
-const availableRegistryTypes = computed(
-  () => props.progressType && PROGRESS_TYPE_REGISTRY_TYPES[props.progressType]
-)
+const isElectronicMethod = computed(() => shouldRequireAdminInfoLinkTime(form.registryMethod))
+const availableRegistryTypes = computed(() => getAllowedRegistryTypes(props.progressType))
 
 const registryTypeOptions = computed(() =>
   getCodeOptions('registryTypes').filter(
     (option) =>
-      ALLOWED_REGISTRY_TYPES.includes(String(option.value) as RegistryTypeValue) &&
+      // 공통코드 전체 중에서도 feature 규칙에서 허용한 타입만 표시한다.
+      availableRegistryTypes.value.includes(String(option.value) as RegistryTypeValue) &&
       // 진행유형별 허용 범위를 함께 적용해 사건과 무관한 등기유형은 처음부터 숨긴다.
-      (!availableRegistryTypes.value ||
-        availableRegistryTypes.value.includes(String(option.value) as RegistryTypeValue))
+      (!props.progressType || availableRegistryTypes.value.length > 0)
   )
 )
 
 const registryCauseOptions = computed(() => {
-  if (!form.registryType) return []
-
-  const allowedCauses =
-    REGISTRY_CAUSE_MAP[form.registryType as RegistryTypeValue] ?? ([] as RegistryCauseValue[])
+  const allowedCauses = getAllowedRegistryCauses(form.registryType)
 
   return getCodeOptions('registryCauses').filter((option) =>
     allowedCauses.includes(String(option.value) as RegistryCauseValue)
@@ -262,24 +190,14 @@ const registryCauseOptions = computed(() => {
 })
 
 const registryMethodOptions = computed(() => {
-  const allOptions = getCodeOptions('registryMethods')
-  const isExtraMethodType = EXTRA_METHOD_REGISTRY_TYPES.includes(
-    form.registryType as RegistryTypeValue
-  )
-
-  let filtered = allOptions.filter((option) => {
-    const value = String(option.value)
-    if (DEFAULT_REGISTRY_METHODS.includes(value as RegistryMethodValue)) return true
-    // 말소 계열은 추가 방식 코드가 열릴 수 있어 기본 방식 외 옵션을 허용한다.
-    return isExtraMethodType
+  const allowedMethods = getAllowedRegistryMethods({
+    registryType: form.registryType,
+    registryCause: form.registryCause
   })
 
-  if (form.registryCause === 'NAME_CHANGE' || form.registryCause === 'REGISTRATION_NUMBER') {
-    // 성명/등록번호 변경은 전자등기 미지원이라 ELECTRONIC을 숨긴다.
-    filtered = filtered.filter((option) => String(option.value) !== 'ELECTRONIC')
-  }
-
-  return filtered
+  return getCodeOptions('registryMethods').filter((option) =>
+    allowedMethods.includes(String(option.value) as RegistryMethodValue)
+  )
 })
 
 const adminInfoLinkTimeOptions = computed(() => getCodeOptions('adminInfoLinkTime'))
@@ -429,7 +347,7 @@ async function validateRequiredFields() {
     !form.registryType ||
     !form.registryCause ||
     !form.registryMethod ||
-    (isElectronicMethod.value && !form.adminInfoLinkTime)
+    (shouldRequireAdminInfoLinkTime(form.registryMethod) && !form.adminInfoLinkTime)
   ) {
     await alert({
       title: '필수 입력값 정보 미입력',
@@ -467,8 +385,10 @@ async function handleSave() {
   isSaving.value = true
   try {
     const normalizedAdminInfoLinkTime = form.adminInfoLinkTime.trim()
-    const adminInfoLinkTime = normalizedAdminInfoLinkTime
-      ? (normalizedAdminInfoLinkTime as AdminInfoLinkTimeValue)
+    const adminInfoLinkTime = shouldRequireAdminInfoLinkTime(form.registryMethod)
+      ? normalizedAdminInfoLinkTime
+        ? (normalizedAdminInfoLinkTime as AdminInfoLinkTimeValue)
+        : null
       : null
 
     if (isEditMode.value) {

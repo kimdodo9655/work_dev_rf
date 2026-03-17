@@ -602,8 +602,8 @@ const endpointConfigs: EndpointConfig[] = [
     path: '/api/registry/rpa/user-tasks/{registryManagementNumber}/full-certificate-view',
     pathParams: ['registryManagementNumber'],
     hasBody: true,
-    defaultBody: { propertyUniqueNumber: '', cardNumber: '' },
-    requiredFields: ['registryManagementNumber', 'propertyUniqueNumber', 'cardNumber']
+    defaultBody: { propertyUniqueNumber: '', credentialId: 0, cardNumber: '' },
+    requiredFields: ['registryManagementNumber', 'propertyUniqueNumber']
   },
   {
     id: 'RPAC-02',
@@ -612,8 +612,8 @@ const endpointConfigs: EndpointConfig[] = [
     path: '/api/registry/rpa/user-tasks/{registryManagementNumber}/property-description',
     pathParams: ['registryManagementNumber'],
     hasBody: true,
-    defaultBody: { propertyUniqueNumber: '' },
-    requiredFields: ['registryManagementNumber', 'propertyUniqueNumber']
+    defaultBody: { propertyUniqueNumber: '', propertyType: 'LAND' },
+    requiredFields: ['registryManagementNumber', 'propertyUniqueNumber', 'propertyType']
   },
   {
     id: 'RPAC-03',
@@ -672,8 +672,8 @@ const endpointConfigs: EndpointConfig[] = [
     path: '/api/registry/rpa/user-tasks/{registryManagementNumber}/registration-case',
     pathParams: ['registryManagementNumber'],
     hasBody: true,
-    defaultBody: { propertyUniqueNumber: '', progressPartyId: 0 },
-    requiredFields: ['registryManagementNumber', 'propertyUniqueNumber', 'progressPartyId']
+    defaultBody: { propertyUniqueNumber: '', progressPropertyOwnerId: 0 },
+    requiredFields: ['registryManagementNumber', 'propertyUniqueNumber', 'progressPropertyOwnerId']
   },
   {
     id: 'RPAC-09',
@@ -692,8 +692,8 @@ const endpointConfigs: EndpointConfig[] = [
     path: '/api/registry/rpa/user-tasks/{registryManagementNumber}/registration-application',
     pathParams: ['registryManagementNumber'],
     hasBody: true,
-    defaultBody: { applicationId: 0, propertyId: 0 },
-    requiredFields: ['registryManagementNumber', 'applicationId', 'propertyId']
+    defaultBody: { applicationId: 0 },
+    requiredFields: ['registryManagementNumber', 'applicationId']
   },
   {
     id: 'RPAC-11',
@@ -722,8 +722,8 @@ const endpointConfigs: EndpointConfig[] = [
     path: '/api/registry/rpa/user-tasks/{registryManagementNumber}/full-certificate-issue',
     pathParams: ['registryManagementNumber'],
     hasBody: true,
-    defaultBody: { propertyUniqueNumber: '', cardNumber: '' },
-    requiredFields: ['registryManagementNumber', 'propertyUniqueNumber', 'cardNumber']
+    defaultBody: { propertyUniqueNumber: '', credentialId: 0, cardNumber: '' },
+    requiredFields: ['registryManagementNumber', 'propertyUniqueNumber']
   }
 ]
 
@@ -1678,9 +1678,12 @@ const candidateMap = computed<Record<string, string[]>>(() => {
     'registryManagementNumber',
     'taskToken',
     'applicationId',
+    'credentialId',
     'propertyId',
     'propertyUniqueNumber',
     'progressPartyId',
+    'progressPropertyOwnerId',
+    'propertyType',
     'certificateSerialNumber',
     'cardNumber',
     'taskStatus'
@@ -1959,15 +1962,12 @@ async function callEndpoint(endpointId: string) {
 
     if ((endpointId === 'RPAC-01' || endpointId === 'RPAC-13') && dataRecord) {
       const cardNumber = String(dataRecord.cardNumber ?? '').trim()
-      if (!cardNumber) {
-        throw new Error('cardNumber가 비어있습니다.')
-      }
-      if (/[^0-9A-Za-z\s-]/.test(cardNumber)) {
+      if (cardNumber && /[^0-9A-Za-z\s-]/.test(cardNumber)) {
         throw new Error(
           'cardNumber 형식이 올바르지 않습니다. 영문/숫자/공백/- 만 입력하세요. (예: P6735534 7877)'
         )
       }
-      dataRecord.cardNumber = cardNumber
+      dataRecord.cardNumber = cardNumber || null
     }
 
     const res = await rpaAPI.requestRaw(

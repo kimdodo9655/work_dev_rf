@@ -5,8 +5,10 @@
 
 import type { AxiosInstance, InternalAxiosRequestConfig } from 'axios'
 
+import { API } from '@/api/endpoints'
 import { runRefreshOnce, shouldSkipAutoRefresh } from '@/api/interceptors/refresh'
 import { isPublicApiRequest } from '@/api/publicApiMap'
+import { shouldAttemptProactiveRefresh } from '@/utils/authInterceptorRules'
 import { handleInvalidAuthState, isValidAuthData } from '@/utils/authValidator'
 import { ENV } from '@/utils/env'
 import { logger } from '@/utils/logger'
@@ -60,11 +62,17 @@ export function setupRequestInterceptor(api: AxiosInstance) {
 
     const now = Math.floor(Date.now() / 1000)
     const remainingSeconds = authData.accessExpires - now
-    const shouldAttemptAutoRefresh =
-      remainingSeconds > 0 && remainingSeconds <= AUTO_REFRESH_THRESHOLD_SECONDS
+    const skipUrls = [API.AUTH.LOGIN, API.AUTH.LOGOUT, API.AUTH.REFRESH] as const
+    const shouldAttemptAutoRefresh = shouldAttemptProactiveRefresh({
+      url: config.url,
+      bankCode,
+      remainingSeconds,
+      thresholdSeconds: AUTO_REFRESH_THRESHOLD_SECONDS,
+      skipUrls
+    })
 
     // 만료 직전에는 요청 실패를 기다리지 않고 백그라운드에서 선제 refresh를 시도한다.
-    if (!shouldSkipAutoRefresh(config.url) && bankCode && shouldAttemptAutoRefresh) {
+    if (shouldAttemptAutoRefresh && !shouldSkipAutoRefresh(config.url)) {
       runRefreshOnce({ ignoreCooldown: false }).catch((err) => {
         logger.warn('[AUTO_REFRESH] Background refresh failed', { error: err })
       })

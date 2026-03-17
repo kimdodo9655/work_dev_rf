@@ -9,6 +9,11 @@ export function shouldSkipAuthFailureRedirect(pathname: string | undefined): boo
   return pathname.startsWith('/auth/')
 }
 
+export function shouldHandleAuthFailureRedirect(pathname: string | undefined): boolean {
+  // 응답 인터셉터에서는 "어디로 보내지 말아야 하는가"보다 "정말 처리해야 하는가"를 더 자주 묻는다.
+  return !shouldSkipAuthFailureRedirect(pathname)
+}
+
 export function shouldBypassUnauthorizedRetry(options: {
   status?: number
   hasOriginalRequest: boolean
@@ -25,4 +30,21 @@ export function shouldSkipAutoRefreshRequest(
   if (!url) return true
   // 로그인/로그아웃/refresh 자체 요청은 토큰 갱신의 대상이 아니라서 제외한다.
   return skipUrls.some((skipUrl) => url.includes(skipUrl))
+}
+
+export function shouldAttemptProactiveRefresh(options: {
+  url: string | undefined
+  bankCode: string | null | undefined
+  remainingSeconds: number
+  thresholdSeconds: number
+  skipUrls: readonly string[]
+}): boolean {
+  const { url, bankCode, remainingSeconds, thresholdSeconds, skipUrls } = options
+
+  // 금융기관이 아직 선택되지 않았거나, 이미 만료됐거나, 너무 많이 남은 경우는 선제 refresh 이득이 없다.
+  if (!bankCode) return false
+  if (remainingSeconds <= 0 || remainingSeconds > thresholdSeconds) return false
+
+  // auth 엔드포인트 자체는 선제 refresh 대상에서 제외한다.
+  return !shouldSkipAutoRefreshRequest(url, skipUrls)
 }

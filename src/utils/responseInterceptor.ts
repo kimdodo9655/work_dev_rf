@@ -6,7 +6,7 @@
 import { getApiPayloadCandidates, toRecord } from './apiPayload.ts'
 import {
   shouldBypassUnauthorizedRetry,
-  shouldSkipAuthFailureRedirect
+  shouldHandleAuthFailureRedirect
 } from './authInterceptorRules.ts'
 
 type RetryRequest = (request: Record<string, unknown>) => Promise<unknown>
@@ -103,7 +103,7 @@ export function createResponseInterceptorHandlers(deps: ResponseInterceptorDeps)
     // 규칙: auth 화면 리다이렉트 제외
     const pathname = deps.browserLocation.getPathname()
     if (!pathname) return
-    if (shouldSkipAuthFailureRedirect(pathname)) {
+    if (!shouldHandleAuthFailureRedirect(pathname)) {
       deps.logger.info('[AUTH] Already on auth page - Skip failure handling')
       return
     }

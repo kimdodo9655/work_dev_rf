@@ -16,14 +16,17 @@ import type {
   DeleteRegistryApplicationResponse,
   GetApplicationDocumentsParams,
   GetApplicationDocumentsResponse,
+  GetApplicationDocumentsResponse as RegistryApplicationDocument,
   GetRegistryApplicationFormsQuery,
   GetRegistryApplicationFormsResponse,
   GetUnifiedApplicationFormParams,
   GetUnifiedApplicationFormResponse,
+  RegistryApplicationFormResponse,
   UpdateRegistryApplicationParams,
   UpdateRegistryApplicationRequest,
   UpdateRegistryApplicationResponse
 } from '@/types'
+import { extractArrayByKeys, extractPrimaryPayload } from '@/utils/apiPayload'
 
 export const registryTypeAPI = {
   async applications(data: CreateRegistryApplicationRequest) {
@@ -59,6 +62,14 @@ export const registryTypeAPI = {
     return apiHelpers.get<GetRegistryApplicationFormsResponse>(API.REGISTRY_TYPE.LIST, query)
   },
 
+  async getTabs(
+    query: GetRegistryApplicationFormsQuery
+  ): Promise<RegistryApplicationFormResponse[]> {
+    // 화면에서는 items/content 래핑을 몰라도 되도록 서비스에서 탭 배열만 꺼내서 넘긴다.
+    const response = await this.getList(query)
+    return extractArrayByKeys<RegistryApplicationFormResponse>(response, ['items', 'content'])
+  },
+
   async documents(params: GetApplicationDocumentsParams) {
     // --------------------------------------------------
     // [R02D-09][GET - /api/registry/applications/{applicationId}/documents] 등기신청서 전자문서 조회
@@ -66,6 +77,14 @@ export const registryTypeAPI = {
     return apiHelpers.get<GetApplicationDocumentsResponse>(
       API.REGISTRY_TYPE.DOCUMENTS(params.applicationId)
     )
+  },
+
+  async getDocument(
+    params: GetApplicationDocumentsParams
+  ): Promise<RegistryApplicationDocument | null> {
+    // 단건 문서 조회는 가장 안쪽 payload만 반환해 composable이 extractPrimaryPayload를 직접 호출하지 않게 한다.
+    const response = await this.documents(params)
+    return extractPrimaryPayload<RegistryApplicationDocument>(response) ?? null
   },
 
   async unifiedForm(params: GetUnifiedApplicationFormParams) {

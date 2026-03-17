@@ -7,7 +7,6 @@ import { ref } from 'vue'
 
 import { registryTypeAPI } from '@/api/services/registry'
 import type { RegistryApplicationDocument } from '@/features/registration/composables/applicationSection.types'
-import { extractPrimaryPayload } from '@/utils/apiPayload'
 
 export function useApplicationSectionDocument({
   getErrorMessage
@@ -34,7 +33,7 @@ export function useApplicationSectionDocument({
     documentErrorMessage.value = ''
 
     try {
-      const res = await registryTypeAPI.documents({ applicationId })
+      const res = await registryTypeAPI.getDocument({ applicationId })
       // 탭 전환 중 늦게 도착한 이전 응답이 현재 문서를 덮어쓰지 않도록 요청 토큰을 비교한다.
       if (
         requestToken !== currentRequestToken.value ||
@@ -43,8 +42,8 @@ export function useApplicationSectionDocument({
         return
       }
 
-      const data = extractPrimaryPayload<RegistryApplicationDocument>(res)
-      document.value = data || null
+      // service에서 꺼낸 최종 문서 DTO만 받으므로 화면에서는 응답 래퍼를 몰라도 된다.
+      document.value = res || null
     } catch (e) {
       // 실패 역시 현재 활성 신청서에 대한 요청일 때만 화면 상태에 반영한다.
       if (

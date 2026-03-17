@@ -8,15 +8,9 @@ import { computed, ref } from 'vue'
 import { registryProgressAPI } from '@/api/services/registry'
 import { useErrorHandler } from '@/composables/utils/useErrorHandler'
 import type { SearchRegistryProgresssListQuery } from '@/types'
-import { extractArrayByKeys, extractRecordByKeys } from '@/utils/apiPayload'
 import { toAssignedWorkDescription } from '@/utils/assignable-user'
 
 import type { CaseStatusFilters, Row } from './caseStatus.types'
-
-interface CaseStatusListPayload {
-  content?: Row[]
-  totalElements?: number
-}
 
 // 형식: YYYY-MM-DD -> YYYYMMDD
 function toApiDate(ymd: string) {
@@ -121,22 +115,20 @@ export function useCaseStatusListData({
       if (resetPage) page.value = 0
 
       const query = buildQuery(page.value + 1)
-      const response = await registryProgressAPI.getList(query)
-      const data = extractRecordByKeys<CaseStatusListPayload>(response, ['content']) ?? {}
+      const data = await registryProgressAPI.getListPage<Row>(query)
 
-      rows.value = extractArrayByKeys<Row>(data, ['content'])
-      totalElements.value = Number(data?.totalElements ?? 0)
+      rows.value = data.content
+      totalElements.value = Number(data.totalElements ?? 0)
       totalPages.value = calcTotalPagesSafe(totalElements.value, size.value)
 
       if (page.value > lastPageIndex.value) {
         // 보정: 현재 페이지가 총 페이지 수를 넘으면 마지막 페이지로 재조회
         page.value = lastPageIndex.value
         const query2 = buildQuery(page.value + 1)
-        const response2 = await registryProgressAPI.getList(query2)
-        const data2 = extractRecordByKeys<CaseStatusListPayload>(response2, ['content']) ?? {}
+        const data2 = await registryProgressAPI.getListPage<Row>(query2)
 
-        rows.value = extractArrayByKeys<Row>(data2, ['content']) || rows.value
-        totalElements.value = Number(data2?.totalElements ?? totalElements.value)
+        rows.value = data2.content || rows.value
+        totalElements.value = Number(data2.totalElements ?? totalElements.value)
         totalPages.value = calcTotalPagesSafe(totalElements.value, size.value)
       }
 
