@@ -27,10 +27,13 @@ export function useApplicationSectionTabs({
   const tabsErrorMessage = ref('')
   const tabs = ref<RegistryApplicationForm[]>([])
   const activeTabIndex = ref(0)
+  const showAddModal = ref(false)
+  const successToastMessage = ref('')
   const tabsThrottle = useThrottle(1000)
   const deletingApplicationIds = ref<Set<number>>(new Set())
   const { alert, confirm } = useDialog()
   const { extractApiSuccessContent, extractApiErrorContent } = useApiAlert()
+  let toastTimer: ReturnType<typeof setTimeout> | null = null
 
   const activeApplicationId = computed(() => {
     // 기준: 현재 탭의 applicationId
@@ -38,7 +41,7 @@ export function useApplicationSectionTabs({
     return activeTab?.applicationId
   })
 
-  async function fetchTabs() {
+  async function fetchTabs(options?: { selectLast?: boolean }) {
     if (!registryManagementNumber.value) {
       tabs.value = []
       tabsErrorMessage.value = '등기관리번호가 없습니다.'
@@ -54,8 +57,12 @@ export function useApplicationSectionTabs({
           registryManagementNumber: registryManagementNumber.value
         })
         tabs.value = extractArrayByKeys<RegistryApplicationForm>(res, ['items', 'content'])
-        if (tabs.value.length > 0 && activeTabIndex.value >= tabs.value.length) {
-          activeTabIndex.value = 0
+        if (tabs.value.length > 0) {
+          if (options?.selectLast) {
+            activeTabIndex.value = tabs.value.length - 1
+          } else if (activeTabIndex.value >= tabs.value.length) {
+            activeTabIndex.value = 0
+          }
         }
       } catch (e) {
         tabs.value = []
@@ -74,7 +81,26 @@ export function useApplicationSectionTabs({
   }
 
   function handleAddTab() {
-    // 상태: 미구현
+    showAddModal.value = true
+  }
+
+  function closeAddModal() {
+    showAddModal.value = false
+  }
+
+  async function handleAddSaved() {
+    showAddModal.value = false
+    await fetchTabs({ selectLast: true })
+    showSuccessToast('등기유형 추가가 완료되었습니다.')
+  }
+
+  function showSuccessToast(message: string) {
+    successToastMessage.value = message
+    if (toastTimer) clearTimeout(toastTimer)
+    toastTimer = setTimeout(() => {
+      successToastMessage.value = ''
+      toastTimer = null
+    }, 2200)
   }
 
   function canDeleteTab(tab: RegistryApplicationForm) {
@@ -185,10 +211,14 @@ export function useApplicationSectionTabs({
   return {
     activeTabIndex,
     canDeleteTab,
+    closeAddModal,
+    handleAddSaved,
     handleAddTab,
     handleDeleteTab,
     isDeletingTab,
     selectTab,
+    showAddModal,
+    successToastMessage,
     tabs,
     tabsErrorMessage,
     tabsLoading

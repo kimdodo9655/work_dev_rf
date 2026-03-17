@@ -16,7 +16,10 @@ import type {
   RegistryCertificateFormResponse,
   SurfaceRightContractSaveResponse
 } from './registry-contract.types'
-import type { TaxSection } from './registry-receipt-document.types'
+import type {
+  TaxPopupSaveApplicationFeeSection,
+  TaxPopupSaveTaxSection
+} from './registry-tax.types'
 
 /**
  * R02D-02
@@ -94,7 +97,7 @@ export interface RegistryApplicationCreateRequest {
   registryType: RegistryType
   registryCause: RegistryCause
   registryMethod: RegistryMethod
-  adminInfoLinkTime: AdminInfoLinkTime
+  adminInfoLinkTime: AdminInfoLinkTime | null
 }
 
 /** 등기신청서 전자문서 응답 */
@@ -137,7 +140,7 @@ export interface RegistryApplicationFormResponse {
 
 export interface RegistryApplicationUpdateRequest {
   registryMethod: RegistryMethod
-  adminInfoLinkTime: AdminInfoLinkTime
+  adminInfoLinkTime: AdminInfoLinkTime | null
 }
 
 /** 등기신청서 - 말소사항정보 */
@@ -233,13 +236,6 @@ export interface AgentInfoResponse {
   address?: string
 }
 
-export interface ApplicationFeeSection {
-  applicationFee?: number
-  registryCount?: number
-  batchPaymentAmount?: number
-  exemptionReason?: string
-}
-
 export interface CertificateShareResponse {
   progressPartyId?: number
   name?: string
@@ -286,7 +282,7 @@ export interface MortgageFinancialSaveResponse {
   filingFeePaymentStatus?: 'PAYMENT' | 'EXEMPTION'
   filingFeeExemptionReason?: string
   filingFeeRegistryCount?: number
-  filingFeeRegistryMethod?: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
+  filingFeeRegistryMethod?: 'ELECTRONIC' | 'E_FORM' | 'PAPER' | 'BANK_REQUEST'
 }
 
 export interface PropertyBondSummary {
@@ -305,6 +301,6 @@ export interface RegistryOfficeFormResponse {
 }
 
 export interface TaxPopupSaveResponse {
-  tax?: TaxSection
-  applicationFee?: ApplicationFeeSection
+  tax?: TaxPopupSaveTaxSection
+  applicationFee?: TaxPopupSaveApplicationFeeSection
 }

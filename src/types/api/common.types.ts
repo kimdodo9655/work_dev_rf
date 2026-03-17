@@ -156,19 +156,17 @@ export interface PartyItem {
 
 /** 부동산 정보 */
 export interface PropertyInfo {
+  propertyUniqueNumber?: string
   propertyType?: PropertyType
-  propertyCount?: number
   propertyAddress?: string
-  propertyArea?: number
-  seniorRepaymentCount?: number
 }
 
 /** 채무자 정보 */
 export interface ObligorInfo {
-  obligorCount?: number
-  obligorEcertificateType?: EcertificateType
-  obligorCertificateType?: CertificateType
-  addressChangeCount?: number
+  partyType?: string
+  name?: string
+  registrationNumber?: string
+  purpose?: string
 }
 
 /** 신청인 항목 */

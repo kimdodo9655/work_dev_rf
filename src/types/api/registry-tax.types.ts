@@ -56,21 +56,21 @@ export interface TaxBaseRequest {
 
 /** 세금 조회 팝업 응답 */
 export interface TaxPopupResponse {
-  taxBase?: TaxBaseSection
-  tax?: RegistryTaxSection
-  filingFee?: FilingFeeSection
+  taxBase?: TaxPopupTaxBaseSection
+  tax?: TaxPopupTaxSection
+  filingFee?: TaxPopupFilingFeeSection
 }
 
 /** 과세표준 정보 */
-export interface TaxBaseSection {
+export interface TaxPopupTaxBaseSection {
   /** 과세표준액 합계 */
   taxBaseAmount?: number
   /** 부동산별 과세표준 항목 */
-  properties?: TaxBaseItem[]
+  properties?: TaxPopupTaxBaseItem[]
 }
 
 /** 부동산별 과세표준 항목 */
-export interface TaxBaseItem {
+export interface TaxPopupTaxBaseItem {
   /** 부동산 고유번호 */
   propertyUniqueNumber?: string
   /** 부동산 주소 */
@@ -86,7 +86,7 @@ export interface TaxBaseItem {
 }
 
 /** 세금 정보 섹션 */
-export interface RegistryTaxSection {
+export interface TaxPopupTaxSection {
   /** 납부 여부 */
   paymentStatus?: string
   /** 감면 사유 */
@@ -97,12 +97,10 @@ export interface RegistryTaxSection {
   educationTax?: number
   /** 농어촌특별세 */
   ruralSpecialTax?: number
-  /** 합계 */
-  totalAmount?: number
 }
 
 /** 등기신청수수료 섹션 */
-export interface FilingFeeSection {
+export interface TaxPopupFilingFeeSection {
   /** 납부 여부 */
   paymentStatus?: string
   /** 감면 사유 */
@@ -115,4 +113,20 @@ export interface FilingFeeSection {
   registryCount?: number
   /** 신청 수수료 */
   applicationFee?: number
+}
+
+export interface TaxPopupSaveTaxSection {
+  registrationLicenseTax?: number
+  educationTax?: number
+  ruralSpecialTax?: number
+  paymentAmount?: number
+  exemptionReason?: string
+  bondPurchaseAmount?: number
+}
+
+export interface TaxPopupSaveApplicationFeeSection {
+  applicationFee?: number
+  registryCount?: number
+  batchPaymentAmount?: number
+  exemptionReason?: string
 }

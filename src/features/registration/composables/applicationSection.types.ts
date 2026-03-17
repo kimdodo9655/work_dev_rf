@@ -3,23 +3,7 @@
  * 문서 제목: 기능 모듈: application-section-types
  */
 
-export interface RegistryApplicationForm {
-  applicationId?: number
-  registryManagementNumber?: string
-  dataSource?: 'REQUEST' | 'MANUAL'
-  registryType?: string
-  registryRole?: 'MAIN' | 'LINKED' | string
-}
+import type { RegistryApplicationDocumentResponse, RegistryApplicationFormResponse } from '@/types'
 
-export interface RegistryApplicationDocument {
-  applicationId?: number
-  registryManagementNumber?: string
-  registryType?: string
-  registryCause?: string
-  registryMethod?: string
-  adminInfoLinkTime?: string
-  sections?: Array<{
-    code?: string
-    title?: string
-  }>
-}
+export type RegistryApplicationForm = RegistryApplicationFormResponse
+export type RegistryApplicationDocument = RegistryApplicationDocumentResponse

@@ -51,7 +51,19 @@ export interface ProgressHousingBondSaveRequest {
   items: ProgressHousingBondSaveItem[]
 }
 
-export type ProgressHousingBondSaveItem = Record<string, unknown>
+export interface ProgressHousingBondSaveItem {
+  registryType:
+    | 'OWNERSHIP_TRANSFER'
+    | 'MORTGAGE'
+    | 'SURFACE_RIGHT'
+    | 'CHANGE'
+    | 'CORRECTION'
+    | 'MORTGAGE_CANCELLATION'
+    | 'SURFACE_RIGHT_CANCELLATION'
+  discountRate?: number
+  bondDiscountAmount?: number
+  housingBondNumber?: string
+}
 
 // ==================== Schemas ====================
 
@@ -74,6 +86,8 @@ export interface HousingBondCase {
     | 'ROAD_NAME_ADDRESS'
     | 'APPLICATION_ERROR'
     | 'TERMINATION'
+    | 'NAME_CHANGE'
+    | 'REGISTRATION_NUMBER'
   /** 매입대상금액 */
   purchaseTargetAmount?: number
   /** 매입구분 */
@@ -107,23 +121,21 @@ export interface RegistryProgressHousingBondListResponse {
   /** 등기관리번호 */
   registryManagementNumber?: string
   /** 국민주택채권 목록 행 */
-  rows?: HousingBondListRow[]
+  rows?: RegistryProgressHousingBondRow[]
 }
 
 /** 국민주택채권 목록 행 정보 */
-export interface HousingBondListRow {
-  /** 신청서 ID */
-  applicationId?: number
-  /** 등기유형(설명) */
+export interface RegistryProgressHousingBondRow {
+  /** 등기유형 */
   registryType?: string
-  /** 매입 구분 (채권할인/채권면제) */
-  purchaseType?: string
+  /** 매입 구분 */
+  purchaseType?: 'PURCHASE' | 'DISCOUNT' | 'EXEMPTION'
   /** 매입대상금액 */
   purchaseTargetAmount?: number
   /** 채권매입금액 */
   bondPurchaseAmount?: number
-  /** 채권할인금액 (채권면제 시 '-') */
-  bondDiscountAmount?: string
-  /** 국민주택채권번호 (채권면제 시 '-') */
+  /** 채권할인금액 */
+  bondDiscountAmount?: number
+  /** 국민주택채권번호 */
   housingBondNumber?: string
 }

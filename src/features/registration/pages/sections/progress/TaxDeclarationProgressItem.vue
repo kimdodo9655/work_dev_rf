@@ -21,8 +21,11 @@
             <tr v-if="rows.length === 0">
               <td colspan="5" class="empty-cell">조회된 목록이 없습니다.</td>
             </tr>
-            <tr v-for="(row, idx) in rows" :key="`tax-${idx}-${row.applicationId ?? idx}`">
-              <td>{{ codeLabel(row.registryTypeName || row.registryType, 'registryTypes') }}</td>
+            <tr
+              v-for="(row, idx) in rows"
+              :key="`tax-${idx}-${row.registryType ?? 'unknown'}-${row.registryCause ?? 'unknown'}`"
+            >
+              <td>{{ codeLabel(row.registryType, 'registryTypes') }}</td>
               <td>{{ codeLabel(row.registryCause, 'registryCauses') }}</td>
               <td>{{ formatNumber(row.paymentAmount) }}</td>
               <td>{{ row.taxNumber ?? '-' }}</td>
@@ -36,18 +39,10 @@
 </template>
 
 <script setup lang="ts">
-interface TaxAgencyListRow {
-  applicationId?: number
-  registryType?: string
-  registryTypeName?: string
-  registryCause?: string
-  paymentAmount?: number
-  taxNumber?: string | null
-  electronicPaymentNumber?: string | null
-}
+import type { RegistryProgressTaxAgencyTableRow } from '@/types'
 
 interface Props {
-  rows: TaxAgencyListRow[]
+  rows: RegistryProgressTaxAgencyTableRow[]
   loading: boolean
   errorMessage: string
   codeLabel: (value?: string | null, category?: string) => string

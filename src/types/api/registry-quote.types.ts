@@ -11,8 +11,6 @@
 import type {
   ApiResultVoid,
   EstimateWritingStatus,
-  ObligorInfo,
-  PropertyInfo,
   QuoteProgressStatus,
   RegistryMethod,
   SelectionStatus
@@ -131,10 +129,53 @@ export interface EstimateDetailResponse {
 
 /** 견적 기본 정보 */
 export interface EstimateInfoResponse {
-  registryInfo?: RegistryInfo
-  propertyInfo?: PropertyInfo
-  obligorInfo?: ObligorInfo
-  obligeeInfo?: ObligeeInfo
+  registryInfo?: EstimateInfoRegistryInfo
+  propertyInfo?: EstimateInfoPropertyInfo
+  obligorInfo?: EstimateInfoObligorInfo
+  obligeeInfo?: EstimateInfoObligeeInfo
+}
+
+/** 등기 기본 정보 */
+export interface EstimateInfoRegistryInfo {
+  registryType?:
+    | 'OWNERSHIP_TRANSFER'
+    | 'MORTGAGE'
+    | 'SURFACE_RIGHT'
+    | 'CHANGE'
+    | 'CORRECTION'
+    | 'MORTGAGE_CANCELLATION'
+    | 'SURFACE_RIGHT_CANCELLATION'
+  registryCause?:
+    | 'TRADE'
+    | 'ESTABLISHMENT_CONTRACT'
+    | 'ADDRESS_CHANGE'
+    | 'ROAD_NAME_ADDRESS'
+    | 'APPLICATION_ERROR'
+    | 'TERMINATION'
+  registryMethod?: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
+  tradeAmount?: number
+  balanceDueDate?: string
+}
+
+/** 부동산 정보 */
+export interface EstimateInfoPropertyInfo {
+  propertyType?: 'LAND' | 'BUILDING' | 'COLLECTIVE_BUILDING'
+  propertyCount?: number
+  propertyAddress?: string
+  propertyArea?: number
+  seniorRepaymentCount?: number
+}
+
+/** 등기의무자 정보 */
+export interface EstimateInfoObligorInfo {
+  obligorCount?: number
+  obligorEcertificateType?: 'OWNED' | 'DELEGATED' | 'NONE'
+  obligorCertificateType?:
+    | 'REGISTRY_CERT_INFO'
+    | 'REGISTRY_CERTIFICATE'
+    | 'CONFIRMATION_DOCUMENT'
+    | 'PRIOR_REGISTRY_LINK'
+  addressChangeCount?: number
 }
 
 /** 등기 견적 관리 목록 아이템 */
@@ -249,7 +290,7 @@ export interface LegalAgentInfo {
 }
 
 /** 등기권리자 정보 */
-export interface ObligeeInfo {
+export interface EstimateInfoObligeeInfo {
   /** 등기권리자 수 */
   obligeeCount?: number
   /** 전자증명서 구분 */
@@ -269,33 +310,4 @@ export interface PublicChargeDetails {
   stampTax?: number
   registryApplicationFee?: number
   totalTax?: number
-}
-
-/** 등기 기본 정보 */
-export interface RegistryInfo {
-  /** 등기유형 */
-  registryType?:
-    | 'OWNERSHIP_TRANSFER'
-    | 'MORTGAGE'
-    | 'SURFACE_RIGHT'
-    | 'CHANGE'
-    | 'CORRECTION'
-    | 'MORTGAGE_CANCELLATION'
-    | 'SURFACE_RIGHT_CANCELLATION'
-  /** 등기원인 */
-  registryCause?:
-    | 'TRADE'
-    | 'ESTABLISHMENT_CONTRACT'
-    | 'ADDRESS_CHANGE'
-    | 'ROAD_NAME_ADDRESS'
-    | 'APPLICATION_ERROR'
-    | 'TERMINATION'
-    | 'NAME_CHANGE'
-    | 'REGISTRATION_NUMBER'
-  /** 매매금액 */
-  tradeAmount?: number
-  /** 잔금일자 */
-  balanceDueDate?: string
-  /** 등기방식 */
-  registryMethod?: 'ELECTRONIC' | 'E_FORM' | 'PAPER'
 }

@@ -92,7 +92,7 @@ export type DeleteReceiptResponse = LoanPaymentAccountDetailResponse
 // ==================== Schemas ====================
 
 /** 매수자 요약 */
-export interface Buyer {
+export interface LoanPaymentAccountCostSummaryBuyer {
   tradeAmount?: number
   downPaymentAmount?: number
   loanPaymentAmount?: number
@@ -102,7 +102,7 @@ export interface Buyer {
 }
 
 /** 채무자 요약 */
-export interface Debtor {
+export interface LoanPaymentAccountCostSummaryDebtor {
   loanPrincipal?: number
   loanRepaymentAmount?: number
   debtorReceivable?: number
@@ -111,13 +111,13 @@ export interface Debtor {
 }
 
 /** 대출금융기관 요약 */
-export interface LoanInstitution {
-  items?: LoanInstitutionItem[]
+export interface LoanPaymentAccountCostSummaryLoanInstitution {
+  items?: LoanPaymentAccountCostSummaryLoanInstitutionItem[]
   totalScheduledAmount?: number
 }
 
 /** 대출금융기관 행 */
-export interface LoanInstitutionItem {
+export interface LoanPaymentAccountCostSummaryLoanInstitutionItem {
   paymentType?: string
   paymentSubject?: string
   paymentBank?: string
@@ -136,10 +136,10 @@ export interface LoanPaymentAccountBranchAccountOption {
 
 /** 지급 비용 요약 */
 export interface LoanPaymentAccountCostSummary {
-  loanInstitution?: LoanInstitution
-  buyer?: Buyer
-  seller?: Seller
-  debtor?: Debtor
+  loanInstitution?: LoanPaymentAccountCostSummaryLoanInstitution
+  buyer?: LoanPaymentAccountCostSummaryBuyer
+  seller?: LoanPaymentAccountCostSummarySeller
+  debtor?: LoanPaymentAccountCostSummaryDebtor
 }
 
 /** 대출금 지급계좌 상세 응답 */
@@ -153,12 +153,12 @@ export interface LoanPaymentAccountDetailResponse {
   /** 미등록 지급 예정 금액 */
   remainingScheduledAmount?: number
   /** 지급 계좌 목록 */
-  paymentItems?: LoanPaymentAccountItem[]
+  paymentItems?: LoanPaymentAccountDetailItem[]
   costSummary?: LoanPaymentAccountCostSummary
 }
 
 /** 지급계좌 행 */
-export interface LoanPaymentAccountItem {
+export interface LoanPaymentAccountDetailItem {
   /** 대출금지급계좌ID */
   loanPaymentAccountId?: number
   /** 지급구분 */
@@ -220,7 +220,7 @@ export interface LoanPaymentAccountListResponse {
 /** 지급계좌 일괄 저장 요청 */
 export interface LoanPaymentAccountListSaveRequest {
   /** 지급계좌 리스트 */
-  paymentItems: LoanPaymentAccountItem[]
+  paymentItems: LoanPaymentAccountSaveItem[]
 }
 
 /** 선순위 대출 옵션 */
@@ -232,11 +232,27 @@ export interface LoanPaymentAccountPriorLoanOption {
 }
 
 /** 매도자 요약 */
-export interface Seller {
+export interface LoanPaymentAccountCostSummarySeller {
   tradeAmount?: number
   downPaymentAmount?: number
   loanRepaymentAmount?: number
   sellerReceivable?: number
   sellerExpense?: number
+  cancellationFee?: number
+}
+
+export interface LoanPaymentAccountSaveItem {
+  loanPaymentAccountId?: number
+  paymentType: string
+  paymentSubject: string
+  branchPaymentAccountId?: number
+  seniorLoanId?: number
+  seniorMortgageBank?: string
+  seniorMaximumCreditAmount?: number
+  loanRedemptionBranch?: string
+  paymentBank?: string
+  accountNumber?: string
+  accountHolder?: string
+  paymentAmount: number
   cancellationFee?: number
 }

@@ -6,7 +6,6 @@
 import { ref } from 'vue'
 
 import { registryTypeAPI } from '@/api/services/registry'
-import { useThrottle } from '@/composables/utils/useThrottle'
 import type { RegistryApplicationDocument } from '@/features/registration/composables/applicationSection.types'
 import { extractPrimaryPayload } from '@/utils/apiPayload'
 
@@ -18,7 +17,8 @@ export function useApplicationSectionDocument({
   const documentLoading = ref(false)
   const documentErrorMessage = ref('')
   const document = ref<RegistryApplicationDocument | null>(null)
-  const documentThrottle = useThrottle(1000)
+  const lastRequestedApplicationId = ref<number | null>(null)
+  const currentRequestToken = ref(0)
 
   async function fetchDocument(applicationId: number) {
     if (!applicationId) {
@@ -27,23 +27,38 @@ export function useApplicationSectionDocument({
       return
     }
 
-    // 규칙: 연속 문서 조회는 throttle로 흡수
-    const result = await documentThrottle.execute(async () => {
-      documentLoading.value = true
-      documentErrorMessage.value = ''
-      try {
-        const res = await registryTypeAPI.documents({ applicationId })
-        const data = extractPrimaryPayload<RegistryApplicationDocument>(res)
-        document.value = data || null
-      } catch (e) {
-        document.value = null
-        documentErrorMessage.value = getErrorMessage(e)
-      } finally {
+    const requestToken = currentRequestToken.value + 1
+    currentRequestToken.value = requestToken
+    lastRequestedApplicationId.value = applicationId
+    documentLoading.value = true
+    documentErrorMessage.value = ''
+
+    try {
+      const res = await registryTypeAPI.documents({ applicationId })
+      if (
+        requestToken !== currentRequestToken.value ||
+        lastRequestedApplicationId.value !== applicationId
+      ) {
+        return
+      }
+
+      const data = extractPrimaryPayload<RegistryApplicationDocument>(res)
+      document.value = data || null
+    } catch (e) {
+      if (
+        requestToken !== currentRequestToken.value ||
+        lastRequestedApplicationId.value !== applicationId
+      ) {
+        return
+      }
+
+      document.value = null
+      documentErrorMessage.value = getErrorMessage(e)
+    } finally {
+      if (requestToken === currentRequestToken.value) {
         documentLoading.value = false
       }
-    })
-
-    if (result === null) return
+    }
   }
 
   function handleActiveApplicationChanged(applicationId?: number) {
@@ -54,12 +69,14 @@ export function useApplicationSectionDocument({
     }
     document.value = null
     documentErrorMessage.value = ''
+    documentLoading.value = false
   }
 
   return {
     document,
     documentErrorMessage,
     documentLoading,
+    fetchDocument,
     handleActiveApplicationChanged
   }
 }

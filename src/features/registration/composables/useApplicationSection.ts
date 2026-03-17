@@ -3,7 +3,7 @@
  * 문서 제목: 기능 모듈: use-application-section
  */
 
-import { computed, type Ref } from 'vue'
+import { computed, type Ref, ref } from 'vue'
 
 import { useCodeReplacer } from '@/composables/utils/useCodeReplacer'
 import { useErrorHandler } from '@/composables/utils/useErrorHandler'
@@ -21,16 +21,25 @@ export function useApplicationSection({
   const { formatCodeLabel, formatTextLabel } = useCodeReplacer()
   const { getErrorMessage } = useErrorHandler()
 
-  const { document, documentErrorMessage, documentLoading, handleActiveApplicationChanged } =
-    useApplicationSectionDocument({ getErrorMessage })
+  const {
+    document,
+    documentErrorMessage,
+    documentLoading,
+    fetchDocument,
+    handleActiveApplicationChanged
+  } = useApplicationSectionDocument({ getErrorMessage })
 
   const {
     activeTabIndex,
     canDeleteTab,
+    closeAddModal,
+    handleAddSaved,
     handleAddTab,
     handleDeleteTab,
     isDeletingTab,
     selectTab,
+    showAddModal,
+    successToastMessage,
     tabs,
     tabsErrorMessage,
     tabsLoading
@@ -46,6 +55,8 @@ export function useApplicationSection({
     const activeTab = tabs.value[activeTabIndex.value]
     return activeTab?.applicationId
   })
+
+  const showEditModal = ref(false)
 
   const {
     activeSectionCode,
@@ -77,18 +88,35 @@ export function useApplicationSection({
     return formatCodeLabel(value, 'adminInfoLinkTime')
   }
 
+  function closeEditModal() {
+    showEditModal.value = false
+  }
+
   function handleEditRegistryMethod() {
-    // 상태: 미구현
+    if (!activeApplicationId.value || !document.value) return
+    showEditModal.value = true
+  }
+
+  async function handleEditSaved() {
+    if (!activeApplicationId.value) {
+      showEditModal.value = false
+      return
+    }
+
+    showEditModal.value = false
+    await fetchDocument(activeApplicationId.value)
   }
 
   return {
     activeTabIndex,
     canDeleteTab,
+    closeAddModal,
     certModalApplicationId,
     activeSectionCode,
     sectionModalApplicationId,
     activeSectionTitle,
     closeCertModal,
+    closeEditModal,
     closeSectionModal,
     displayAdminInfoLinkTime,
     displayRegistryCause,
@@ -100,13 +128,18 @@ export function useApplicationSection({
     documentErrorMessage,
     documentLoading,
     handleAddTab,
+    handleAddSaved,
     handleDeleteTab,
+    handleEditSaved,
     handleEditRegistryMethod,
     handleSectionClick,
     isDeletingTab,
     selectTab,
+    showAddModal,
     showCertModal,
+    showEditModal,
     showSectionModal,
+    successToastMessage,
     tabs,
     tabsErrorMessage,
     tabsLoading

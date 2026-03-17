@@ -120,10 +120,11 @@ import type {
   CaseInquiryListItem,
   CompleteDocumentListItem,
   FullCertificateItem,
-  HousingBondListRow,
   LoanPaymentAccountListItem,
   PostCertificateItem,
-  ReceiptSummaryItem
+  ReceiptSummaryItem,
+  RegistryProgressHousingBondRow,
+  RegistryProgressTaxAgencyTableRow
 } from '@/types'
 import { extractArrayByKeys, extractRecordByKeys } from '@/utils/apiPayload'
 
@@ -169,16 +170,6 @@ interface CompletionDetailPayload {
   postCertificates?: PostCertificateItem[]
 }
 
-interface TaxAgencyListRow {
-  applicationId?: number
-  registryType?: string
-  registryTypeName?: string
-  registryCause?: string
-  paymentAmount?: number
-  taxNumber?: string | null
-  electronicPaymentNumber?: string | null
-}
-
 const props = defineProps<Props>()
 const { formatCodeLabel } = useCodeReplacer()
 const { getErrorMessage } = useErrorHandler()
@@ -203,13 +194,13 @@ const transferThrottle = useThrottle(1000)
 // 세금신고 대행 목록
 const taxLoading = ref(false)
 const taxErrorMessage = ref('')
-const taxRows = ref<TaxAgencyListRow[]>([])
+const taxRows = ref<RegistryProgressTaxAgencyTableRow[]>([])
 const taxThrottle = useThrottle(1000)
 
 // 국민주택채권 목록
 const housingBondLoading = ref(false)
 const housingBondErrorMessage = ref('')
-const housingBondRows = ref<HousingBondListRow[]>([])
+const housingBondRows = ref<RegistryProgressHousingBondRow[]>([])
 const housingBondThrottle = useThrottle(1000)
 
 // 대출금 지급계좌 목록
@@ -339,7 +330,11 @@ async function fetchTaxAgencyList() {
       const res = await registryTaxReportAPI.getList({
         registryManagementNumber: props.registryManagementNumber
       })
-      taxRows.value = extractArrayByKeys<TaxAgencyListRow>(res, ['rows', 'items', 'content'])
+      taxRows.value = extractArrayByKeys<RegistryProgressTaxAgencyTableRow>(res, [
+        'rows',
+        'items',
+        'content'
+      ])
     } catch (e: unknown) {
       taxRows.value = []
       taxErrorMessage.value = getErrorMessage(e)
@@ -365,7 +360,7 @@ async function fetchHousingBondList() {
       const res = await registryHousingBondAPI.getList({
         registryManagementNumber: props.registryManagementNumber
       })
-      housingBondRows.value = extractArrayByKeys<HousingBondListRow>(res, [
+      housingBondRows.value = extractArrayByKeys<RegistryProgressHousingBondRow>(res, [
         'rows',
         'items',
         'content'

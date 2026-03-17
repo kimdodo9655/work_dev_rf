@@ -23,7 +23,7 @@
             </tr>
             <tr
               v-for="(row, idx) in rows"
-              :key="`receipt-doc-${idx}-${row.receiptDocumentId ?? idx}`"
+              :key="`receipt-doc-${idx}-${row.registryType ?? 'unknown'}`"
             >
               <td>{{ formatCodeLabel(row.registryType, 'registryTypes') }}</td>
               <td>{{ formatNumber(row.feeSubtotal) }}</td>

@@ -8,11 +8,7 @@
  * @generated 2025-01-27
  */
 
-import type {
-  PropertyInfo,
-  RegistryProgressTaxInfoResponse,
-  TaxInfoWithNumbersRequest
-} from './common.types'
+import type { RegistryProgressTaxInfoResponse, TaxInfoWithNumbersRequest } from './common.types'
 
 /**
  * R02P-01
@@ -96,13 +92,13 @@ export interface RegistryProgressTaxAgencyReplaceRequestItem {
 }
 
 /** 구비서류 정보 */
-export interface AttachmentInfo {
+export interface RegistryProgressTaxAgencyInputAttachmentInfo {
   /** 위임장 파일명 (JPG) */
   powerOfAttorneyFileName?: string
 }
 
 /** 등록원인 정보 */
-export interface RegistryCauseInfo {
+export interface RegistryProgressTaxAgencyInputRegistryCauseInfo {
   /** 물건종류 */
   propertyType?: string
   /** 물건상세 */
@@ -112,7 +108,7 @@ export interface RegistryCauseInfo {
 }
 
 /** 납세자 정보 */
-export interface TaxPayer {
+export interface RegistryProgressTaxAgencyInputTaxPayer {
   /** 성명 */
   name?: string
   /** 법인명 (법인일 경우) */
@@ -131,20 +127,20 @@ export interface TaxPayer {
 
 /** 세금신고 대행 입력정보 */
 export interface RegistryProgressTaxAgencyInputInfoResponse {
-  taxpayer?: TaxPayer
-  registryCause?: RegistryCauseInfo
-  property?: PropertyInfo
-  attachment?: AttachmentInfo
+  taxpayer?: RegistryProgressTaxAgencyInputTaxPayer
+  registryCause?: RegistryProgressTaxAgencyInputRegistryCauseInfo
+  property?: RegistryProgressTaxAgencyInputPropertyInfo
+  attachment?: RegistryProgressTaxAgencyInputAttachmentInfo
 }
 
 /** 세금신고 대행 작업 프로세스 테이블 응답 */
 export interface RegistryProgressTaxAgencyTableResponse {
   /** 세금신고 대행 테이블 행 목록 */
-  rows?: Row[]
+  rows?: RegistryProgressTaxAgencyTableRow[]
 }
 
 /** 세금신고 대행 테이블 행 정보 */
-export interface Row {
+export interface RegistryProgressTaxAgencyTableRow {
   /** 등기유형 */
   registryType?:
     | 'OWNERSHIP_TRANSFER'
@@ -154,14 +150,28 @@ export interface Row {
     | 'CORRECTION'
     | 'MORTGAGE_CANCELLATION'
     | 'SURFACE_RIGHT_CANCELLATION'
-  /** 매입구분 */
-  purchaseType?: 'PURCHASE' | 'DISCOUNT' | 'EXEMPTION'
-  /** 매입대상금액 */
-  purchaseTargetAmount?: number
-  /** 채권매입금액 */
-  bondPurchaseAmount?: number
-  /** 채권할인금액 */
-  bondDiscountAmount?: number
-  /** 국민주택채권번호 */
-  housingBondNumber?: string
+  /** 등기원인 */
+  registryCause?:
+    | 'TRADE'
+    | 'ESTABLISHMENT_CONTRACT'
+    | 'ADDRESS_CHANGE'
+    | 'ROAD_NAME_ADDRESS'
+    | 'APPLICATION_ERROR'
+    | 'TERMINATION'
+    | 'NAME_CHANGE'
+    | 'REGISTRATION_NUMBER'
+  /** 납부 금액 */
+  paymentAmount?: number
+  /** 납세 번호 */
+  taxNumber?: string
+  /** 전자납부 번호 */
+  electronicPaymentNumber?: string
+}
+
+export interface RegistryProgressTaxAgencyInputPropertyInfo {
+  propertyLocation?: string
+  jurisdiction?: string
+  taxableBaseAmount?: number
+  propertyCount?: number
+  taxableObject?: string
 }

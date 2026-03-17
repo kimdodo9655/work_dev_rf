@@ -3536,7 +3536,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
+              "enum": ["ELECTRONIC", "E_FORM", "PAPER", "BANK_REQUEST"]
             },
             "example": "ELECTRONIC"
           },
@@ -3647,6 +3647,17 @@
             "example": 0
           },
           {
+            "name": "numberOfBuyersAsDirectSigners",
+            "in": "query",
+            "description": "개인 담보제공자 중 직접서명 대상자 수",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "example": 1
+          },
+          {
             "name": "numberOfIndividualSellers",
             "in": "query",
             "description": "개인 매도자 수 (소유권이전 한정)",
@@ -3677,6 +3688,17 @@
               "type": "boolean"
             },
             "example": false
+          },
+          {
+            "name": "numberOfSellersAsDirectSigners",
+            "in": "query",
+            "description": "개인 매도자 중 직접서명 대상자 수 (소유권이전 한정)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "example": 1
           },
           {
             "name": "hasScopeOfSecuredDebt",
@@ -6097,7 +6119,6 @@
                 "RFR",
                 "RLS",
                 "TRC",
-                "TRCP",
                 "DRW",
                 "LPA",
                 "RPA"
@@ -6191,7 +6212,6 @@
                 "RFR",
                 "RLS",
                 "TRC",
-                "TRCP",
                 "DRW",
                 "LPA",
                 "RPA"
@@ -9482,7 +9502,7 @@
         },
         "description": "세금신고 정보 저장 요청 (납부기관/번호 포함)"
       },
-      "AttachmentInfo": {
+      "RegistryProgressTaxAgencyInputAttachmentInfo": {
         "type": "object",
         "properties": {
           "powerOfAttorneyFileName": {
@@ -9492,38 +9512,57 @@
         },
         "description": "구비서류 정보"
       },
-      "PropertyInfo": {
+      "RegistryProgressTaxAgencyInputInfoResponse": {
         "type": "object",
         "properties": {
-          "propertyType": {
-            "$ref": "#/components/schemas/PropertyType"
+          "taxpayer": {
+            "$ref": "#/components/schemas/RegistryProgressTaxAgencyInputTaxPayer"
+          },
+          "registryCause": {
+            "$ref": "#/components/schemas/RegistryProgressTaxAgencyInputRegistryCauseInfo"
+          },
+          "property": {
+            "$ref": "#/components/schemas/RegistryProgressTaxAgencyInputPropertyInfo"
+          },
+          "attachment": {
+            "$ref": "#/components/schemas/RegistryProgressTaxAgencyInputAttachmentInfo"
+          }
+        },
+        "description": "세금신고 대행 입력정보"
+      },
+      "RegistryProgressTaxAgencyInputPropertyInfo": {
+        "type": "object",
+        "properties": {
+          "propertyLocation": {
+            "type": "string",
+            "description": "부동산소재지",
+            "example": "서울특별시 용산구 한강대로 10"
+          },
+          "jurisdiction": {
+            "type": "string",
+            "description": "관할자치단체",
+            "example": "서울중앙지방법원"
+          },
+          "taxableBaseAmount": {
+            "type": "number",
+            "description": "과세표준(등록가액)",
+            "example": 300000000
           },
           "propertyCount": {
             "type": "integer",
-            "description": "부동산 필지 수",
+            "description": "물건 수 (말소/변경/경정 계열일 때)",
             "format": "int32",
             "example": 2
           },
-          "propertyAddress": {
+          "taxableObject": {
             "type": "string",
-            "description": "부동산 주소 (시/군/구)",
-            "example": "서울특별시 용산구"
-          },
-          "propertyArea": {
-            "type": "number",
-            "description": "부동산 면적",
-            "example": 84.32
-          },
-          "seniorRepaymentCount": {
-            "type": "integer",
-            "description": "선순위 상환 건수",
-            "format": "int32",
-            "example": 1
+            "description": "과세물건",
+            "example": "서울특별시 용산구 한강대로 10"
           }
         },
-        "description": "부동산 정보"
+        "description": "등록물건 정보"
       },
-      "RegistryCauseInfo": {
+      "RegistryProgressTaxAgencyInputRegistryCauseInfo": {
         "type": "object",
         "properties": {
           "propertyType": {
@@ -9544,23 +9583,46 @@
         },
         "description": "등록원인 정보"
       },
-      "RegistryProgressTaxAgencyInputInfoResponse": {
+      "RegistryProgressTaxAgencyInputTaxPayer": {
         "type": "object",
         "properties": {
-          "taxpayer": {
-            "$ref": "#/components/schemas/TaxPayer"
+          "name": {
+            "type": "string",
+            "description": "성명/법인명",
+            "example": "주식회사 한빛건설"
           },
-          "registryCause": {
-            "$ref": "#/components/schemas/RegistryCauseInfo"
+          "corporationName": {
+            "type": "string",
+            "description": "구분 (개인 / 개인 외)",
+            "example": "개인 외"
           },
-          "property": {
-            "$ref": "#/components/schemas/PropertyInfo"
+          "jointOwnershipType": {
+            "type": "string",
+            "description": "공동명의 인원(등기의무자 수 - 1)",
+            "example": "1"
           },
-          "attachment": {
-            "$ref": "#/components/schemas/AttachmentInfo"
+          "registrationNumber": {
+            "type": "string",
+            "description": "주민등록번호/법인등록번호",
+            "example": "110111-1234567"
+          },
+          "businessRegistrationNumber": {
+            "type": "string",
+            "description": "사업자등록번호 표시값",
+            "example": "입력함 (110111-1234567)"
+          },
+          "mobile": {
+            "type": "string",
+            "description": "휴대전화번호/전화번호",
+            "example": "02-555-1234"
+          },
+          "address": {
+            "type": "string",
+            "description": "주소",
+            "example": "서울특별시 중구 세종대로 1"
           }
         },
-        "description": "세금신고 대행 입력정보"
+        "description": "납세자 정보 (등기의무자 정보)"
       },
       "RegistryProgressTaxAgencyItemResponse": {
         "type": "object",
@@ -9676,48 +9738,7 @@
         },
         "description": "진행단위 세금신고 정보 응답 (번호/납부기관 포함)"
       },
-      "TaxPayer": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "성명/법인명",
-            "example": "주식회사 한빛건설"
-          },
-          "corporationName": {
-            "type": "string",
-            "description": "구분 (개인 / 개인 외)",
-            "example": "개인 외"
-          },
-          "jointOwnershipType": {
-            "type": "string",
-            "description": "공동명의 인원(등기의무자 수 - 1)",
-            "example": "1"
-          },
-          "registrationNumber": {
-            "type": "string",
-            "description": "주민등록번호/법인등록번호",
-            "example": "110111-1234567"
-          },
-          "businessRegistrationNumber": {
-            "type": "string",
-            "description": "사업자등록번호 표시값",
-            "example": "입력함 (110111-1234567)"
-          },
-          "mobile": {
-            "type": "string",
-            "description": "휴대전화번호/전화번호",
-            "example": "02-555-1234"
-          },
-          "address": {
-            "type": "string",
-            "description": "주소",
-            "example": "서울특별시 중구 세종대로 1"
-          }
-        },
-        "description": "납세자 정보 (등기의무자 정보)"
-      },
-      "BondSection": {
+      "ReceiptDocumentSaveBondSection": {
         "type": "object",
         "properties": {
           "bondPurchaseAmount": {
@@ -9729,7 +9750,7 @@
         },
         "description": "국민주택채권 정보"
       },
-      "FeeSection": {
+      "ReceiptDocumentSaveFeeSection": {
         "type": "object",
         "properties": {
           "baseFee": {
@@ -9768,20 +9789,7 @@
         },
         "description": "보수료 정보"
       },
-      "ReceiptDocumentSaveRequest": {
-        "type": "object",
-        "properties": {
-          "receipts": {
-            "type": "array",
-            "description": "저장 대상 영수증 목록",
-            "items": {
-              "$ref": "#/components/schemas/ReceiptSaveItem"
-            }
-          }
-        },
-        "description": "등기 영수증 저장 요청"
-      },
-      "ReceiptSaveItem": {
+      "ReceiptDocumentSaveItem": {
         "required": ["receiptDocumentId"],
         "type": "object",
         "properties": {
@@ -9791,46 +9799,53 @@
             "format": "int64"
           },
           "fee": {
-            "$ref": "#/components/schemas/FeeSection"
+            "$ref": "#/components/schemas/ReceiptDocumentSaveFeeSection"
           },
           "tax": {
-            "$ref": "#/components/schemas/TaxSection"
+            "$ref": "#/components/schemas/ReceiptDocumentSaveTaxSection"
           },
           "bond": {
-            "$ref": "#/components/schemas/BondSection"
+            "$ref": "#/components/schemas/ReceiptDocumentSaveBondSection"
           }
         },
         "description": "영수증 저장 항목"
       },
-      "TaxSection": {
+      "ReceiptDocumentSaveRequest": {
         "type": "object",
         "properties": {
-          "registrationLicenseTax": {
-            "type": "number",
-            "description": "등록면허세"
-          },
-          "educationTax": {
-            "type": "number",
-            "description": "교육세"
-          },
-          "ruralSpecialTax": {
-            "type": "number",
-            "description": "농어촌특별세"
-          },
-          "paymentAmount": {
-            "type": "number",
-            "description": "세액 합계"
-          },
-          "exemptionReason": {
-            "type": "string",
-            "description": "비과세/면제 사유"
-          },
-          "bondPurchaseAmount": {
-            "type": "number",
-            "description": "국민주택채권 매입금액"
+          "receipts": {
+            "type": "array",
+            "description": "저장 대상 영수증 목록",
+            "items": {
+              "$ref": "#/components/schemas/ReceiptDocumentSaveItem"
+            }
           }
         },
-        "description": "세금 신고 정보"
+        "description": "등기 영수증 저장 요청"
+      },
+      "ReceiptDocumentSaveTaxSection": {
+        "type": "object",
+        "properties": {
+          "acquisitionTax": {
+            "type": "number"
+          },
+          "registrationLicenseTax": {
+            "type": "number"
+          },
+          "educationTax": {
+            "type": "number"
+          },
+          "ruralSpecialTax": {
+            "type": "number"
+          },
+          "stampTax": {
+            "type": "number"
+          },
+          "registryApplicationFee": {
+            "type": "number"
+          }
+        },
+        "description": "공과금 정보"
       },
       "ApiResult": {
         "type": "object",
@@ -9853,7 +9868,206 @@
           }
         }
       },
-      "LoanPaymentAccountItem": {
+      "LoanPaymentAccountListSaveRequest": {
+        "required": ["paymentItems"],
+        "type": "object",
+        "properties": {
+          "paymentItems": {
+            "type": "array",
+            "description": "지급계좌 리스트",
+            "items": {
+              "$ref": "#/components/schemas/LoanPaymentAccountSaveItem"
+            }
+          }
+        },
+        "description": "지급계좌 일괄 저장 요청"
+      },
+      "LoanPaymentAccountSaveItem": {
+        "required": ["paymentAmount", "paymentSubject", "paymentType"],
+        "type": "object",
+        "properties": {
+          "loanPaymentAccountId": {
+            "type": "integer",
+            "description": "지급계좌ID (신규일 경우 null)",
+            "format": "int64"
+          },
+          "paymentType": {
+            "type": "string",
+            "description": "지급구분"
+          },
+          "paymentSubject": {
+            "type": "string",
+            "description": "지급주체"
+          },
+          "branchPaymentAccountId": {
+            "type": "integer",
+            "description": "법무대리인 지급계좌ID",
+            "format": "int64"
+          },
+          "seniorLoanId": {
+            "type": "integer",
+            "description": "선순위 대출ID",
+            "format": "int64"
+          },
+          "seniorMortgageBank": {
+            "type": "string",
+            "description": "선순위 설정 금융기관"
+          },
+          "seniorMaximumCreditAmount": {
+            "type": "number",
+            "description": "선순위 채권최고액"
+          },
+          "loanRedemptionBranch": {
+            "type": "string",
+            "description": "대출상환 취급지점"
+          },
+          "paymentBank": {
+            "type": "string",
+            "description": "지급 금융기관"
+          },
+          "accountNumber": {
+            "type": "string",
+            "description": "지급 계좌번호"
+          },
+          "accountHolder": {
+            "type": "string",
+            "description": "예금주"
+          },
+          "paymentAmount": {
+            "type": "number",
+            "description": "지급금액"
+          },
+          "cancellationFee": {
+            "type": "number",
+            "description": "말소비용"
+          }
+        },
+        "description": "지급계좌 항목"
+      },
+      "LoanPaymentAccountCostSummary": {
+        "type": "object",
+        "properties": {
+          "loanInstitution": {
+            "$ref": "#/components/schemas/LoanPaymentAccountCostSummaryLoanInstitution"
+          },
+          "buyer": {
+            "$ref": "#/components/schemas/LoanPaymentAccountCostSummaryBuyer"
+          },
+          "seller": {
+            "$ref": "#/components/schemas/LoanPaymentAccountCostSummarySeller"
+          },
+          "debtor": {
+            "$ref": "#/components/schemas/LoanPaymentAccountCostSummaryDebtor"
+          }
+        },
+        "description": "지급 비용 요약"
+      },
+      "LoanPaymentAccountCostSummaryBuyer": {
+        "type": "object",
+        "properties": {
+          "tradeAmount": {
+            "type": "number"
+          },
+          "downPaymentAmount": {
+            "type": "number"
+          },
+          "loanPaymentAmount": {
+            "type": "number"
+          },
+          "loanBalanceAmount": {
+            "type": "number"
+          },
+          "buyerExpense": {
+            "type": "number"
+          },
+          "buyerRefund": {
+            "type": "number"
+          }
+        },
+        "description": "매수자 요약"
+      },
+      "LoanPaymentAccountCostSummaryDebtor": {
+        "type": "object",
+        "properties": {
+          "loanPrincipal": {
+            "type": "number"
+          },
+          "loanRepaymentAmount": {
+            "type": "number"
+          },
+          "debtorReceivable": {
+            "type": "number"
+          },
+          "debtorExpense": {
+            "type": "number"
+          },
+          "cancellationFee": {
+            "type": "number"
+          }
+        },
+        "description": "채무자 요약"
+      },
+      "LoanPaymentAccountCostSummaryLoanInstitution": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LoanPaymentAccountCostSummaryLoanInstitutionItem"
+            }
+          },
+          "totalScheduledAmount": {
+            "type": "number"
+          }
+        },
+        "description": "대출금융기관 요약"
+      },
+      "LoanPaymentAccountCostSummaryLoanInstitutionItem": {
+        "type": "object",
+        "properties": {
+          "paymentType": {
+            "type": "string"
+          },
+          "paymentSubject": {
+            "type": "string"
+          },
+          "paymentBank": {
+            "type": "string"
+          },
+          "accountNumber": {
+            "type": "string"
+          },
+          "scheduledPaymentAmount": {
+            "type": "number"
+          }
+        },
+        "description": "대출금융기관 행"
+      },
+      "LoanPaymentAccountCostSummarySeller": {
+        "type": "object",
+        "properties": {
+          "tradeAmount": {
+            "type": "number"
+          },
+          "downPaymentAmount": {
+            "type": "number"
+          },
+          "loanRepaymentAmount": {
+            "type": "number"
+          },
+          "sellerReceivable": {
+            "type": "number"
+          },
+          "sellerExpense": {
+            "type": "number"
+          },
+          "cancellationFee": {
+            "type": "number"
+          }
+        },
+        "description": "매도자 요약"
+      },
+      "LoanPaymentAccountDetailItem": {
         "type": "object",
         "properties": {
           "loanPaymentAccountId": {
@@ -9919,119 +10133,6 @@
         },
         "description": "지급계좌 행"
       },
-      "LoanPaymentAccountListSaveRequest": {
-        "required": ["paymentItems"],
-        "type": "object",
-        "properties": {
-          "paymentItems": {
-            "type": "array",
-            "description": "지급계좌 리스트",
-            "items": {
-              "$ref": "#/components/schemas/LoanPaymentAccountItem"
-            }
-          }
-        },
-        "description": "지급계좌 일괄 저장 요청"
-      },
-      "Buyer": {
-        "type": "object",
-        "properties": {
-          "tradeAmount": {
-            "type": "number"
-          },
-          "downPaymentAmount": {
-            "type": "number"
-          },
-          "loanPaymentAmount": {
-            "type": "number"
-          },
-          "loanBalanceAmount": {
-            "type": "number"
-          },
-          "buyerExpense": {
-            "type": "number"
-          },
-          "buyerRefund": {
-            "type": "number"
-          }
-        },
-        "description": "매수자 요약"
-      },
-      "Debtor": {
-        "type": "object",
-        "properties": {
-          "loanPrincipal": {
-            "type": "number"
-          },
-          "loanRepaymentAmount": {
-            "type": "number"
-          },
-          "debtorReceivable": {
-            "type": "number"
-          },
-          "debtorExpense": {
-            "type": "number"
-          },
-          "cancellationFee": {
-            "type": "number"
-          }
-        },
-        "description": "채무자 요약"
-      },
-      "LoanInstitution": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/LoanInstitutionItem"
-            }
-          },
-          "totalScheduledAmount": {
-            "type": "number"
-          }
-        },
-        "description": "대출금융기관 요약"
-      },
-      "LoanInstitutionItem": {
-        "type": "object",
-        "properties": {
-          "paymentType": {
-            "type": "string"
-          },
-          "paymentSubject": {
-            "type": "string"
-          },
-          "paymentBank": {
-            "type": "string"
-          },
-          "accountNumber": {
-            "type": "string"
-          },
-          "scheduledPaymentAmount": {
-            "type": "number"
-          }
-        },
-        "description": "대출금융기관 행"
-      },
-      "LoanPaymentAccountCostSummary": {
-        "type": "object",
-        "properties": {
-          "loanInstitution": {
-            "$ref": "#/components/schemas/LoanInstitution"
-          },
-          "buyer": {
-            "$ref": "#/components/schemas/Buyer"
-          },
-          "seller": {
-            "$ref": "#/components/schemas/Seller"
-          },
-          "debtor": {
-            "$ref": "#/components/schemas/Debtor"
-          }
-        },
-        "description": "지급 비용 요약"
-      },
       "LoanPaymentAccountDetailResponse": {
         "type": "object",
         "properties": {
@@ -10059,7 +10160,7 @@
             "type": "array",
             "description": "지급 계좌 목록",
             "items": {
-              "$ref": "#/components/schemas/LoanPaymentAccountItem"
+              "$ref": "#/components/schemas/LoanPaymentAccountDetailItem"
             }
           },
           "costSummary": {
@@ -10068,73 +10169,41 @@
         },
         "description": "대출금 지급계좌 상세 응답"
       },
-      "Seller": {
+      "ProgressHousingBondSaveItem": {
+        "required": ["registryType"],
         "type": "object",
         "properties": {
-          "tradeAmount": {
-            "type": "number"
+          "registryType": {
+            "type": "string",
+            "description": "등기유형",
+            "example": "MORTGAGE",
+            "enum": [
+              "OWNERSHIP_TRANSFER",
+              "MORTGAGE",
+              "SURFACE_RIGHT",
+              "CHANGE",
+              "CORRECTION",
+              "MORTGAGE_CANCELLATION",
+              "SURFACE_RIGHT_CANCELLATION"
+            ]
           },
-          "downPaymentAmount": {
-            "type": "number"
+          "discountRate": {
+            "type": "number",
+            "description": "채권 할인율(소수 그대로)",
+            "example": 0.084231
           },
-          "loanRepaymentAmount": {
-            "type": "number"
+          "bondDiscountAmount": {
+            "type": "number",
+            "description": "채권 할인 금액",
+            "example": 150000
           },
-          "sellerReceivable": {
-            "type": "number"
-          },
-          "sellerExpense": {
-            "type": "number"
-          },
-          "cancellationFee": {
-            "type": "number"
+          "housingBondNumber": {
+            "type": "string",
+            "description": "국민주택채권 번호",
+            "example": "123412341234"
           }
         },
-        "description": "매도자 요약"
-      },
-      "Item": {
-        "type": "object",
-        "properties": {
-          "noticeId": {
-            "type": "integer",
-            "description": "번호",
-            "format": "int64",
-            "example": 152
-          },
-          "bankName": {
-            "type": "string",
-            "description": "금융기관",
-            "example": "뱅글은행"
-          },
-          "category": {
-            "type": "string",
-            "description": "공지 분류(enum)",
-            "example": "SYSTEM_IMPROVEMENT",
-            "enum": ["SYSTEM_IMPROVEMENT", "SYSTEM_MAINTENANCE", "ETC"]
-          },
-          "isImportant": {
-            "type": "boolean",
-            "description": "중요 여부",
-            "example": true
-          },
-          "title": {
-            "type": "string",
-            "description": "제목",
-            "example": "[중요] 서비스 안정화를 위한 x월 시스템 개선 작업 안내"
-          },
-          "noticeDate": {
-            "type": "string",
-            "description": "작성일자",
-            "format": "date",
-            "example": "2025-05-08"
-          },
-          "isNew": {
-            "type": "boolean",
-            "description": "신규 표시 여부",
-            "example": true
-          }
-        },
-        "description": "공지사항 항목"
+        "description": "국민주택채권 저장 항목"
       },
       "ProgressHousingBondSaveRequest": {
         "required": ["items"],
@@ -10145,7 +10214,7 @@
             "type": "array",
             "description": "등기유형별 국민주택채권 저장 항목 목록",
             "items": {
-              "$ref": "#/components/schemas/Item"
+              "$ref": "#/components/schemas/ProgressHousingBondSaveItem"
             }
           }
         },
@@ -10227,23 +10296,21 @@
       "ObligorInfo": {
         "type": "object",
         "properties": {
-          "obligorCount": {
-            "type": "integer",
-            "description": "등기의무자 수",
-            "format": "int32",
-            "example": 1
+          "partyType": {
+            "type": "string",
+            "description": "당사자 구분 (법인/개인)"
           },
-          "obligorEcertificateType": {
-            "$ref": "#/components/schemas/EcertificateType"
+          "name": {
+            "type": "string",
+            "description": "성명(명칭)"
           },
-          "obligorCertificateType": {
-            "$ref": "#/components/schemas/CertificateType"
+          "registrationNumber": {
+            "type": "string",
+            "description": "등록번호"
           },
-          "addressChangeCount": {
-            "type": "integer",
-            "description": "주소 이전 건수",
-            "format": "int32",
-            "example": 0
+          "purpose": {
+            "type": "string",
+            "description": "매입용도"
           }
         },
         "description": "등기의무자 정보"
@@ -10529,7 +10596,7 @@
             "type": "string",
             "description": "등기 방식",
             "example": "ELECTRONIC",
-            "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
+            "enum": ["ELECTRONIC", "E_FORM", "PAPER", "BANK_REQUEST"]
           },
           "receiptRegistryOffice": {
             "type": "string",
@@ -11998,7 +12065,7 @@
             "minLength": 1,
             "type": "string",
             "description": "선순위 설정 금융기관",
-            "example": "주식회사뱅클클리어"
+            "example": "주식회사뱅크클리어"
           },
           "seniorMortgageBranch": {
             "minLength": 1,
@@ -12211,7 +12278,7 @@
           "seniorMortgageBank": {
             "type": "string",
             "description": "선순위 설정 금융기관",
-            "example": "주식회사뱅클클리어"
+            "example": "주식회사뱅크클리어"
           },
           "seniorMortgageBranch": {
             "type": "string",
@@ -12334,7 +12401,7 @@
           "rightHolderName": {
             "type": "string",
             "description": "설정 금융기관",
-            "example": "주식회사뱅클클리어"
+            "example": "주식회사뱅크클리어"
           },
           "rightHolderBranch": {
             "type": "string",
@@ -12448,7 +12515,6 @@
               "RFR",
               "RLS",
               "TRC",
-              "TRCP",
               "DRW",
               "LPA",
               "RPA"
@@ -12584,7 +12650,6 @@
               "RFR",
               "RLS",
               "TRC",
-              "TRCP",
               "DRW",
               "LPA",
               "RPA"
@@ -12593,7 +12658,7 @@
           "registryMethod": {
             "type": "string",
             "description": "등기방식",
-            "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
+            "enum": ["ELECTRONIC", "E_FORM", "PAPER", "BANK_REQUEST"]
           },
           "registryType": {
             "type": "string",
@@ -13723,7 +13788,7 @@
         "type": "string",
         "description": "등기방식",
         "example": "ELECTRONIC",
-        "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
+        "enum": ["ELECTRONIC", "E_FORM", "PAPER", "BANK_REQUEST"]
       },
       "EstimateSubmitResponse": {
         "type": "object",
@@ -13781,13 +13846,7 @@
         "enum": ["BEFORE_SUBMISSION", "AFTER_SUBMISSION"]
       },
       "RegistryApplicationCreateRequest": {
-        "required": [
-          "adminInfoLinkTime",
-          "registryCause",
-          "registryManagementNumber",
-          "registryMethod",
-          "registryType"
-        ],
+        "required": ["registryCause", "registryManagementNumber", "registryMethod", "registryType"],
         "type": "object",
         "properties": {
           "registryManagementNumber": {
@@ -13964,7 +14023,7 @@
         },
         "description": "세금신고 정보 저장 요청"
       },
-      "ApplicationFeeSection": {
+      "TaxPopupSaveApplicationFeeSection": {
         "type": "object",
         "properties": {
           "applicationFee": {
@@ -13991,13 +14050,43 @@
         "type": "object",
         "properties": {
           "tax": {
-            "$ref": "#/components/schemas/TaxSection"
+            "$ref": "#/components/schemas/TaxPopupSaveTaxSection"
           },
           "applicationFee": {
-            "$ref": "#/components/schemas/ApplicationFeeSection"
+            "$ref": "#/components/schemas/TaxPopupSaveApplicationFeeSection"
           }
         },
         "description": "세금 팝업 저장 응답"
+      },
+      "TaxPopupSaveTaxSection": {
+        "type": "object",
+        "properties": {
+          "registrationLicenseTax": {
+            "type": "number",
+            "description": "등록면허세"
+          },
+          "educationTax": {
+            "type": "number",
+            "description": "교육세"
+          },
+          "ruralSpecialTax": {
+            "type": "number",
+            "description": "농어촌특별세"
+          },
+          "paymentAmount": {
+            "type": "number",
+            "description": "세액 합계"
+          },
+          "exemptionReason": {
+            "type": "string",
+            "description": "비과세/면제 사유"
+          },
+          "bondPurchaseAmount": {
+            "type": "number",
+            "description": "국민주택채권 매입금액"
+          }
+        },
+        "description": "세금 신고 정보"
       },
       "BondPropertyItem": {
         "required": ["propertyUniqueNumber", "request"],
@@ -14257,7 +14346,7 @@
           "filingFeeRegistryMethod": {
             "type": "string",
             "description": "등기신청수수료 등기 방식",
-            "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
+            "enum": ["ELECTRONIC", "E_FORM", "PAPER", "BANK_REQUEST"]
           },
           "filingFeeRegistryCount": {
             "type": "integer",
@@ -15197,13 +15286,11 @@
             "example": 1
           },
           "creationYear": {
-            "minLength": 1,
             "type": "string",
             "description": "작성년도",
             "example": "2025"
           },
           "creationNumber": {
-            "minLength": 1,
             "type": "string",
             "description": "작성번호",
             "example": "122"
@@ -15274,7 +15361,7 @@
             "type": "string",
             "description": "등기방식",
             "example": "E_FORM",
-            "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
+            "enum": ["ELECTRONIC", "E_FORM", "PAPER", "BANK_REQUEST"]
           },
           "adminInfoLinkTime": {
             "type": "string",
@@ -15392,6 +15479,27 @@
         },
         "description": "당사자 정보"
       },
+      "PropertyInfo": {
+        "type": "object",
+        "properties": {
+          "propertyUniqueNumber": {
+            "type": "string",
+            "description": "부동산고유번호",
+            "example": "27019537700605"
+          },
+          "propertyType": {
+            "type": "string",
+            "description": "부동산구분",
+            "example": "토지"
+          },
+          "propertyAddress": {
+            "type": "string",
+            "description": "부동산주소",
+            "example": "서울특별시 용산구 이태원동 225-39"
+          }
+        },
+        "description": "부동산 정보"
+      },
       "RegistryApplicationAdminInfoRequestResponse": {
         "type": "object",
         "properties": {
@@ -15507,7 +15615,7 @@
             "type": "string",
             "description": "등기진행방식",
             "example": "ELECTRONIC",
-            "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
+            "enum": ["ELECTRONIC", "E_FORM", "PAPER", "BANK_REQUEST"]
           },
           "registryReceiptOffice": {
             "type": "string",
@@ -15560,7 +15668,7 @@
         "description": "등기 접수 상세 조회 정보"
       },
       "RegistryApplicationUpdateRequest": {
-        "required": ["adminInfoLinkTime", "registryMethod"],
+        "required": ["registryMethod"],
         "type": "object",
         "properties": {
           "registryMethod": {
@@ -16209,39 +16317,60 @@
             "type": "array",
             "description": "세금신고 대행 테이블 행 목록",
             "items": {
-              "$ref": "#/components/schemas/Row"
+              "$ref": "#/components/schemas/RegistryProgressTaxAgencyTableRow"
             }
           }
         },
         "description": "세금신고 대행 작업 프로세스 테이블 응답"
       },
-      "Row": {
+      "RegistryProgressTaxAgencyTableRow": {
         "type": "object",
         "properties": {
           "registryType": {
-            "$ref": "#/components/schemas/RegistryType"
-          },
-          "purchaseType": {
-            "$ref": "#/components/schemas/PurchaseType"
-          },
-          "purchaseTargetAmount": {
-            "type": "number",
-            "description": "매입대상금액(면제 제외 합산)"
-          },
-          "bondPurchaseAmount": {
-            "type": "number",
-            "description": "채권매입금액(면제 제외 합산)"
-          },
-          "bondDiscountAmount": {
-            "type": "number",
-            "description": "채권할인금액"
-          },
-          "housingBondNumber": {
             "type": "string",
-            "description": "국민주택채권번호 (채권면제 시 '-')"
+            "description": "등기유형",
+            "example": "MORTGAGE",
+            "enum": [
+              "OWNERSHIP_TRANSFER",
+              "MORTGAGE",
+              "SURFACE_RIGHT",
+              "CHANGE",
+              "CORRECTION",
+              "MORTGAGE_CANCELLATION",
+              "SURFACE_RIGHT_CANCELLATION"
+            ]
+          },
+          "registryCause": {
+            "type": "string",
+            "description": "등기원인",
+            "example": "ESTABLISHMENT_CONTRACT",
+            "enum": [
+              "TRADE",
+              "ESTABLISHMENT_CONTRACT",
+              "ADDRESS_CHANGE",
+              "ROAD_NAME_ADDRESS",
+              "APPLICATION_ERROR",
+              "TERMINATION",
+              "NAME_CHANGE",
+              "REGISTRATION_NUMBER"
+            ]
+          },
+          "paymentAmount": {
+            "type": "number",
+            "description": "납부 금액"
+          },
+          "taxNumber": {
+            "type": "string",
+            "description": "납세 번호",
+            "example": "9900112233445566"
+          },
+          "electronicPaymentNumber": {
+            "type": "string",
+            "description": "전자납부 번호",
+            "example": "20250309123456"
           }
         },
-        "description": "국민주택채권 목록 행 정보"
+        "description": "세금신고 대행 테이블 행 정보"
       },
       "RegistryProgressSeniorLoanRepaymentItemResponse": {
         "type": "object",
@@ -16276,7 +16405,7 @@
           "rightHolderName": {
             "type": "string",
             "description": "선순위 설정 금융기관명",
-            "example": "주식회사뱅클클리어"
+            "example": "주식회사뱅크클리어"
           },
           "rightHolderBranch": {
             "type": "string",
@@ -16328,14 +16457,9 @@
       "ReceiptSummaryItem": {
         "type": "object",
         "properties": {
-          "receiptDocumentId": {
-            "type": "integer",
-            "description": "영수증ID",
-            "format": "int64"
-          },
           "registryType": {
             "type": "string",
-            "description": "등기유형 (enum name). 통합 영수증은 INTEGRATED_RECEIPT로 반환",
+            "description": "등기유형 (enum name). 통합 등기 영수증은 문자열 하드코딩로 반환",
             "example": "OWNERSHIP_TRANSFER"
           },
           "feeSubtotal": {
@@ -16604,7 +16728,19 @@
         },
         "description": "공과금 내역"
       },
-      "BusinessSection": {
+      "ReceiptDocumentFormBondSection": {
+        "type": "object",
+        "properties": {
+          "bondPurchaseAmount": {
+            "type": "number"
+          },
+          "housingBondDiscountAmount": {
+            "type": "number"
+          }
+        },
+        "description": "국민주택채권 정보"
+      },
+      "ReceiptDocumentFormBusinessSection": {
         "type": "object",
         "properties": {
           "businessRegistrationNumber": {
@@ -16628,6 +16764,45 @@
           }
         },
         "description": "사업자/입금계좌 정보"
+      },
+      "ReceiptDocumentFormFeeSection": {
+        "type": "object",
+        "properties": {
+          "baseFee": {
+            "type": "number"
+          },
+          "additionalFee": {
+            "type": "number"
+          },
+          "certificateFee": {
+            "type": "number"
+          },
+          "registryCauseDocumentFee": {
+            "type": "number"
+          },
+          "taxPaymentAgencyFee": {
+            "type": "number"
+          },
+          "bondSaleAgencyFee": {
+            "type": "number"
+          },
+          "inspectionTradeReportAgencyFee": {
+            "type": "number"
+          },
+          "confirmationDocumentFee": {
+            "type": "number"
+          },
+          "actualCost": {
+            "type": "number"
+          },
+          "otherFee": {
+            "type": "number"
+          },
+          "vat": {
+            "type": "number"
+          }
+        },
+        "description": "보수료 정보"
       },
       "ReceiptDocumentFormResponse": {
         "type": "object",
@@ -16659,24 +16834,48 @@
             "description": "부동산 표시"
           },
           "fee": {
-            "$ref": "#/components/schemas/FeeSection"
+            "$ref": "#/components/schemas/ReceiptDocumentFormFeeSection"
           },
           "tax": {
-            "$ref": "#/components/schemas/TaxSection"
+            "$ref": "#/components/schemas/ReceiptDocumentFormTaxSection"
           },
           "bond": {
-            "$ref": "#/components/schemas/BondSection"
+            "$ref": "#/components/schemas/ReceiptDocumentFormBondSection"
           },
           "businessSection": {
-            "$ref": "#/components/schemas/BusinessSection"
+            "$ref": "#/components/schemas/ReceiptDocumentFormBusinessSection"
           },
           "typeSpecific": {
-            "$ref": "#/components/schemas/TypeSpecificSection"
+            "$ref": "#/components/schemas/ReceiptDocumentFormTypeSpecificSection"
           }
         },
         "description": "등기 영수증 폼 조회 응답"
       },
-      "TypeSpecificSection": {
+      "ReceiptDocumentFormTaxSection": {
+        "type": "object",
+        "properties": {
+          "acquisitionTax": {
+            "type": "number"
+          },
+          "registrationLicenseTax": {
+            "type": "number"
+          },
+          "educationTax": {
+            "type": "number"
+          },
+          "ruralSpecialTax": {
+            "type": "number"
+          },
+          "stampTax": {
+            "type": "number"
+          },
+          "registryApplicationFee": {
+            "type": "number"
+          }
+        },
+        "description": "공과금 정보"
+      },
+      "ReceiptDocumentFormTypeSpecificSection": {
         "type": "object",
         "properties": {
           "tradeAmount": {
@@ -16853,7 +17052,7 @@
           "registryMethod": {
             "type": "string",
             "description": "등기방식",
-            "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
+            "enum": ["ELECTRONIC", "E_FORM", "PAPER", "BANK_REQUEST"]
           },
           "currentStatus": {
             "type": "string",
@@ -17104,11 +17303,39 @@
             "type": "array",
             "description": "국민주택채권 목록 행(등기유형별 집계)",
             "items": {
-              "$ref": "#/components/schemas/Row"
+              "$ref": "#/components/schemas/RegistryProgressHousingBondRow"
             }
           }
         },
         "description": "국민주택채권 목록 응답"
+      },
+      "RegistryProgressHousingBondRow": {
+        "type": "object",
+        "properties": {
+          "registryType": {
+            "$ref": "#/components/schemas/RegistryType"
+          },
+          "purchaseType": {
+            "$ref": "#/components/schemas/PurchaseType"
+          },
+          "purchaseTargetAmount": {
+            "type": "number",
+            "description": "매입대상금액(면제 제외 합산)"
+          },
+          "bondPurchaseAmount": {
+            "type": "number",
+            "description": "채권매입금액(면제 제외 합산)"
+          },
+          "bondDiscountAmount": {
+            "type": "number",
+            "description": "채권할인금액"
+          },
+          "housingBondNumber": {
+            "type": "string",
+            "description": "국민주택채권번호 (채권면제 시 '-')"
+          }
+        },
+        "description": "국민주택채권 목록 행 정보"
       },
       "RegistryProgressESignatureDocumentResponse": {
         "type": "object",
@@ -17314,7 +17541,7 @@
           "obligeeName": {
             "type": "string",
             "description": "등기권리자",
-            "example": "주식회사뱅클클리어"
+            "example": "주식회사뱅크클리어"
           },
           "filePath": {
             "type": "string",
@@ -17438,7 +17665,7 @@
           "obligeeName": {
             "type": "string",
             "description": "등기권리자",
-            "example": "주식회사뱅클클리어"
+            "example": "주식회사뱅크클리어"
           },
           "filePath": {
             "type": "string",
@@ -17666,7 +17893,7 @@
             "type": "string",
             "description": "등기진행방식",
             "example": "ELECTRONIC",
-            "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
+            "enum": ["ELECTRONIC", "E_FORM", "PAPER", "BANK_REQUEST"]
           },
           "registryReceiptOffice": {
             "type": "string",
@@ -18112,25 +18339,7 @@
         "example": "DELEGATED",
         "enum": ["OWNED", "DELEGATED", "NONE"]
       },
-      "EstimateInfoResponse": {
-        "type": "object",
-        "properties": {
-          "registryInfo": {
-            "$ref": "#/components/schemas/RegistryInfo"
-          },
-          "propertyInfo": {
-            "$ref": "#/components/schemas/PropertyInfo"
-          },
-          "obligorInfo": {
-            "$ref": "#/components/schemas/ObligorInfo"
-          },
-          "obligeeInfo": {
-            "$ref": "#/components/schemas/ObligeeInfo"
-          }
-        },
-        "description": "견적 기본 정보"
-      },
-      "ObligeeInfo": {
+      "EstimateInfoObligeeInfo": {
         "type": "object",
         "properties": {
           "obligeeCount": {
@@ -18156,13 +18365,62 @@
         },
         "description": "등기권리자 정보"
       },
-      "PropertyType": {
-        "type": "string",
-        "description": "부동산 구분",
-        "example": "COLLECTIVE_BUILDING",
-        "enum": ["LAND", "BUILDING", "COLLECTIVE_BUILDING"]
+      "EstimateInfoObligorInfo": {
+        "type": "object",
+        "properties": {
+          "obligorCount": {
+            "type": "integer",
+            "description": "등기의무자 수",
+            "format": "int32",
+            "example": 1
+          },
+          "obligorEcertificateType": {
+            "$ref": "#/components/schemas/EcertificateType"
+          },
+          "obligorCertificateType": {
+            "$ref": "#/components/schemas/CertificateType"
+          },
+          "addressChangeCount": {
+            "type": "integer",
+            "description": "주소 이전 건수",
+            "format": "int32",
+            "example": 0
+          }
+        },
+        "description": "등기의무자 정보"
       },
-      "RegistryInfo": {
+      "EstimateInfoPropertyInfo": {
+        "type": "object",
+        "properties": {
+          "propertyType": {
+            "$ref": "#/components/schemas/PropertyType"
+          },
+          "propertyCount": {
+            "type": "integer",
+            "description": "부동산 필지 수",
+            "format": "int32",
+            "example": 2
+          },
+          "propertyAddress": {
+            "type": "string",
+            "description": "부동산 주소 (시/군/구)",
+            "example": "서울특별시 용산구"
+          },
+          "propertyArea": {
+            "type": "number",
+            "description": "부동산 면적",
+            "example": 84.32
+          },
+          "seniorRepaymentCount": {
+            "type": "integer",
+            "description": "선순위 상환 건수",
+            "format": "int32",
+            "example": 1
+          }
+        },
+        "description": "부동산 정보"
+      },
+      "EstimateInfoRegistryInfo": {
         "type": "object",
         "properties": {
           "registryType": {
@@ -18187,6 +18445,30 @@
           }
         },
         "description": "등기 기본 정보"
+      },
+      "EstimateInfoResponse": {
+        "type": "object",
+        "properties": {
+          "registryInfo": {
+            "$ref": "#/components/schemas/EstimateInfoRegistryInfo"
+          },
+          "propertyInfo": {
+            "$ref": "#/components/schemas/EstimateInfoPropertyInfo"
+          },
+          "obligorInfo": {
+            "$ref": "#/components/schemas/EstimateInfoObligorInfo"
+          },
+          "obligeeInfo": {
+            "$ref": "#/components/schemas/EstimateInfoObligeeInfo"
+          }
+        },
+        "description": "견적 기본 정보"
+      },
+      "PropertyType": {
+        "type": "string",
+        "description": "부동산 구분",
+        "example": "COLLECTIVE_BUILDING",
+        "enum": ["LAND", "BUILDING", "COLLECTIVE_BUILDING"]
       },
       "ApplicationReceiptListItem": {
         "type": "object",
@@ -18224,7 +18506,7 @@
             "type": "string",
             "description": "등기진행방식",
             "example": "ELECTRONIC",
-            "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
+            "enum": ["ELECTRONIC", "E_FORM", "PAPER", "BANK_REQUEST"]
           },
           "registryReceiptOffice": {
             "type": "string",
@@ -18262,7 +18544,7 @@
         },
         "description": "등기 접수 정보 목록 조회 응답"
       },
-      "FilingFeeSection": {
+      "TaxPopupFilingFeeSection": {
         "type": "object",
         "properties": {
           "paymentStatus": {
@@ -18290,7 +18572,7 @@
           "registryMethod": {
             "type": "string",
             "description": "등기 방식",
-            "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
+            "enum": ["ELECTRONIC", "E_FORM", "PAPER", "BANK_REQUEST"]
           },
           "registryCount": {
             "type": "integer",
@@ -18304,7 +18586,22 @@
         },
         "description": "등기신청수수료 정보 섹션"
       },
-      "TaxBaseItem": {
+      "TaxPopupResponse": {
+        "type": "object",
+        "properties": {
+          "taxBase": {
+            "$ref": "#/components/schemas/TaxPopupTaxBaseSection"
+          },
+          "tax": {
+            "$ref": "#/components/schemas/TaxPopupTaxSection"
+          },
+          "filingFee": {
+            "$ref": "#/components/schemas/TaxPopupFilingFeeSection"
+          }
+        },
+        "description": "세금정보 응답"
+      },
+      "TaxPopupTaxBaseItem": {
         "type": "object",
         "properties": {
           "propertyUniqueNumber": {
@@ -18335,7 +18632,7 @@
         },
         "description": "부동산별 과세표준액 항목"
       },
-      "TaxBaseSection": {
+      "TaxPopupTaxBaseSection": {
         "type": "object",
         "properties": {
           "taxBaseAmount": {
@@ -18346,27 +18643,39 @@
             "type": "array",
             "description": "부동산별 과세표준액 목록",
             "items": {
-              "$ref": "#/components/schemas/TaxBaseItem"
+              "$ref": "#/components/schemas/TaxPopupTaxBaseItem"
             }
           }
         },
         "description": "과세표준액 산정 섹션",
         "nullable": true
       },
-      "TaxPopupResponse": {
+      "TaxPopupTaxSection": {
         "type": "object",
         "properties": {
-          "taxBase": {
-            "$ref": "#/components/schemas/TaxBaseSection"
+          "paymentStatus": {
+            "type": "string",
+            "description": "납부 여부",
+            "enum": ["PAYMENT", "EXEMPTION"]
           },
-          "tax": {
-            "$ref": "#/components/schemas/TaxSection"
+          "exemptionReason": {
+            "type": "string",
+            "description": "면제 사유"
           },
-          "filingFee": {
-            "$ref": "#/components/schemas/FilingFeeSection"
+          "registrationLicenseTax": {
+            "type": "number",
+            "description": "등록면허세"
+          },
+          "educationTax": {
+            "type": "number",
+            "description": "교육세"
+          },
+          "ruralSpecialTax": {
+            "type": "number",
+            "description": "농어촌특별세"
           }
         },
-        "description": "세금정보 응답"
+        "description": "세금신고 정보 섹션"
       },
       "BondPropertyItemResponse": {
         "type": "object",
@@ -18456,7 +18765,7 @@
           "registryMethod": {
             "type": "string",
             "description": "등기 방식",
-            "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
+            "enum": ["ELECTRONIC", "E_FORM", "PAPER", "BANK_REQUEST"]
           },
           "registryCount": {
             "type": "integer",
@@ -19848,7 +20157,7 @@
             "type": "string",
             "description": "등기방식",
             "example": "ELECTRONIC",
-            "enum": ["ELECTRONIC", "E_FORM", "PAPER"]
+            "enum": ["ELECTRONIC", "E_FORM", "PAPER", "BANK_REQUEST"]
           },
           "adminInfoLinkTime": {
             "type": "string",
@@ -20132,6 +20441,50 @@
           }
         },
         "description": "공지사항 상세 응답"
+      },
+      "Item": {
+        "type": "object",
+        "properties": {
+          "noticeId": {
+            "type": "integer",
+            "description": "번호",
+            "format": "int64",
+            "example": 152
+          },
+          "bankName": {
+            "type": "string",
+            "description": "금융기관",
+            "example": "뱅글은행"
+          },
+          "category": {
+            "type": "string",
+            "description": "공지 분류(enum)",
+            "example": "SYSTEM_IMPROVEMENT",
+            "enum": ["SYSTEM_IMPROVEMENT", "SYSTEM_MAINTENANCE", "ETC"]
+          },
+          "isImportant": {
+            "type": "boolean",
+            "description": "중요 여부",
+            "example": true
+          },
+          "title": {
+            "type": "string",
+            "description": "제목",
+            "example": "[중요] 서비스 안정화를 위한 x월 시스템 개선 작업 안내"
+          },
+          "noticeDate": {
+            "type": "string",
+            "description": "작성일자",
+            "format": "date",
+            "example": "2025-05-08"
+          },
+          "isNew": {
+            "type": "boolean",
+            "description": "신규 표시 여부",
+            "example": true
+          }
+        },
+        "description": "공지사항 항목"
       },
       "NoticeListResponse": {
         "type": "object",

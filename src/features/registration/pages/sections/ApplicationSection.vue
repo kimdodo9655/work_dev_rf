@@ -90,6 +90,12 @@
     <button class="add-first-btn" @click="handleAddTab">첫 등기신청서 추가</button>
   </div>
 
+  <Transition name="toast">
+    <div v-if="successToastMessage" class="success-toast">
+      {{ successToastMessage }}
+    </div>
+  </Transition>
+
   <!-- 등기권리증 정보 등록 모달 -->
   <CaseCertInfoRegModal
     v-if="showCertModal && certModalApplicationId"
@@ -112,6 +118,30 @@
       </div>
     </div>
   </div>
+
+  <CaseTypeAddModal
+    v-if="showAddModal"
+    :registry-management-number="registryManagementNumber"
+    :existing-forms="tabs"
+    @close="closeAddModal"
+    @saved="handleAddSaved"
+  />
+
+  <CaseTypeAddModal
+    v-if="showEditModal && activeApplicationId && document"
+    mode="edit"
+    :application-id="activeApplicationId"
+    :registry-management-number="registryManagementNumber"
+    :existing-forms="tabs"
+    :initial-values="{
+      registryType: document.registryType,
+      registryCause: document.registryCause,
+      registryMethod: document.registryMethod,
+      adminInfoLinkTime: document.adminInfoLinkTime
+    }"
+    @close="closeEditModal"
+    @saved="handleEditSaved"
+  />
 </template>
 
 <script setup lang="ts">
@@ -120,6 +150,7 @@ import { toRef } from 'vue'
 import ApplicationPaperPreview from '@/features/registration/components/ApplicationPaperPreview.vue'
 import { useApplicationSection } from '@/features/registration/composables/useApplicationSection'
 import CaseCertInfoRegModal from '@/features/registration/modals/application/CaseCertInfoRegModal.vue'
+import CaseTypeAddModal from '@/features/registration/modals/application/CaseTypeAddModal.vue'
 import SectionApiPreviewModal from '@/features/registration/modals/application/SectionApiPreviewModal.vue'
 
 interface Props {
@@ -135,7 +166,9 @@ const {
   activeSectionTitle,
   canDeleteTab,
   certModalApplicationId,
+  closeAddModal,
   closeCertModal,
+  closeEditModal,
   closeSectionModal,
   displayAdminInfoLinkTime,
   displayRegistryCause,
@@ -147,16 +180,278 @@ const {
   documentErrorMessage,
   documentLoading,
   handleAddTab,
+  handleAddSaved,
   handleDeleteTab,
+  handleEditSaved,
   handleEditRegistryMethod,
   handleSectionClick,
   isDeletingTab,
   selectTab,
+  showAddModal,
   showCertModal,
+  showEditModal,
   showSectionModal,
+  successToastMessage,
   tabs
 } = useApplicationSection({
   registryManagementNumber: toRef(props, 'registryManagementNumber'),
   isOpen: toRef(props, 'isOpen')
 })
 </script>
+
+<style scoped lang="scss">
+.application-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tabs-container {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.tabs-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f8fafc;
+  overflow-x: auto;
+}
+
+.tab-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  background: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tab-item.active {
+  border-color: #0284c7;
+  background: #e0f2fe;
+  color: #0f172a;
+}
+
+.tab-label {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.tab-close-btn,
+.tab-add-btn,
+.edit-btn,
+.add-first-btn {
+  border: 0;
+  cursor: pointer;
+}
+
+.tab-close-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.tab-close-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tab-add-btn,
+.add-first-btn {
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: #0ea5e9;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.tab-content {
+  padding: 18px;
+}
+
+.info-table-wrapper {
+  overflow-x: auto;
+}
+
+.info-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.info-table th,
+.info-table td {
+  padding: 14px 12px;
+  border: 1px solid #e5e7eb;
+  text-align: left;
+  font-size: 14px;
+}
+
+.info-table th {
+  background: #f8fafc;
+  color: #374151;
+}
+
+.editable-cell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.edit-btn {
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.sections-container {
+  margin-top: 18px;
+}
+
+.sections-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.section-btn {
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 20px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.muted {
+  color: #6b7280;
+}
+
+.error {
+  color: #b91c1c;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(17, 24, 39, 0.45);
+}
+
+.modal-container {
+  width: min(1000px, calc(100vw - 32px));
+  max-height: calc(100vh - 40px);
+  overflow: auto;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.24);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.modal-close {
+  border: 0;
+  background: transparent;
+  font-size: 34px;
+  color: #9ca3af;
+  cursor: pointer;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.success-toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1300;
+  padding: 14px 18px;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.92);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.2);
+}
+
+.toast-enter-active,
+.toast-leave-active {
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.toast-enter-from,
+.toast-leave-to {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+@media (max-width: 768px) {
+  .tabs-header {
+    padding: 10px;
+  }
+
+  .tab-content {
+    padding: 14px;
+  }
+
+  .editable-cell {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .success-toast {
+    right: 16px;
+    left: 16px;
+    bottom: 16px;
+  }
+}
+</style>

@@ -116,13 +116,13 @@ export interface ApiResult {
 }
 
 /** 국민주택채권 정보 */
-export interface BondSection {
+export interface ReceiptDocumentFormBondSection {
   bondPurchaseAmount?: number
   housingBondDiscountAmount?: number
 }
 
 /** 사업자/입금계좌 정보 */
-export interface BusinessSection {
+export interface ReceiptDocumentFormBusinessSection {
   businessRegistrationNumber?: string
   officeAddress?: string
   businessName?: string
@@ -132,7 +132,7 @@ export interface BusinessSection {
 }
 
 /** 보수료 정보 */
-export interface FeeSection {
+export interface ReceiptDocumentFormFeeSection {
   baseFee?: number
   additionalFee?: number
   certificateFee?: number
@@ -244,11 +244,11 @@ export interface ReceiptDocumentFormResponse {
   creationDate?: string
   /** 부동산 표시 */
   propertyDescription?: string
-  fee?: FeeSection
-  tax?: TaxSection
-  bond?: BondSection
-  businessSection?: BusinessSection
-  typeSpecific?: TypeSpecificSection
+  fee?: ReceiptDocumentFormFeeSection
+  tax?: ReceiptDocumentFormTaxSection
+  bond?: ReceiptDocumentFormBondSection
+  businessSection?: ReceiptDocumentFormBusinessSection
+  typeSpecific?: ReceiptDocumentFormTypeSpecificSection
 }
 
 /** 등기 영수증 목록 응답 */
@@ -261,22 +261,20 @@ export interface ReceiptDocumentListResponse {
 /** 등기 영수증 저장 요청 */
 export interface ReceiptDocumentSaveRequest {
   /** 저장 대상 영수증 목록 */
-  receipts?: ReceiptSaveItem[]
+  receipts?: ReceiptDocumentSaveItem[]
 }
 
 /** 영수증 저장 항목 */
-export interface ReceiptSaveItem {
+export interface ReceiptDocumentSaveItem {
   /** 영수증ID */
   receiptDocumentId: number
-  fee?: FeeSection
-  tax?: TaxSection
-  bond?: BondSection
+  fee?: ReceiptDocumentSaveFeeSection
+  tax?: ReceiptDocumentSaveTaxSection
+  bond?: ReceiptDocumentSaveBondSection
 }
 
 /** 영수증 요약 항목 */
 export interface ReceiptSummaryItem {
-  /** 영수증ID */
-  receiptDocumentId?: number
   /** 등기유형 */
   registryType?: string
   /** 보수료 소계 */
@@ -302,18 +300,17 @@ export interface SummaryTotals {
 }
 
 /** 공과금 정보 */
-export interface TaxSection {
-  /** 면제사유 */
-  exemptionReason?: string
-  paymentAmount?: number
-  bondPurchaseAmount?: number
+export interface ReceiptDocumentFormTaxSection {
+  acquisitionTax?: number
   registrationLicenseTax?: number
   educationTax?: number
   ruralSpecialTax?: number
+  stampTax?: number
+  registryApplicationFee?: number
 }
 
 /** 의뢰 업무별 추가 정보 */
-export interface TypeSpecificSection {
+export interface ReceiptDocumentFormTypeSpecificSection {
   tradeAmount?: number
   standardMarketPrice?: number
   bondPurchaseAmount?: number
@@ -323,4 +320,30 @@ export interface TypeSpecificSection {
   correctionCount?: number
   cancellationCount?: number
   propertyDescription?: string
+}
+
+export interface ReceiptDocumentSaveBondSection {
+  bondPurchaseAmount?: number
+  housingBondDiscountAmount?: number
+}
+export interface ReceiptDocumentSaveFeeSection {
+  baseFee?: number
+  additionalFee?: number
+  certificateFee?: number
+  registryCauseDocumentFee?: number
+  taxPaymentAgencyFee?: number
+  bondSaleAgencyFee?: number
+  inspectionTradeReportAgencyFee?: number
+  confirmationDocumentFee?: number
+  actualCost?: number
+  otherFee?: number
+  vat?: number
+}
+export interface ReceiptDocumentSaveTaxSection {
+  acquisitionTax?: number
+  registrationLicenseTax?: number
+  educationTax?: number
+  ruralSpecialTax?: number
+  stampTax?: number
+  registryApplicationFee?: number
 }

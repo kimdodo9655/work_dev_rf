@@ -28,7 +28,7 @@
                 <td>{{ getRegistryTypeName(item.registryType) }}</td>
                 <td>{{ getRegistryCauseName(item.registryCause) }}</td>
                 <td>{{ getRegistryMethodName(item.registryMethod) }}</td>
-                <td>{{ item.establishmentJurisdictionOffice ?? '-' }}</td>
+                <td>{{ item.registryReceiptOffice ?? '-' }}</td>
                 <td>{{ item.creationYear ?? '-' }}</td>
                 <td>{{ item.creationNumber ?? '-' }}</td>
                 <td>
@@ -50,22 +50,12 @@ import { registryAdminConsentAPI } from '@/api/services/registry'
 import { useCodeReplacer } from '@/composables/utils/useCodeReplacer'
 import { useErrorHandler } from '@/composables/utils/useErrorHandler'
 import { useThrottle } from '@/composables/utils/useThrottle'
+import type { ApplicationAdminInfoRequestListItem } from '@/types'
 import { extractArrayByKeys } from '@/utils/apiPayload'
 
 interface Props {
   registryManagementNumber: string
   isOpen: boolean
-}
-
-interface AdminInfoRequest {
-  applicationId: number
-  registryType: string
-  registryCause: string
-  registryMethod: string
-  establishmentJurisdictionOffice: string | null
-  creationYear: string | null
-  creationNumber: string | null
-  adminInfoRequestId: number
 }
 
 const props = defineProps<Props>()
@@ -78,21 +68,21 @@ const { getErrorMessage } = useErrorHandler()
 const throttle = useThrottle(1000)
 const loading = ref(false)
 const errorMessage = ref('')
-const list = ref<AdminInfoRequest[]>([])
+const list = ref<ApplicationAdminInfoRequestListItem[]>([])
 
-function getRegistryTypeName(type: string): string {
+function getRegistryTypeName(type?: string): string {
   return formatCodeLabel(type, 'registryTypes')
 }
 
-function getRegistryCauseName(cause: string): string {
+function getRegistryCauseName(cause?: string): string {
   return formatCodeLabel(cause, 'registryCauses')
 }
 
-function getRegistryMethodName(method: string): string {
+function getRegistryMethodName(method?: string): string {
   return formatCodeLabel(method, 'registryMethods')
 }
 
-function handleDetail(item: AdminInfoRequest) {
+function handleDetail(item: ApplicationAdminInfoRequestListItem) {
   // TODO: 행정정보 요청 상세 화면 또는 상세 모달 연결
   void item
 }
@@ -112,7 +102,7 @@ async function fetchData() {
       const res = await registryAdminConsentAPI.getList({
         registryManagementNumber: props.registryManagementNumber
       })
-      list.value = extractArrayByKeys<AdminInfoRequest>(res, [
+      list.value = extractArrayByKeys<ApplicationAdminInfoRequestListItem>(res, [
         'applicationAdminInfoRequest',
         'items',
         'content'
