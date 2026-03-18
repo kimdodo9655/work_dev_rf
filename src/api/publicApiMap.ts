@@ -1,9 +1,4 @@
 /**
- * 문서 경로: `@/src/api/publicApiMap.ts`
- * 문서 제목: API 모듈: public-api-map
- */
-
-/**
  * Public API map generated from openapi.json.
  * Rule: operation summary contains "🅿️".
  * Do not edit manually.
@@ -34,6 +29,7 @@ export const PUBLIC_API_OPERATIONS = [
   'GET /api/codes/file-progress-document-types',
   'GET /api/codes/file-registry-types',
   'GET /api/codes/file-request-document-types',
+  'GET /api/codes/notice-category',
   'GET /api/codes/organization-statuses',
   'GET /api/codes/organization-types',
   'GET /api/codes/ownership-types',
@@ -60,6 +56,7 @@ export const PUBLIC_API_OPERATIONS = [
   'GET /api/codes/user-role-levels',
   'GET /api/codes/user-statuses',
   'GET /api/codes/work-types',
+  'GET /api/codes/workflow-notification-event',
   'GET /api/organizations/{organizationId}/branches/{branchId}/documents',
   'GET /api/organizations/{organizationId}/branches/{branchId}/documents/download',
   'GET /api/organizations/{organizationId}/branches/{branchId}/documents/download/base64',
@@ -68,6 +65,9 @@ export const PUBLIC_API_OPERATIONS = [
   'GET /api/users/check-email',
   'GET /api/users/check-login-id',
   'PATCH /api/registry/rpa/user-tasks/{taskToken}/result',
+  'POST /api/admin/crypto/decrypt',
+  'POST /api/admin/crypto/encrypt',
+  'POST /api/admin/crypto/hash',
   'POST /api/auth/email-verify',
   'POST /api/auth/email-verify/validate',
   'POST /api/auth/login',

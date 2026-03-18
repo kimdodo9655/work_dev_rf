@@ -197,7 +197,8 @@
   },
   "eSignatureMethods": {
     "DELEGATED": "위임서명",
-    "DIRECT": "직접서명"
+    "DIRECT": "직접서명",
+    "NONE": "해당사항없음"
   },
   "eSignatureStatuses": {
     "COMPLETED": "서명완료",

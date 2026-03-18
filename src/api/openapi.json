@@ -9399,12 +9399,6 @@
               "PRIOR_REGISTRY_LINK"
             ]
           },
-          "isUseCertificatePassword": {
-            "type": "boolean"
-          },
-          "specialNote": {
-            "type": "string"
-          },
           "confirmationDocumentType": {
             "type": "string",
             "enum": [
@@ -9414,6 +9408,12 @@
               "FOREIGN_REGISTRATION",
               "DOMESTIC_RESIDENCE_REPORT"
             ]
+          },
+          "isUseCertificatePassword": {
+            "type": "boolean"
+          },
+          "specialNote": {
+            "type": "string"
           }
         },
         "description": "등기권리증 목록"
@@ -9541,7 +9541,7 @@
           "jurisdiction": {
             "type": "string",
             "description": "관할자치단체",
-            "example": "서울중앙지방법원"
+            "example": "서울특별시 용산구 한강대로"
           },
           "taxableBaseAmount": {
             "type": "number",
@@ -10667,7 +10667,7 @@
           "registrationNumber": {
             "type": "string",
             "description": "(주민)등록번호",
-            "example": "801010-1234567"
+            "example": "8010101234567"
           },
           "registryHandlingBranch": {
             "type": "string",
@@ -17382,7 +17382,7 @@
             "type": "string",
             "description": "서명 방식 코드",
             "example": "DIRECT",
-            "enum": ["DIRECT", "DELEGATED"]
+            "enum": ["DIRECT", "DELEGATED", "NONE"]
           },
           "signatureMethodName": {
             "type": "string",

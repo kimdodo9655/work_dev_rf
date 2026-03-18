@@ -125,7 +125,9 @@ function validateCodeResponseKeys(codeEndpoints) {
     throw new Error(
       [
         'OpenAPI 공통코드 키와 CodeResponse 인터페이스가 일치하지 않습니다.',
-        missingInCodeTypes.length > 0 ? `- missingInCodeTypes: ${missingInCodeTypes.join(', ')}` : '',
+        missingInCodeTypes.length > 0
+          ? `- missingInCodeTypes: ${missingInCodeTypes.join(', ')}`
+          : '',
         extraInCodeTypes.length > 0 ? `- extraInCodeTypes: ${extraInCodeTypes.join(', ')}` : ''
       ]
         .filter(Boolean)

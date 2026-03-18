@@ -115,7 +115,7 @@ export interface RegistryProgressESignatureResponse {
   /** 성명(명칭) */
   name?: string
   /** 서명 방식 코드 */
-  signatureMethod?: 'DIRECT' | 'DELEGATED'
+  signatureMethod?: 'DIRECT' | 'DELEGATED' | 'NONE'
   /** 서명 방식명 */
   signatureMethodName?: string
   /** 서명 상태 코드 */
