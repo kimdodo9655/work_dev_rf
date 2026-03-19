@@ -380,12 +380,13 @@ async function validateRequiredFields() {
 
 async function confirmDuplicateRegistryTypeIfNeeded() {
   const hasSameRegistryType = props.existingForms.some(
-    (item) => item.registryType && item.registryType === form.registryType
+    (item) =>
+      item.registryRole === 'MAIN' && item.registryType && item.registryType === form.registryType
   )
 
   if (!hasSameRegistryType) return
 
-  // 현재 API는 별도 복사 여부 플래그를 받지 않으므로, 기획서상의 확인 절차만 먼저 맞춘다.
+  // TODO: 현재 API는 별도 복사 여부 플래그를 받지 않으므로, 기획서상의 확인 절차만 먼저 맞춘다.
   await confirm({
     title: '데이터 복사 여부',
     message: '기존에 등록된 등기유형 정보가 있습니다.\n기존 등기유형 정보를 복사하시겠습니까?',

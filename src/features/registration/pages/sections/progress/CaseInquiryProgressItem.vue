@@ -21,7 +21,7 @@
               <td colspan="4" class="empty-cell">조회된 목록이 없습니다.</td>
             </tr>
             <tr v-for="(row, idx) in rows" :key="`case-${idx}-${row.propertyUniqueNumber ?? idx}`">
-              <td>{{ row.propertyUniqueNumber ?? '-' }}</td>
+              <td>{{ formatPropertyUniqueNumber(row.propertyUniqueNumber) }}</td>
               <td>{{ codeLabel(row.propertyType, 'propertyTypes') }}</td>
               <td>{{ row.propertyAddress ?? '-' }}</td>
               <td>
@@ -41,6 +41,7 @@
 
 <script setup lang="ts">
 import type { CaseInquiryListItem } from '@/types'
+import { formatPropertyUniqueNumber } from '@/utils/format'
 
 interface Props {
   rows: CaseInquiryListItem[]

@@ -154,6 +154,7 @@ const rows = computed<DisplayRow[]>(() => {
         ['name', '성명'],
         ['registrationNumber', '등록번호'],
         ['address', '주소'],
+        ['addressDetail', '상세주소'],
         ['share', '지분']
       ])
     ),
@@ -170,6 +171,7 @@ const rows = computed<DisplayRow[]>(() => {
         ['name', '성명(명칭)'],
         ['registrationNumber', '등록번호'],
         ['address', '주소'],
+        ['addressDetail', '상세주소'],
         ['share', '지분'],
         ['holdingShare', '보유 지분'],
         ['transferShare', '이전 지분'],
@@ -185,6 +187,7 @@ const rows = computed<DisplayRow[]>(() => {
         ['name', '성명(명칭)'],
         ['registrationNumber', '등록번호'],
         ['address', '주소'],
+        ['addressDetail', '상세주소'],
         ['share', '지분'],
         ['holdingShare', '보유 지분'],
         ['transferShare', '이전 지분'],

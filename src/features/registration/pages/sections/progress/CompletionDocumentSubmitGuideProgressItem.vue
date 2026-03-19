@@ -27,7 +27,7 @@
                 v-for="(row, idx) in fullCertificateRows"
                 :key="`full-cert-${idx}-${row.propertyUniqueNumber ?? idx}`"
               >
-                <td>{{ row.propertyUniqueNumber ?? '-' }}</td>
+                <td>{{ formatPropertyUniqueNumber(row.propertyUniqueNumber) }}</td>
                 <td>{{ codeLabel(row.propertyType, 'propertyTypes') }}</td>
                 <td>{{ row.jurisdictionRegistryOffice ?? '-' }}</td>
                 <td>{{ row.propertyAddress ?? '-' }}</td>
@@ -58,7 +58,7 @@
                 :key="`post-cert-${idx}-${row.propertyUniqueNumber ?? idx}`"
               >
                 <td>{{ row.documentName ?? '-' }}</td>
-                <td>{{ row.propertyUniqueNumber ?? '-' }}</td>
+                <td>{{ formatPropertyUniqueNumber(row.propertyUniqueNumber) }}</td>
                 <td>{{ codeLabel(row.registryType, 'registryTypes') }}</td>
                 <td>{{ row.obligeeName ?? '-' }}</td>
                 <td>{{ row.filePath ?? '-' }}</td>
@@ -73,6 +73,7 @@
 
 <script setup lang="ts">
 import type { FullCertificateItem, PostCertificateItem } from '@/types'
+import { formatPropertyUniqueNumber } from '@/utils/format'
 
 interface Props {
   fullCertificateRows: FullCertificateItem[]

@@ -28,8 +28,8 @@
               <td>{{ codeLabel(row.registryType, 'registryTypes') }}</td>
               <td>{{ codeLabel(row.registryCause, 'registryCauses') }}</td>
               <td>{{ formatNumber(row.paymentAmount) }}</td>
-              <td>{{ row.taxNumber ?? '-' }}</td>
-              <td>{{ row.electronicPaymentNumber ?? '-' }}</td>
+              <td>{{ formatTaxNumber(row.taxNumber) }}</td>
+              <td>{{ formatElectronicPaymentNumber(row.electronicPaymentNumber) }}</td>
             </tr>
           </tbody>
         </table>
@@ -40,6 +40,7 @@
 
 <script setup lang="ts">
 import type { RegistryProgressTaxAgencyTableRow } from '@/types'
+import { formatElectronicPaymentNumber, formatTaxNumber } from '@/utils/format'
 
 interface Props {
   rows: RegistryProgressTaxAgencyTableRow[]

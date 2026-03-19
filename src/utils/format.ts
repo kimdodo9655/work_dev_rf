@@ -89,11 +89,67 @@ export const formatPhone = (phone: string): string => {
 
   if (cleaned.length === 11) {
     return cleaned.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3')
+  } else if (cleaned.startsWith('02') && cleaned.length === 10) {
+    return cleaned.replace(/(02)(\d{4})(\d{4})/, '$1-$2-$3')
+  } else if (cleaned.startsWith('02') && cleaned.length === 9) {
+    return cleaned.replace(/(02)(\d{3})(\d{4})/, '$1-$2-$3')
   } else if (cleaned.length === 10) {
     return cleaned.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3')
+  } else if (cleaned.length === 9) {
+    return cleaned.replace(/(\d{2})(\d{3})(\d{4})/, '$1-$2-$3')
   }
 
   return phone
+}
+
+function formatByGroups(value: string | number, groups: number[]): string {
+  const cleaned = String(value).replace(/\D/g, '')
+  const totalLength = groups.reduce((sum, group) => sum + group, 0)
+
+  if (!cleaned || cleaned.length !== totalLength) {
+    return String(value)
+  }
+
+  let cursor = 0
+  return groups
+    .map((group) => {
+      const chunk = cleaned.slice(cursor, cursor + group)
+      cursor += group
+      return chunk
+    })
+    .join('-')
+}
+
+export const formatTaxNumber = (value?: string | null): string => {
+  if (!value) return '-'
+  return formatByGroups(value, [3, 1, 2, 6, 6, 1, 3, 6, 1])
+}
+
+export const formatElectronicPaymentNumber = (value?: string | null): string => {
+  if (!value) return '-'
+  return formatByGroups(value, [5, 1, 2, 2, 1, 7, 1])
+}
+
+export const formatHousingBondNumber = (value?: string | null): string => {
+  if (!value) return '-'
+  return formatByGroups(value, [4, 2, 4, 4])
+}
+
+export const formatPropertyUniqueNumber = (value?: string | null): string => {
+  if (!value) return '-'
+  return formatByGroups(value, [4, 4, 6])
+}
+
+export const formatWonAmount = (value?: string | number | null): string => {
+  if (value === null || value === undefined || value === '') return '-'
+
+  const numeric = typeof value === 'number' ? value : Number(String(value).replace(/[^\d.-]/g, ''))
+
+  if (!Number.isFinite(numeric)) {
+    return String(value)
+  }
+
+  return `${numeric.toLocaleString('ko-KR')}원`
 }
 
 /**

@@ -48,7 +48,8 @@ export const email = (message = '올바른 이메일 형식이 아닙니다'): V
 
 export const phone = (message = '올바른 전화번호 형식이 아닙니다'): ValidationRule => ({
   validate: (value: string) => {
-    const phoneRegex = /^01[0-9]-?[0-9]{3,4}-?[0-9]{4}$/
+    const phoneRegex =
+      /^(01[016789]-?\d{3,4}-?\d{4}|02-?\d{3,4}-?\d{4}|0[3-9]{1}[0-9]{1}-?\d{3,4}-?\d{4}|1\d{3}-?\d{4})$/
     return phoneRegex.test(value.replace(/\s/g, ''))
   },
   message

@@ -26,7 +26,7 @@
               :key="`completion-list-${idx}-${row.propertyUniqueNumber ?? idx}`"
             >
               <td>{{ row.documentName ?? '-' }}</td>
-              <td>{{ row.propertyUniqueNumber ?? '-' }}</td>
+              <td>{{ formatPropertyUniqueNumber(row.propertyUniqueNumber) }}</td>
               <td>{{ codeLabel(row.registryType, 'registryTypes') }}</td>
               <td>{{ row.obligeeName ?? '-' }}</td>
               <td>{{ row.filePath ?? '-' }}</td>
@@ -40,6 +40,7 @@
 
 <script setup lang="ts">
 import type { CompleteDocumentListItem } from '@/types'
+import { formatPropertyUniqueNumber } from '@/utils/format'
 
 interface Props {
   rows: CompleteDocumentListItem[]

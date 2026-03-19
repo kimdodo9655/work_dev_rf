@@ -27,8 +27,8 @@
               <td>{{ codeLabel(row.purchaseType, 'bondPurchaseTypes') }}</td>
               <td>{{ formatNumber(row.purchaseTargetAmount) }}</td>
               <td>{{ formatNumber(row.bondPurchaseAmount) }}</td>
-              <td>{{ row.bondDiscountAmount ?? '-' }}</td>
-              <td>{{ row.housingBondNumber ?? '-' }}</td>
+              <td>{{ formatWonAmount(row.bondDiscountAmount) }}</td>
+              <td>{{ formatHousingBondNumber(row.housingBondNumber) }}</td>
             </tr>
           </tbody>
         </table>
@@ -39,6 +39,7 @@
 
 <script setup lang="ts">
 import type { RegistryProgressHousingBondRow } from '@/types'
+import { formatHousingBondNumber, formatWonAmount } from '@/utils/format'
 
 interface Props {
   rows: RegistryProgressHousingBondRow[]

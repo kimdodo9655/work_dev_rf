@@ -24,7 +24,7 @@
             </tr>
             <tr v-for="(row, idx) in rows" :key="`cert-${idx}-${row.propertyUniqueNumber ?? idx}`">
               <td>{{ codeLabel(row.registryType, 'registryTypes') }}</td>
-              <td>{{ row.propertyUniqueNumber ?? '-' }}</td>
+              <td>{{ formatPropertyUniqueNumber(row.propertyUniqueNumber) }}</td>
               <td>{{ row.name ?? '-' }}</td>
               <td>{{ row.receiptDate ?? '-' }}</td>
               <td>{{ row.receiptNumber ?? '-' }}</td>
@@ -39,6 +39,7 @@
 
 <script setup lang="ts">
 import type { CancellationCertificateListItem } from '@/types'
+import { formatPropertyUniqueNumber } from '@/utils/format'
 
 interface Props {
   rows: CancellationCertificateListItem[]
